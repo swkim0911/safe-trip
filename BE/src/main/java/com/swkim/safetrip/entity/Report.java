@@ -18,16 +18,21 @@ public class Report  extends BaseEntity{
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "title", nullable = false)
     private String title;
 
     private String category;
 
+    @Column(name = "location", nullable = false, length = 100)
     private String location;
 
+    @Column(name = "url", nullable = false, length = 100)
     private String url;
 
+    @Column(name = "description", nullable = false)
     private String description;
 
+    @Column(name = "advice", nullable = false)
     private String advice;
 
     @Builder
