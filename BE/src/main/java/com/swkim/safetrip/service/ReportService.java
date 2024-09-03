@@ -1,6 +1,7 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.request.ReportRequest;
+import com.swkim.safetrip.entity.Report;
 import org.springframework.stereotype.Service;
 
 @Service
