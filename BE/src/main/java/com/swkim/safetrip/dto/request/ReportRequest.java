@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReportRequest {
 
-    private Long id;
     private String title;
     private String category;
     private String url;
