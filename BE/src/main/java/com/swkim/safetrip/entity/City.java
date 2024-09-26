@@ -16,7 +16,7 @@ public class City {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id") // 양방향
     private Country country;
 
@@ -28,6 +28,4 @@ public class City {
 
     @Column(name = "longitude", nullable = false)
     private Double longitude;
-
-
 }
