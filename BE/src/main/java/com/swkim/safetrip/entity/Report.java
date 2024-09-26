@@ -1,14 +1,14 @@
 package com.swkim.safetrip.entity;
 
+import com.swkim.safetrip.entity.enums.Category;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
-@Table(name = "report")
 @Entity
+@Table(name = "report")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Report  extends BaseEntity{
@@ -18,16 +18,25 @@ public class Report  extends BaseEntity{
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    private Location location;
+
     @Column(name = "title", nullable = false)
     private String title;
 
-    private String category;
+    @Column(name = "likes", nullable = false)
+    private Integer likeCnt;
 
-    @Column(name = "location", nullable = false, length = 100)
-    private String location;
-
-    @Column(name = "url", nullable = false, length = 100)
-    private String url;
+    @Column(name = "image_url", nullable = false)
+    private String imageURL;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -36,11 +45,13 @@ public class Report  extends BaseEntity{
     private String advice;
 
     @Builder
-    public Report(String title, String category, String url, String description, String advice, String location) {
-        this.title = title;
+    public Report(Category category, User user, Location location, String title, String imageURL, String description, String advice) {
         this.category = category;
+        this.user = user;
         this.location = location;
-        this.url = url;
+        this.title = title;
+        this.likeCnt = 0;
+        this.imageURL = imageURL;
         this.description = description;
         this.advice = advice;
     }
