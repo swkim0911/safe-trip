@@ -45,8 +45,8 @@ public class Report  extends BaseEntity{
     private String advice;
 
     @Builder
-    public Report(Category category, User user, Location location, String title, String imageURL, String description, String advice) {
-        this.category = category;
+    public Report(String category, User user, Location location, String title, String imageURL, String description, String advice) {
+        this.category = Category.valueOf(category);
         this.user = user;
         this.location = location;
         this.title = title;

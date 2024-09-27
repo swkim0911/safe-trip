@@ -1,6 +1,7 @@
 package com.swkim.safetrip.mapper;
 
 import com.swkim.safetrip.dto.request.ReportRequest;
+import com.swkim.safetrip.entity.Location;
 import com.swkim.safetrip.entity.Report;
 
 public class ReportMapper {
@@ -9,8 +10,7 @@ public class ReportMapper {
         return Report.builder()
                 .title(reportRequest.getTitle())
                 .category(reportRequest.getCategory())
-                .location(reportRequest.getLocation())
-                .url(reportRequest.getUrl())
+                .location(null)
                 .description(reportRequest.getDescription())
                 .advice(reportRequest.getAdvice())
                 .build();

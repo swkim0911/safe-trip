@@ -4,6 +4,7 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/safetrip?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
     password: 1234
+
 ---
 spring:
   jpa:

@@ -33,8 +33,6 @@ class ReportControllerTest {
         ReportRequest reportRequest = ReportRequest.builder()
                 .title("title")
                 .category("category")
-                .location("location")
-                .url("url")
                 .description("description")
                 .advice("advice").build();
 
