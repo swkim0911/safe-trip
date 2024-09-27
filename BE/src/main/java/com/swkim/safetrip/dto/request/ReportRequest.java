@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReportRequest {
 
+    @NotBlank
     private String address;
     private String category;
     private String title;

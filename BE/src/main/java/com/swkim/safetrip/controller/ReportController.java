@@ -22,7 +22,7 @@ public class ReportController {
     @PostMapping(value = "/reports", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Long> report(@RequestPart ReportRequest request, @RequestPart(required = false) MultipartFile image) {
 
-        Long id = reportService.enroll(request, image);
+        Long id = reportService.write(request, image);
 
         return new ResponseEntity<>(1L, HttpStatus.CREATED);
     }

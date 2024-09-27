@@ -13,7 +13,7 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
 
-    public Long enroll(ReportRequest reportRequest) {
+    public Long write(ReportRequest reportRequest) {
         //todo validation
         Report report = ReportMapper.toReport(reportRequest);
 
