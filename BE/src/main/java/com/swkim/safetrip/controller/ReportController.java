@@ -2,6 +2,7 @@ package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.request.ReportRequest;
 import com.swkim.safetrip.service.ReportService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,9 +21,9 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping(value = "/reports", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Long> report(@RequestPart ReportRequest request, @RequestPart(required = false) MultipartFile image) {
+    public ResponseEntity<Long> report(@RequestPart @Valid ReportRequest request, @RequestPart(required = false) MultipartFile image) {
 
-        Long id = reportService.write(request, image);
+//        Long id = reportService.write(request, image);
 
         return new ResponseEntity<>(1L, HttpStatus.CREATED);
     }

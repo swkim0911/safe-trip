@@ -8,8 +8,12 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum Error {
 
-    UN_AUTHENTICATION_ERROR(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+    // 400
+    Method_Argument_NotValid_ERROR(HttpStatus.BAD_REQUEST.value(), "잘못된 입력입니다."),
 
-    private final HttpStatus httpStatus;
+    // 401
+    UN_AUTHENTICATION_ERROR(HttpStatus.UNAUTHORIZED.value(), "로그인이 필요합니다.");
+
+    private final int statusCode;
     private final String message;
 }
