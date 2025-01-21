@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### yaml file ###
+application-dev.yml
+application-prod.yml
