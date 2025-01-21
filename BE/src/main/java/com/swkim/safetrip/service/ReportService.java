@@ -17,9 +17,7 @@ public class ReportService {
 
     public Long write(ReportRequest reportRequest, MultipartFile image) {
 
-        // 1. validation 처리
-
-        // 2. 이미지가 있으면 S3에 전송
+        // 1. 이미지가 있으면 S3에 전송
         if (!image.isEmpty()) {
             // Image Url = s3.save(image);
         }
