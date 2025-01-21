@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +23,7 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping(value = "/reports", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Long> report(@RequestPart @Valid ReportRequest request, @RequestPart(required = false) MultipartFile image) {
+    public ResponseEntity<Long> report(@RequestPart @Valid ReportRequest request, @RequestPart(required = false) List<MultipartFile> image) {
 
 //        Long id = reportService.write(request, image);
 
