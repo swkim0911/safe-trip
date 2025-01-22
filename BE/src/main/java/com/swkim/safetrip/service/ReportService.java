@@ -40,12 +40,23 @@ public class ReportService {
             report.addImage(image);
         }
 
-        return (long) report.getImages().size();
-
         // 3. address에 대한 location 객체 생성
+        // Json jsonResult = getLocationInfo(String lat, String lon);
+        // String country = jsonResult.getCountry;
+        // String city = jsonResult.getCity;
+        // String cityCode = jsonResult.getCityCode;
+        // Json jsonResult = getCityInfo(String cityCode);
+        // String cityLat = getLat(jsonResult)
+        // String cityLon = getLon(jsonResult)
+
+        // Location location = new Location
+        // Country country = new Country
+        // City city = new City
+
+        // report.setLocation(location)
         // 4. report 저장
-//        Report savedReport = reportRepository.save(report);
-//        return savedReport.getId();
+        Report savedReport = reportRepository.save(report);
+        return savedReport.getId();
     }
 
 
@@ -68,7 +79,6 @@ public class ReportService {
 
         String accessURL = amazonS3Client.getUrl(bucketName, fileName).toString();
         image.setAccessURL(accessURL);
-        System.out.println("done");
         return image;
     }
 }

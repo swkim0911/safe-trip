@@ -13,8 +13,11 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 public class ReportRequest {
 
-    @NotBlank(message = "위치를 입력해주세요.")
-    private String address;
+    @NotBlank(message = "위도를 입력해주세요.")
+    private String latitude;
+
+    @NotBlank(message = "경도를 입력해주세요.")
+    private String longitude;
 
     @NotBlank(message = "카테고리를 입력해주세요.")
     private String category;
