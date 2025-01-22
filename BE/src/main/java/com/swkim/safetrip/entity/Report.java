@@ -41,9 +41,6 @@ public class Report  extends BaseEntity{
     @Column(name = "likes", nullable = false)
     private Integer likeCnt;
 
-    @Column(name = "image_url", nullable = false)
-    private String imageURL;
-
     @Column(name = "description", nullable = false)
     private String description;
 
@@ -51,14 +48,19 @@ public class Report  extends BaseEntity{
     private String advice;
 
     @Builder
-    public Report(String category, User user, Location location, String title, String imageURL, String description, String advice) {
+    public Report(String category, User user, Location location, String title, String description, String advice) {
         this.category = Category.valueOf(category);
         this.user = user;
         this.location = location;
         this.title = title;
         this.likeCnt = 0;
-        this.imageURL = imageURL;
         this.description = description;
         this.advice = advice;
+    }
+
+    // 양방향 연관관계 편의 메서드
+    public void addImage(Image image){
+        images.add(image);
+        image.setReport(this);
     }
 }

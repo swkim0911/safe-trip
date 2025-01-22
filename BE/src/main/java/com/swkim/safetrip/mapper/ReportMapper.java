@@ -6,6 +6,7 @@ import com.swkim.safetrip.entity.Report;
 
 public class ReportMapper {
 
+    // todo User 객체 넣기
     public static Report toReport(ReportRequest reportRequest) {
         return Report.builder()
                 .title(reportRequest.getTitle())
