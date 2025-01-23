@@ -9,6 +9,7 @@ import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.CountryRepository;
 import com.swkim.safetrip.repository.ReportRepository;
+import com.swkim.safetrip.vo.LocationData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
@@ -35,7 +36,6 @@ public class ReportService {
     private final CountryRepository countryRepository;
     private final AmazonS3Client amazonS3Client;
 
-    @Transactional
     public Long write(ReportRequest reportRequest, List<MultipartFile> files) {
 
         // 1. reportRequest -> Report Mapping
@@ -45,9 +45,48 @@ public class ReportService {
         saveImagesInS3Bucket(files).forEach(report::addImage);
 
         // 4. Country, City 엔티티 생성
+        LocationData locationData = getLocationData(reportRequest);
 
+        // 4. address에 대한 location 객체 생성
+        Location location = saveLocationData(locationData, reportRequest.getLatitude(), reportRequest.getLongitude());
+
+        // 5. report 저장
+        return saveReport(report, location);
+    }
+
+    @Transactional
+    private Long saveReport(Report report, Location location) {
+        report.setLocation(location);
+        Report savedReport = reportRepository.save(report);
+        return savedReport.getId();
+    }
+    @Transactional
+    private Location saveLocationData(LocationData locationData, String latitude, String longitude){
+        City city = City.builder()
+                .name(locationData.getCityName())
+                .latitude(locationData.getCityLatitude())
+                .longitude(locationData.getCityLongitude())
+                .build();
+
+        Country country = Country.builder()
+                .name(locationData.getCountryName())
+                .build();
+
+        country.addCity(city);
+        countryRepository.save(country);
+
+        return Location.builder()
+                .country(country)
+                .city(city)
+                .latitude(latitude)
+                .longitude(longitude)
+                .build();
+    }
+
+    private LocationData getLocationData(ReportRequest reportRequest) {
         String locationInfo = getLocationInfo(reportRequest.getLatitude(), reportRequest.getLongitude());
 
+        // get city name
         JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
         JsonObject addressObject = locationObject.getAsJsonObject("address");
         String countryName = addressObject.get("country").getAsString();
@@ -59,31 +98,7 @@ public class ReportService {
         String latitude = cityObject.get("lat").getAsString();
         String longitude = cityObject.get("lon").getAsString();
 
-        City city = City.builder()
-                .name(cityName)
-                .latitude(latitude)
-                .longitude(longitude)
-                .build();
-
-        Country country = Country.builder()
-                .name(countryName)
-                .build();
-
-        country.addCity(city);
-        countryRepository.save(country);
-
-        // 4. address에 대한 location 객체 생성
-        Location location = Location.builder()
-                .country(country)
-                .city(city)
-                .latitude(reportRequest.getLatitude())
-                .longitude(reportRequest.getLongitude())
-                .build();
-        // 5. report 저장
-
-        report.setLocation(location);
-        Report savedReport = reportRepository.save(report);
-        return savedReport.getId();
+        return new LocationData(countryName, cityName, latitude, longitude);
     }
 
     private List<Image> saveImagesInS3Bucket(List<MultipartFile> files) {
@@ -157,7 +172,7 @@ public class ReportService {
         try {
             amazonS3Client.putObject(bucketName, fileName, file.getInputStream(), objectMetadata);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); //todo
         }
 
         String accessURL = amazonS3Client.getUrl(bucketName, fileName).toString();
