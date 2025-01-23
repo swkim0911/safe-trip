@@ -18,13 +18,9 @@ public class Country {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "city_id")
-    private City capital;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
     private List<City> cities;
-
-    @Column(name = "name", nullable = false)
-    private String name;
 }
