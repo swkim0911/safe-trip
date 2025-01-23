@@ -2,21 +2,30 @@ package com.swkim.safetrip.service;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.transfer.ObjectMetadataProvider;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportRequest;
-import com.swkim.safetrip.entity.Image;
-import com.swkim.safetrip.entity.Report;
+import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.gson.GsonBuilderCustomizer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,19 +44,26 @@ public class ReportService {
         Report report = ReportMapper.toReport(reportRequest);
 
         // 2. 이미지 S3에 전송
-        for (MultipartFile file : files) {
-            Image image = saveImage(file);
-            report.addImage(image);
-        }
+        Optional.ofNullable(files)
+                .orElse(Collections.emptyList())
+                .forEach(file -> {
+                    Image image = saveImage(file);
+                    report.addImage(image);
+                });
 
         // 3. address에 대한 location 객체 생성
-        // Json jsonResult = getLocationInfo(String lat, String lon);
-        // String country = jsonResult.getCountry;
-        // String city = jsonResult.getCity;
-        // String cityCode = jsonResult.getCityCode;
-        // Json jsonResult = getCityInfo(String cityCode);
-        // String cityLat = getLat(jsonResult)
-        // String cityLon = getLon(jsonResult)
+        String locationInfo = getLocationInfo(reportRequest.getLatitude(), reportRequest.getLongitude());
+
+        JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
+        JsonObject addressObject = locationObject.getAsJsonObject("address");
+        String country = addressObject.get("country").getAsString();
+        String city = addressObject.get("city").getAsString();
+
+        String cityInfo = getCityInfo(city);
+
+        JsonObject cityObject = JsonParser.parseString(cityInfo).getAsJsonArray().get(0).getAsJsonObject();
+        String lat = cityObject.get("lat").getAsString();
+        String lon = cityObject.get("lon").getAsString();
 
         // Location location = new Location
         // Country country = new Country
@@ -55,8 +71,46 @@ public class ReportService {
 
         // report.setLocation(location)
         // 4. report 저장
-        Report savedReport = reportRepository.save(report);
-        return savedReport.getId();
+        return 1L;
+//        Report savedReport = reportRepository.save(report);
+//        return savedReport.getId();
+    }
+
+    private String getCityInfo(String city){
+        RestClient restClient = RestClient.create();
+        String uri = UriComponentsBuilder.newInstance()
+                .scheme("https")
+                .host("nominatim.openstreetmap.org")
+                .path("/search")
+                .queryParam("city",city)
+                .queryParam("format", "json")
+                .queryParam("addressdetails", "1")
+                .queryParam("accept-language", "en")
+                .toUriString();
+
+        return restClient.get()
+                .uri(uri)
+                .retrieve()
+                .body(String.class);
+    }
+
+    private String getLocationInfo(String lat, String lon) {
+        RestClient restClient = RestClient.create();
+        String uri = UriComponentsBuilder.newInstance()
+                .scheme("https")
+                .host("nominatim.openstreetmap.org")
+                .path("/reverse")
+                .queryParam("lat", lat)
+                .queryParam("lon", lon)
+                .queryParam("format", "json")
+                .queryParam("addressdetails", "1")
+                .queryParam("accept-language", "en")
+                .toUriString();
+
+        return restClient.get()
+                .uri(uri)
+                .retrieve()
+                .body(String.class);
     }
 
 

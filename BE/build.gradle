@@ -27,7 +27,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	implementation group: 'io.awspring.cloud', name: 'spring-cloud-starter-aws', version: '2.4.0'
+	implementation group: 'io.awspring.cloud', name: 'spring-cloud-starter-aws-secrets-manager-config', version: '2.4.0'
+	implementation 'javax.xml.bind:jaxb-api:2.3.1'
+	implementation 'com.sun.xml.bind:jaxb-impl:2.3.1'
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
