@@ -2,19 +2,16 @@ package com.swkim.safetrip.service;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportRequest;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.mapper.ReportMapper;
+import com.swkim.safetrip.repository.CountryRepository;
 import com.swkim.safetrip.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.gson.GsonBuilderCustomizer;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -22,9 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -35,6 +32,7 @@ public class ReportService {
     private String bucketName;
 
     private final ReportRepository reportRepository;
+    private final CountryRepository countryRepository;
     private final AmazonS3Client amazonS3Client;
 
     @Transactional
@@ -43,37 +41,62 @@ public class ReportService {
         // 1. reportRequest -> Report Mapping
         Report report = ReportMapper.toReport(reportRequest);
 
-        // 2. 이미지 S3에 전송
-        Optional.ofNullable(files)
-                .orElse(Collections.emptyList())
-                .forEach(file -> {
-                    Image image = saveImage(file);
-                    report.addImage(image);
-                });
+        // 2. 이미지 S3에 전송하고 report에 저장
+        saveImagesInS3Bucket(files).forEach(report::addImage);
 
-        // 3. address에 대한 location 객체 생성
+        // 4. Country, City 엔티티 생성
+
         String locationInfo = getLocationInfo(reportRequest.getLatitude(), reportRequest.getLongitude());
 
         JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
         JsonObject addressObject = locationObject.getAsJsonObject("address");
-        String country = addressObject.get("country").getAsString();
-        String city = addressObject.get("city").getAsString();
+        String countryName = addressObject.get("country").getAsString();
+        String cityName = addressObject.get("city").getAsString();
 
-        String cityInfo = getCityInfo(city);
+        String cityInfo = getCityInfo(cityName);
 
         JsonObject cityObject = JsonParser.parseString(cityInfo).getAsJsonArray().get(0).getAsJsonObject();
-        String lat = cityObject.get("lat").getAsString();
-        String lon = cityObject.get("lon").getAsString();
+        String latitude = cityObject.get("lat").getAsString();
+        String longitude = cityObject.get("lon").getAsString();
 
-        // Location location = new Location
-        // Country country = new Country
-        // City city = new City
+        City city = City.builder()
+                .name(cityName)
+                .latitude(latitude)
+                .longitude(longitude)
+                .build();
 
-        // report.setLocation(location)
-        // 4. report 저장
-        return 1L;
-//        Report savedReport = reportRepository.save(report);
-//        return savedReport.getId();
+        Country country = Country.builder()
+                .name(countryName)
+                .build();
+
+        country.addCity(city);
+        countryRepository.save(country);
+
+        // 4. address에 대한 location 객체 생성
+        Location location = Location.builder()
+                .country(country)
+                .city(city)
+                .latitude(reportRequest.getLatitude())
+                .longitude(reportRequest.getLongitude())
+                .build();
+        // 5. report 저장
+
+        report.setLocation(location);
+        Report savedReport = reportRepository.save(report);
+        return savedReport.getId();
+    }
+
+    private List<Image> saveImagesInS3Bucket(List<MultipartFile> files) {
+        ArrayList<Image> imageList = new ArrayList<>();
+
+        Optional.ofNullable(files)
+                .orElse(Collections.emptyList())
+                .forEach(file -> {
+                    Image image = saveImage(file);
+                    imageList.add(image);
+                });
+
+        return imageList;
     }
 
     private String getCityInfo(String city){
@@ -91,6 +114,9 @@ public class ReportService {
         return restClient.get()
                 .uri(uri)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, ((request, response) -> {
+                    throw new RuntimeException(); // todo
+                }))
                 .body(String.class);
     }
 
@@ -110,6 +136,9 @@ public class ReportService {
         return restClient.get()
                 .uri(uri)
                 .retrieve()
+                .onStatus(HttpStatusCode :: is4xxClientError, ((request, response) -> {
+                    throw new RuntimeException(); // todo
+                }))
                 .body(String.class);
     }
 

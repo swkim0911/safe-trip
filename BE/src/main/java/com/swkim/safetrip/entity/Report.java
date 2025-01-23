@@ -2,10 +2,7 @@ package com.swkim.safetrip.entity;
 
 import com.swkim.safetrip.entity.enums.Category;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +18,9 @@ public class Report  extends BaseEntity{
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "title", nullable = false)
+    private String title;
+
     @Enumerated(EnumType.STRING)
     private Category category;
 
@@ -28,15 +28,13 @@ public class Report  extends BaseEntity{
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Setter
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id")
     private Location location;
 
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
-
-    @Column(name = "title", nullable = false)
-    private String title;
 
     @Column(name = "likes", nullable = false)
     private Integer likeCnt;
@@ -48,12 +46,12 @@ public class Report  extends BaseEntity{
     private String advice;
 
     @Builder
-    public Report(String category, User user, Location location, String title, String description, String advice) {
+    public Report(String title, String category, User user, Location location, int likeCnt, String description, String advice) {
         this.category = Category.valueOf(category);
         this.user = user;
         this.location = location;
         this.title = title;
-        this.likeCnt = 0;
+        this.likeCnt = likeCnt;
         this.description = description;
         this.advice = advice;
     }

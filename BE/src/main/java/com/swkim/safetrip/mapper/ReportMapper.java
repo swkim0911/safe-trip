@@ -12,6 +12,7 @@ public class ReportMapper {
                 .title(reportRequest.getTitle())
                 .category(reportRequest.getCategory())
                 .location(null)
+                .likeCnt(0)
                 .description(reportRequest.getDescription())
                 .advice(reportRequest.getAdvice())
                 .build();

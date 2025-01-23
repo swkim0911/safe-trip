@@ -1,6 +1,7 @@
 package com.swkim.safetrip.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,5 +29,6 @@ public class ReportRequest {
     @NotBlank(message = "설명을 해주세요.")
     private String description;
 
+    @NotNull
     private String advice;
 }

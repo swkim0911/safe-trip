@@ -2,9 +2,11 @@ package com.swkim.safetrip.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,5 +24,16 @@ public class Country {
     private String name;
 
     @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
-    private List<City> cities;
+    private List<City> cities = new ArrayList<>();
+
+    @Builder
+    public Country(String name){
+        this.name = name;
+    }
+
+    // 양방향 연관관계 편의 메서드
+    public void addCity(City city){
+        cities.add(city);
+        city.setCountry(this);
+    }
 }
