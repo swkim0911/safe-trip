@@ -2,10 +2,10 @@ package com.swkim.safetrip.entity;
 
 import com.swkim.safetrip.entity.enums.Category;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "report")
@@ -18,6 +18,9 @@ public class Report  extends BaseEntity{
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "title", nullable = false)
+    private String title;
+
     @Enumerated(EnumType.STRING)
     private Category category;
 
@@ -25,18 +28,16 @@ public class Report  extends BaseEntity{
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @Setter
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id")
     private Location location;
 
-    @Column(name = "title", nullable = false)
-    private String title;
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images = new ArrayList<>();
 
     @Column(name = "likes", nullable = false)
     private Integer likeCnt;
-
-    @Column(name = "image_url", nullable = false)
-    private String imageURL;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -45,14 +46,19 @@ public class Report  extends BaseEntity{
     private String advice;
 
     @Builder
-    public Report(Category category, User user, Location location, String title, String imageURL, String description, String advice) {
-        this.category = category;
+    public Report(String title, String category, User user, Location location, int likeCnt, String description, String advice) {
+        this.category = Category.valueOf(category);
         this.user = user;
         this.location = location;
         this.title = title;
-        this.likeCnt = 0;
-        this.imageURL = imageURL;
+        this.likeCnt = likeCnt;
         this.description = description;
         this.advice = advice;
+    }
+
+    // 양방향 연관관계 편의 메서드
+    public void addImage(Image image){
+        images.add(image);
+        image.setReport(this);
     }
 }

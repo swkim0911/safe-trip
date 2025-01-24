@@ -2,6 +2,7 @@ package com.swkim.safetrip.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,12 +25,17 @@ public class Location extends BaseEntity{
     @JoinColumn(name = "city_id")
     private City city;
 
-    @Column(name = "address", nullable = false)
-    private String address;
-
     @Column(name = "latitude", nullable = false)
     private Double latitude;
 
     @Column(name = "longitude", nullable = false)
     private Double longitude;
+
+    @Builder
+    public Location(Country country, City city, String latitude, String longitude){
+        this.country = country;
+        this.city = city;
+        this.latitude = Double.parseDouble(latitude);
+        this.longitude = Double.parseDouble(longitude);
+    }
 }

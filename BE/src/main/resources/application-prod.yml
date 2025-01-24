@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/safetrip?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: 1234
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true      # 쿼리 로그 포맷 (정렬)
+        show_sql: true        # 쿼리 로그 출력
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    defer-datasource-initialization: true
+
+cloud:
+  aws:
+    credentials:
+      access-key: REMOVED
+      secret-key: REMOVED
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    s3:
+      bucket-name: safetrip-bucket

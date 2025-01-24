@@ -2,9 +2,11 @@ package com.swkim.safetrip.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,13 +20,20 @@ public class Country {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "city_id")
-    private City capital;
-
-    @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
-    private List<City> cities;
-
     @Column(name = "name", nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
+    private List<City> cities = new ArrayList<>();
+
+    @Builder
+    public Country(String name){
+        this.name = name;
+    }
+
+    // 양방향 연관관계 편의 메서드
+    public void addCity(City city){
+        cities.add(city);
+        city.setCountry(this);
+    }
 }
