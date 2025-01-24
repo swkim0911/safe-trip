@@ -9,6 +9,7 @@ import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.CountryRepository;
 import com.swkim.safetrip.repository.ReportRepository;
+import com.swkim.safetrip.vo.CountryCityData;
 import com.swkim.safetrip.vo.LocationData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,14 +42,14 @@ public class ReportService {
         // 1. reportRequest -> Report Mapping
         Report report = ReportMapper.toReport(reportRequest);
 
-        // 2. 이미지 S3에 전송하고 report에 저장
+        // 2. 이미지 S3에 전송하고 report에 추가
         saveImagesInS3Bucket(files).forEach(report::addImage);
 
-        // 4. Country, City 엔티티 생성
-        LocationData locationData = getLocationData(reportRequest);
+        // 3. Country, City 정보 Get
+        CountryCityData countryCityData = getCountryCityData(reportRequest);
 
-        // 4. address에 대한 location 객체 생성
-        Location location = saveLocationData(locationData, reportRequest.getLatitude(), reportRequest.getLongitude());
+        // 4. Country, City 엔티티 저장 address에 대한 location 객체 생성
+        Location location = saveLocationData(countryCityData, reportRequest.getLatitude(), reportRequest.getLongitude());
 
         // 5. report 저장
         return saveReport(report, location);
@@ -60,16 +61,17 @@ public class ReportService {
         Report savedReport = reportRepository.save(report);
         return savedReport.getId();
     }
+
     @Transactional
-    private Location saveLocationData(LocationData locationData, String latitude, String longitude){
+    private Location saveLocationData(CountryCityData countryCityData, String locationLatitude, String locationLongitude){
         City city = City.builder()
-                .name(locationData.getCityName())
-                .latitude(locationData.getCityLatitude())
-                .longitude(locationData.getCityLongitude())
+                .name(countryCityData.getCityName())
+                .latitude(countryCityData.getCityLatitude())
+                .longitude(countryCityData.getCityLongitude())
                 .build();
 
         Country country = Country.builder()
-                .name(locationData.getCountryName())
+                .name(countryCityData.getCountryName())
                 .build();
 
         country.addCity(city);
@@ -78,27 +80,26 @@ public class ReportService {
         return Location.builder()
                 .country(country)
                 .city(city)
-                .latitude(latitude)
-                .longitude(longitude)
+                .latitude(locationLatitude)
+                .longitude(locationLongitude)
                 .build();
     }
 
-    private LocationData getLocationData(ReportRequest reportRequest) {
+    private CountryCityData getCountryCityData(ReportRequest reportRequest) {
         String locationInfo = getLocationInfo(reportRequest.getLatitude(), reportRequest.getLongitude());
-
-        // get city name
         JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
         JsonObject addressObject = locationObject.getAsJsonObject("address");
+
         String countryName = addressObject.get("country").getAsString();
         String cityName = addressObject.get("city").getAsString();
 
         String cityInfo = getCityInfo(cityName);
-
         JsonObject cityObject = JsonParser.parseString(cityInfo).getAsJsonArray().get(0).getAsJsonObject();
+
         String latitude = cityObject.get("lat").getAsString();
         String longitude = cityObject.get("lon").getAsString();
 
-        return new LocationData(countryName, cityName, latitude, longitude);
+        return new CountryCityData(countryName, cityName, latitude, longitude);
     }
 
     private List<Image> saveImagesInS3Bucket(List<MultipartFile> files) {

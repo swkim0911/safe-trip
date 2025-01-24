@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public class LocationData {
+public class CountryCityData {
 
     private final String countryName;
     private final String cityName;
