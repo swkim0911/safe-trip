@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportRequest;
 import com.swkim.safetrip.entity.*;
+import com.swkim.safetrip.global.exception.Error;
+import com.swkim.safetrip.global.exception.GeneralException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.CountryRepository;
 import com.swkim.safetrip.repository.ReportRepository;
@@ -130,7 +132,7 @@ public class ReportService {
                 .uri(uri)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, ((request, response) -> {
-                    throw new RuntimeException(); // todo
+                    throw new GeneralException(Error.COORDINATIES_NOT_VALID_ERROR);
                 }))
                 .body(String.class);
     }
@@ -152,7 +154,7 @@ public class ReportService {
                 .uri(uri)
                 .retrieve()
                 .onStatus(HttpStatusCode :: is4xxClientError, ((request, response) -> {
-                    throw new RuntimeException(); // todo
+                    throw new GeneralException(Error.COORDINATIES_NOT_VALID_ERROR);
                 }))
                 .body(String.class);
     }
