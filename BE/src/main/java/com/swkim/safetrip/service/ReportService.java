@@ -49,7 +49,7 @@ public class ReportService {
         // 3. Country, City 정보 Get
         CountryCityData countryCityData = getCountryCityData(reportRequest);
 
-        // 4. Country, City 엔티티 저장 address에 대한 location 객체 생성
+        // 4. Country, City 엔티티 저장. address에 대한 location 객체 생성
         Location location = saveLocationData(countryCityData, reportRequest.getLatitude(), reportRequest.getLongitude());
 
         // 5. report 저장
