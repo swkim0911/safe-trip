@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportRequest;
-import com.swkim.safetrip.dto.response.ReportResponse;
+import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.global.exception.Error;
 import com.swkim.safetrip.global.exception.GeneralException;
@@ -60,8 +60,8 @@ public class ReportService {
     }
 
     @Transactional
-    public Page<ReportResponse> getReports(String country, String city, Pageable pageable) {
-        return reportRepository.findByCountryAndCity(country, city, pageable);
+    public Page<ReportFindAllResponse> getReports(String country, String city, Pageable pageable) {
+        return reportRepository.findAllByCountryAndCity(country, city, pageable);
     }
 
     @Transactional

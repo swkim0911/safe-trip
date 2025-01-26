@@ -1,7 +1,7 @@
 package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.request.ReportRequest;
-import com.swkim.safetrip.dto.response.ReportResponse;
+import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.service.ReportService;
 import jakarta.validation.Valid;
@@ -32,7 +32,7 @@ public class ReportController {
     }
 
     @GetMapping(value = "/reports")
-    public ApiResponse<Page<ReportResponse>> getReports(@RequestParam(required = false) String country, @RequestParam(required = false) String city, Pageable pageable) {
+    public ApiResponse<Page<ReportFindAllResponse>> getReports(@RequestParam(required = false) String country, @RequestParam(required = false) String city, Pageable pageable) {
 
         return ApiResponse.of(HttpStatus.OK.value(), "report 조회가 완료되었습니다.", reportService.getReports(country, city, pageable));
     }

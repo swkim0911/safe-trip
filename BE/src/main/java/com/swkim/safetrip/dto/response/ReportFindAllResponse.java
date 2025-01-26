@@ -11,18 +11,11 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportResponse {
+public class ReportFindAllResponse {
 
     private String title;
 
     private String category;
 
-    private List<String> imageURLs;
-
     private Integer likes;
-
-    private String description;
-
-    private String advice;
-
 }
