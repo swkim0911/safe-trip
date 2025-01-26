@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportRequest;
+import com.swkim.safetrip.dto.response.ReportResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.global.exception.Error;
 import com.swkim.safetrip.global.exception.GeneralException;
@@ -14,6 +15,8 @@ import com.swkim.safetrip.repository.ReportRepository;
 import com.swkim.safetrip.vo.CountryCityData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +41,7 @@ public class ReportService {
     private final CountryRepository countryRepository;
     private final AmazonS3Client amazonS3Client;
 
-    public Long write(ReportRequest reportRequest, List<MultipartFile> files) {
+    public Long saveReport(ReportRequest reportRequest, List<MultipartFile> files) {
 
         // 1. reportRequest -> Report Mapping
         Report report = ReportMapper.toReport(reportRequest);
@@ -53,11 +56,16 @@ public class ReportService {
         Location location = saveLocationData(countryCityData, reportRequest.getLatitude(), reportRequest.getLongitude());
 
         // 5. report 저장
-        return saveReport(report, location);
+        return save(report, location);
     }
 
     @Transactional
-    private Long saveReport(Report report, Location location) {
+    public Page<ReportResponse> getReports(String country, String city, Pageable pageable) {
+        return reportRepository.findByCountryAndCity(country, city, pageable);
+    }
+
+    @Transactional
+    private Long save(Report report, Location location) {
         report.setLocation(location);
         Report savedReport = reportRepository.save(report);
         return savedReport.getId();

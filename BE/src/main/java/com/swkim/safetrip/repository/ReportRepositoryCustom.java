@@ -1,6 +1,10 @@
 package com.swkim.safetrip.repository;
 
+import com.swkim.safetrip.dto.response.ReportResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface ReportRepositoryCustom {
 
-    Page<ReportResponse> findByCountryAndCity(String country, String city, String pageable)
+    Page<ReportResponse> findByCountryAndCity(String country, String city, Pageable pageable);
 }
