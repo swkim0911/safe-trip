@@ -4,7 +4,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.swkim.safetrip.dto.request.ReportRequest;
+import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.global.exception.Error;
@@ -41,19 +41,19 @@ public class ReportService {
     private final CountryRepository countryRepository;
     private final AmazonS3Client amazonS3Client;
 
-    public Long saveReport(ReportRequest reportRequest, List<MultipartFile> files) {
+    public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
 
         // 1. reportRequest -> Report Mapping
-        Report report = ReportMapper.toReport(reportRequest);
+        Report report = ReportMapper.toReport(reportSaveRequest);
 
         // 2. 이미지 S3에 전송하고 report에 추가
         saveImagesInS3Bucket(files).forEach(report::addImage);
 
         // 3. Country, City 정보 Get
-        CountryCityData countryCityData = getCountryCityData(reportRequest);
+        CountryCityData countryCityData = getCountryCityData(reportSaveRequest);
 
         // 4. Country, City 엔티티 저장. address에 대한 location 객체 생성
-        Location location = saveLocationData(countryCityData, reportRequest.getLatitude(), reportRequest.getLongitude());
+        Location location = saveLocationData(countryCityData, reportSaveRequest.getLatitude(), reportSaveRequest.getLongitude());
 
         // 5. report 저장
         return save(report, location);
@@ -94,8 +94,8 @@ public class ReportService {
                 .build();
     }
 
-    private CountryCityData getCountryCityData(ReportRequest reportRequest) {
-        String locationInfo = getLocationInfo(reportRequest.getLatitude(), reportRequest.getLongitude());
+    private CountryCityData getCountryCityData(ReportSaveRequest reportSaveRequest) {
+        String locationInfo = getLocationInfo(reportSaveRequest.getLatitude(), reportSaveRequest.getLongitude());
         JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
         JsonObject addressObject = locationObject.getAsJsonObject("address");
 

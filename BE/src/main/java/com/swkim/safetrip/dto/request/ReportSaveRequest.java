@@ -6,13 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportRequest {
+public class ReportSaveRequest {
 
     @NotBlank(message = "위도를 입력해주세요.")
     private String latitude;

@@ -1,6 +1,6 @@
 package com.swkim.safetrip.controller;
 
-import com.swkim.safetrip.dto.request.ReportRequest;
+import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.service.ReportService;
@@ -24,7 +24,7 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping(value = "/reports", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ApiResponse<Long> create(@RequestPart @Valid ReportRequest request, @RequestPart(required = false) List<MultipartFile> images) {
+    public ApiResponse<Long> create(@RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
 
         Long id = reportService.saveReport(request, images);
 
