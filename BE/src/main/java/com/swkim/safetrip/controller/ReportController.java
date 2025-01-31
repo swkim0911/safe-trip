@@ -23,8 +23,9 @@ public class ReportController {
 
     private final ReportService reportService;
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/reports", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ApiResponse<Long> create(@RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
+    public ApiResponse<Long> createReport(@RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
 
         Long id = reportService.saveReport(request, images);
 
