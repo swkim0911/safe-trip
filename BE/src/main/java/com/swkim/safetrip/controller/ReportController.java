@@ -1,16 +1,17 @@
 package com.swkim.safetrip.controller;
 
-import com.swkim.safetrip.dto.request.ReportRequest;
+import com.swkim.safetrip.dto.request.ReportSaveRequest;
+import com.swkim.safetrip.dto.response.ReportFindAllResponse;
+import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -22,12 +23,20 @@ public class ReportController {
 
     private final ReportService reportService;
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/reports", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Long> report(@RequestPart @Valid ReportRequest request, @RequestPart(required = false) List<MultipartFile> images) {
+    public ApiResponse<Long> createReport(@RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
 
-        Long id = reportService.write(request, images);
+        Long id = reportService.saveReport(request, images);
 
-        return new ResponseEntity<>(id, HttpStatus.CREATED);
+        return new ApiResponse<>(HttpStatus.CREATED.value(), "report 등록이 완료되었습니다.", id);
     }
 
+    @GetMapping(value = "/reports")
+    public ApiResponse<Page<ReportFindAllResponse>> getReports(@RequestParam(required = false) String country, @RequestParam(required = false) String city, Pageable pageable) {
+
+        Page<ReportFindAllResponse> reports = reportService.getReports(country, city, pageable);
+
+        return ApiResponse.of(HttpStatus.OK.value(), "report 조회가 완료되었습니다.", reports);
+    }
 }

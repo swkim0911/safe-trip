@@ -37,7 +37,7 @@ public class Report  extends BaseEntity{
     private List<Image> images = new ArrayList<>();
 
     @Column(name = "likes", nullable = false)
-    private Integer likeCnt;
+    private Integer likes;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -46,12 +46,12 @@ public class Report  extends BaseEntity{
     private String advice;
 
     @Builder
-    public Report(String title, String category, User user, Location location, int likeCnt, String description, String advice) {
+    public Report(String title, String category, User user, Location location, int likes, String description, String advice) {
         this.category = Category.valueOf(category);
         this.user = user;
         this.location = location;
         this.title = title;
-        this.likeCnt = likeCnt;
+        this.likes = likes;
         this.description = description;
         this.advice = advice;
     }
