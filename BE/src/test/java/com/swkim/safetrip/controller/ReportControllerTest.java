@@ -98,7 +98,7 @@ class ReportControllerTest {
                         .queryParam("size", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value("report 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.message").value("report 목록 조회가 완료되었습니다."))
                 .andExpect(jsonPath("$.result.numberOfElements").value(3));
     }
 
@@ -136,7 +136,7 @@ class ReportControllerTest {
                         .queryParam("sort", "likes,desc"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value("report 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.message").value("report 목록 조회가 완료되었습니다."))
                 .andExpect(jsonPath("$.result.content[0].likes").value(30))
                 .andExpect(jsonPath("$.result.content[1].likes").value(20))
                 .andExpect(jsonPath("$.result.content[2].likes").value(10))

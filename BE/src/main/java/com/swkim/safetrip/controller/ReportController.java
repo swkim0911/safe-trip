@@ -37,6 +37,14 @@ public class ReportController {
 
         Page<ReportFindAllResponse> reports = reportService.getReports(country, city, pageable);
 
-        return ApiResponse.of(HttpStatus.OK.value(), "report 조회가 완료되었습니다.", reports);
+        return ApiResponse.of(HttpStatus.OK.value(), "report 목록 조회가 완료되었습니다.", reports);
+    }
+
+    @GetMapping(value = "/reports/{id}")
+    public ApiResponse<ReportFindByIdResponse> getReport(@PathVariable Long id) {
+
+        ReportFindByIdResponse report = reportService.getReport(id);
+
+        return ApiResponse.of(HttpStatus.OK.value(), "report 조회가 완료되었습니다.", report);
     }
 }
