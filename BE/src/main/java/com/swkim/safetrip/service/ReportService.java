@@ -6,7 +6,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
+import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.entity.*;
+import com.swkim.safetrip.exception.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.Error;
 import com.swkim.safetrip.global.exception.GeneralException;
 import com.swkim.safetrip.mapper.ReportMapper;
@@ -59,8 +61,14 @@ public class ReportService {
         return save(report, location);
     }
 
+    public ReportFindByIdResponse getReport(Long id){
+        Report report = reportRepository.findById(id).orElseThrow(ReportNotFoundException::new);
+
+        return ReportMapper.toReportFindByIdResponse(report);
+    }
+
     @Transactional
-    public Page<ReportFindAllResponse> getReports(String country, String city, Pageable pageable) {
+    private Page<ReportFindAllResponse> getReports(String country, String city, Pageable pageable) {
         return reportRepository.findAllByCountryAndCity(country, city, pageable);
     }
 
