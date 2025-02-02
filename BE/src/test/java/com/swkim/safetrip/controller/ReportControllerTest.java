@@ -2,19 +2,26 @@ package com.swkim.safetrip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
+import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.service.ReportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -72,9 +79,28 @@ class ReportControllerTest {
     }
 
     @Test
-    @DisplayName("[GET] /reports 요청시 저장된 report li")
-    void get_report_list() {
+    @DisplayName("[GET] /reports?page=0&size=10 요청시 저장된 모든 report 들을 반환한다")
+    void get_report_list_with_no_condition() throws Exception {
+        //given
+        List<ReportFindAllResponse> listOfResponse = Arrays.asList(
+                new ReportFindAllResponse("this is 1 title", "THEFT", 10),
+                new ReportFindAllResponse("this is 2 title", "THEFT", 20),
+                new ReportFindAllResponse("this is 3 title", "THEFT", 30)
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ReportFindAllResponse> mockPage = new PageImpl<>(listOfResponse, pageable, listOfResponse.size());
 
+        //when
+        when(reportService.getReports(nullable(String.class), nullable(String.class), any(Pageable.class))).thenReturn(mockPage);
+
+        //then
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/reports")
+                        .queryParam("page", "0")
+                        .queryParam("size", "10"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("report 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.result.numberOfElements").value(3));
     }
-
 }
