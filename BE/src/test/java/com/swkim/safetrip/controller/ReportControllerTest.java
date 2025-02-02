@@ -9,10 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -23,6 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -102,5 +100,46 @@ class ReportControllerTest {
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("report 조회가 완료되었습니다."))
                 .andExpect(jsonPath("$.result.numberOfElements").value(3));
+    }
+
+    @Test
+    @DisplayName("[GET] /reports?page=0&size=10&sort=likes,asc 요청시 저장된 모든 report 들을 likes 내림차순으로 반환한다")
+    void get_report_list_with_Country_And_City() throws Exception {
+        //given
+        List<ReportFindAllResponse> listOfResponse = Arrays.asList(
+                new ReportFindAllResponse("this is 1 title", "THEFT", 10),
+                new ReportFindAllResponse("this is 2 title", "THEFT", 20),
+                new ReportFindAllResponse("this is 3 title", "THEFT", 30)
+        );
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("likes")));
+        Page<ReportFindAllResponse> mockPage = new PageImpl<>(listOfResponse, pageable, listOfResponse.size());
+
+        //when
+        when(reportService.getReports(nullable(String.class), nullable(String.class), any(Pageable.class)))
+                .thenAnswer(invocation -> { // 정렬 조건을 동적으로 적용하기 위해 thenReturn() 함수가 아닌 thenAnswer() 함수 사용.
+                    Pageable pageableArg = invocation.getArgument(2);
+                    List<ReportFindAllResponse> sortedList = listOfResponse.stream().sorted((o1, o2) -> {
+                        Sort.Order sortOrder = pageableArg.getSort().getOrderFor("likes");
+                        if (sortOrder != null && sortOrder.isAscending()) {
+                            return Integer.compare(o1.getLikes(), o2.getLikes());
+                        }
+                        return Integer.compare(o2.getLikes(), o1.getLikes());
+                    }).toList();
+                    return new PageImpl<>(sortedList, pageableArg, sortedList.size());
+                });
+
+        //then
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
+                        .get("/reports")
+                        .queryParam("page", "0")
+                        .queryParam("size", "10")
+                        .queryParam("sort", "likes,desc"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("report 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.result.content[0].likes").value(30))
+                .andExpect(jsonPath("$.result.content[1].likes").value(20))
+                .andExpect(jsonPath("$.result.content[2].likes").value(10))
+                .andReturn();
     }
 }
