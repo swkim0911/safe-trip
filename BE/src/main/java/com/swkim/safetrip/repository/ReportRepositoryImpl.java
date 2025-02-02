@@ -32,8 +32,8 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
         List<ReportFindAllResponse> returnReport = jpaQueryFactory.select(Projections.fields(
                         ReportFindAllResponse.class,
                         report.title,
-                        report.category,
-                        report.likeCnt
+                        report.category.stringValue().as("category"),
+                        report.likeCnt.intValue().as("likes")
                 ))
                 .from(report)
                 .where(conditions)

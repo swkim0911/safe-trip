@@ -34,8 +34,9 @@ class ReportControllerTest {
     private ReportService reportService;
 
     @Test
-    @DisplayName("/reports 요청시 저장된 report의 id를 반환한다")
-    void test_of_saving_report() throws Exception {
+    @DisplayName("[Post] /reports 요청시 저장된 report의 id를 반환한다")
+    @SuppressWarnings("unchecked")
+    void saving_report() throws Exception {
 
         // given
         String latitude = "37.56711260434211";
@@ -66,8 +67,14 @@ class ReportControllerTest {
                         .file(jsonRequest))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(jsonPath("$.code").value(201))
-                .andExpect(jsonPath("$.message").value("report가 등록되었습니다."))
+                .andExpect(jsonPath("$.message").value("report 등록이 완료되었습니다."))
                 .andExpect(jsonPath("$.result").value(1L));
+    }
+
+    @Test
+    @DisplayName("[GET] /reports 요청시 저장된 report li")
+    void get_report_list() {
+
     }
 
 }

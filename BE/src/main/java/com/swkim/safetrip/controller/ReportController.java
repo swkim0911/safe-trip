@@ -29,12 +29,14 @@ public class ReportController {
 
         Long id = reportService.saveReport(request, images);
 
-        return new ApiResponse<>(HttpStatus.CREATED.value(), "report가 등록되었습니다.", id);
+        return new ApiResponse<>(HttpStatus.CREATED.value(), "report 등록이 완료되었습니다.", id);
     }
 
     @GetMapping(value = "/reports")
     public ApiResponse<Page<ReportFindAllResponse>> getReports(@RequestParam(required = false) String country, @RequestParam(required = false) String city, Pageable pageable) {
 
-        return ApiResponse.of(HttpStatus.OK.value(), "report 조회가 완료되었습니다.", reportService.getReports(country, city, pageable));
+        Page<ReportFindAllResponse> reports = reportService.getReports(country, city, pageable);
+
+        return ApiResponse.of(HttpStatus.OK.value(), "report 조회가 완료되었습니다.", reports);
     }
 }
