@@ -11,7 +11,7 @@ public class ReportMapper {
                 .title(reportSaveRequest.getTitle())
                 .category(reportSaveRequest.getCategory())
                 .location(null)
-                .likeCnt(0)
+                .likes(0)
                 .description(reportSaveRequest.getDescription())
                 .advice(reportSaveRequest.getAdvice())
                 .build();
