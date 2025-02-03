@@ -71,6 +71,7 @@ public class ReportService {
 
         Report report = Optional.ofNullable(reportRepository.findReportWithLocationById(id)).orElseThrow(ReportNotFoundException::new);
 
+
         return ReportMapper.toReportFindByIdResponse(report);
     }
 
