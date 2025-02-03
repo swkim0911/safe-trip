@@ -13,6 +13,7 @@ import com.swkim.safetrip.global.exception.Error;
 import com.swkim.safetrip.global.exception.GeneralException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.CountryRepository;
+import com.swkim.safetrip.repository.ImageRepository;
 import com.swkim.safetrip.repository.ReportRepository;
 import com.swkim.safetrip.vo.CountryCityData;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,8 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
     private final CountryRepository countryRepository;
+    private final ImageRepository imageRepository;
+
     private final AmazonS3Client amazonS3Client;
 
     public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
@@ -69,10 +72,13 @@ public class ReportService {
     @Transactional
     public ReportFindByIdResponse getReport(Long id){
 
-        Report report = Optional.ofNullable(reportRepository.findReportWithLocationById(id)).orElseThrow(ReportNotFoundException::new);
+        Report report = reportRepository.findReportWithLocationById(id).orElseThrow(ReportNotFoundException::new);
+        List<Image> images = imageRepository.findImagesByReportId(id);
+        List<String> URLs = images.stream()
+                .map(Image::getAccessURL)
+                .toList();
 
-
-        return ReportMapper.toReportFindByIdResponse(report);
+        return ReportMapper.toReportFindByIdResponse(report, URLs);
     }
 
     @Transactional
