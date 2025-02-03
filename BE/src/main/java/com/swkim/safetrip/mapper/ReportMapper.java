@@ -1,7 +1,9 @@
 package com.swkim.safetrip.mapper;
 
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
+import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.entity.Report;
+import com.swkim.safetrip.entity.enums.Category;
 
 public class ReportMapper {
 
@@ -16,4 +18,13 @@ public class ReportMapper {
                 .advice(reportSaveRequest.getAdvice())
                 .build();
     }
+
+    public static ReportFindByIdResponse toReportFindByIdResponse(Report report) {
+        return ReportFindByIdResponse.builder()
+                .title(report.getTitle())
+                .category(report.getCategory().name())
+                .URLs(report.getImages())
+
+    }
+
 }

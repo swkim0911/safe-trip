@@ -61,15 +61,17 @@ public class ReportService {
         return save(report, location);
     }
 
-    public ReportFindByIdResponse getReport(Long id){
-        Report report = reportRepository.findById(id).orElseThrow(ReportNotFoundException::new);
-
-        return ReportMapper.toReportFindByIdResponse(report);
+    @Transactional
+    public Page<ReportFindAllResponse> getReports(String country, String city, Pageable pageable) {
+        return reportRepository.findAllByCountryAndCity(country, city, pageable);
     }
 
     @Transactional
-    private Page<ReportFindAllResponse> getReports(String country, String city, Pageable pageable) {
-        return reportRepository.findAllByCountryAndCity(country, city, pageable);
+    public ReportFindByIdResponse getReport(Long id){
+
+        Report report = Optional.ofNullable(reportRepository.findReportWithLocationById(id)).orElseThrow(ReportNotFoundException::new);
+
+        return ReportMapper.toReportFindByIdResponse(report);
     }
 
     @Transactional
