@@ -3,6 +3,7 @@ package com.swkim.safetrip.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
+import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.service.ReportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,12 +19,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ReportController.class)
 @MockBean(JpaMetamodelMappingContext.class)
@@ -141,5 +143,31 @@ class ReportControllerTest {
                 .andExpect(jsonPath("$.result.content[1].likes").value(20))
                 .andExpect(jsonPath("$.result.content[2].likes").value(10))
                 .andReturn();
+    }
+
+    @Test
+    @DisplayName("[GET] /reports/{id} 요청시 저장된 report 정보를 보인다.")
+    void get_report() throws Exception {
+
+        // given
+        Long id = 0L;
+        ReportFindByIdResponse response = ReportFindByIdResponse.builder()
+                .title("this is title")
+                .category("THEFT")
+                .description("this is description")
+                .advice("this is my advice")
+                .URLs(new ArrayList<>())
+                .latitude("51.231")
+                .longitude("129.141")
+                .likes(13)
+                .build();
+
+        // when
+        when(reportService.getReport(id)).thenReturn(response);
+        // then
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/reports/" + "{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200));
     }
 }
