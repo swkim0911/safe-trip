@@ -1,6 +1,8 @@
 spring:
   profiles:
     active: dev
+  messages:
+    basename: messages
   servlet:
     multipart:
       max-file-size: 2MB
