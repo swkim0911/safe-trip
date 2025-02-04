@@ -6,11 +6,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
+import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.entity.*;
+import com.swkim.safetrip.exception.CoordinatesNotValidException;
+import com.swkim.safetrip.exception.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.Error;
 import com.swkim.safetrip.global.exception.GeneralException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.CountryRepository;
+import com.swkim.safetrip.repository.ImageRepository;
 import com.swkim.safetrip.repository.ReportRepository;
 import com.swkim.safetrip.vo.CountryCityData;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +43,8 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
     private final CountryRepository countryRepository;
+    private final ImageRepository imageRepository;
+
     private final AmazonS3Client amazonS3Client;
 
     public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
@@ -62,6 +68,18 @@ public class ReportService {
     @Transactional
     public Page<ReportFindAllResponse> getReports(String country, String city, Pageable pageable) {
         return reportRepository.findAllByCountryAndCity(country, city, pageable);
+    }
+
+    @Transactional
+    public ReportFindByIdResponse getReport(Long id){
+
+        Report report = reportRepository.findReportWithLocationById(id).orElseThrow(ReportNotFoundException::new);
+        List<Image> images = imageRepository.findImagesByReportId(id);
+        List<String> URLs = images.stream()
+                .map(Image::getAccessURL)
+                .toList();
+
+        return ReportMapper.toReportFindByIdResponse(report, URLs);
     }
 
     @Transactional
@@ -140,7 +158,7 @@ public class ReportService {
                 .uri(uri)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, ((request, response) -> {
-                    throw new GeneralException(Error.COORDINATIES_NOT_VALID_ERROR);
+                    throw new CoordinatesNotValidException();
                 }))
                 .body(String.class);
     }
@@ -162,7 +180,7 @@ public class ReportService {
                 .uri(uri)
                 .retrieve()
                 .onStatus(HttpStatusCode :: is4xxClientError, ((request, response) -> {
-                    throw new GeneralException(Error.COORDINATIES_NOT_VALID_ERROR);
+                    throw new CoordinatesNotValidException();
                 }))
                 .body(String.class);
     }

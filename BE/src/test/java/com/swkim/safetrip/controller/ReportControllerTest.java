@@ -3,12 +3,14 @@ package com.swkim.safetrip.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
+import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.service.ReportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
@@ -18,12 +20,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ReportController.class)
 @MockBean(JpaMetamodelMappingContext.class)
@@ -37,6 +40,9 @@ class ReportControllerTest {
 
     @MockBean
     private ReportService reportService;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Test
     @DisplayName("[Post] /reports 요청시 저장된 report의 id를 반환한다")
@@ -70,10 +76,11 @@ class ReportControllerTest {
                         .multipart("/reports")
                         .file(image)
                         .file(jsonRequest))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value(201))
-                .andExpect(jsonPath("$.message").value("report 등록이 완료되었습니다."))
-                .andExpect(jsonPath("$.result").value(1L));
+                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.create.success", null, null)))
+                .andExpect(jsonPath("$.result").value(1L))
+                .andReturn();
     }
 
     @Test
@@ -98,7 +105,7 @@ class ReportControllerTest {
                         .queryParam("size", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value("report 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.list.get.success", null, null)))
                 .andExpect(jsonPath("$.result.numberOfElements").value(3));
     }
 
@@ -136,10 +143,37 @@ class ReportControllerTest {
                         .queryParam("sort", "likes,desc"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value("report 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.list.get.success", null, null)))
                 .andExpect(jsonPath("$.result.content[0].likes").value(30))
                 .andExpect(jsonPath("$.result.content[1].likes").value(20))
                 .andExpect(jsonPath("$.result.content[2].likes").value(10))
                 .andReturn();
+    }
+
+    @Test
+    @DisplayName("[GET] /reports/{id} 요청시 저장된 report 정보를 보인다.")
+    void get_report() throws Exception {
+
+        // given
+        Long id = 0L;
+        ReportFindByIdResponse response = ReportFindByIdResponse.builder()
+                .title("this is title")
+                .category("THEFT")
+                .description("this is description")
+                .advice("this is my advice")
+                .URLs(new ArrayList<>())
+                .latitude("51.231")
+                .longitude("129.141")
+                .likes(13)
+                .build();
+
+        // when
+        when(reportService.getReport(id)).thenReturn(response);
+        // then
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/reports/" + "{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.get.success", null, null)));
     }
 }
