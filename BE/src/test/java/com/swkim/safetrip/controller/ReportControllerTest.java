@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
@@ -39,6 +40,9 @@ class ReportControllerTest {
 
     @MockBean
     private ReportService reportService;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Test
     @DisplayName("[Post] /reports 요청시 저장된 report의 id를 반환한다")
@@ -72,10 +76,11 @@ class ReportControllerTest {
                         .multipart("/reports")
                         .file(image)
                         .file(jsonRequest))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value(201))
-                .andExpect(jsonPath("$.message").value("report 등록이 완료되었습니다."))
-                .andExpect(jsonPath("$.result").value(1L));
+                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.create.success", null, null)))
+                .andExpect(jsonPath("$.result").value(1L))
+                .andReturn();
     }
 
     @Test
@@ -100,7 +105,7 @@ class ReportControllerTest {
                         .queryParam("size", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value("report 목록 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.list.get.success", null, null)))
                 .andExpect(jsonPath("$.result.numberOfElements").value(3));
     }
 
@@ -138,7 +143,7 @@ class ReportControllerTest {
                         .queryParam("sort", "likes,desc"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value("report 목록 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.list.get.success", null, null)))
                 .andExpect(jsonPath("$.result.content[0].likes").value(30))
                 .andExpect(jsonPath("$.result.content[1].likes").value(20))
                 .andExpect(jsonPath("$.result.content[2].likes").value(10))
@@ -168,6 +173,7 @@ class ReportControllerTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/reports/" + "{id}", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200));
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.get.success", null, null)));
     }
 }
