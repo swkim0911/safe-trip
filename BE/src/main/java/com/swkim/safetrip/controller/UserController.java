@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -18,7 +20,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/users")
-    public ApiResponse<Long> signup(@Valid SignUpRequest signUpRequest) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<Long> signup(@RequestBody @Valid SignUpRequest signUpRequest) {
         Long userId = userService.enroll(signUpRequest);
 
         return new ApiResponse<>(HttpStatus.CREATED.value(), "회원가입이 완료되었습니다.", userId);

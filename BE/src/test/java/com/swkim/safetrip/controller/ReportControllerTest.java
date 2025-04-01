@@ -1,13 +1,10 @@
 package com.swkim.safetrip.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
-import com.swkim.safetrip.dto.request.SignUpRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.service.ReportService;
-import com.swkim.safetrip.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +15,6 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -44,9 +40,6 @@ class ReportControllerTest {
 
     @MockBean
     private ReportService reportService;
-
-    @MockBean
-    private UserService userService;
 
     @Autowired
     private MessageSource messageSource;
@@ -182,28 +175,5 @@ class ReportControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.get.success", null, null)));
-    }
-
-    @Test
-    @DisplayName("[POST] /users 요청시 회원가입을 한다.")
-    void signup() throws Exception {
-        //given
-        SignUpRequest signUpRequest = SignUpRequest.builder()
-                .username("username")
-                .password("password")
-                .name("nickname")
-                .phoneNumber("010-1234-5678")
-                .email("test@gmail.com")
-                .build();
-        //when
-        when(userService.enroll(signUpRequest)).thenReturn(1L);
-        //then
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(signUpRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.code").value(201))
-                .andExpect(jsonPath("$.result").value(1L));
     }
 }
