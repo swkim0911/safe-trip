@@ -2,6 +2,7 @@ package com.swkim.safetrip.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,8 +19,8 @@ public class User extends BaseEntity{
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "login_id", nullable = false)
-    private String loginId;
+    @Column(name = "username", nullable = false)
+    private String username;
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -32,4 +33,13 @@ public class User extends BaseEntity{
 
     @Column(name = "email", nullable = false)
     private String email;
+
+    @Builder
+    public User(String username, String password, String name, String phoneNumber, String email) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+    }
 }

@@ -44,10 +44,10 @@ public class ReportController {
         return ApiResponse.of(HttpStatus.OK.value(), message, reports);
     }
 
-    @GetMapping(value = "/reports/{id}")
-    public ApiResponse<ReportFindByIdResponse> getReport(@PathVariable Long id) {
+    @GetMapping(value = "/reports/{reportId}")
+    public ApiResponse<ReportFindByIdResponse> getReport(@PathVariable Long reportId) {
 
-        ReportFindByIdResponse report = reportService.getReport(id);
+        ReportFindByIdResponse report = reportService.getReport(reportId);
         String message = messageSource.getMessage("report.get.success", null, null);
 
         return ApiResponse.of(HttpStatus.OK.value(), message, report);
