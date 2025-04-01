@@ -3,7 +3,6 @@ package com.swkim.safetrip.mapper;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.entity.Report;
-import com.swkim.safetrip.entity.enums.Category;
 
 import java.util.List;
 
