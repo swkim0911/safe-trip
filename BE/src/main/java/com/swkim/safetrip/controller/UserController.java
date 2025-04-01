@@ -1,6 +1,7 @@
 package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.request.SignUpRequest;
+import com.swkim.safetrip.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/users")
-    public String signup(@Valid SignUpRequest SignUpRequest) {
-        return "Sign up";
+    public Long signup(@Valid SignUpRequest signUpRequest) {
+        return userService.enroll(signUpRequest);
     }
 }
