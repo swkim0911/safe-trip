@@ -1,5 +1,5 @@
 <template>
-  <h1>SideBar</h1>
+  <h1>MapView</h1>
 </template>
 <script setup>
 
