@@ -1,5 +1,4 @@
 <template>
-  <h1>MapView</h1>
 </template>
 <script setup>
 
