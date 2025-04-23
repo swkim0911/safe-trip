@@ -1,7 +1,7 @@
 <template>
   <div class="mapview-container">
     <div style="height: 100vh; width: 100%">
-    <l-map :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="[47.41322, -1.219482]" :min-zoom="3" :options="{zoomControl: false}">
+    <l-map :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="[37.5665, 126.9780]" :min-zoom="3" :options="{zoomControl: false,  maxBoundsViscosity: 1.0}" :max-bounds="[[ -75, -180 ], [ 85, 180 ]]">
       <l-tile-layer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         layer-type="base"
