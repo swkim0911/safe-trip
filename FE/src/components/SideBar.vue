@@ -55,6 +55,8 @@ const toggleSidebar = () => {
   background-color: #343a40;
   transition: left 0.3s ease;
   padding: 20px;
+
+  z-index: 1000; 
 }
 
 /* 사이드바가 열릴 때 */
