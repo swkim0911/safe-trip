@@ -1,7 +1,7 @@
 <template>
   <div class="mapview-container">
     <div style="height: 100vh; width: 100%">
-    <l-map :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="[37.5665, 126.9780]" :min-zoom="3" :options="{zoomControl: false,  maxBoundsViscosity: 1.0}" :max-bounds="[[ -75, -180 ], [ 85, 180 ]]">
+    <l-map :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="[centerOfSeoul.lat, centerOfSeoul.lng]" :min-zoom="3" :options="{zoomControl: false,  maxBoundsViscosity: 1.0}" :max-bounds="[[ -75, -1800 ], [ 85, 1800 ]]">
       <l-tile-layer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         layer-type="base"
@@ -23,6 +23,8 @@ import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LControlZoom } from "@vue-leaflet/vue-leaflet";
 
 const zoom = ref(3);
+const centerOfSeoul = ref({ "lat": 37.5665, "lng": 126.9780 });
+
 </script>
 
 <style scoped lang="scss">
