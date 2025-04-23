@@ -16,6 +16,18 @@
           <li> item</li>
           <li> item</li>
           <li> item</li>
+          <li> item</li>
+          <li> item</li>
+          <li> item</li>
+          <li> item</li>
+          <li> item</li>
+          <li> item</li>
+          <li> item</li>
+          <li> item</li>
+          <li> item</li>
+          <li> item</li>
+          <li> item</li>
+          <li> item</li>
         </ul>
       </div>
     </div>
@@ -38,15 +50,19 @@ const toggleSidebar = () => {
 };
 </script>
 
-<style scoped >
+<style scoped lang="scss">
 /* 사이드바 컨테이너 */
 .sidebar-container {
-
+  position: fixed;
+  display: flex;
+  height: 100vh;
+  z-index: 1000;
 }
 
-/* 사이드바 스타일 */
+/* 사이드바 */
 .sidebar {
   position: fixed;
+  display: flex;
   top: 0;
   left: -500px; /* 기본적으로 숨김 */
   width: 500px;
@@ -55,8 +71,7 @@ const toggleSidebar = () => {
   background-color: #343a40;
   transition: left 0.3s ease;
   padding: 20px;
-
-  z-index: 1000; 
+  flex-direction: column;
 }
 
 /* 사이드바가 열릴 때 */
@@ -66,10 +81,15 @@ const toggleSidebar = () => {
 
 /* 사이드바 헤더 */
 .sidebar-header {
-  display: flex;
   align-items: center;
   font-size: 18px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.sidebar-body {
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain; /* 스크롤 범위를 벗어나면 움직이지 않게 */
 }
 
 /* 사이드바가 열렸을 때 토글 버튼 위치 조정 */
@@ -89,12 +109,6 @@ const toggleSidebar = () => {
   margin-bottom: 8px; /* 아래 여백 */
   border: 1px solid #ddd; /* 테두리 */
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
-  transition: transform 0.2s ease-in-out;
-}
-
-.sidebar-body li:hover {
-  background-color: #e9ecef; /* 마우스 오버 시 색 변경 */
-  transform: scale(1.05); /* 약간 확대 */
 }
 
 /* 토글 버튼 (사이드바 여닫기 버튼) */
@@ -110,7 +124,5 @@ const toggleSidebar = () => {
   font-size: 18px;
   cursor: pointer;
   transition: all 0.3s;
-
-  z-index: 1000; 
 }
 </style>
