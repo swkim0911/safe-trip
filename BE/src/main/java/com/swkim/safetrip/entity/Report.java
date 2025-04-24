@@ -1,6 +1,5 @@
 package com.swkim.safetrip.entity;
 
-import com.swkim.safetrip.entity.enums.Category;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -48,7 +47,6 @@ public class Report  extends BaseEntity{
         this.user = user;
         this.location = location;
         this.title = title;
-        this.likes = likes;
         this.description = description;
         this.advice = advice;
     }
