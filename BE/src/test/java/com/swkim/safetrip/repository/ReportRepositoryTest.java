@@ -30,7 +30,6 @@ class ReportRepositoryTest {
 
         Report report = Report.builder()
                 .title("title")
-                .category("THEFT")
                 .description("description")
                 .advice("advice")
                 .build();

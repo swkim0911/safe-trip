@@ -26,6 +26,7 @@ public class Report extends BaseEntity{
     @JoinColumn(name = "location_id")
     private Location location;
 
+    @Setter
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id")
     private Category category;
@@ -43,9 +44,7 @@ public class Report extends BaseEntity{
     private String advice;
 
     @Builder
-    public Report(String title, String category, User user, Location location, String description, String advice) {
-        this.user = user;
-        this.location = location;
+    public Report(String title, String description, String advice) {
         this.title = title;
         this.description = description;
         this.advice = advice;
