@@ -12,7 +12,7 @@ public class ReportMapper {
     public static Report toReport(ReportSaveRequest reportSaveRequest) {
         return Report.builder()
                 .title(reportSaveRequest.getTitle())
-                .category(reportSaveRequest.getCategory())
+                .category(reportSaveRequest.)
                 .location(null)
                 .description(reportSaveRequest.getDescription())
                 .advice(reportSaveRequest.getAdvice())

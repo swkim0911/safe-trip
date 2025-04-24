@@ -10,7 +10,7 @@ import java.util.List;
 @Table(name = "report")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Report  extends BaseEntity{
+public class Report extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,11 +26,12 @@ public class Report  extends BaseEntity{
     @JoinColumn(name = "location_id")
     private Location location;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "location_id")
+    private Category category;
+
     @Column(name = "title", nullable = false)
     private String title;
-
-    @Enumerated(EnumType.STRING)
-    private Category category;
 
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
@@ -42,8 +43,7 @@ public class Report  extends BaseEntity{
     private String advice;
 
     @Builder
-    public Report(String title, String category, User user, Location location, int likes, String description, String advice) {
-        this.category = Category.valueOf(category);
+    public Report(String title, String category, User user, Location location, String description, String advice) {
         this.user = user;
         this.location = location;
         this.title = title;
