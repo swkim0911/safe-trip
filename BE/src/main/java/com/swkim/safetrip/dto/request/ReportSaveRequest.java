@@ -22,11 +22,11 @@ public class ReportSaveRequest {
     @NotBlank(message = "위치를 입력해주세요.")
     private String location;
 
+    @NotBlank(message = "카테고리를 입력해주세요.")
+    private Long categoryId;
+
     @NotBlank(message = "제목을 입력하세요.")
     private String title;
-
-    @NotBlank(message = "카테고리를 입력해주세요.")
-    private String category;
 
     @NotBlank(message = "설명을 해주세요.")
     private String description;
