@@ -6,15 +6,18 @@
         <input
         type="text"
         v-model="searchText"
-        placeholder="검색어를 입력하세요"
+        placeholder="국가, 도시 검색"
         class="form-control form-control-lg mb-3"
         />
       
       </div>
       <div class="sidebar-body">
         <ul>
-          <li> item</li>
-          <li> item</li>
+          <li> 
+            <span class="country-name">대한민국</span>
+            <span class="number">100</span>
+          </li>
+          <li> <faceTear style="height: 20px; width: 20px;"/></li>
           <li> item</li>
           <li> item</li>
           <li> item</li>
@@ -42,8 +45,10 @@
 
 <script setup>
 import { ref } from 'vue';
+import faceTear from "../assets/face-sad-tear-regular.svg";
 
 const isOpen = ref(false);
+
 
 const toggleSidebar = () => {
   isOpen.value = !isOpen.value;
@@ -104,6 +109,7 @@ const toggleSidebar = () => {
 
 .sidebar-body li {
   background-color: #f8f9fa; /* 배경색 */
+  color: black;
   border-radius: 10px; /* 모서리를 둥글게 */
   padding: 12px; /* 내부 여백 */
   margin-bottom: 8px; /* 아래 여백 */
@@ -124,5 +130,18 @@ const toggleSidebar = () => {
   font-size: 18px;
   cursor: pointer;
   transition: all 0.3s;
+}
+
+.country-name {
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 12px; /* 숫자와 텍스트 사이 여백 */
+  color: #333; /* 글자색 */
+}
+
+/* 숫자 스타일 */
+.number {
+  font-size: 14px;
+  color: #007bff; /* 숫자 색상 */
 }
 </style>
