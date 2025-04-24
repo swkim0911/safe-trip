@@ -12,25 +12,79 @@
       
       </div>
       <div class="sidebar-body">
-        <ul>
-          <li class="list-item"> 
-            <div class="country-name">그리스</div>
-            <faceTear class="icon" style= "height: 20px; width: 20px;"/>
-            <div class="scam-count">10</div>
+        <ul class="list-group">
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">크로아티아</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
           </li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
-          <li> item</li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">스페인</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">프랑스</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">인도</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">대한민국</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">브라질</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">코트디부아르</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">케냐</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">러시아</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">오스트레일리아</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">오스트리아</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">독일</div>
+            </div>
+            <span class="badge text-bg-primary rounded-pill">14</span>
+          </li>
         </ul>
       </div>
     </div>
@@ -45,7 +99,6 @@
 
 <script setup>
 import { ref } from 'vue';
-import faceTear from "../assets/face-sad-tear-regular.svg";
 
 const isOpen = ref(false);
 
@@ -56,6 +109,7 @@ const toggleSidebar = () => {
 </script>
 
 <style scoped lang="scss">
+
 /* 사이드바 컨테이너 */
 .sidebar-container {
   position: fixed;
@@ -72,8 +126,7 @@ const toggleSidebar = () => {
   left: -400px; /* 기본적으로 숨김 */
   width: 400px;
   height: 100vh;
-  color: white;
-  background-color: #343a40;
+  background-color: #e0e0e0bd;
   transition: left 0.3s ease;
   padding: 20px;
   flex-direction: column;
@@ -92,7 +145,8 @@ const toggleSidebar = () => {
 }
 
 .sidebar-body {
-  padding: 16px;
+  padding-left: 4px;
+  padding-right: 4px;
   overflow-y: auto;
   overscroll-behavior: contain; /* 스크롤 범위를 벗어나면 움직이지 않게 */
 }
@@ -102,17 +156,13 @@ const toggleSidebar = () => {
   left: 400px;
 }
 
-.sidebar-body ul {
-  list-style: none; /* 기본 리스트 스타일 제거 */
-  padding: 0;
-}
-
-.sidebar-body li {
+.list-group-item {
   background-color: #f8f9fa; /* 배경색 */
   color: black;
-  border-radius: 10px; /* 모서리를 둥글게 */
+  border-radius: 8px; /* 모서리를 둥글게 */
   padding: 12px; /* 내부 여백 */
-  margin-bottom: 8px; /* 아래 여백 */
+  margin-bottom: 12px; /* 아래 여백 */
+  margin-top: 12px;
   border: 1px solid #ddd; /* 테두리 */
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
 }
@@ -130,43 +180,5 @@ const toggleSidebar = () => {
   font-size: 18px;
   cursor: pointer;
   transition: all 0.3s;
-}
-
-.country-name {
-  font-size: 16px;
-  font-weight: bold;
-  margin-right: 12px; /* 숫자와 텍스트 사이 여백 */
-  color: #333; /* 글자색 */
-}
-
-/* 숫자 스타일 */
-.number {
-  font-size: 14px;
-  color: #007bff; /* 숫자 색상 */
-}
-
-.list-item {
-  display: flex;
-  align-items: center; /* 세로 중앙 정렬 */
-  width: 100%; /* 전체 너비 */
-}
-
-.country-name {
-  flex: 0 0 70%; /* 70% 너비 */
-  padding-right: 10px; /* 이름과 아이콘 간의 간격 */
-  align-items: center;        // 수직 가운데
-  justify-content: center;    // 수평 가운데
-  text-align: center;
-}
-
-.icon {
-  flex: 0 0 15%; /* 15% 너비 */
-  display: flex;
-  justify-content: center; /* 아이콘 중앙 정렬 */
-}
-
-.scam-count {
-  flex: 0 0 15%; /* 15% 너비 */
-  text-align: center; /* 숫자 중앙 정렬 */
 }
 </style>
