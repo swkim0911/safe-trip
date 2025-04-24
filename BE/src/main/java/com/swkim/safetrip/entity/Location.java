@@ -25,6 +25,9 @@ public class Location extends BaseEntity{
     @JoinColumn(name = "city_id")
     private City city;
 
+    @Column(name = "name", nullable = false)
+    private String name;
+
     @Column(name = "latitude", nullable = false)
     private Double latitude;
 
