@@ -3,9 +3,10 @@
     <div style="height: 100vh; width: 100%">
     <l-map :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="[centerOfSeoul.lat, centerOfSeoul.lng]" :min-zoom="3" :options="{zoomControl: false,  maxBoundsViscosity: 1.0}" :max-bounds="[[ -75, -1800 ], [ 85, 1800 ]]">
       <l-tile-layer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         layer-type="base"
-        name="OpenStreetMap"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
+        name="CartoDB Positron"
       ></l-tile-layer>
       <l-control-zoom position="bottomright"></l-control-zoom>
     </l-map>

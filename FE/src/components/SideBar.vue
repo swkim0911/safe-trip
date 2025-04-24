@@ -13,11 +13,11 @@
       </div>
       <div class="sidebar-body">
         <ul>
-          <li> 
-            <span class="country-name">대한민국</span>
-            <span class="number">100</span>
+          <li class="list-item"> 
+            <div class="country-name">그리스</div>
+            <faceTear class="icon" style= "height: 20px; width: 20px;"/>
+            <div class="scam-count">10</div>
           </li>
-          <li> <faceTear style="height: 20px; width: 20px;"/></li>
           <li> item</li>
           <li> item</li>
           <li> item</li>
@@ -69,8 +69,8 @@ const toggleSidebar = () => {
   position: fixed;
   display: flex;
   top: 0;
-  left: -500px; /* 기본적으로 숨김 */
-  width: 500px;
+  left: -400px; /* 기본적으로 숨김 */
+  width: 400px;
   height: 100vh;
   color: white;
   background-color: #343a40;
@@ -99,7 +99,7 @@ const toggleSidebar = () => {
 
 /* 사이드바가 열렸을 때 토글 버튼 위치 조정 */
 .sidebar.open + .toggle-btn {
-  left: 500px;
+  left: 400px;
 }
 
 .sidebar-body ul {
@@ -143,5 +143,30 @@ const toggleSidebar = () => {
 .number {
   font-size: 14px;
   color: #007bff; /* 숫자 색상 */
+}
+
+.list-item {
+  display: flex;
+  align-items: center; /* 세로 중앙 정렬 */
+  width: 100%; /* 전체 너비 */
+}
+
+.country-name {
+  flex: 0 0 70%; /* 70% 너비 */
+  padding-right: 10px; /* 이름과 아이콘 간의 간격 */
+  align-items: center;        // 수직 가운데
+  justify-content: center;    // 수평 가운데
+  text-align: center;
+}
+
+.icon {
+  flex: 0 0 15%; /* 15% 너비 */
+  display: flex;
+  justify-content: center; /* 아이콘 중앙 정렬 */
+}
+
+.scam-count {
+  flex: 0 0 15%; /* 15% 너비 */
+  text-align: center; /* 숫자 중앙 정렬 */
 }
 </style>
