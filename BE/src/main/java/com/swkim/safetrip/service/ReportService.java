@@ -53,7 +53,8 @@ public class ReportService {
         Report report = ReportMapper.toReport(reportSaveRequest);
 
         // 2. 이미지 S3에 전송하고 report에 추가
-        saveImagesInS3Bucket(files).forEach(report::addImage);
+        List<Image> savedImageList = saveImagesInS3Bucket(files);
+        savedImageList.forEach(report::addImage);
 
         // 3. Country, City 정보 Get
         CountryCityData countryCityData = getCountryCityData(reportSaveRequest);
