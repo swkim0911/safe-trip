@@ -36,9 +36,6 @@ public class Report  extends BaseEntity{
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
 
-    @Column(name = "likes", nullable = false)
-    private Integer likes;
-
     @Column(name = "description", nullable = false)
     private String description;
 
