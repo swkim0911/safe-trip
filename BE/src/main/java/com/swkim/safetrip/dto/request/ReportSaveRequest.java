@@ -20,7 +20,7 @@ public class ReportSaveRequest {
     private String longitude;
 
     @NotBlank(message = "위치를 입력해주세요.")
-    private String location;
+    private String address;
 
     @NotBlank(message = "카테고리를 입력해주세요.")
     private Long categoryId;
