@@ -8,9 +8,9 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 // 사용할 아이콘
-import { faUserLarge } from '@fortawesome/free-solid-svg-icons'
+import { faUserLarge, faBullhorn, faPen } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUserLarge)
+library.add(faUserLarge, faBullhorn, faPen)
 
 createApp(App)
   .component('font-awesome-icon', FontAwesomeIcon)
