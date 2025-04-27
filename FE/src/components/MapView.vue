@@ -11,10 +11,17 @@
         <l-control-zoom position="bottomright"></l-control-zoom>
       </l-map>
     </div>
-    <button type="button" class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3">
+    <button 
+    type="button" 
+    class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3" 
+    data-bs-toggle="modal"
+    data-bs-target="#reportModal"
+    @click="openReportModal">
       <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
       제보하기
     </button>
+    <ReportModal id="reportModal"/>
+    
     <button class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn">
       <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
       LOGIN
@@ -27,9 +34,10 @@ import {ref} from 'vue'
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LControlZoom } from "@vue-leaflet/vue-leaflet";
 
+import ReportModal from './ReportModal.vue'
+
 const zoom = ref(3);
 const centerOfSeoul = ref({ "lat": 37.5665, "lng": 126.9780 });
-
 </script>
 
 <style scoped lang="scss">
