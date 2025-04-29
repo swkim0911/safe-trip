@@ -47,7 +47,7 @@
                 </div>
                 <div ref="mapRef" style="width: 100%; height: 400px; margin-top: 10px;"></div>
 
-              <p>선택된 주소: {{ selectedAddress }}</p>
+              <p>선택된 주소: {{ address }}</p>
               <p>위도: {{ selectedLat }}, 경도: {{ selectedLng }}</p>
             </div>
             <div class="mb-3">
@@ -83,7 +83,6 @@ const mapRef = ref(null)
 const address = ref('')
 const selectedLat = ref(null) // 값이 존재하지 않음을 표시하기 위해 null로 초기화
 const selectedLng = ref(null)
-const selectedAddress = ref('')
 
 const errorMessage = ref('')
 
@@ -140,9 +139,10 @@ function searchAddress() {
 function reverseGeocode(lat, lng) {
   geocoder.geocode({ location: { lat, lng } }, (results, status) => {
     if (status === 'OK' && results[0]) {
-      selectedAddress.value = results[0].formatted_address
+      address.value = results[0].formatted_address
+      errorMessage.value = ''
     } else {
-      selectedAddress.value = '주소를 찾을 수 없음'
+      errorMessage.value = `Google 지도에서 ${address.value}을(를) 찾을 수 없습니다.`;
     }
     selectedLat.value = lat
     selectedLng.value = lng
