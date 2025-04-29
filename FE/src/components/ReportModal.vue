@@ -49,16 +49,18 @@
             </div>
             <div class="mb-3">
               <label for="photo" class="form-label">사진 업로드</label>
-              <input class="form-control" type="file" id="photo" accept="image/*" multiple>
+              <input class="form-control" type="file" id="photo" accept="image/*">
             </div>
 
             <div class="mb-3">
               <label for="report-description" class="col-form-label">내용</label>
-              <textarea class="form-control" id="report-description"></textarea>
+              <textarea class="form-control" id="report-description" ref="descriptionRef" @input="e => updateCharCnt(e, 'description')"></textarea>
+              <small ref="descriptionCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
             </div>
             <div class="mb-3">
               <label for="report-advice" class="col-form-label">조언</label>
-              <textarea class="form-control" id="report-advice"></textarea>
+              <textarea class="form-control" id="report-advice" ref="adviceRef" @input="e => updateCharCnt(e, 'advice')"></textarea>
+              <small ref="adviceCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
             </div>
           </div>
           <div class="modal-footer">
@@ -83,10 +85,38 @@ const selectedLng = ref(null)
 
 const errorMessage = ref('')
 
-
 let map, marker, geocoder
 
-// 2. 지도 초기화
+const textareaLength = 300
+
+const descriptionRef = ref(null)
+const descriptionCntRef = ref(null)
+
+const adviceRef = ref(null)
+const adviceCntRef = ref(null)
+
+function updateCharCnt(event, type) {
+  const textarea = event.target
+  let text = textarea.value
+
+  if (text.length > textareaLength) {
+    text = text.slice(0, textareaLength)
+    textarea.value = text
+  }
+
+  const countText = `${text.length} / ${textareaLength}`
+
+  if (type === 'description') {
+    descriptionCntRef.value.textContent = countText
+  } else if (type === 'advice') {
+    adviceCntRef.value.textContent = countText
+  }
+}
+
+
+
+
+// 지도 초기화
 async function initMap() {
 
   const loader = new Loader({
@@ -115,7 +145,7 @@ async function initMap() {
   });
 }
 
-// 3. 주소 검색 → 좌표 → 지도 표시
+// 주소 검색 → 좌표 → 지도 표시
 function searchAddress() {
   if (!address.value || !geocoder) return
 
@@ -136,7 +166,7 @@ function searchAddress() {
   })
 }
 
-// 4. 위도/경도로 주소 변환
+// 위도/경도로 주소 변환
 function reverseGeocode(lat, lng) {
   geocoder.geocode({ location: { lat, lng } }, (results, status) => {
     if (status === 'OK' && results[0]) {
