@@ -42,6 +42,9 @@
                   v-model="address"
                   @keyup.enter="searchAddress"
                 />
+                <div v-if="errorMessage" class="alert alert-danger mt-2">
+                  {{ errorMessage }}
+                </div>
                 <div ref="mapRef" style="width: 100%; height: 400px; margin-top: 10px;"></div>
 
               <p>선택된 주소: {{ selectedAddress }}</p>
@@ -78,9 +81,11 @@ const googleMapApiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
 // 반응형 변수
 const mapRef = ref(null)
 const address = ref('')
-const selectedLat = ref(null)
+const selectedLat = ref(null) // 값이 존재하지 않음을 표시하기 위해 null로 초기화
 const selectedLng = ref(null)
 const selectedAddress = ref('')
+
+const errorMessage = ref('')
 
 
 let map, marker, geocoder
@@ -98,7 +103,7 @@ async function initMap() {
   const { Map } = await google.maps.importLibrary("maps");
   geocoder = new google.maps.Geocoder();
   map = new Map(mapRef.value, {
-    center: { lat: 37.5665, lng: 126.9780 },
+    center: { lat: 37.5665, lng: 126.9780 }, // 서울
     zoom: 14,
   });
 
@@ -119,13 +124,14 @@ function searchAddress() {
       const location = results[0].geometry.location
       const lat = location.lat()
       const lng = location.lng()
-      map.setCenter(location)
+      map.setCenter(location) // location 위치로 지도의 중심 변경
       setMarker({ lat, lng })
       selectedAddress.value = results[0].formatted_address
       selectedLat.value = lat
       selectedLng.value = lng
+      errorMessage.value = ''
     } else {
-      alert('주소를 찾을 수 없습니다.')
+      errorMessage.value = `Google 지도에서 ${address.value}을(를) 찾을 수 없습니다.`;
     }
   })
 }
