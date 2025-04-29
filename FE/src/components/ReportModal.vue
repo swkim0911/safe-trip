@@ -48,17 +48,26 @@
                 <div ref="mapRef" style="width: 100%; height: 400px; margin-top: 10px;"></div>
             </div>
             <div class="mb-3">
-              <label for="photo" class="form-label">사진 업로드</label>
+              <label for="photo" class="form-label">
+                <font-awesome-icon :icon="['fas', 'camera']" class="modal-icon"/>
+                사진 업로드
+              </label>
               <input class="form-control" type="file" id="photo" accept="image/*">
             </div>
 
             <div class="mb-3">
-              <label for="report-description" class="col-form-label">내용</label>
+              <label for="report-description" class="col-form-label">
+                <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
+                내용
+              </label>
               <textarea class="form-control" id="report-description" ref="descriptionRef" @input="e => updateCharCnt(e, 'description')"></textarea>
               <small ref="descriptionCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
             </div>
             <div class="mb-3">
-              <label for="report-advice" class="col-form-label">조언</label>
+              <label for="report-advice" class="col-form-label">
+                <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
+                조언
+              </label>
               <textarea class="form-control" id="report-advice" ref="adviceRef" @input="e => updateCharCnt(e, 'advice')"></textarea>
               <small ref="adviceCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
             </div>
