@@ -5,7 +5,7 @@
         <l-tile-layer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           layer-type="base"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
           name="CartoDB Positron"
         ></l-tile-layer>
         <l-control-zoom position="bottomright"></l-control-zoom>
@@ -15,8 +15,7 @@
     type="button" 
     class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3" 
     data-bs-toggle="modal"
-    data-bs-target="#reportModal"
-    @click="openReportModal">
+    data-bs-target="#reportModal">
       <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
       제보하기
     </button>

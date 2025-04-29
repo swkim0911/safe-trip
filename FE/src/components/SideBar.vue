@@ -101,6 +101,7 @@
 import { ref } from 'vue';
 
 const isOpen = ref(false);
+const searchText = ref('');
 
 
 const toggleSidebar = () => {
