@@ -46,9 +46,6 @@
                   {{ errorMessage }}
                 </div>
                 <div ref="mapRef" style="width: 100%; height: 400px; margin-top: 10px;"></div>
-
-              <p>선택된 주소: {{ address }}</p>
-              <p>위도: {{ selectedLat }}, 경도: {{ selectedLng }}</p>
             </div>
             <div class="mb-3">
               <label for="photo" class="form-label">사진 업로드</label>
@@ -100,10 +97,14 @@ async function initMap() {
   await loader.load();
 
   const { Map } = await google.maps.importLibrary("maps");
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
   geocoder = new google.maps.Geocoder();
+
   map = new Map(mapRef.value, {
     center: { lat: 37.5665, lng: 126.9780 }, // 서울
     zoom: 14,
+    mapId: "MAP_ID"
   });
 
   map.addListener("click", (e) => {
@@ -125,12 +126,12 @@ function searchAddress() {
       const lng = location.lng()
       map.setCenter(location) // location 위치로 지도의 중심 변경
       setMarker({ lat, lng })
-      selectedAddress.value = results[0].formatted_address
+      address.value = results[0].formatted_address
       selectedLat.value = lat
       selectedLng.value = lng
       errorMessage.value = ''
     } else {
-      errorMessage.value = `Google 지도에서 ${address.value}을(를) 찾을 수 없습니다.`;
+      errorMessage.value = `Google 지도에서 ${address.value}을(를) 찾을 수 없습니다.`
     }
   })
 }
@@ -140,22 +141,23 @@ function reverseGeocode(lat, lng) {
   geocoder.geocode({ location: { lat, lng } }, (results, status) => {
     if (status === 'OK' && results[0]) {
       address.value = results[0].formatted_address
+      selectedLat.value = lat
+      selectedLng.value = lng
       errorMessage.value = ''
     } else {
-      errorMessage.value = `Google 지도에서 ${address.value}을(를) 찾을 수 없습니다.`;
+      errorMessage.value = `Google 지도에서 ${address.value}을(를) 찾을 수 없습니다.`
     }
-    selectedLat.value = lat
-    selectedLng.value = lng
   })
 }
 
 // 마커 설정
-function setMarker({ lat, lng }) {
+async function setMarker({ lat, lng }) {
   if (marker) marker.setMap(null)
-  marker = new google.maps.Marker({
-    position: { lat, lng },
-    map,
-  })
+
+  marker = new google.maps.marker.AdvancedMarkerElement({
+        map,
+        position: { lat, lng },
+    });
 }
 
 onMounted(initMap)
