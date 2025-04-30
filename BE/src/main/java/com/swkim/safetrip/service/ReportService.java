@@ -96,7 +96,10 @@ public class ReportService {
     }
 
     @Transactional
-    private Location saveLocationData(CountryCityData countryCityData, String locationLatitude, String locationLongitude){
+    private Location saveLocationData(CountryCityData countryCityData, String locationLat, String locationLng){
+
+        countryRepository.findByName(countryCityData.getCountryName());
+
         City city = City.builder()
                 .name(countryCityData.getCityName())
                 .lat(countryCityData.getCityLat())
@@ -113,8 +116,8 @@ public class ReportService {
         return Location.builder()
                 .country(country)
                 .city(city)
-                .lat(locationLatitude)
-                .lng(locationLongitude)
+                .lat(locationLat)
+                .lng(locationLng)
                 .build();
     }
 
@@ -129,10 +132,10 @@ public class ReportService {
         String cityInfo = getCityInfo(cityName);
         JsonObject cityObject = JsonParser.parseString(cityInfo).getAsJsonArray().get(0).getAsJsonObject();
 
-        String lat = cityObject.get("lat").getAsString();
-        String lng = cityObject.get("lon").getAsString();
+        String cityLat = cityObject.get("lat").getAsString();
+        String cityLng = cityObject.get("lon").getAsString();
 
-        return new CountryCityData(countryName, cityName, lat, lng);
+        return new CountryCityData(countryName, cityName, cityLat, cityLng);
     }
 
     private List<Image> saveImagesInS3Bucket(List<MultipartFile> files) {

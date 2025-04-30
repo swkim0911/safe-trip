@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "country")
+@Table(name = "country", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "name")
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Country {
