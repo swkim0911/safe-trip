@@ -13,9 +13,9 @@ import java.util.List;
 @AllArgsConstructor
 public class ReportFindAllResponse {
 
-    private String title;
+    private Long reportId;
+
+    private String reportTitle;
 
     private String scam;
-
-    private Integer likes;
 }

@@ -39,9 +39,9 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 
         List<ReportFindAllResponse> returnReport = jpaQueryFactory.select(Projections.fields(
                         ReportFindAllResponse.class,
+                        report.id,
                         report.title,
-                        report.title.stringValue().as("scam"),
-                        report.likes.intValue().as("likes")))
+                        report.scam.name.as("scam")))
                 .from(report)
                 .where(conditions)
                 .offset(pageable.getOffset())
