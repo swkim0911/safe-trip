@@ -12,10 +12,7 @@ import com.swkim.safetrip.exception.CoordinatesNotValidException;
 import com.swkim.safetrip.exception.ReportNotFoundException;
 import com.swkim.safetrip.exception.ScamNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
-import com.swkim.safetrip.repository.CountryRepository;
-import com.swkim.safetrip.repository.ImageRepository;
-import com.swkim.safetrip.repository.ReportRepository;
-import com.swkim.safetrip.repository.ScamRepository;
+import com.swkim.safetrip.repository.*;
 import com.swkim.safetrip.vo.CountryCityData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +41,7 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final ScamRepository scamRepository;
     private final CountryRepository countryRepository;
+    private final CityRepository cityRepository;
     private final ImageRepository imageRepository;
 
     private final AmazonS3Client amazonS3Client;
@@ -98,16 +96,17 @@ public class ReportService {
     @Transactional
     private Location saveLocationData(CountryCityData countryCityData, String locationLat, String locationLng){
 
-        countryRepository.findByName(countryCityData.getCountryName());
+        Country findCountry = countryRepository.findByName(countryCityData.getCountryName()).orElseGet(() -> {
+            return Country.builder()
+                    .name(countryCityData.getCountryName())
+                    .build();
+        });
+
 
         City city = City.builder()
                 .name(countryCityData.getCityName())
                 .lat(countryCityData.getCityLat())
                 .lng(countryCityData.getCityLng())
-                .build();
-
-        Country country = Country.builder()
-                .name(countryCityData.getCountryName())
                 .build();
 
         country.addCity(city);
