@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "city", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "name")
-})
+@Table(name = "city")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class City {
