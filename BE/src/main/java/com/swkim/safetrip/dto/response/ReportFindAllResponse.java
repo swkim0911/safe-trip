@@ -15,7 +15,7 @@ public class ReportFindAllResponse {
 
     private String title;
 
-    private String category;
+    private String scam;
 
     private Integer likes;
 }

@@ -14,6 +14,7 @@ import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.CountryRepository;
 import com.swkim.safetrip.repository.ImageRepository;
 import com.swkim.safetrip.repository.ReportRepository;
+import com.swkim.safetrip.repository.ScamRepository;
 import com.swkim.safetrip.vo.CountryCityData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +41,7 @@ public class ReportService {
     private String bucketName;
 
     private final ReportRepository reportRepository;
+    private final ScamRepository scamRepository;
     private final CountryRepository countryRepository;
     private final ImageRepository imageRepository;
 
@@ -50,17 +52,23 @@ public class ReportService {
         // 1. reportRequest -> Report Mapping
         Report report = ReportMapper.toReport(reportSaveRequest);
 
-        // 2. 이미지 S3에 전송하고 report에 추가
+        // 2. scam 객체 report에 추가
+        Scam findScam = scamRepository.findById(reportSaveRequest.getScamId()).orElseThrow(
+                RuntimeException::new //todo
+        );
+        report.setScam(findScam);
+
+        // 3. 이미지 S3에 전송하고 report에 추가
         List<Image> savedImageList = saveImagesInS3Bucket(files);
         savedImageList.forEach(report::addImage);
 
-        // 3. Country, City 정보 Get
+        // 4. Country, City 정보 Get
         CountryCityData countryCityData = getCountryCityData(reportSaveRequest);
 
-        // 4. Country, City 엔티티 저장. address에 대한 location 객체 생성
+        // 5. Country, City 엔티티 저장. address에 대한 location 객체 생성
         Location location = saveLocationData(countryCityData, reportSaveRequest.getLat(), reportSaveRequest.getLng());
 
-        // 5. report 저장
+        // 6. report 저장
         return save(report, location);
     }
 
