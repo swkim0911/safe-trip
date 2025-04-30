@@ -19,16 +19,17 @@ public class ReportFindByIdResponse {
 
     private String scam;
 
-    private List<String> URLs;
+    private String address;
 
     private String lat;
 
     private String lng;
 
+    private List<String> URLs;
+
     private String description;
 
     private String advice;
-
 
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm")
     private LocalDateTime createdAt;

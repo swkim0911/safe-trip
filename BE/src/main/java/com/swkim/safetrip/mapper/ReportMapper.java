@@ -21,14 +21,14 @@ public class ReportMapper {
         return ReportFindByIdResponse.builder()
                 .title(report.getTitle())
                 .scam(report.getScam().getName())
-                .URLs(URLs)
+                .address(report.getLocation().getName())
                 .lat(String.valueOf(report.getLocation().getLat()))
                 .lng(String.valueOf(report.getLocation().getLng()))
+                .URLs(URLs)
                 .description(report.getDescription())
                 .advice(report.getAdvice())
                 .createdAt(report.getCreatedAt())
                 .build();
-
     }
 
 }
