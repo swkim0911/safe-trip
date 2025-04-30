@@ -28,17 +28,17 @@ public class Location extends BaseEntity{
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "latitude", nullable = false)
-    private Double latitude;
+    @Column(name = "lat", nullable = false)
+    private Double lat;
 
-    @Column(name = "longitude", nullable = false)
-    private Double longitude;
+    @Column(name = "lng", nullable = false)
+    private Double lng;
 
     @Builder
-    public Location(Country country, City city, String latitude, String longitude){
+    public Location(Country country, City city, String lat, String lng){
         this.country = country;
         this.city = city;
-        this.latitude = Double.parseDouble(latitude);
-        this.longitude = Double.parseDouble(longitude);
+        this.lat = Double.parseDouble(lat);
+        this.lng = Double.parseDouble(lng);
     }
 }

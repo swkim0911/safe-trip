@@ -20,13 +20,12 @@ public class ReportMapper {
     public static ReportFindByIdResponse toReportFindByIdResponse(Report report, List<String> URLs) {
         return ReportFindByIdResponse.builder()
                 .title(report.getTitle())
-                .category(report.getCategory().name())
+                .category(report.getScam().name())
                 .URLs(URLs)
-                .latitude(String.valueOf(report.getLocation().getLatitude()))
-                .longitude(String.valueOf(report.getLocation().getLongitude()))
+                .latitude(String.valueOf(report.getLocation().getLat()))
+                .longitude(String.valueOf(report.getLocation().getLng()))
                 .description(report.getDescription())
                 .advice(report.getAdvice())
-                .likes(report.getLikes())
                 .createdAt(report.getCreatedAt())
                 .build();
 

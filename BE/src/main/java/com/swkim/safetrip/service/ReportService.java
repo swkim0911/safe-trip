@@ -10,8 +10,6 @@ import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.exception.CoordinatesNotValidException;
 import com.swkim.safetrip.exception.ReportNotFoundException;
-import com.swkim.safetrip.global.exception.Error;
-import com.swkim.safetrip.global.exception.GeneralException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.CountryRepository;
 import com.swkim.safetrip.repository.ImageRepository;
@@ -60,7 +58,7 @@ public class ReportService {
         CountryCityData countryCityData = getCountryCityData(reportSaveRequest);
 
         // 4. Country, City 엔티티 저장. address에 대한 location 객체 생성
-        Location location = saveLocationData(countryCityData, reportSaveRequest.getLatitude(), reportSaveRequest.getLongitude());
+        Location location = saveLocationData(countryCityData, reportSaveRequest.getLat(), reportSaveRequest.getLng());
 
         // 5. report 저장
         return save(report, location);
@@ -94,8 +92,8 @@ public class ReportService {
     private Location saveLocationData(CountryCityData countryCityData, String locationLatitude, String locationLongitude){
         City city = City.builder()
                 .name(countryCityData.getCityName())
-                .latitude(countryCityData.getCityLatitude())
-                .longitude(countryCityData.getCityLongitude())
+                .lat(countryCityData.getCityLat())
+                .lng(countryCityData.getCityLng())
                 .build();
 
         Country country = Country.builder()
@@ -108,13 +106,13 @@ public class ReportService {
         return Location.builder()
                 .country(country)
                 .city(city)
-                .latitude(locationLatitude)
-                .longitude(locationLongitude)
+                .lat(locationLatitude)
+                .lng(locationLongitude)
                 .build();
     }
 
     private CountryCityData getCountryCityData(ReportSaveRequest reportSaveRequest) {
-        String locationInfo = getLocationInfo(reportSaveRequest.getLatitude(), reportSaveRequest.getLongitude());
+        String locationInfo = getLocationInfo(reportSaveRequest.getLat(), reportSaveRequest.getLng());
         JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
         JsonObject addressObject = locationObject.getAsJsonObject("address");
 
@@ -124,10 +122,10 @@ public class ReportService {
         String cityInfo = getCityInfo(cityName);
         JsonObject cityObject = JsonParser.parseString(cityInfo).getAsJsonArray().get(0).getAsJsonObject();
 
-        String latitude = cityObject.get("lat").getAsString();
-        String longitude = cityObject.get("lon").getAsString();
+        String lat = cityObject.get("lat").getAsString();
+        String lng = cityObject.get("lon").getAsString();
 
-        return new CountryCityData(countryName, cityName, latitude, longitude);
+        return new CountryCityData(countryName, cityName, lat, lng);
     }
 
     private List<Image> saveImagesInS3Bucket(List<MultipartFile> files) {

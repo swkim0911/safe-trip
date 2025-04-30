@@ -9,6 +9,6 @@ public class CountryCityData {
 
     private final String countryName;
     private final String cityName;
-    private final String cityLatitude;
-    private final String cityLongitude;
+    private final String cityLat;
+    private final String cityLng;
 }
