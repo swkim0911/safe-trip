@@ -21,7 +21,7 @@ public class ReportMapper {
         return ReportFindByIdResponse.builder()
                 .title(report.getTitle())
                 .scam(report.getScam().getName())
-                .address(report.getLocation().getName())
+                .address(report.getLocation().getAddress())
                 .lat(String.valueOf(report.getLocation().getLat()))
                 .lng(String.valueOf(report.getLocation().getLng()))
                 .URLs(URLs)

@@ -16,7 +16,7 @@ public class ReportSaveRequest {
     @NotBlank(message = "제목을 입력하세요.")
     private String title;
 
-    @NotBlank(message = "카테고리를 입력해주세요.")
+    @NotNull(message = "카테고리를 입력해주세요.")
     private Long scamId;
 
     @NotBlank(message = "주소를 입력해주세요.")
