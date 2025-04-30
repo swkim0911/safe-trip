@@ -10,6 +10,7 @@ import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.exception.CoordinatesNotValidException;
 import com.swkim.safetrip.exception.ReportNotFoundException;
+import com.swkim.safetrip.exception.S3UploadException;
 import com.swkim.safetrip.exception.ScamNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.*;
@@ -232,7 +233,7 @@ public class ReportService {
         try {
             amazonS3Client.putObject(bucketName, fileName, file.getInputStream(), objectMetadata);
         } catch (IOException e) {
-            throw new RuntimeException(e); //todo
+            throw new S3UploadException();
         }
 
         String accessURL = amazonS3Client.getUrl(bucketName, fileName).toString();
