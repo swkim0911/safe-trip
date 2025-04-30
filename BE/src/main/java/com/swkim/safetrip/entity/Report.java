@@ -28,8 +28,8 @@ public class Report extends BaseEntity{
 
     @Setter
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "location_id")
-    private Category category;
+    @JoinColumn(name = "scam_id")
+    private Scam scam;
 
     @Column(name = "title", nullable = false)
     private String title;
