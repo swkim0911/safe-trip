@@ -10,6 +10,7 @@ import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.exception.CoordinatesNotValidException;
 import com.swkim.safetrip.exception.ReportNotFoundException;
+import com.swkim.safetrip.exception.ScamNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.CountryRepository;
 import com.swkim.safetrip.repository.ImageRepository;
@@ -53,9 +54,7 @@ public class ReportService {
         Report report = ReportMapper.toReport(reportSaveRequest);
 
         // 2. scam 객체 report에 추가
-        Scam findScam = scamRepository.findById(reportSaveRequest.getScamId()).orElseThrow(
-                RuntimeException::new //todo
-        );
+        Scam findScam = scamRepository.findById(reportSaveRequest.getScamId()).orElseThrow(ScamNotFoundException::new);
         report.setScam(findScam);
 
         // 3. 이미지 S3에 전송하고 report에 추가
