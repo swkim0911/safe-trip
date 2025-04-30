@@ -64,7 +64,7 @@ public class ReportService {
         CountryCityData countryCityData = getCountryCityData(reportSaveRequest);
 
         // 5. Country, City 엔티티 저장. address에 대한 location 객체 생성
-        Location location = saveLocationData(countryCityData, reportSaveRequest.getLat(), reportSaveRequest.getLng());
+        Location location = saveLocationData(countryCityData, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
 
         // 6. report 저장
         return save(report, location);
@@ -95,7 +95,7 @@ public class ReportService {
     }
 
     @Transactional
-    private Location saveLocationData(CountryCityData countryCityData, String locationLat, String locationLng){
+    private Location saveLocationData(CountryCityData countryCityData, String address, String locationLat, String locationLng){
 
         String countryName = countryCityData.getCountryName();
         String cityName = countryCityData.getCityName();
@@ -139,6 +139,7 @@ public class ReportService {
         return Location.builder()
                 .country(country)
                 .city(city)
+                .address(address)
                 .lat(locationLat)
                 .lng(locationLng)
                 .build();

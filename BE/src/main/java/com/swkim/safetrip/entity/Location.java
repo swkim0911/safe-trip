@@ -25,8 +25,8 @@ public class Location extends BaseEntity{
     @JoinColumn(name = "city_id")
     private City city;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "address", nullable = false)
+    private String address;
 
     @Column(name = "lat", nullable = false)
     private Double lat;
@@ -35,8 +35,9 @@ public class Location extends BaseEntity{
     private Double lng;
 
     @Builder
-    public Location(Country country, City city, String lat, String lng){
+    public Location(Country country, City city, String address, String lat, String lng){
         this.country = country;
+        this.address = address;
         this.city = city;
         this.lat = Double.parseDouble(lat);
         this.lng = Double.parseDouble(lng);
