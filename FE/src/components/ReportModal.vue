@@ -26,7 +26,7 @@
                 <label class="btn btn-outline-primary" for="scam3">투어 사기</label>
 
                 <input type="radio" class="btn-check" name="scamType" id="scam4" v-model="form.scamId" :value="3">
-                <label class="btn btn-outline-primary" for="scam4">강매 / 바가지</label>
+                <label class="btn btn-outline-primary" for="scam4">강매 / 바가지 (금전사기)</label>
 
                 <input type="radio" class="btn-check" name="scamType" id="scam5" v-model="form.scamId" :value="4">
                 <label class="btn btn-outline-primary" for="scam5">기타</label>
