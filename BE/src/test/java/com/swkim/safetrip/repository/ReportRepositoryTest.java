@@ -24,8 +24,9 @@ class ReportRepositoryTest {
     void lazy_loading_test() {
         //given
         Location location = Location.builder()
-                .latitude("31.123")
-                .longitude("102.13925")
+                .address("downtown")
+                .lat("31.123")
+                .lng("102.13925")
                 .build();
 
         Report report = Report.builder()
