@@ -27,7 +27,7 @@ public class Report extends BaseEntity{
     private Location location;
 
     @Setter
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scam_id")
     private Scam scam;
 
