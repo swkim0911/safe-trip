@@ -39,3 +39,6 @@ out/
 ### yaml file ###
 application-dev.yml
 application-prod.yml
+
+### .sql ###
+import.sql
