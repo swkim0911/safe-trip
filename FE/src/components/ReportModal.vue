@@ -97,7 +97,7 @@ const errorMessage = ref('')
 
 let map, marker, geocoder
 
-const textareaLength = 300
+const textareaLength = 500
 
 const descriptionRef = ref(null)
 const descriptionCntRef = ref(null)
@@ -116,36 +116,45 @@ const form = reactive({
   imageFile: null
 })
 
-
-
-function handleFileChange(event) {
+const handleFileChange = (event) => {
   form.imageFile = event.target.files[0]
 }
 
-async function submitForm() {
-  try {
-    const formData = new FormData()
-    formData.append('title', form.title)
-    formData.append('scamId', form.scamId)
-    formData.append('address', form.address)
-    formData.append('lat', form.lat)
-    formData.append('lng', form.lng)
-    formData.append('description', form.description)
-    formData.append('advice', form.advice)
-    if (form.imageFile) {
-      formData.append('image', form.imageFile)
-    }
-    await axios.post('http://localhost:8080/reports', formData)
+const extractJsonFromForm = (form, excludeKeys = ['imageFile']) => {
+  const json = {}
 
-    alert('신고가 성공적으로 접수되었습니다.')
-  } catch (error) {
-    console.error(error)
-  } 
+  for (const key in form) {
+    if (!excludeKeys.includes(key)) {
+      json[key] = form[key]
+    }
+  }
+  return new Blob([JSON.stringify(json)], {type:'application/json'})
 }
 
 
 
-function updateCharCnt(event, type) {
+// async function submitForm() {
+//   try {
+//     const formData = new FormData()
+//     formData.append('title', form.title)
+//     formData.append('scamId', form.scamId)
+//     formData.append('address', form.address)
+//     formData.append('lat', form.lat)
+//     formData.append('lng', form.lng)
+//     formData.append('description', form.description)
+//     formData.append('advice', form.advice)
+//     if (form.imageFile) {
+//       formData.append('image', form.imageFile)
+//     }
+//     await axios.post('http://localhost:8080/reports', formData)
+
+//     alert('신고가 성공적으로 접수되었습니다.')
+//   } catch (error) {
+//     console.error(error)
+//   } 
+// }
+
+const updateCharCnt = (event, type) => {
   const textarea = event.target
   let text = textarea.value
 
@@ -163,12 +172,8 @@ function updateCharCnt(event, type) {
   }
 }
 
-
-
-
 // 지도 초기화
-async function initMap() {
-
+const initMap = async () => {
   const loader = new Loader({
     apiKey: googleMapApiKey,
     version: 'weekly',
@@ -196,7 +201,7 @@ async function initMap() {
 }
 
 // 주소 검색 → 좌표 → 지도 표시
-function searchAddress() {
+const searchAddress = () => {
   if (!form.address || !geocoder) return
 
   geocoder.geocode({ address: form.address }, (results, status) => {
@@ -217,7 +222,7 @@ function searchAddress() {
 }
 
 // 위도/경도로 주소 변환
-function reverseGeocode(lat, lng) {
+const reverseGeocode = (lat, lng) => {
   geocoder.geocode({ location: { lat, lng } }, (results, status) => {
     if (status === 'OK' && results[0]) {
       form.address = results[0].formatted_address
@@ -231,15 +236,14 @@ function reverseGeocode(lat, lng) {
     }
   })
 }
-
 // 마커 설정
-async function setMarker({ lat, lng }) {
+const setMarker = async ({lat, lng}) => {
   if (marker) marker.setMap(null)
 
-  marker = new google.maps.marker.AdvancedMarkerElement({
-        map,
-        position: { lat, lng },
-    });
+    marker = new google.maps.marker.AdvancedMarkerElement({
+          map,
+          position: { lat, lng },
+      });
 }
 
 onMounted(initMap)
