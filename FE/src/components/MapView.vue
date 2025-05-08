@@ -19,7 +19,7 @@
       <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
       제보하기
     </button>
-    <ReportModal id="reportModal"/>
+    <ReportModal/>
     
     <button class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn">
       <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />

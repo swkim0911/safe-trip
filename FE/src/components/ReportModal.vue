@@ -1,5 +1,5 @@
 <template>
-  <div class="modal fade" ref="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal fade" id = "reportModal" ref="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
       <div class="modal-content">
           <div class="modal-header">
@@ -54,7 +54,7 @@
                   <font-awesome-icon :icon="['fas', 'camera']" class="modal-icon"/>
                   사진 업로드
                 </label>
-                <input class="form-control" type="file" id="photo" accept="image/*" @change="handleFileChange">
+                <input ref="fileInput" class="form-control" type="file" id="photo" accept="image/*" @change="handleFileChange">
               </div>
 
               <div class="mb-3">
@@ -62,7 +62,7 @@
                   <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
                   내용
                 </label>
-                <textarea class="form-control" id="report-description" ref="descriptionRef" v-model="form.description" @input="e => updateCharCnt(e, 'description')"></textarea>
+                <textarea class="form-control" id="report-description" v-model="form.description" @input="e => updateCharCnt(e, 'description')"></textarea>
                 <small ref="descriptionCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
               </div>
               <div class="mb-3">
@@ -70,7 +70,7 @@
                   <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
                   조언
                 </label>
-                <textarea class="form-control" id="report-advice" ref="adviceRef" v-model="form.advice" @input="e => updateCharCnt(e, 'advice')"></textarea>
+                <textarea class="form-control" id="report-advice" v-model="form.advice" @input="e => updateCharCnt(e, 'advice')"></textarea>
                 <small ref="adviceCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
               </div>
               <div class="modal-footer">
@@ -91,19 +91,16 @@ import axios from 'axios'
 const googleMapApiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
 
 // 반응형 변수
-const mapRef = ref(null)
+const mapRef = ref(null);
 
-const errorMessage = ref('')
+const errorMessage = ref('');
 
-let map, marker, geocoder
+let map, marker, geocoder;
 
-const textareaLength = 500
+const textareaLength = 500;
 
-const descriptionRef = ref(null)
-const descriptionCntRef = ref(null)
-
-const adviceRef = ref(null)
-const adviceCntRef = ref(null)
+const descriptionCntRef = ref(null);
+const adviceCntRef = ref(null);
 
 const form = reactive({
   title: '',
@@ -116,11 +113,13 @@ const form = reactive({
   imageFile: null
 })
 
+const fileInput = ref(null);
+
 const handleFileChange = (event) => {
   form.imageFile = event.target.files[0]
 }
 
-const extractJsonFromForm = (form, excludeKeys = ['imageFile']) => {
+const extractJsonFromForm = (excludeKeys = ['imageFile']) => {
   const json = {}
 
   for (const key in form) {
@@ -131,44 +130,73 @@ const extractJsonFromForm = (form, excludeKeys = ['imageFile']) => {
   return new Blob([JSON.stringify(json)], {type:'application/json'})
 }
 
+const resetForm = () => {
+  form.title = '';
+  form.scamId = null;
+  form.address = null;
+  form.lat = '';
+  form.lng = '';
+  form.description = '';
+  form.advice = '';
+  form.imageFile = null;
 
-
-// async function submitForm() {
-//   try {
-//     const formData = new FormData()
-//     formData.append('title', form.title)
-//     formData.append('scamId', form.scamId)
-//     formData.append('address', form.address)
-//     formData.append('lat', form.lat)
-//     formData.append('lng', form.lng)
-//     formData.append('description', form.description)
-//     formData.append('advice', form.advice)
-//     if (form.imageFile) {
-//       formData.append('image', form.imageFile)
-//     }
-//     await axios.post('http://localhost:8080/reports', formData)
-
-//     alert('신고가 성공적으로 접수되었습니다.')
-//   } catch (error) {
-//     console.error(error)
-//   } 
-// }
-
-const updateCharCnt = (event, type) => {
-  const textarea = event.target
-  let text = textarea.value
-
-  if (text.length > textareaLength) {
-    text = text.slice(0, textareaLength)
-    textarea.value = text
+  if (fileInput.value) {
+    fileInput.value.value = '';
   }
 
-  const countText = `${text.length} / ${textareaLength}`
+  marker?.setMap(null);
+  descriptionCntRef.value.textContent = `0 / ${textareaLength}`;
+  adviceCntRef.value.textContent = `0 / ${textareaLength}`;
+}
+
+const setupModalEventListener = () => {
+  const modal = document.getElementById('reportModal');
+  if (modal) {
+    modal.addEventListener('hidden.bs.modal', () => {
+      resetForm();
+    });
+  }
+}
+
+const submitForm = async () => {
+  if (!errorMessage) return;
+  resetForm();
+  
+  // try {
+  //   const formData = new FormData()
+  //   formData.append('request', extractJsonFromForm())
+
+  //   if (form.imageFile) {
+  //     formData.append('images', form.imageFile)
+  //   }
+
+  //   const response = await axios.post('http://localhost:8080/reports', formData, {
+  //     headers: {
+  //       'Content-Type': 'multipart/form-data'
+  //     }
+  //   })
+  //   console.log(response);
+
+  // } catch (error) {
+    
+  // }
+}
+
+const updateCharCnt = (event, type) => {
+  const textarea = event.target;
+  let text = textarea.value;
+
+  if (text.length > textareaLength) {
+    text = text.slice(0, textareaLength);
+    textarea.value = text;
+  }
+
+  const countText = `${text.length} / ${textareaLength}`;
 
   if (type === 'description') {
-    descriptionCntRef.value.textContent = countText
+    descriptionCntRef.value.textContent = countText;
   } else if (type === 'advice') {
-    adviceCntRef.value.textContent = countText
+    adviceCntRef.value.textContent = countText;
   }
 }
 
@@ -177,7 +205,7 @@ const initMap = async () => {
   const loader = new Loader({
     apiKey: googleMapApiKey,
     version: 'weekly',
-  })
+  });
 
   await loader.load();
 
@@ -202,21 +230,21 @@ const initMap = async () => {
 
 // 주소 검색 → 좌표 → 지도 표시
 const searchAddress = () => {
-  if (!form.address || !geocoder) return
+  if (!form.address || !geocoder) return;
 
   geocoder.geocode({ address: form.address }, (results, status) => {
     if (status === 'OK') {
-      const location = results[0].geometry.location
-      const lat = location.lat()
-      const lng = location.lng()
-      map.setCenter(location) // location 위치로 지도의 중심 변경
-      setMarker({ lat, lng })
-      form.address = results[0].formatted_address
-      form.lat = lat
-      form.lng = lng
-      errorMessage.value = ''
+      const location = results[0].geometry.location;
+      const lat = location.lat();
+      const lng = location.lng();
+      map.setCenter(location); // location 위치로 지도의 중심 변경
+      setMarker({ lat, lng });
+      form.address = results[0].formatted_address;
+      form.lat = lat;
+      form.lng = lng;
+      errorMessage.value = '';
     } else {
-      errorMessage.value = `Google 지도에서 ${form.address}을(를) 찾을 수 없습니다.`
+      errorMessage.value = `Google 지도에서 ${form.address}을(를) 찾을 수 없습니다.`;
     }
   })
 }
@@ -225,20 +253,18 @@ const searchAddress = () => {
 const reverseGeocode = (lat, lng) => {
   geocoder.geocode({ location: { lat, lng } }, (results, status) => {
     if (status === 'OK' && results[0]) {
-      form.address = results[0].formatted_address
-      form.lat = lat
-      form.lng = lng
-      errorMessage.value = ''
+      form.address = results[0].formatted_address;
+      form.lat = lat;
+      form.lng = lng;
+      errorMessage.value = '';
     } else {
-      errorMessage.value = `Google 지도에서 ${form.address}을(를) 찾을 수 없습니다.`
-
-      // 상태
+      errorMessage.value = `Google 지도에서 ${form.address}을(를) 찾을 수 없습니다.`;
     }
   })
 }
 // 마커 설정
 const setMarker = async ({lat, lng}) => {
-  if (marker) marker.setMap(null)
+  if (marker) marker.setMap(null);
 
     marker = new google.maps.marker.AdvancedMarkerElement({
           map,
@@ -246,7 +272,11 @@ const setMarker = async ({lat, lng}) => {
       });
 }
 
-onMounted(initMap)
+onMounted(() => {
+  initMap(),
+  setupModalEventListener()
+
+})
 
 </script>
 <style lang="scss">
