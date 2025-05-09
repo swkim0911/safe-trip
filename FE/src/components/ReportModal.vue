@@ -1,5 +1,5 @@
 <template>
-  <div class="modal fade" id = "reportModal" ref="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal fade" id = "reportModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
       <div class="modal-content">
           <div class="modal-header">
@@ -75,7 +75,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">close</button>
-                <button type="button" class="btn btn-primary" @click="submitForm">send</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="submitForm">send</button>
               </div>
             </form>
           </div>          
@@ -86,6 +86,7 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue'
 import { Loader } from '@googlemaps/js-api-loader'
+import * as bootstrap from 'bootstrap';
 import axios from 'axios'
 
 const googleMapApiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
@@ -151,6 +152,7 @@ const resetForm = () => {
 
 const setupModalEventListener = () => {
   const modal = document.getElementById('reportModal');
+
   if (modal) {
     modal.addEventListener('hidden.bs.modal', () => {
       resetForm();
@@ -160,8 +162,7 @@ const setupModalEventListener = () => {
 
 const submitForm = async () => {
   if (!errorMessage) return;
-  resetForm();
-  
+
   // try {
   //   const formData = new FormData()
   //   formData.append('request', extractJsonFromForm())
