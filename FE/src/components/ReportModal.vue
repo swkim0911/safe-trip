@@ -13,7 +13,7 @@
                   <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
                   제목
                 </label>
-                <input type="text" class="form-control" id="report-title" v-model="form.title" maxlength="100" placeholder="제목을 입력하세요">
+                <input type="text" :class="['form-control', { 'is-invalid': errors.title }]" id="report-title" v-model="form.title" maxlength="100" placeholder="제목을 입력하세요">
               </div>
               <div class="btn-group d-flex justify-content-center ms-3 me-3" role="group">
                 <input type="radio" class="btn-check" name="scamType" id="scam1" v-model="form.scamId" :value="0">
@@ -30,7 +30,9 @@
 
                 <input type="radio" class="btn-check" name="scamType" id="scam5" v-model="form.scamId" :value="4">
                 <label class="btn btn-outline-primary" for="scam5">기타</label>
-
+              </div>
+              <div v-if="errors.scamId && form.scamId === null" class="text-danger small mt-1 text-start ms-3">
+                {{ errors.scamId }}
               </div>
               <div class="mb-3">
                 <label for="report-address" class="col-form-label">
@@ -38,44 +40,50 @@
                   주소
                 </label>
                 <input
-                    id="report-address"
-                    placeholder="장소를 검색하세요"
-                    class="form-control"
-                    v-model="form.address"
-                    @keyup.enter="searchAddress"
-                  />
-                  <div v-if="errorMessage" class="alert alert-danger mt-2">
-                    {{ errorMessage }}
-                  </div>
-                  <div ref="mapRef" style="width: 100%; height: 400px; margin-top: 10px;"></div>
+                  id="report-address"
+                  placeholder="주소를 검색하세요"
+                  :class="['form-control', { 'is-invalid': errors.address }]"
+                  v-model="form.address"
+                  @keyup.enter="searchAddress"
+                />
+                <div v-if="errorMessage" class="alert alert-danger mt-2">
+                  {{ errorMessage }}
+                </div>
+                <div ref="mapRef" style="width: 100%; height: 400px; margin-top: 10px;"></div>
               </div>
               <div class="mb-3">
                 <label for="photo" class="form-label">
                   <font-awesome-icon :icon="['fas', 'camera']" class="modal-icon"/>
-                  사진 업로드
+                  사진 업로드 (선택)
                 </label>
                 <input ref="fileInput" class="form-control" type="file" id="photo" accept="image/*" @change="handleFileChange">
+                <div v-if="errors.imageFile" class="text-danger small mt-1">
+                {{ errors.imageFile }}
               </div>
-
+              </div>
               <div class="mb-3">
                 <label for="report-description" class="col-form-label">
                   <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
                   내용
                 </label>
-                <textarea class="form-control" id="report-description" v-model="form.description" @input="e => updateCharCnt(e, 'description')"></textarea>
+                <textarea :class="['form-control', { 'is-invalid': errors.advice }]" id="report-description" v-model="form.description" @input="e => updateCharCnt(e, 'description')" placeholder="내용을 입력하세요."></textarea>
                 <small ref="descriptionCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
+                
               </div>
               <div class="mb-3">
                 <label for="report-advice" class="col-form-label">
                   <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
                   조언
                 </label>
-                <textarea class="form-control" id="report-advice" v-model="form.advice" @input="e => updateCharCnt(e, 'advice')"></textarea>
+                <textarea :class="['form-control', { 'is-invalid': errors.advice }]" id="report-advice" v-model="form.advice" @input="e => updateCharCnt(e, 'advice')" placeholder="조언을 입력하세요."></textarea>
                 <small ref="adviceCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
               </div>
               <div class="modal-footer">
+                <div v-if="submitMessage" :class="['me-3 fw-bold', submitStatus === 'success' ? 'text-success' : 'text-danger']">
+                  {{ submitMessage }}
+                </div>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">close</button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="submitForm">send</button>
+                <button type="button" class="btn btn-primary" @click="submitForm">send</button>
               </div>
             </form>
           </div>          
@@ -86,7 +94,6 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue'
 import { Loader } from '@googlemaps/js-api-loader'
-import * as bootstrap from 'bootstrap';
 import axios from 'axios'
 
 const googleMapApiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
@@ -99,6 +106,7 @@ const errorMessage = ref('');
 let map, marker, geocoder;
 
 const textareaLength = 500;
+const fileInput = ref('');
 
 const descriptionCntRef = ref(null);
 const adviceCntRef = ref(null);
@@ -114,10 +122,34 @@ const form = reactive({
   imageFile: null
 })
 
-const fileInput = ref(null);
+const errors = reactive({
+  title: false,
+  scamId: '',
+  address: false,
+  imageFile: '',
+  description: false,
+  advice: false,
+})
+
+const submitMessage = ref('');
+const submitStatus = ref(''); // 'success' | 'error'
 
 const handleFileChange = (event) => {
-  form.imageFile = event.target.files[0]
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+
+   if (file.size > maxSizeInBytes) {
+    errors.imageFile = '5MB 이하의 이미지만 업로드할 수 있습니다.';
+    form.imageFile = null;
+    event.target.value = ''; // input 초기화
+    return;
+  }
+
+  // 통과 시 저장
+  form.imageFile = file;
+  errors.imageFile = '';
 }
 
 const extractJsonFromForm = (excludeKeys = ['imageFile']) => {
@@ -131,6 +163,47 @@ const extractJsonFromForm = (excludeKeys = ['imageFile']) => {
   return new Blob([JSON.stringify(json)], {type:'application/json'})
 }
 
+const checkForm = () => {
+  let isValid = true;
+
+  if (!form.title.trim()) {
+    errors.title = true;
+    isValid = false;
+  } else {
+    errors.title = false;
+  }
+
+  if (form.scamId === null) {
+    errors.scamId = '사기를 선택해주세요.';
+    isValid = false;
+  } else {
+    errors.scamId = '';
+  }
+
+  if (!form.address.trim()) {
+    errors.address = true;
+    isValid = false;
+  } else {
+    errors.address = false;
+  }
+
+  if (!form.description.trim()) {
+    errors.description = true;
+    isValid = false;
+  } else {
+    errors.description = false;
+  }
+
+  if (!form.advice.trim()) {
+    errors.advice = true;
+    isValid = false;
+  } else {
+    errors.advice = false;
+  }
+
+  return isValid;
+};
+
 const resetForm = () => {
   form.title = '';
   form.scamId = null;
@@ -141,13 +214,19 @@ const resetForm = () => {
   form.advice = '';
   form.imageFile = null;
 
-  if (fileInput.value) {
+  if (fileInput) {
     fileInput.value.value = '';
   }
-
   marker?.setMap(null);
   descriptionCntRef.value.textContent = `0 / ${textareaLength}`;
   adviceCntRef.value.textContent = `0 / ${textareaLength}`;
+
+  errors.title = false;
+  errors.scamId = '';
+  errors.address = false;
+  errors.imageFile = '';
+  errors.description = false;
+  errors.advice = false;
 }
 
 const setupModalEventListener = () => {
@@ -155,15 +234,29 @@ const setupModalEventListener = () => {
 
   if (modal) {
     modal.addEventListener('hidden.bs.modal', () => {
-      resetForm();
+      resetForm(); // 모달이 닫힐 때 form에 입력된 값들 모두 지움.
+      submitMessage.value = '';
+      submitStatus.value = '';
     });
   }
 }
 
 const submitForm = async () => {
-  if (!errorMessage) return;
+  if (!checkForm()) {
+    submitMessage.value = '잘못된 입력입니다. 입력을 확인해주세요.';
+    submitStatus.value = 'error';
+    return;
+  }
+  // if (errorMessage.value) {
+  //   submitMessage.value = '잘못된 입력입니다. 입력을 확인해주세요.';
+  //   submitStatus.value = 'error';
+  //   return;
+  // }
 
-  // try {
+  submitMessage.value = '글이 등록되었습니다.';
+  submitStatus.value = 'success';
+  resetForm();
+    // try {
   //   const formData = new FormData()
   //   formData.append('request', extractJsonFromForm())
 
@@ -244,8 +337,10 @@ const searchAddress = () => {
       form.lat = lat;
       form.lng = lng;
       errorMessage.value = '';
+      errors.address = false;
     } else {
       errorMessage.value = `Google 지도에서 ${form.address}을(를) 찾을 수 없습니다.`;
+      errors.address = false;
     }
   })
 }
@@ -258,8 +353,10 @@ const reverseGeocode = (lat, lng) => {
       form.lat = lat;
       form.lng = lng;
       errorMessage.value = '';
+      errors.address = false;
     } else {
       errorMessage.value = `Google 지도에서 ${form.address}을(를) 찾을 수 없습니다.`;
+      errors.address = false;
     }
   })
 }
