@@ -101,6 +101,7 @@
 import { ref } from 'vue';
 
 const isOpen = ref(false);
+const searchText = ref('');
 
 
 const toggleSidebar = () => {
@@ -173,7 +174,7 @@ const toggleSidebar = () => {
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  background-color: #007bff;
+  background-color: #0d6efd;
   color: white;
   border: none;
   padding: 10px 15px;
