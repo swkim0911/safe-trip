@@ -227,12 +227,18 @@ const resetForm = () => {
   errors.imageFile = '';
   errors.description = false;
   errors.advice = false;
+
+  errorMessage.value = '';
 }
 
 const setupModalEventListener = () => {
   const modal = document.getElementById('reportModal');
 
   if (modal) {
+    modal.addEventListener('hide.bs.modal', () => {
+      document.activeElement.blur(); // 모달이 닫히기 직전에 blur
+    });
+
     modal.addEventListener('hidden.bs.modal', () => {
       resetForm(); // 모달이 닫힐 때 form에 입력된 값들 모두 지움.
       submitMessage.value = '';
@@ -242,16 +248,11 @@ const setupModalEventListener = () => {
 }
 
 const submitForm = async () => {
-  if (!checkForm()) {
+  if (!checkForm() || errorMessage.value) {
     submitMessage.value = '잘못된 입력입니다. 입력을 확인해주세요.';
     submitStatus.value = 'error';
     return;
   }
-  // if (errorMessage.value) {
-  //   submitMessage.value = '잘못된 입력입니다. 입력을 확인해주세요.';
-  //   submitStatus.value = 'error';
-  //   return;
-  // }
 
   submitMessage.value = '글이 등록되었습니다.';
   submitStatus.value = 'success';
