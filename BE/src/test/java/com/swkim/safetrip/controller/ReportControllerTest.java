@@ -54,6 +54,8 @@ class ReportControllerTest {
         String address = "대한민국 서울시 남산타워";
         String lat = "37.56711260434211";
         String lng = "126.97911625963219";
+        String country = "Korea";
+        String city = "Seoul";
         String description = "this is description";
         String advice = "this is advice";
 
@@ -63,6 +65,8 @@ class ReportControllerTest {
                 .address(address)
                 .lat(lat)
                 .lng(lng)
+                .country(country)
+                .city(city)
                 .description(description)
                 .advice(advice).build();
 
