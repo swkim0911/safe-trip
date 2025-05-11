@@ -28,6 +28,12 @@ public class ReportSaveRequest {
     @NotBlank(message = "경도를 입력해주세요.")
     private String lng;
 
+    @NotBlank
+    private String country;
+
+    @NotBlank
+    private String city;
+
     @NotBlank(message = "설명을 해주세요.")
     private String description;
 
