@@ -151,14 +151,17 @@ public class ReportService {
         JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
         JsonObject addressObject = locationObject.getAsJsonObject("address");
 
-        String countryName = addressObject.get("country").getAsString();
         String cityName = addressObject.get("city").getAsString();
 
         String cityInfo = getCityInfo(cityName);
         JsonObject cityObject = JsonParser.parseString(cityInfo).getAsJsonArray().get(0).getAsJsonObject();
 
+        String countryName = cityObject.getAsJsonObject("address").get("country").getAsString();
+        cityName = cityObject.getAsJsonObject("address").get("city").getAsString();
+
         String cityLat = cityObject.get("lat").getAsString();
         String cityLng = cityObject.get("lon").getAsString();
+
 
         return new CountryCityData(countryName, cityName, cityLat, cityLng);
     }
@@ -176,6 +179,9 @@ public class ReportService {
         return imageList;
     }
 
+    /**
+     * @return 도시 이름 -> 도시 위도, 경도
+     */
     private String getCityInfo(String city){
         RestClient restClient = RestClient.create();
         String uri = UriComponentsBuilder.newInstance()
@@ -185,7 +191,7 @@ public class ReportService {
                 .queryParam("city",city)
                 .queryParam("format", "json")
                 .queryParam("addressdetails", "1")
-                .queryParam("accept-language", "en")
+                .queryParam("accept-language", "ko")
                 .toUriString();
 
         return restClient.get()
@@ -197,6 +203,9 @@ public class ReportService {
                 .body(String.class);
     }
 
+    /**
+     * @return 위도 경도 -> 국가, 도시 정보
+     */
     private String getLocationInfo(String lat, String lon) {
         RestClient restClient = RestClient.create();
         String uri = UriComponentsBuilder.newInstance()
