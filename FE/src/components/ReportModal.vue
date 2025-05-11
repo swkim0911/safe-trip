@@ -187,6 +187,13 @@ const checkForm = () => {
     errors.address = false;
   }
 
+  if (!form.lat.trim() && !form.lng.trim()) {
+    errors.address = true;
+    isValid = false;
+  } else {
+    errors.address = false;
+  }
+
   if (!form.description.trim()) {
     errors.description = true;
     isValid = false;
@@ -347,6 +354,7 @@ const searchAddress = () => {
 
   geocoder.geocode({ address: form.address }, (results, status) => {
     if (status === 'OK') {
+      console.log(results);
       const location = results[0].geometry.location;
       const lat = location.lat();
       const lng = location.lng();
@@ -368,6 +376,7 @@ const searchAddress = () => {
 const reverseGeocode = (lat, lng) => {
   geocoder.geocode({ location: { lat, lng } }, (results, status) => {
     if (status === 'OK' && results[0]) {
+      console.log(results);
       form.address = results[0].formatted_address;
       form.lat = lat;
       form.lng = lng;
