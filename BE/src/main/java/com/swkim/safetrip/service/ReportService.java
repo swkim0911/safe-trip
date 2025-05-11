@@ -143,14 +143,12 @@ public class ReportService {
                 .lat(locationLat)
                 .lng(locationLng)
                 .build();
-
     }
 
     private CountryCityData getCountryCityData(ReportSaveRequest reportSaveRequest) {
         String locationInfo = getLocationInfo(reportSaveRequest.getLat(), reportSaveRequest.getLng());
         JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
         JsonObject addressObject = locationObject.getAsJsonObject("address");
-
         String cityName = addressObject.get("city").getAsString();
 
         String cityInfo = getCityInfo(cityName);
