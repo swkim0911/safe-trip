@@ -107,7 +107,7 @@ public class ReportService {
 
         if(findCountry.isEmpty()){ // country가 없는 경우. country에 있는 city도 당연히 없으니 두 객체 모두 생성
             country = Country.builder()
-                    .name(cityName)
+                    .name(countryName)
                     .build();
 
             city = City.builder()
