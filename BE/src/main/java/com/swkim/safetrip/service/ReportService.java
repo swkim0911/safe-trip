@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
+import com.swkim.safetrip.dto.response.ReportMapSummaryResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.exception.CoordinatesNotValidException;
 import com.swkim.safetrip.exception.ReportNotFoundException;
@@ -46,6 +47,16 @@ public class ReportService {
     private final ImageRepository imageRepository;
 
     private final AmazonS3Client amazonS3Client;
+
+    @Transactional(readOnly = true)
+    public List<ReportMapSummaryResponse> getCountrySummary(){
+        return reportRepository.findScamCountGroupedByCountry();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReportMapSummaryResponse> getCitySummary(){
+        return reportRepository.findScamCountGroupedByCity();
+    }
 
     public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
 
