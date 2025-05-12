@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReportMapSummaryResponse{
 
+    private Long id;
     private String name;
     private String type;
     private Integer scamCnt;
