@@ -29,7 +29,7 @@ public class ReportController {
 
     @GetMapping(value = "/reports/map-summary")
     public ApiResponse<ReportMapSummaryResponse> getMapSummaryReports(@RequestParam Integer zoom){
-        if(zoom <= 5){
+        if(zoom < 7){
             ReportMapSummaryResponse countrySummary = reportService.getCountrySummary();
             return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummary);
         }
