@@ -28,12 +28,12 @@ public class ReportController {
     private final MessageSource messageSource;
 
     @GetMapping(value = "/reports/map-summary")
-    public ApiResponse<List<ReportMapSummaryResponse>> getMapSummaryReports(@RequestParam Integer zoom){
+    public ApiResponse<List<ReportMapSummaryResponse>> getMapSummaryReports(@RequestParam Integer zoom, @RequestParam(required = false) Long countryId){
         if(zoom <= 5){
             List<ReportMapSummaryResponse> countrySummary = reportService.getCountrySummary();
             return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummary);
         }
-        List<ReportMapSummaryResponse> citySummary = reportService.getCitySummary();
+        List<ReportMapSummaryResponse> citySummary = reportService.getCitySummary(countryId);
         return ApiResponse.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummary);
     }
 
