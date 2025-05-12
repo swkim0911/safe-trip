@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import {ref} from 'vue'
+import {ref, onMounted, watch} from 'vue'
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LControlZoom } from "@vue-leaflet/vue-leaflet";
 
@@ -38,13 +38,23 @@ import ReportModal from './ReportModal.vue'
 const zoom = ref(3);
 const centerOfSeoul = ref({ "lat": 37.5665, "lng": 126.9780 });
 
-const mapSummary = ref([]);
+const mapSummary = ref({});
+
+
+watch(zoom, (newZoom, oldZoom) => {
+  const prevGroup = oldZoom >= 7 ? 'city' : 'country'
+  const currGroup = newZoom >= 7 ? 'city' : 'country'
+
+  if (prevGroup !== currGroup) {
+    loadMapSummary()
+  }
+})
 
 const loadMapSummary = async () => {
   try {
-    const response = await fetch(`/reports/map-summary?zoom=${zoom.value}`)
-    const data = await response.json()
-    mapSummary.value = data
+    const response = await fetch(`http://localhost:8080/reports/map-summary?zoom=${zoom.value}`);
+    const data = await response.json();
+    mapSummary.value = data.ㄱㄷㄴ;
   } catch (e) {
     console.error('지도 요약 정보 로딩 실패:', e)
   }
