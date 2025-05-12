@@ -54,8 +54,8 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReportMapSummaryResponse> getCitySummary(Long countryId){
-        return reportRepository.findScamCountGroupedByCity(countryId);
+    public List<ReportMapSummaryResponse> getCitySummary(){
+        return reportRepository.findScamCountGroupedByCity();
     }
 
     public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {

@@ -43,8 +43,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
             )
             FROM Location l
             JOIN l.city c
-            WHERE l.country.id = :countryId
             GROUP BY c.id, c.name, c.lat, c.lng
             """)
-    List<ReportMapSummaryResponse> findScamCountGroupedByCity(@Param("countryId") Long countryId);
+    List<ReportMapSummaryResponse> findScamCountGroupedByCity();
 }
