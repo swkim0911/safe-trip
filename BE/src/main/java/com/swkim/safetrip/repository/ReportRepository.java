@@ -18,7 +18,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
 
 
     @Query("""
-            SELECT new com.example.dto.ReportMapSummaryResponse(
+            SELECT new com.swkim.safetrip.dto.response.ReportMapSummaryResponse(
                 c.id,
                 c.name,
                 'country',
@@ -33,7 +33,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
     List<ReportMapSummaryResponse> findScamCountGroupedByCountry();
 
     @Query("""
-            SELECT new com.example.dto.ReportMapSummaryResponse(
+            SELECT new com.swkim.safetrip.dto.response.ReportMapSummaryResponse(
                 c.id,
                 c.name,
                 'city',
