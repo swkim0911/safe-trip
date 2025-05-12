@@ -17,7 +17,7 @@
     data-bs-toggle="modal"
     data-bs-target="#reportModal">
       <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
-      제보하기
+      제보하기 {{ zoom }}
     </button>
     <ReportModal/>
     
@@ -37,6 +37,22 @@ import ReportModal from './ReportModal.vue'
 
 const zoom = ref(3);
 const centerOfSeoul = ref({ "lat": 37.5665, "lng": 126.9780 });
+
+const mapSummary = ref([]);
+
+const loadMapSummary = async () => {
+  try {
+    const response = await fetch(`/reports/map-summary?zoom=${zoom.value}`)
+    const data = await response.json()
+    mapSummary.value = data
+  } catch (e) {
+    console.error('지도 요약 정보 로딩 실패:', e)
+  }
+}
+
+onMounted(() => {
+  loadMapSummary()
+})
 </script>
 
 <style scoped lang="scss">
