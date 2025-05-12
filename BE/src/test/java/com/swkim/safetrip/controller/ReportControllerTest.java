@@ -16,7 +16,6 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -50,18 +49,24 @@ class ReportControllerTest {
     void saving_report() throws Exception {
 
         // given
-        String latitude = "37.56711260434211";
-        String longitude = "126.97911625963219";
         String title = "this is title";
-        String category = "THEFT";
+        Long scamId = 1L;
+        String address = "대한민국 서울시 남산타워";
+        String lat = "37.56711260434211";
+        String lng = "126.97911625963219";
+        String country = "Korea";
+        String city = "Seoul";
         String description = "this is description";
         String advice = "this is advice";
 
         ReportSaveRequest reportSaveRequest = ReportSaveRequest.builder()
-                .latitude(latitude)
-                .longitude(longitude)
                 .title(title)
-                .category(category)
+                .scamId(scamId)
+                .address(address)
+                .lat(lat)
+                .lng(lng)
+                .country(country)
+                .city(city)
                 .description(description)
                 .advice(advice).build();
 
@@ -88,9 +93,9 @@ class ReportControllerTest {
     void get_report_list_with_no_condition() throws Exception {
         //given
         List<ReportFindAllResponse> listOfResponse = Arrays.asList(
-                new ReportFindAllResponse("this is 1 title", "THEFT", 10),
-                new ReportFindAllResponse("this is 2 title", "THEFT", 20),
-                new ReportFindAllResponse("this is 3 title", "THEFT", 30)
+                new ReportFindAllResponse(0L, "this is 1 title", "THEFT"),
+                new ReportFindAllResponse(1L, "this is 2 title", "THEFT"),
+                new ReportFindAllResponse(2L, "this is 3 title", "THEFT")
         );
         Pageable pageable = PageRequest.of(0, 10);
         Page<ReportFindAllResponse> mockPage = new PageImpl<>(listOfResponse, pageable, listOfResponse.size());
@@ -110,47 +115,6 @@ class ReportControllerTest {
     }
 
     @Test
-    @DisplayName("[GET] /reports?page=0&size=10&sort=likes,asc 요청시 저장된 모든 report 들을 likes 내림차순으로 반환한다")
-    void get_report_list_with_Country_And_City() throws Exception {
-        //given
-        List<ReportFindAllResponse> listOfResponse = Arrays.asList(
-                new ReportFindAllResponse("this is 1 title", "THEFT", 10),
-                new ReportFindAllResponse("this is 2 title", "THEFT", 20),
-                new ReportFindAllResponse("this is 3 title", "THEFT", 30)
-        );
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("likes")));
-        Page<ReportFindAllResponse> mockPage = new PageImpl<>(listOfResponse, pageable, listOfResponse.size());
-
-        //when
-        when(reportService.getReports(nullable(String.class), nullable(String.class), any(Pageable.class)))
-                .thenAnswer(invocation -> { // 정렬 조건을 동적으로 적용하기 위해 thenReturn() 함수가 아닌 thenAnswer() 함수 사용.
-                    Pageable pageableArg = invocation.getArgument(2);
-                    List<ReportFindAllResponse> sortedList = listOfResponse.stream().sorted((o1, o2) -> {
-                        Sort.Order sortOrder = pageableArg.getSort().getOrderFor("likes");
-                        if (sortOrder != null && sortOrder.isAscending()) {
-                            return Integer.compare(o1.getLikes(), o2.getLikes());
-                        }
-                        return Integer.compare(o2.getLikes(), o1.getLikes());
-                    }).toList();
-                    return new PageImpl<>(sortedList, pageableArg, sortedList.size());
-                });
-
-        //then
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                        .get("/reports")
-                        .queryParam("page", "0")
-                        .queryParam("size", "10")
-                        .queryParam("sort", "likes,desc"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.list.get.success", null, null)))
-                .andExpect(jsonPath("$.result.content[0].likes").value(30))
-                .andExpect(jsonPath("$.result.content[1].likes").value(20))
-                .andExpect(jsonPath("$.result.content[2].likes").value(10))
-                .andReturn();
-    }
-
-    @Test
     @DisplayName("[GET] /reports/{id} 요청시 저장된 report 정보를 보인다.")
     void get_report() throws Exception {
 
@@ -158,13 +122,13 @@ class ReportControllerTest {
         Long id = 0L;
         ReportFindByIdResponse response = ReportFindByIdResponse.builder()
                 .title("this is title")
-                .category("THEFT")
+                .scam("THEFT")
+                .lat("51.231")
+                .lng("129.141")
+                .address("대한민국 서울시 남산타워")
+                .URLs(new ArrayList<>())
                 .description("this is description")
                 .advice("this is my advice")
-                .URLs(new ArrayList<>())
-                .latitude("51.231")
-                .longitude("129.141")
-                .likes(13)
                 .build();
 
         // when

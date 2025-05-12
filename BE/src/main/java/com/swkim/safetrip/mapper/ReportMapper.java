@@ -12,9 +12,6 @@ public class ReportMapper {
     public static Report toReport(ReportSaveRequest reportSaveRequest) {
         return Report.builder()
                 .title(reportSaveRequest.getTitle())
-                .category(reportSaveRequest.getCategory())
-                .location(null)
-                .likes(0)
                 .description(reportSaveRequest.getDescription())
                 .advice(reportSaveRequest.getAdvice())
                 .build();
@@ -23,16 +20,15 @@ public class ReportMapper {
     public static ReportFindByIdResponse toReportFindByIdResponse(Report report, List<String> URLs) {
         return ReportFindByIdResponse.builder()
                 .title(report.getTitle())
-                .category(report.getCategory().name())
+                .scam(report.getScam().getName())
+                .address(report.getLocation().getAddress())
+                .lat(String.valueOf(report.getLocation().getLat()))
+                .lng(String.valueOf(report.getLocation().getLng()))
                 .URLs(URLs)
-                .latitude(String.valueOf(report.getLocation().getLatitude()))
-                .longitude(String.valueOf(report.getLocation().getLongitude()))
                 .description(report.getDescription())
                 .advice(report.getAdvice())
-                .likes(report.getLikes())
                 .createdAt(report.getCreatedAt())
                 .build();
-
     }
 
 }

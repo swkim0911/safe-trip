@@ -17,25 +17,29 @@ public class Location extends BaseEntity{
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id")
     private Country country;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "city_id")
     private City city;
 
-    @Column(name = "latitude", nullable = false)
-    private Double latitude;
+    @Column(name = "address", nullable = false)
+    private String address;
 
-    @Column(name = "longitude", nullable = false)
-    private Double longitude;
+    @Column(name = "lat", nullable = false)
+    private Double lat;
+
+    @Column(name = "lng", nullable = false)
+    private Double lng;
 
     @Builder
-    public Location(Country country, City city, String latitude, String longitude){
+    public Location(Country country, City city, String address, String lat, String lng){
         this.country = country;
+        this.address = address;
         this.city = city;
-        this.latitude = Double.parseDouble(latitude);
-        this.longitude = Double.parseDouble(longitude);
+        this.lat = Double.parseDouble(lat);
+        this.lng = Double.parseDouble(lng);
     }
 }

@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "country")
+@Table(name = "country", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "name")
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Country {
@@ -22,6 +24,12 @@ public class Country {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "lat", nullable = false)
+    private Double lat;
+
+    @Column(name = "lng", nullable = false)
+    private Double lng;
 
     @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
     private List<City> cities = new ArrayList<>();

@@ -1,6 +1,5 @@
 package com.swkim.safetrip.entity;
 
-import com.swkim.safetrip.entity.enums.Category;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,33 +10,32 @@ import java.util.List;
 @Table(name = "report")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Report  extends BaseEntity{
+public class Report extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "user_id")
+//    private User user;
 
     @Setter
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id")
     private Location location;
 
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "scam_id")
+    private Scam scam;
+
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Enumerated(EnumType.STRING)
-    private Category category;
-
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
-
-    @Column(name = "likes", nullable = false)
-    private Integer likes;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -46,12 +44,8 @@ public class Report  extends BaseEntity{
     private String advice;
 
     @Builder
-    public Report(String title, String category, User user, Location location, int likes, String description, String advice) {
-        this.category = Category.valueOf(category);
-        this.user = user;
-        this.location = location;
+    public Report(String title, String description, String advice) {
         this.title = title;
-        this.likes = likes;
         this.description = description;
         this.advice = advice;
     }

@@ -11,11 +11,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportFindAllResponse {
+public class ReportMapSummaryResponse {
 
-    private Long reportId;
+    private String Type;
+    private List<ReportMapSummaryItem> reportMapSummaryItem;
 
-    private String reportTitle;
-
-    private String scam;
 }

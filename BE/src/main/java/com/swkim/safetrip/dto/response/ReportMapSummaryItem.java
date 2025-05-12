@@ -5,17 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportFindAllResponse {
+public class ReportMapSummaryItem {
 
-    private Long reportId;
-
-    private String reportTitle;
-
-    private String scam;
+    private Long id;
+    private String name;
+    private Long scamCnt;
+    private double lat;
+    private double lng;
 }

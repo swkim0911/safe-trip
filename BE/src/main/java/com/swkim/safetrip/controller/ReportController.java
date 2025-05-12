@@ -3,6 +3,7 @@ package com.swkim.safetrip.controller;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
+import com.swkim.safetrip.dto.response.ReportMapSummaryResponse;
 import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.service.ReportService;
 import jakarta.validation.Valid;
@@ -26,13 +27,23 @@ public class ReportController {
     private final ReportService reportService;
     private final MessageSource messageSource;
 
+    @GetMapping(value = "/reports/map-summary")
+    public ApiResponse<ReportMapSummaryResponse> getMapSummaryReports(@RequestParam Integer zoom){
+        if(zoom < 7){
+            ReportMapSummaryResponse countrySummary = reportService.getCountrySummary();
+            return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummary);
+        }
+        ReportMapSummaryResponse citySummary = reportService.getCitySummary();
+        return ApiResponse.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummary);
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/reports", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/reports", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ApiResponse<Long> createReport(@RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
 
         Long id = reportService.saveReport(request, images);
         String message = messageSource.getMessage("report.create.success", null, null);
-        return new ApiResponse<>(HttpStatus.CREATED.value(), message, id);
+        return ApiResponse.of(HttpStatus.CREATED.value(), message, id);
     }
 
     @GetMapping(value = "/reports")
