@@ -1,6 +1,6 @@
 package com.swkim.safetrip.repository;
 
-import com.swkim.safetrip.dto.response.ReportMapSummaryResponse;
+import com.swkim.safetrip.dto.response.ReportMapSummaryItem;
 import com.swkim.safetrip.entity.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,10 +18,9 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
 
 
     @Query("""
-            SELECT new com.swkim.safetrip.dto.response.ReportMapSummaryResponse(
+            SELECT new com.swkim.safetrip.dto.response.ReportMapSummaryItem(
                 c.id,
                 c.name,
-                'country',
                 COUNT(l),
                 c.lat,
                 c.lng
@@ -30,13 +29,12 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
             JOIN l.country c
             GROUP BY c.id, c.name, c.lat, c.lng
             """)
-    List<ReportMapSummaryResponse> findScamCountGroupedByCountry();
+    List<ReportMapSummaryItem> findScamCountGroupedByCountry();
 
     @Query("""
-            SELECT new com.swkim.safetrip.dto.response.ReportMapSummaryResponse(
+            SELECT new com.swkim.safetrip.dto.response.ReportMapSummaryItem(
                 c.id,
                 c.name,
-                'city',
                 COUNT(l),
                 c.lat,
                 c.lng
@@ -45,5 +43,5 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
             JOIN l.city c
             GROUP BY c.id, c.name, c.lat, c.lng
             """)
-    List<ReportMapSummaryResponse> findScamCountGroupedByCity();
+    List<ReportMapSummaryItem> findScamCountGroupedByCity();
 }
