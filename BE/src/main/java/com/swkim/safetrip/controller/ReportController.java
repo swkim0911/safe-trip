@@ -28,7 +28,7 @@ public class ReportController {
     private final MessageSource messageSource;
 
     @GetMapping(value = "/reports/map-summary")
-    public ApiResponse<ReportMapSummaryResponse> getSummaryReportsForMap(@RequestParam Integer zoom){
+    public ApiResponse<ReportMapSummaryResponse> getMapReportSummaries(@RequestParam Integer zoom){
         if(zoom < 7){
             ReportMapSummaryResponse countrySummary = reportService.getCountrySummary();
             return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummary);
@@ -44,6 +44,13 @@ public class ReportController {
         Long id = reportService.saveReport(request, images);
         String message = messageSource.getMessage("report.create.success", null, null);
         return ApiResponse.of(HttpStatus.CREATED.value(), message, id);
+    }
+
+    @GetMapping(value = "/reports/sidebar-summary/counties")
+    public ApiResponse<Page<ReportMapSummaryResponse>> getSideBarReportSummaries(Pageable pageable){
+        Page<ReportMapSummaryResponse> countrySummaryPage = reportService.getCountrySummaryPage();
+
+        return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummaryPage);
     }
 
     @GetMapping(value = "/reports")
