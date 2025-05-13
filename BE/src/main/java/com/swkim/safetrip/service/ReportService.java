@@ -8,7 +8,7 @@ import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.LocationSummaryItem;
-import com.swkim.safetrip.dto.response.ReportMapSummaryResponse;
+import com.swkim.safetrip.dto.response.LocationSummaryResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.exception.CoordinatesNotValidException;
 import com.swkim.safetrip.exception.ReportNotFoundException;
@@ -50,15 +50,15 @@ public class ReportService {
     private final AmazonS3Client amazonS3Client;
 
     @Transactional(readOnly = true)
-    public ReportMapSummaryResponse getCountrySummary(){
+    public LocationSummaryResponse getCountrySummary(){
         List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findScamCountGroupedByCountry();
-        return new ReportMapSummaryResponse("country", reportMapSummaryItems);
+        return new LocationSummaryResponse("country", reportMapSummaryItems);
     }
 
     @Transactional(readOnly = true)
-    public ReportMapSummaryResponse getCitySummary(){
+    public LocationSummaryResponse getCitySummary(){
         List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findScamCountGroupedByCity();
-        return new ReportMapSummaryResponse("city", reportMapSummaryItems);
+        return new LocationSummaryResponse("city", reportMapSummaryItems);
     }
 
     public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {

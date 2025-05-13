@@ -11,9 +11,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportMapSummaryResponse {
+public class LocationSummaryResponse {
 
     private String Type;
-    private List<LocationSummaryItem> reportMapSummaryItem;
+    private List<LocationSummaryItem> locationSummaryItems;
 
 }

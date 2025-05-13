@@ -3,7 +3,7 @@ package com.swkim.safetrip.controller;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
-import com.swkim.safetrip.dto.response.ReportMapSummaryResponse;
+import com.swkim.safetrip.dto.response.LocationSummaryResponse;
 import com.swkim.safetrip.dto.response.LocationSummaryItem;
 import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.service.ReportService;
@@ -29,12 +29,12 @@ public class ReportController {
     private final MessageSource messageSource;
 
     @GetMapping(value = "/reports/map-summary")
-    public ApiResponse<ReportMapSummaryResponse> getMapCountrySummaries(@RequestParam Integer zoom){
+    public ApiResponse<LocationSummaryResponse> getMapCountrySummaries(@RequestParam Integer zoom){
         if(zoom < 7){
-            ReportMapSummaryResponse countrySummary = reportService.getCountrySummary();
+            LocationSummaryResponse countrySummary = reportService.getCountrySummary();
             return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummary);
         }
-        ReportMapSummaryResponse citySummary = reportService.getCitySummary();
+        LocationSummaryResponse citySummary = reportService.getCitySummary();
         return ApiResponse.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummary);
     }
 
