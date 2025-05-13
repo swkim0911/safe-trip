@@ -49,7 +49,7 @@ public class ReportController {
 
     @GetMapping(value = "/reports/sidebar-summary/counties")
     public ApiResponse<Page<LocationSummaryItem>> getSideBarCountrySummaries(Pageable pageable){
-        Page<LocationSummaryItem> countrySummaryPage = reportService.getCountrySummaryPage();
+        Page<LocationSummaryItem> countrySummaryPage = reportService.getCountrySummaryPage(pageable);
 
         return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummaryPage);
     }

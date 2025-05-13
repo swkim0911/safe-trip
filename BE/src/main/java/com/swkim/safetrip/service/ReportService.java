@@ -61,6 +61,10 @@ public class ReportService {
         return new LocationSummaryResponse("city", reportMapSummaryItems);
     }
 
+    public Page<LocationSummaryItem> getCountrySummaryPage(Pageable pageable) {
+        return reportRepository.findCountrySummary(pageable);
+    }
+
     public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
 
         // 1. reportRequest -> Report Mapping
