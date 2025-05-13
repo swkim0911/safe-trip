@@ -29,7 +29,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
             JOIN l.country c
             GROUP BY c.id, c.name, c.lat, c.lng
             """)
-    List<LocationSummaryItem> findScamCountGroupedByCountry();
+    List<LocationSummaryItem> findCountrySummary();
 
     @Query("""
             SELECT new com.swkim.safetrip.dto.response.ReportMapSummaryItem(
@@ -43,5 +43,5 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
             JOIN l.city c
             GROUP BY c.id, c.name, c.lat, c.lng
             """)
-    List<LocationSummaryItem> findScamCountGroupedByCity();
+    List<LocationSummaryItem> findCitySummary();
 }

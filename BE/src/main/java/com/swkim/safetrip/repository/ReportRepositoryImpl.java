@@ -57,7 +57,7 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
     }
 
     @Override
-    public Page<LocationSummaryItem> findCountrySummary(Pageable pageable) {
+    public Page<LocationSummaryItem> findCountrySummaryPage(Pageable pageable) {
         List<LocationSummaryItem> locationSummaryItems = jpaQueryFactory.select(Projections.fields(
                         LocationSummaryItem.class,
                         country.id,

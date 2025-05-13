@@ -51,18 +51,18 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public LocationSummaryResponse getCountrySummary(){
-        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findScamCountGroupedByCountry();
+        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findCountrySummary();
         return new LocationSummaryResponse("country", reportMapSummaryItems);
     }
 
     @Transactional(readOnly = true)
     public LocationSummaryResponse getCitySummary(){
-        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findScamCountGroupedByCity();
+        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findCitySummary();
         return new LocationSummaryResponse("city", reportMapSummaryItems);
     }
 
     public Page<LocationSummaryItem> getCountrySummaryPage(Pageable pageable) {
-        return reportRepository.findCountrySummary(pageable);
+        return reportRepository.findCountrySummaryPage(pageable);
     }
 
     public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
