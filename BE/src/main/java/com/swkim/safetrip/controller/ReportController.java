@@ -28,7 +28,7 @@ public class ReportController {
     private final MessageSource messageSource;
 
     @GetMapping(value = "/reports/map-summary")
-    public ApiResponse<ReportMapSummaryResponse> getMapSummaryReports(@RequestParam Integer zoom){
+    public ApiResponse<ReportMapSummaryResponse> getSummaryReportsForMap(@RequestParam Integer zoom){
         if(zoom < 7){
             ReportMapSummaryResponse countrySummary = reportService.getCountrySummary();
             return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummary);
