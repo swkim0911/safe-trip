@@ -17,7 +17,7 @@
           :fill-opacity="0.5"
           :weight="1"
         >
-          <l-tooltip :options="{ permanent: true, direction: 'center'}">
+          <l-tooltip :options="{ permanent: false, direction: 'auto'}">
             {{ marker.scamCnt }}
           </l-tooltip>
         </l-circle-marker>
@@ -44,7 +44,7 @@
 <script setup>
 import {ref, onMounted, watch} from 'vue'
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer, LControlZoom,  LCircleMarker, LTooltip } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LControlZoom,  LCircleMarker, LTooltip, LMarker } from "@vue-leaflet/vue-leaflet";
 
 import ReportModal from './ReportModal.vue'
 
@@ -59,7 +59,6 @@ watch(zoom, (newZoom, oldZoom) => {
 
   if (prevGroup !== currGroup) {
     loadMapSummary();
-    console.log(markers);
   }
 })
 
@@ -76,7 +75,6 @@ const loadMapSummary = async () => {
     const response = await fetch(`http://localhost:8080/reports/map-summary?zoom=${zoom.value}`);
     const data = await response.json();
     markers.value = data.result.reportMapSummaryItem;
-    console.log(data.result.reportMapSummaryItem);
   } catch (e) {
     console.error('지도 요약 정보 로딩 실패:', e);
   }
