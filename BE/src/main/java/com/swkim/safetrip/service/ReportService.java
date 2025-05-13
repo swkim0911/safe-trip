@@ -61,8 +61,14 @@ public class ReportService {
         return new LocationSummaryResponse("city", reportMapSummaryItems);
     }
 
+    @Transactional(readOnly = true)
     public Page<LocationSummaryItem> getCountrySummaryPage(Pageable pageable) {
         return reportRepository.findCountrySummaryPage(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<LocationSummaryItem> getCitySummaryPage(Pageable pageable) {
+        return reportRepository.findCitySummaryPage(pageable);
     }
 
     public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
