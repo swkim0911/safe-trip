@@ -14,6 +14,6 @@ import java.util.List;
 public class ReportMapSummaryResponse {
 
     private String Type;
-    private List<ReportMapSummaryItem> reportMapSummaryItem;
+    private List<LocationSummaryItem> reportMapSummaryItem;
 
 }

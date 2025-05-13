@@ -7,7 +7,7 @@ import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
-import com.swkim.safetrip.dto.response.ReportMapSummaryItem;
+import com.swkim.safetrip.dto.response.LocationSummaryItem;
 import com.swkim.safetrip.dto.response.ReportMapSummaryResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.exception.CoordinatesNotValidException;
@@ -51,13 +51,13 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public ReportMapSummaryResponse getCountrySummary(){
-        List<ReportMapSummaryItem> reportMapSummaryItems = reportRepository.findScamCountGroupedByCountry();
+        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findScamCountGroupedByCountry();
         return new ReportMapSummaryResponse("country", reportMapSummaryItems);
     }
 
     @Transactional(readOnly = true)
     public ReportMapSummaryResponse getCitySummary(){
-        List<ReportMapSummaryItem> reportMapSummaryItems = reportRepository.findScamCountGroupedByCity();
+        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findScamCountGroupedByCity();
         return new ReportMapSummaryResponse("city", reportMapSummaryItems);
     }
 
