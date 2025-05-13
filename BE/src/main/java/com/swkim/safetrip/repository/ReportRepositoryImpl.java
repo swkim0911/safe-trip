@@ -6,6 +6,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.swkim.safetrip.dto.response.LocationSummaryItem;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.entity.Report;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,10 @@ import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static com.swkim.safetrip.entity.QCountry.country;
+import static com.swkim.safetrip.entity.QLocation.location;
 import static com.swkim.safetrip.entity.QReport.report;
 
 @RequiredArgsConstructor
@@ -37,7 +41,7 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 
         List<OrderSpecifier<?>> orderSpecifiers = getOrderSpecifiers(pageable); // 정렬 조건
 
-        List<ReportFindAllResponse> returnReport = jpaQueryFactory.select(Projections.fields(
+        List<ReportFindAllResponse> reportFindAllResponses = jpaQueryFactory.select(Projections.fields(
                         ReportFindAllResponse.class,
                         report.id,
                         report.title,
@@ -49,7 +53,32 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
                 .orderBy(orderSpecifiers.toArray(OrderSpecifier[]::new))
                 .fetch();
 
-        return new PageImpl<>(returnReport, pageable, returnReport.size());
+        return new PageImpl<>(reportFindAllResponses, pageable, reportFindAllResponses.size());
+    }
+
+    @Override
+    public Page<LocationSummaryItem> findCountrySummary(Pageable pageable) {
+        List<LocationSummaryItem> locationSummaryItems = jpaQueryFactory.select(Projections.fields(
+                        LocationSummaryItem.class,
+                        country.id,
+                        country.name,
+                        location.count().as("scamCnt"),
+                        country.lat,
+                        country.lng))
+                .from(location)
+                .join(location.country, country)
+                .groupBy(country.id, country.name, country.lat, country.lng)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long total = Optional.ofNullable(jpaQueryFactory
+                .select(country.id.countDistinct()) // 전체 그룹 수
+                .from(location)
+                .join(location.country, country)
+                .fetchOne()).orElse(0L);
+
+        return new PageImpl<>(locationSummaryItems, pageable, total);
     }
 
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {
