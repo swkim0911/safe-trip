@@ -1,13 +1,26 @@
 <template>
   <div class="mapview-container">
     <div style="height: 100vh; width: 100%">
-      <l-map :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="[centerOfSeoul.lat, centerOfSeoul.lng]" :min-zoom="3" :options="{zoomControl: false,  maxBoundsViscosity: 1.0}" :max-bounds="[[ -75, -1800 ], [ 85, 1800 ]]">
+      <l-map :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="[center.lat, center.lng]" :min-zoom="3" :options="{zoomControl: false,  maxBoundsViscosity: 1.0}" :max-bounds="[[ -75, -1800 ], [ 85, 1800 ]]" worldCopyJump>
         <l-tile-layer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           layer-type="base"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
           name="CartoDB Positron"
         ></l-tile-layer>
+        <l-circle-marker
+          v-for="marker in markers"
+          :key="marker.id"
+          :lat-lng="[marker.lat, marker.lng]"
+          :radius="getRadius(marker.scamCnt, zoom)"
+          color="#ff9500"
+          :fill-opacity="0.5"
+          :weight="1"
+        >
+          <l-tooltip :options="{ permanent: true, direction: 'center'}">
+            {{ marker.scamCnt }}
+          </l-tooltip>
+        </l-circle-marker>
         <l-control-zoom position="bottomright"></l-control-zoom>
       </l-map>
     </div>
@@ -17,7 +30,7 @@
     data-bs-toggle="modal"
     data-bs-target="#reportModal">
       <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
-      제보하기 {{ zoom }}
+      제보하기
     </button>
     <ReportModal/>
     
@@ -31,37 +44,46 @@
 <script setup>
 import {ref, onMounted, watch} from 'vue'
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer, LControlZoom } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LControlZoom,  LCircleMarker, LTooltip } from "@vue-leaflet/vue-leaflet";
 
 import ReportModal from './ReportModal.vue'
 
 const zoom = ref(3);
-const centerOfSeoul = ref({ "lat": 37.5665, "lng": 126.9780 });
+const center = ref({ "lat": 42.8333, "lng": 12.8333 });
 
-const mapSummary = ref({});
-
+const markers = ref([]);
 
 watch(zoom, (newZoom, oldZoom) => {
-  const prevGroup = oldZoom >= 7 ? 'city' : 'country'
-  const currGroup = newZoom >= 7 ? 'city' : 'country'
+  const prevGroup = oldZoom >= 7 ? 'city' : 'country';
+  const currGroup = newZoom >= 7 ? 'city' : 'country';
 
   if (prevGroup !== currGroup) {
-    loadMapSummary()
+    loadMapSummary();
+    console.log(markers);
   }
 })
+
+
+const getRadius = (scamCnt, zoom) => {
+  if (zoom <= 4) return Math.sqrt(scamCnt) * 15
+  if (zoom <= 6) return Math.sqrt(scamCnt) * 20
+  if (zoom <= 8) return Math.sqrt(scamCnt) * 25
+  return scamCnt * 30
+}
 
 const loadMapSummary = async () => {
   try {
     const response = await fetch(`http://localhost:8080/reports/map-summary?zoom=${zoom.value}`);
     const data = await response.json();
-    mapSummary.value = data.result;
+    markers.value = data.result.reportMapSummaryItem;
+    console.log(data.result.reportMapSummaryItem);
   } catch (e) {
-    console.error('지도 요약 정보 로딩 실패:', e)
+    console.error('지도 요약 정보 로딩 실패:', e);
   }
 }
 
 onMounted(() => {
-  loadMapSummary()
+  loadMapSummary();
 })
 </script>
 
