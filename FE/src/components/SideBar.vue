@@ -37,10 +37,10 @@
               class="btn position-absolute start-0"
               @click="backToCountryList"
             >
-              ←
+              <font-awesome-icon :icon="['fas', 'arrow-left']" />
             </button>
 
-            <h6 class="fw-bold mb-0 text-center">{{ selectedCountry }}의 도시</h6>
+            <h6 class="fw-bold mb-0 text-center"> City of {{ selectedCountry }}</h6>
           </div>
           <ul class="list-group">
             <li
