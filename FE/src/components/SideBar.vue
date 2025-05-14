@@ -68,11 +68,11 @@
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
-              v-for="scam in sidebarScams"
-              :key="scam.id"
+              v-for="report in sidebarReports"
+              :key="report.id"
             >
-                <div class="ms-2 me-auto">{{ scam.title }}</div>
-                <span class="badge text-bg-primary rounded-pill">{{ scam.scam }}</span>
+                <div class="ms-2 me-auto">{{ report.title }}</div>
+                <span class="badge text-bg-primary rounded-pill">{{ report.scam }}</span>
             </li>
           </ul>
         </template>
@@ -98,7 +98,7 @@ const viewState = ref('country') // 'country' 또는 'city' 또는 'scam'
 
 const sidebarCountries = ref([]);
 const sidebarCities = ref([]);
-const sidebarScams = ref([]);
+const sidebarReports = ref([]);
 
 const selectedCountry = reactive({
   id: null,
@@ -123,7 +123,7 @@ const loadSidebarScamSummary = async (countryId, cityId, cityName) => {
         size: 20
       }
     });
-    sidebarScams.value = response.data.result.content;
+    sidebarReports.value = response.data.result.content;
     viewState.value = 'scam';
   } catch (e) {
     console.error('API 요청 실패:', e);
