@@ -5,10 +5,10 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
-import com.swkim.safetrip.dto.response.ReportFindAllResponse;
-import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.LocationSummaryItem;
 import com.swkim.safetrip.dto.response.LocationSummaryResponse;
+import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
+import com.swkim.safetrip.dto.response.ScamSummaryItem;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.exception.CoordinatesNotValidException;
 import com.swkim.safetrip.exception.ReportNotFoundException;
@@ -19,7 +19,6 @@ import com.swkim.safetrip.repository.*;
 import com.swkim.safetrip.vo.CountryCityData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatusCode;
@@ -64,12 +63,12 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public Slice<LocationSummaryItem> getCountrySummaryPage(Pageable pageable) {
-        return reportRepository.findCountrySummaryPage(pageable);
+        return reportRepository.findCountrySummarySlice(pageable);
     }
 
     @Transactional(readOnly = true)
     public Slice<LocationSummaryItem> getCitySummaryPage(Long countryId, Pageable pageable) {
-        return reportRepository.findCitySummaryPage(countryId, pageable);
+        return reportRepository.findCitySummarySlice(countryId, pageable);
     }
 
     public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
@@ -96,8 +95,8 @@ public class ReportService {
     }
 
     @Transactional
-    public Page<ReportFindAllResponse> getReports(String country, String city, Pageable pageable) {
-        return reportRepository.findAllByCountryAndCity(country, city, pageable);
+    public Slice<ScamSummaryItem> getScamSummaryPage(Long countryId, Long cityId, Pageable pageable) {
+        return reportRepository.findScamSummarySliceByCountryAndCity(countryId, cityId, pageable);
     }
 
     @Transactional

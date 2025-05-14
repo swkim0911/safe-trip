@@ -1,25 +1,27 @@
 package com.swkim.safetrip.repository;
 
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.swkim.safetrip.dto.response.LocationSummaryItem;
-import com.swkim.safetrip.dto.response.ReportFindAllResponse;
+import com.swkim.safetrip.dto.response.ScamSummaryItem;
 import com.swkim.safetrip.entity.Report;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.swkim.safetrip.entity.QCity.city;
 import static com.swkim.safetrip.entity.QCountry.country;
 import static com.swkim.safetrip.entity.QLocation.location;
 import static com.swkim.safetrip.entity.QReport.report;
+import static com.swkim.safetrip.entity.QScam.scam;
 
 @RequiredArgsConstructor
 public class ReportRepositoryImpl implements ReportRepositoryCustom {
@@ -27,35 +29,34 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<ReportFindAllResponse> findAllByCountryAndCity(String country, String city, Pageable pageable) {
+    public Slice<ScamSummaryItem> findScamSummarySliceByCountryAndCity(Long countryId, Long cityId, Pageable pageable) {
 
-        BooleanBuilder conditions = new BooleanBuilder();
-        if (country != null) {
-            conditions.and(report.location.country.name.eq(country));
-        }
-        if (city != null) {
-            conditions.and(report.location.city.name.eq(city));
-        }
+        int pageSize = pageable.getPageSize();
 
-        List<OrderSpecifier<?>> orderSpecifiers = getOrderSpecifiers(pageable); // 정렬 조건
-
-        List<ReportFindAllResponse> reportFindAllResponses = jpaQueryFactory.select(Projections.fields(
-                        ReportFindAllResponse.class,
-                        report.id,
+        List<ScamSummaryItem> scamSummaryItems = jpaQueryFactory.select(Projections.fields(
+                        ScamSummaryItem.class,
+                        report.id.as("reportId"),
                         report.title,
-                        report.scam.name.as("scam")))
+                        scam.name.as("scam")))
                 .from(report)
-                .where(conditions)
+                .join(report.location, location)
+                .join(report.scam, scam)
+                .where(
+                        location.country.id.eq(countryId),
+                        location.city.id.eq(cityId)
+                )
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(orderSpecifiers.toArray(OrderSpecifier[]::new))
+                .limit(pageSize + 1) // 다음 페이지가 있는지 확인
                 .fetch();
 
-        return new PageImpl<>(reportFindAllResponses, pageable, reportFindAllResponses.size());
+        boolean hasNext = scamSummaryItems.size() > pageSize;
+        List<ScamSummaryItem> content = hasNext ? scamSummaryItems.subList(0, pageSize) : scamSummaryItems;
+
+        return new SliceImpl<>(content, pageable, hasNext);
     }
 
     @Override
-    public Slice<LocationSummaryItem> findCountrySummaryPage(Pageable pageable) {
+    public Slice<LocationSummaryItem> findCountrySummarySlice(Pageable pageable) {
         int pageSize = pageable.getPageSize();
 
         List<LocationSummaryItem> locationSummaryItems = jpaQueryFactory.select(Projections.fields(
@@ -69,20 +70,17 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
                 .join(location.country, country)
                 .groupBy(country.id, country.name, country.lat, country.lng)
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .limit(pageSize + 1)
                 .fetch();
 
-        boolean hasNext = false;
-        if (locationSummaryItems.size() > pageSize) {
-            hasNext = true;
-            locationSummaryItems.remove(pageSize); // 초과 데이터 제거
-        }
+        boolean hasNext = locationSummaryItems.size() > pageSize;
+        List<LocationSummaryItem> content = hasNext ? locationSummaryItems.subList(0, pageSize) : locationSummaryItems;
 
-        return new SliceImpl<>(locationSummaryItems, pageable, hasNext);
+        return new SliceImpl<>(content, pageable, hasNext);
     }
 
     @Override
-    public Slice<LocationSummaryItem> findCitySummaryPage(Long countryId, Pageable pageable) {
+    public Slice<LocationSummaryItem> findCitySummarySlice(Long countryId, Pageable pageable) {
         int pageSize = pageable.getPageSize();
 
         List<LocationSummaryItem> locationSummaryItems = jpaQueryFactory.select(Projections.fields(
@@ -97,16 +95,13 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
                 .groupBy(city.id, city.name, city.lat, city.lng)
                 .where(location.country.id.eq(countryId))
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .limit(pageSize + 1)
                 .fetch();
 
-        boolean hasNext = false;
-        if (locationSummaryItems.size() > pageSize) {
-            hasNext = true;
-            locationSummaryItems.remove(pageSize); // 초과 데이터 제거
-        }
+        boolean hasNext = locationSummaryItems.size() > pageSize;
+        List<LocationSummaryItem> content = hasNext ? locationSummaryItems.subList(0, pageSize) : locationSummaryItems;
 
-        return new SliceImpl<>(locationSummaryItems, pageable, hasNext);
+        return new SliceImpl<>(content, pageable, hasNext);
     }
 
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {
