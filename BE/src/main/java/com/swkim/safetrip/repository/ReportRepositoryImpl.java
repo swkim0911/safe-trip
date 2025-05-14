@@ -10,10 +10,7 @@ import com.swkim.safetrip.dto.response.LocationSummaryItem;
 import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.entity.Report;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +55,9 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
     }
 
     @Override
-    public Page<LocationSummaryItem> findCountrySummaryPage(Pageable pageable) {
+    public Slice<LocationSummaryItem> findCountrySummaryPage(Pageable pageable) {
+        int pageSize = pageable.getPageSize();
+
         List<LocationSummaryItem> locationSummaryItems = jpaQueryFactory.select(Projections.fields(
                         LocationSummaryItem.class,
                         country.id,
@@ -73,17 +72,18 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        Long total = Optional.ofNullable(jpaQueryFactory
-                .select(country.id.countDistinct()) // 전체 그룹 수
-                .from(location)
-                .join(location.country, country)
-                .fetchOne()).orElse(0L);
+        boolean hasNext = false;
+        if (locationSummaryItems.size() > pageSize) {
+            hasNext = true;
+            locationSummaryItems.remove(pageSize); // 초과 데이터 제거
+        }
 
-        return new PageImpl<>(locationSummaryItems, pageable, total);
+        return new SliceImpl<>(locationSummaryItems, pageable, hasNext);
     }
 
     @Override
-    public Page<LocationSummaryItem> findCitySummaryPage(Long countryId, Pageable pageable) {
+    public Slice<LocationSummaryItem> findCitySummaryPage(Long countryId, Pageable pageable) {
+        int pageSize = pageable.getPageSize();
 
         List<LocationSummaryItem> locationSummaryItems = jpaQueryFactory.select(Projections.fields(
                         LocationSummaryItem.class,
@@ -100,14 +100,13 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        Long total = Optional.ofNullable(jpaQueryFactory
-                .select(city.id.countDistinct()) // 전체 그룹 수
-                .from(location)
-                .join(location.city, city)
-                .where(location.country.id.eq(countryId))
-                .fetchOne()).orElse(0L);
+        boolean hasNext = false;
+        if (locationSummaryItems.size() > pageSize) {
+            hasNext = true;
+            locationSummaryItems.remove(pageSize); // 초과 데이터 제거
+        }
 
-        return new PageImpl<>(locationSummaryItems, pageable, total);
+        return new SliceImpl<>(locationSummaryItems, pageable, hasNext);
     }
 
     private List<OrderSpecifier<?>> getOrderSpecifiers(Pageable pageable) {

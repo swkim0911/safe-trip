@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,12 +63,12 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
-    public Page<LocationSummaryItem> getCountrySummaryPage(Pageable pageable) {
+    public Slice<LocationSummaryItem> getCountrySummaryPage(Pageable pageable) {
         return reportRepository.findCountrySummaryPage(pageable);
     }
 
     @Transactional(readOnly = true)
-    public Page<LocationSummaryItem> getCitySummaryPage(Long countryId, Pageable pageable) {
+    public Slice<LocationSummaryItem> getCitySummaryPage(Long countryId, Pageable pageable) {
         return reportRepository.findCitySummaryPage(countryId, pageable);
     }
 

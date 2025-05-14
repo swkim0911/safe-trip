@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -48,14 +49,14 @@ public class ReportController {
     }
 
     @GetMapping(value = "/reports/sidebar-summary/counties")
-    public ApiResponse<Page<LocationSummaryItem>> getSideBarCountrySummaries(Pageable pageable){
-        Page<LocationSummaryItem> countrySummaryPage = reportService.getCountrySummaryPage(pageable);
+    public ApiResponse<Slice<LocationSummaryItem>> getSideBarCountrySummaries(Pageable pageable){
+        Slice<LocationSummaryItem> countrySummaryPage = reportService.getCountrySummaryPage(pageable);
         return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummaryPage);
     }
 
     @GetMapping(value = "/reports/sidebar-summary/cities")
-    public ApiResponse<Page<LocationSummaryItem>> getSideBarCitySummaries(@RequestParam Long countryId, Pageable pageable){
-        Page<LocationSummaryItem> citySummaryPage = reportService.getCitySummaryPage(countryId, pageable);
+    public ApiResponse<Slice<LocationSummaryItem>> getSideBarCitySummaries(@RequestParam Long countryId, Pageable pageable){
+        Slice<LocationSummaryItem> citySummaryPage = reportService.getCitySummaryPage(countryId, pageable);
         return ApiResponse.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummaryPage);
     }
 
