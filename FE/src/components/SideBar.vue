@@ -12,21 +12,47 @@
       
       </div>
       <div class="sidebar-body">
-        <ul class="list-group">
-          <li
-            class="list-group-item d-flex justify-content-between align-items-start"
-            v-for="country in sidebarCountries"
-            :key="country.id"
-            @click="loadSidbarCitySummary(country.id)"
-          >
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">{{ country.name }}</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">
-              {{ country.scamCnt }}
-            </span>
-          </li>
-        </ul>
+        <template v-if="viewState === 'country'">
+          <ul class="list-group">
+            <li
+              class="list-group-item d-flex justify-content-between align-items-start"
+              v-for="country in sidebarCountries"
+              :key="country.id"
+              @click="loadSidbarCitySummary(country.id, country.name)"
+            >
+              <div class="ms-2 me-auto">
+                <div class="fw-bold">{{ country.name }}</div>
+              </div>
+              <span class="badge text-bg-primary rounded-pill">
+                {{ country.scamCnt }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <!-- 도시 리스트 -->
+        <template v-else-if="viewState === 'city'">
+          <div class="d-flex align-items-center justify-content-center position-relative mb-2">
+            <button
+              class="btn position-absolute start-0"
+              @click="backToCountryList"
+            >
+              ←
+            </button>
+
+            <h6 class="fw-bold mb-0 text-center">{{ selectedCountry }}의 도시</h6>
+          </div>
+          <ul class="list-group">
+            <li
+              class="list-group-item d-flex justify-content-between align-items-start"
+              v-for="city in sidebarCities"
+              :key="city.id"
+            >
+              <div class="ms-2 me-auto">{{ city.name }}</div>
+              <span class="badge text-bg-primary rounded-pill">{{ city.scamCnt }}</span>
+            </li>
+          </ul>
+        </template>
       </div>
     </div>
 
@@ -45,35 +71,45 @@ import axios from 'axios'
 const isOpen = ref(false);
 const searchText = ref('');
 
+const viewState = ref('country') // 'country' 또는 'city' 또는 'scam'
+
+
 
 const sidebarCountries = ref([]);
 const sidebarCities = ref([]);
-const selectedCountryId = ref(null)
+const selectedCountry = ref('');
+
 
 const loadSidebarCountrySummary = async () => {
   try {
-  const response = await axios.get('http://localhost:8080/reports/sidebar-summary/counties', {
-    params: {
-      page: 0,
-      size: 20
-    }
-  });
-  sidebarCountries.value = response.data.result.content;
+    const response = await axios.get('http://localhost:8080/reports/sidebar-summary/counties', {
+      params: {
+        page: 0,
+        size: 20
+      }
+    });
+    sidebarCountries.value = response.data.result.content;
   } catch (e) {
     console.error('API 요청 실패:', e);
   }
 }
 
-const loadSidbarCitySummary = async (countryId) => {
-  selectedCountryId.value = countryId
+const loadSidbarCitySummary = async (countryId, countryName) => {
+  selectedCountry.value = countryName;
   try {
     const response = await axios.get(`http://localhost:8080/reports/sidebar-summary/cities`, {
       params: { countryId: countryId }
-    }) 
-    sidebarCities.value = response.data.result.content 
+    });
+    sidebarCities.value = response.data.result.content;
+    viewState.value = 'city';
+
   } catch (e) {
     console.error('API 요청 실패:', e);
   }
+}
+
+const backToCountryList = () => {
+  viewState.value = 'country'
 }
 
 const toggleSidebar = () => {
