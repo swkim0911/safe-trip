@@ -15,7 +15,8 @@ const loadSidebarCountrySummary = async () => {
       size: 10
     }
   });
-  sidebarCountries.value = response.data.result.LocationSummaryItem;
+
+  sidebarCountries.value = response.data.result.content;
   console.log(sidebarCountries.value);
 
 } catch (e) {
@@ -31,7 +32,7 @@ onMounted(() => {
 
 
 <template>
-  <SideBar/>
+  <SideBar :sidebar-countries="sidebarCountries"/>
   <MapView/>
 </template>
 

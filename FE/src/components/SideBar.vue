@@ -15,7 +15,7 @@
         <ul class="list-group">
           <li
             class="list-group-item d-flex justify-content-between align-items-start"
-            v-for="country in countryScamList"
+            v-for="country in sidebarCountries"
             :key="country.id"
           >
             <div class="ms-2 me-auto">
@@ -42,6 +42,12 @@ import { ref } from 'vue';
 
 const isOpen = ref(false);
 const searchText = ref('');
+
+defineProps({
+  sidebarCountries: Array
+})
+
+
 
 
 const toggleSidebar = () => {

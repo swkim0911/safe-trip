@@ -44,7 +44,9 @@
 <script setup>
 import {ref, onMounted, watch} from 'vue'
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer, LControlZoom,  LCircleMarker, LTooltip, LMarker } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker } from "@vue-leaflet/vue-leaflet";
+import axios from 'axios'
+
 
 import ReportModal from './ReportModal.vue'
 
@@ -72,13 +74,18 @@ const getRadius = (scamCnt, zoom) => {
 
 const loadMapSummary = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/reports/map-summary?zoom=${zoom.value}`);
-    const data = await response.json();
-    markers.value = data.result.locationSummaryItems;
+    const response = await axios.get('http://localhost:8080/reports/map-summary', {
+      params: {
+        zoom: zoom.value
+      }
+    });
+
+    markers.value = response.data.result.locationSummaryItems;
+
   } catch (e) {
     console.error('지도 요약 정보 로딩 실패:', e);
   }
-}
+};
 
 onMounted(() => {
   loadMapSummary();
