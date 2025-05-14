@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.swkim.safetrip.entity.QCity.city;
 import static com.swkim.safetrip.entity.QCountry.country;
 import static com.swkim.safetrip.entity.QLocation.location;
 import static com.swkim.safetrip.entity.QReport.report;
@@ -76,6 +77,34 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
                 .select(country.id.countDistinct()) // 전체 그룹 수
                 .from(location)
                 .join(location.country, country)
+                .fetchOne()).orElse(0L);
+
+        return new PageImpl<>(locationSummaryItems, pageable, total);
+    }
+
+    @Override
+    public Page<LocationSummaryItem> findCitySummaryPage(Long countryId, Pageable pageable) {
+
+        List<LocationSummaryItem> locationSummaryItems = jpaQueryFactory.select(Projections.fields(
+                        LocationSummaryItem.class,
+                        city.id,
+                        city.name,
+                        location.count().as("scamCnt"),
+                        city.lat,
+                        city.lng))
+                .from(location)
+                .join(location.city, city)
+                .groupBy(city.id, city.name, city.lat, city.lng)
+                .where(location.country.id.eq(countryId))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long total = Optional.ofNullable(jpaQueryFactory
+                .select(city.id.countDistinct()) // 전체 그룹 수
+                .from(location)
+                .join(location.city, city)
+                .where(location.country.id.eq(countryId))
                 .fetchOne()).orElse(0L);
 
         return new PageImpl<>(locationSummaryItems, pageable, total);

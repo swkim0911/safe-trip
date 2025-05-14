@@ -18,7 +18,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
 
 
     @Query("""
-            SELECT new com.swkim.safetrip.dto.response.ReportMapSummaryItem(
+            SELECT new com.swkim.safetrip.dto.response.LocationSummaryItem(
                 c.id,
                 c.name,
                 COUNT(l),
@@ -32,7 +32,7 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
     List<LocationSummaryItem> findCountrySummary();
 
     @Query("""
-            SELECT new com.swkim.safetrip.dto.response.ReportMapSummaryItem(
+            SELECT new com.swkim.safetrip.dto.response.LocationSummaryItem(
                 c.id,
                 c.name,
                 COUNT(l),

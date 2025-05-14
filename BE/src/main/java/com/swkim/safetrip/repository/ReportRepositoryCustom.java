@@ -10,4 +10,6 @@ public interface ReportRepositoryCustom {
     Page<ReportFindAllResponse> findAllByCountryAndCity(String country, String city, Pageable pageable);
 
     Page<LocationSummaryItem> findCountrySummaryPage(Pageable pageable);
+
+    Page<LocationSummaryItem> findCitySummaryPage(Long countryId, Pageable pageable);
 }

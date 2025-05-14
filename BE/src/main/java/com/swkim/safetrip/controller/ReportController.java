@@ -55,7 +55,7 @@ public class ReportController {
 
     @GetMapping(value = "/reports/sidebar-summary/cities")
     public ApiResponse<Page<LocationSummaryItem>> getSideBarCitySummaries(@RequestParam Long countryId, Pageable pageable){
-        Page<LocationSummaryItem> citySummaryPage = reportService.getCitySummaryPage(pageable);
+        Page<LocationSummaryItem> citySummaryPage = reportService.getCitySummaryPage(countryId, pageable);
         return ApiResponse.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummaryPage);
     }
 
