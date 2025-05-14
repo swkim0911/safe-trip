@@ -18,7 +18,7 @@
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="country in sidebarCountries"
               :key="country.id"
-              @click="loadSidbarCitySummary(country.id, country.name)"
+              @click="loadSidebarCitySummary(country.id, country.name)"
             >
               <div class="ms-2 me-auto">
                 <div class="fw-bold">{{ country.name }}</div>
@@ -30,26 +30,49 @@
           </ul>
         </template>
 
-        <!-- 도시 리스트 -->
         <template v-else-if="viewState === 'city'">
           <div class="d-flex align-items-center justify-content-center position-relative mb-2">
             <button
               class="btn position-absolute start-0"
-              @click="backToCountryList"
+              @click="backToList('country')"
             >
-              <font-awesome-icon :icon="['fas', 'arrow-left']" />
+              <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
 
-            <h6 class="fw-bold mb-0 text-center"> City of {{ selectedCountry }}</h6>
+            <h6 class="fw-bold mb-0 text-center"> City of {{ selectedCountry.name }}</h6>
           </div>
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="city in sidebarCities"
               :key="city.id"
+              @click="loadSidebarScamSummary(selectedCountry.id, city.id, city.name)"
             >
               <div class="ms-2 me-auto">{{ city.name }}</div>
               <span class="badge text-bg-primary rounded-pill">{{ city.scamCnt }}</span>
+            </li>
+          </ul>
+        </template>
+
+        <template v-else-if="viewState === 'scam'">
+          <div class="d-flex align-items-center justify-content-center position-relative mb-2">
+            <button
+              class="btn position-absolute start-0"
+              @click="backToList('city')"
+            >
+              <font-awesome-icon :icon="['fas', 'chevron-left']" />
+            </button>
+
+            <h6 class="fw-bold mb-0 text-center"> Scam of {{ selectedCity.name }}</h6>
+          </div>
+          <ul class="list-group">
+            <li
+              class="list-group-item d-flex justify-content-between align-items-start"
+              v-for="scam in sidebarScams"
+              :key="scam.id"
+            >
+                <div class="ms-2 me-auto">{{ scam.title }}</div>
+                <span class="badge text-bg-primary rounded-pill">{{ scam.scam }}</span>
             </li>
           </ul>
         </template>
@@ -65,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import axios from 'axios'
 
 const isOpen = ref(false);
@@ -73,11 +96,39 @@ const searchText = ref('');
 
 const viewState = ref('country') // 'country' 또는 'city' 또는 'scam'
 
-
-
 const sidebarCountries = ref([]);
 const sidebarCities = ref([]);
-const selectedCountry = ref('');
+const sidebarScams = ref([]);
+
+const selectedCountry = reactive({
+  id: null,
+  name: ''
+});
+
+const selectedCity = reactive({
+  id: null,
+  name: ''
+});
+
+const loadSidebarScamSummary = async (countryId, cityId, cityName) => {
+  selectedCity.id = cityId;
+  selectedCity.name = cityName;
+
+  try {
+    const response = await axios.get('http://localhost:8080/reports/sidebar-summary/scams', {
+      params: {
+        countryId: countryId,
+        cityId: cityId,
+        page: 0,
+        size: 20
+      }
+    });
+    sidebarScams.value = response.data.result.content;
+    viewState.value = 'scam';
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  }
+}
 
 
 const loadSidebarCountrySummary = async () => {
@@ -89,13 +140,16 @@ const loadSidebarCountrySummary = async () => {
       }
     });
     sidebarCountries.value = response.data.result.content;
+    viewState.value = 'country';
   } catch (e) {
     console.error('API 요청 실패:', e);
   }
 }
 
-const loadSidbarCitySummary = async (countryId, countryName) => {
-  selectedCountry.value = countryName;
+const loadSidebarCitySummary = async (countryId, countryName) => {
+  selectedCountry.id = countryId;
+  selectedCountry.name = countryName;
+
   try {
     const response = await axios.get(`http://localhost:8080/reports/sidebar-summary/cities`, {
       params: { countryId: countryId }
@@ -108,8 +162,8 @@ const loadSidbarCitySummary = async (countryId, countryName) => {
   }
 }
 
-const backToCountryList = () => {
-  viewState.value = 'country'
+const backToList = (type) => {
+  viewState.value = type;
 }
 
 const toggleSidebar = () => {
