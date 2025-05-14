@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportMapSummaryItem {
+public class LocationSummaryItem {
 
     private Long id;
     private String name;

@@ -5,10 +5,10 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
-import com.swkim.safetrip.dto.response.ReportFindAllResponse;
+import com.swkim.safetrip.dto.response.LocationSummaryItem;
+import com.swkim.safetrip.dto.response.LocationSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
-import com.swkim.safetrip.dto.response.ReportMapSummaryItem;
-import com.swkim.safetrip.dto.response.ReportMapSummaryResponse;
+import com.swkim.safetrip.dto.response.ScamSummaryItem;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.exception.CoordinatesNotValidException;
 import com.swkim.safetrip.exception.ReportNotFoundException;
@@ -19,8 +19,8 @@ import com.swkim.safetrip.repository.*;
 import com.swkim.safetrip.vo.CountryCityData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,15 +50,25 @@ public class ReportService {
     private final AmazonS3Client amazonS3Client;
 
     @Transactional(readOnly = true)
-    public ReportMapSummaryResponse getCountrySummary(){
-        List<ReportMapSummaryItem> reportMapSummaryItems = reportRepository.findScamCountGroupedByCountry();
-        return new ReportMapSummaryResponse("country", reportMapSummaryItems);
+    public LocationSummaryResponse getCountrySummary(){
+        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findCountrySummary();
+        return new LocationSummaryResponse("country", reportMapSummaryItems);
     }
 
     @Transactional(readOnly = true)
-    public ReportMapSummaryResponse getCitySummary(){
-        List<ReportMapSummaryItem> reportMapSummaryItems = reportRepository.findScamCountGroupedByCity();
-        return new ReportMapSummaryResponse("city", reportMapSummaryItems);
+    public LocationSummaryResponse getCitySummary(){
+        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findCitySummary();
+        return new LocationSummaryResponse("city", reportMapSummaryItems);
+    }
+
+    @Transactional(readOnly = true)
+    public Slice<LocationSummaryItem> getCountrySummaryPage(Pageable pageable) {
+        return reportRepository.findCountrySummarySlice(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Slice<LocationSummaryItem> getCitySummaryPage(Long countryId, Pageable pageable) {
+        return reportRepository.findCitySummarySlice(countryId, pageable);
     }
 
     public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
@@ -85,8 +95,8 @@ public class ReportService {
     }
 
     @Transactional
-    public Page<ReportFindAllResponse> getReports(String country, String city, Pageable pageable) {
-        return reportRepository.findAllByCountryAndCity(country, city, pageable);
+    public Slice<ScamSummaryItem> getScamSummaryPage(Long countryId, Long cityId, Pageable pageable) {
+        return reportRepository.findScamSummarySliceByCountryAndCity(countryId, cityId, pageable);
     }
 
     @Transactional

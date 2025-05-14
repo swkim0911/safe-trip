@@ -1,14 +1,15 @@
 package com.swkim.safetrip.repository;
 
-import com.swkim.safetrip.dto.response.ReportFindAllResponse;
-import com.swkim.safetrip.entity.Report;
-import org.springframework.data.domain.Page;
+import com.swkim.safetrip.dto.response.LocationSummaryItem;
+import com.swkim.safetrip.dto.response.ScamSummaryItem;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Slice;
 
 public interface ReportRepositoryCustom {
 
-    Page<ReportFindAllResponse> findAllByCountryAndCity(String country, String city, Pageable pageable);
+    Slice<ScamSummaryItem> findScamSummarySliceByCountryAndCity(Long country, Long city, Pageable pageable);
 
+    Slice<LocationSummaryItem> findCountrySummarySlice(Pageable pageable);
+
+    Slice<LocationSummaryItem> findCitySummarySlice(Long countryId, Pageable pageable);
 }
