@@ -74,7 +74,7 @@ const loadMapSummary = async () => {
   try {
     const response = await fetch(`http://localhost:8080/reports/map-summary?zoom=${zoom.value}`);
     const data = await response.json();
-    markers.value = data.result.reportMapSummaryItem;
+    markers.value = data.result.locationSummaryItems;
   } catch (e) {
     console.error('지도 요약 정보 로딩 실패:', e);
   }

@@ -13,77 +13,17 @@
       </div>
       <div class="sidebar-body">
         <ul class="list-group">
-          <li class="list-group-item d-flex justify-content-between align-items-start">
+          <li
+            class="list-group-item d-flex justify-content-between align-items-start"
+            v-for="country in countryScamList"
+            :key="country.id"
+          >
             <div class="ms-2 me-auto">
-              <div class="fw-bold">크로아티아</div>
+              <div class="fw-bold">{{ country.name }}</div>
             </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">스페인</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">프랑스</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">인도</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">대한민국</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">브라질</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">코트디부아르</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">케냐</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">러시아</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">오스트레일리아</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">오스트리아</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">독일</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
+            <span class="badge text-bg-primary rounded-pill">
+              {{ country.scamCnt }}
+            </span>
           </li>
         </ul>
       </div>
