@@ -17,6 +17,7 @@
             class="list-group-item d-flex justify-content-between align-items-start"
             v-for="country in sidebarCountries"
             :key="country.id"
+            @click="loadSidbarCitySummary(country.id)"
           >
             <div class="ms-2 me-auto">
               <div class="fw-bold">{{ country.name }}</div>
@@ -38,21 +39,51 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios'
 
 const isOpen = ref(false);
 const searchText = ref('');
 
-defineProps({
-  sidebarCountries: Array
-})
 
+const sidebarCountries = ref([]);
+const sidebarCities = ref([]);
+const selectedCountryId = ref(null)
 
+const loadSidebarCountrySummary = async () => {
+  try {
+  const response = await axios.get('http://localhost:8080/reports/sidebar-summary/counties', {
+    params: {
+      page: 0,
+      size: 20
+    }
+  });
+  sidebarCountries.value = response.data.result.content;
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  }
+}
 
+const loadSidbarCitySummary = async (countryId) => {
+  selectedCountryId.value = countryId
+  try {
+    const response = await axios.get(`http://localhost:8080/reports/sidebar-summary/cities`, {
+      params: { countryId: countryId }
+    }) 
+    sidebarCities.value = response.data.result.content 
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  }
+}
 
 const toggleSidebar = () => {
   isOpen.value = !isOpen.value;
 };
+
+onMounted(() => {
+  loadSidebarCountrySummary();
+})
+
 </script>
 
 <style scoped lang="scss">
