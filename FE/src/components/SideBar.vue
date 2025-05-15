@@ -69,7 +69,8 @@
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="report in sidebarReports"
-              :key="report.id"
+              :key="report.reportId"
+              @click="openReportDetailModal(report.reportId)"
               data-bs-toggle="modal"
               data-bs-target="#reportDetailsModal"
             >
@@ -87,7 +88,7 @@
       <span v-else>◀</span>
     </button>
   </div>
-  <ReportDetailsModal/>
+  <ReportDetailsModal :report="selectedReport"/>
 
 </template>
 
@@ -115,6 +116,15 @@ const selectedCity = reactive({
   name: ''
 });
 
+const selectedReport = reactive({
+  title: '',
+  scam: '',
+  address: '',
+  description: '',
+  advice: '',
+  createdAt: ''
+})
+
 const size = 10;
 
 const countryPage = ref(0);
@@ -131,9 +141,26 @@ const isLoadingReport = ref(false);
 
 const sidebarRef = ref(null);
 
-const openReportDetailModal = () => {
-  console.log("aa");
+const openReportDetailModal = (reportId) => {
+  loadReportDetialInfo(reportId);
 };
+
+const loadReportDetialInfo = async (reportId) => {
+  try {
+    const response = await axios.get(`http://localhost:8080/reports/${reportId}`);
+
+    const result = response.data.result;
+    selectedReport.title = result.title;
+    selectedReport.scam = result.scam;
+    selectedReport.address = result.address;
+    selectedReport.description = result.description;
+    selectedReport.advice = result.advice;
+    selectedReport.createdAt = result.createdAt;
+
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  }
+}
 
 const loadSidebarCountrySummary = async (mode = 'click') => {
 
