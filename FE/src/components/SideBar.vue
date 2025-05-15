@@ -70,6 +70,8 @@
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="report in sidebarReports"
               :key="report.id"
+              data-bs-toggle="modal"
+              data-bs-target="#reportDetailsModal"
             >
                 <div class="ms-2 me-auto">{{ report.title }}</div>
                 <span class="badge text-bg-primary rounded-pill">{{ report.scam }}</span>
@@ -85,11 +87,14 @@
       <span v-else>◀</span>
     </button>
   </div>
+  <ReportDetailsModal/>
+
 </template>
 
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 import axios from 'axios'
+import ReportDetailsModal from './ReportDetailsModal.vue'
 
 const isOpen = ref(false);
 const searchText = ref('');
@@ -125,6 +130,15 @@ const isLastReportPage = ref(false);
 const isLoadingReport = ref(false);
 
 const sidebarRef = ref(null);
+
+const openReportDetailModal = () => {
+  console.log("aa");
+  const modalEl = document.getElementById('reportDetailsModal');
+  // if (modalEl) {
+  //   const modal = new bootstrap.Modal(modalEl);
+  //   modal.show();
+  // }
+};
 
 const loadSidebarCountrySummary = async () => {
   if (isLoadingCountry.value || isLastCountryPage.value) return;
@@ -195,7 +209,7 @@ const loadSidebarReportSummary = async (countryId, cityId, cityName) => {
       params: {
         countryId: countryId,
         cityId: cityId,
-        page: reportPage,
+        page: reportPage.value,
         size: size
       }
     });

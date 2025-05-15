@@ -451,7 +451,7 @@ onMounted(() => {
 })
 
 </script>
-<style lang="scss">
+<style scoped lang="scss">
   .modal-icon{
     font-size: 95%;
   }
