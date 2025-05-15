@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScamSummaryItem {
+public class ReportSummaryItem {
 
     private Long reportId;
 

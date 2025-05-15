@@ -6,7 +6,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.swkim.safetrip.dto.response.LocationSummaryItem;
-import com.swkim.safetrip.dto.response.ScamSummaryItem;
+import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.Report;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -29,12 +29,12 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Slice<ScamSummaryItem> findScamSummarySliceByCountryAndCity(Long countryId, Long cityId, Pageable pageable) {
+    public Slice<ReportSummaryItem> findReportSummarySliceByCountryAndCity(Long countryId, Long cityId, Pageable pageable) {
 
         int pageSize = pageable.getPageSize();
 
-        List<ScamSummaryItem> scamSummaryItems = jpaQueryFactory.select(Projections.fields(
-                        ScamSummaryItem.class,
+        List<ReportSummaryItem> reportSummaryItems = jpaQueryFactory.select(Projections.fields(
+                        ReportSummaryItem.class,
                         report.id.as("reportId"),
                         report.title,
                         scam.name.as("scam")))
@@ -49,8 +49,8 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
                 .limit(pageSize + 1) // 다음 페이지가 있는지 확인
                 .fetch();
 
-        boolean hasNext = scamSummaryItems.size() > pageSize;
-        List<ScamSummaryItem> content = hasNext ? scamSummaryItems.subList(0, pageSize) : scamSummaryItems;
+        boolean hasNext = reportSummaryItems.size() > pageSize;
+        List<ReportSummaryItem> content = hasNext ? reportSummaryItems.subList(0, pageSize) : reportSummaryItems;
 
         return new SliceImpl<>(content, pageable, hasNext);
     }

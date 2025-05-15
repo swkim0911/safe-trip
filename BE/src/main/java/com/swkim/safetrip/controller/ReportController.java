@@ -4,7 +4,7 @@ import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.LocationSummaryItem;
 import com.swkim.safetrip.dto.response.LocationSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
-import com.swkim.safetrip.dto.response.ScamSummaryItem;
+import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.service.ReportService;
 import jakarta.validation.Valid;
@@ -59,9 +59,9 @@ public class ReportController {
         return ApiResponse.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummaryPage);
     }
 
-    @GetMapping(value = "/reports/sidebar-summary/scams")
-    public ApiResponse<Slice<ScamSummaryItem>> getSideBarScamSummaries(@RequestParam Long countryId, @RequestParam Long cityId, Pageable pageable) {
-        Slice<ScamSummaryItem> scamSummaryItems = reportService.getScamSummaryPage(countryId, cityId, pageable);
+    @GetMapping(value = "/reports/sidebar-summary/reports")
+    public ApiResponse<Slice<ReportSummaryItem>> getSideBarScamSummaries(@RequestParam Long countryId, @RequestParam Long cityId, Pageable pageable) {
+        Slice<ReportSummaryItem> scamSummaryItems = reportService.getReportSummaryPage(countryId, cityId, pageable);
         String message = messageSource.getMessage("report.list.get.success", null, null);
 
         return ApiResponse.of(HttpStatus.OK.value(), message, scamSummaryItems);
