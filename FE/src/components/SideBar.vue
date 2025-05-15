@@ -11,7 +11,7 @@
         />
       
       </div>
-      <div class="sidebar-body">
+      <div class="sidebar-body" @scroll="onSidebarScroll" ref="sidebarRef">
         <template v-if="viewState === 'country'">
           <ul class="list-group">
             <li
@@ -46,7 +46,7 @@
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="city in sidebarCities"
               :key="city.id"
-              @click="loadSidebarScamSummary(selectedCountry.id, city.id, city.name)"
+              @click="loadSidebarReportSummary(selectedCountry.id, city.id, city.name)"
             >
               <div class="ms-2 me-auto">{{ city.name }}</div>
               <span class="badge text-bg-primary rounded-pill">{{ city.scamCnt }}</span>
@@ -110,7 +110,83 @@ const selectedCity = reactive({
   name: ''
 });
 
-const loadSidebarScamSummary = async (countryId, cityId, cityName) => {
+const size = 10;
+
+const countryPage = ref(0);
+const isLastCountryPage = ref(false);
+const isLoadingCountry = ref(false);
+
+const cityPage = ref(0);
+const isLastCityPage = ref(false);
+const isLoadingCity = ref(false);
+
+const reportPage = ref(0);
+const isLastReportPage = ref(false);
+const isLoadingReport = ref(false);
+
+const sidebarRef = ref(null);
+
+const loadSidebarCountrySummary = async () => {
+  if (isLoadingCountry.value || isLastCountryPage.value) return;
+
+  isLoadingCountry.value = true;
+  try {
+    const response = await axios.get('http://localhost:8080/reports/sidebar-summary/counties', {
+      params: {
+        page: countryPage.value,
+        size: size
+      }
+    });
+
+    const content = response.data.result.content;
+    const last = response.data.result.last;
+    // 기존 데이터에 추가
+    sidebarCountries.value.push(...content);
+    isLastCountryPage.value = last;
+    countryPage.value += 1;
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  } finally {
+    isLoadingCountry.value = false;
+  }
+}
+
+const loadSidebarCitySummary = async (countryId, countryName) => {
+  if (isLoadingCity.value || isLastCityPage.value) return;
+
+  isLoadingCity.value = true;
+
+  selectedCountry.id = countryId;
+  selectedCountry.name = countryName;
+
+  try {
+    const response = await axios.get(`http://localhost:8080/reports/sidebar-summary/cities`, {
+      params: {
+        countryId: countryId,
+        page: cityPage.value,
+        size: size
+      }
+    });
+    const content = response.data.result.content;
+    const last = response.data.result.last;
+
+    sidebarCities.value.push(...content);
+    isLastCityPage.value = last;
+    cityPage.value += 1;
+
+    viewState.value = 'city';
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  } finally {
+    isLoadingCity.value = false;
+  }
+}
+
+const loadSidebarReportSummary = async (countryId, cityId, cityName) => {
+  if (isLoadingReport.value || isLastReportPage.value) return;
+
+  isLoadingReport.value = true;
+
   selectedCity.id = cityId;
   selectedCity.name = cityName;
 
@@ -119,48 +195,25 @@ const loadSidebarScamSummary = async (countryId, cityId, cityName) => {
       params: {
         countryId: countryId,
         cityId: cityId,
-        page: 0,
-        size: 20
+        page: reportPage,
+        size: size
       }
     });
-    sidebarReports.value = response.data.result.content;
+    const content = response.data.result.content;
+    const last = response.data.result.last;
+
+    sidebarReports.value.push(...content);
+    isLastReportPage.value = last;
+    reportPage.value += 1;
+
     viewState.value = 'scam';
   } catch (e) {
     console.error('API 요청 실패:', e);
+  } finally {
+    isLoadingReport.value = false;
   }
 }
 
-
-const loadSidebarCountrySummary = async () => {
-  try {
-    const response = await axios.get('http://localhost:8080/reports/sidebar-summary/counties', {
-      params: {
-        page: 0,
-        size: 20
-      }
-    });
-    sidebarCountries.value = response.data.result.content;
-    viewState.value = 'country';
-  } catch (e) {
-    console.error('API 요청 실패:', e);
-  }
-}
-
-const loadSidebarCitySummary = async (countryId, countryName) => {
-  selectedCountry.id = countryId;
-  selectedCountry.name = countryName;
-
-  try {
-    const response = await axios.get(`http://localhost:8080/reports/sidebar-summary/cities`, {
-      params: { countryId: countryId }
-    });
-    sidebarCities.value = response.data.result.content;
-    viewState.value = 'city';
-
-  } catch (e) {
-    console.error('API 요청 실패:', e);
-  }
-}
 
 const backToList = (type) => {
   viewState.value = type;
@@ -168,6 +221,17 @@ const backToList = (type) => {
 
 const toggleSidebar = () => {
   isOpen.value = !isOpen.value;
+};
+
+// 스크롤 감지
+const onSidebarScroll = () => {
+  const sidebarEl = sidebarRef.value;
+  if (!sidebarEl) return;
+
+  const scrollBottom = sidebarEl.scrollTop + sidebarEl.clientHeight >= sidebarEl.scrollHeight - 100;
+  if (scrollBottom) {
+    loadSidebarCountrySummary();
+  }
 };
 
 onMounted(() => {
