@@ -117,6 +117,8 @@ const form = reactive({
   address: '',
   lat: '',
   lng: '',
+  country: '',
+  city: '',
   description: '',
   advice: '',
   imageFile: null
@@ -187,6 +189,13 @@ const checkForm = () => {
     errors.address = false;
   }
 
+  if (!form.lat.trim() && !form.lng.trim()) {
+    errors.address = true;
+    isValid = false;
+  } else {
+    errors.address = false;
+  }
+
   if (!form.description.trim()) {
     errors.description = true;
     isValid = false;
@@ -210,6 +219,8 @@ const resetForm = () => {
   form.address = null;
   form.lat = '';
   form.lng = '';
+  form.country = '';
+  form.city = '';
   form.description = '';
   form.advice = '';
   form.imageFile = null;
@@ -351,12 +362,8 @@ const searchAddress = () => {
       const lat = location.lat();
       const lng = location.lng();
       map.setCenter(location); // location 위치로 지도의 중심 변경
+      reverseGeocode(lat, lng);
       setMarker({ lat, lng });
-      form.address = results[0].formatted_address;
-      form.lat = lat;
-      form.lng = lng;
-      errorMessage.value = '';
-      errors.address = false;
     } else {
       errorMessage.value = `Google 지도에서 ${form.address}을(를) 찾을 수 없습니다.`;
       errors.address = false;
@@ -371,6 +378,21 @@ const reverseGeocode = (lat, lng) => {
       form.address = results[0].formatted_address;
       form.lat = lat;
       form.lng = lng;
+
+      const address_components = results[0].address_components;
+      const countryComponent = extractCountry(address_components);
+      const country = countryComponent.name;
+      let city;
+      if (countryComponent.code === 'JP') {
+        city = address_components.find(comp =>
+          comp.types.includes("administrative_area_level_1")
+        ).long_name;
+      } else {
+        city = extractCity(address_components);
+      }
+      form.country = country;
+      form.city = city;
+
       errorMessage.value = '';
       errors.address = false;
     } else {
@@ -379,6 +401,39 @@ const reverseGeocode = (lat, lng) => {
     }
   })
 }
+
+const extractCity = (address_components) => {
+  const locality = address_components.find(comp =>
+    comp.types.includes("locality")
+  );
+  if (locality) return locality.long_name;
+
+  const postalTown = address_components.find(comp =>
+    comp.types.includes("postal_town")
+  );
+  if (postalTown) return postalTown.long_name;
+
+  const admin1 = address_components.find(comp =>
+    comp.types.includes("administrative_area_level_1")
+  );
+  if (admin1) return admin1.long_name;
+
+  console.warn("도시 정보를 추출할 수 없습니다.", address_components);
+  return "Unknown City";
+}
+
+const extractCountry = (address_components) => {
+  const countryComponent = address_components.find(comp =>
+    comp.types.includes("country")
+  );
+
+  return {
+    name: countryComponent?.long_name || null,
+    code: countryComponent?.short_name || null
+  };
+}
+
+
 // 마커 설정
 const setMarker = async ({lat, lng}) => {
   if (marker) marker.setMap(null);

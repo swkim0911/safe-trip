@@ -11,81 +11,71 @@
         />
       
       </div>
-      <div class="sidebar-body">
-        <ul class="list-group">
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">크로아티아</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">스페인</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">프랑스</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">인도</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">대한민국</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">브라질</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">코트디부아르</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">케냐</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">러시아</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">오스트레일리아</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">오스트리아</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">독일</div>
-            </div>
-            <span class="badge text-bg-primary rounded-pill">14</span>
-          </li>
-        </ul>
+      <div class="sidebar-body" @scroll="onSidebarScroll" ref="sidebarRef">
+        <template v-if="viewState === 'country'">
+          <ul class="list-group">
+            <li
+              class="list-group-item d-flex justify-content-between align-items-start"
+              v-for="country in sidebarCountries"
+              :key="country.id"
+              @click="loadSidebarCitySummary(country.id, country.name)"
+            >
+              <div class="ms-2 me-auto">
+                <div class="fw-bold">{{ country.name }}</div>
+              </div>
+              <span class="badge text-bg-primary rounded-pill">
+                {{ country.scamCnt }}
+              </span>
+            </li>
+          </ul>
+        </template>
+
+        <template v-else-if="viewState === 'city'">
+          <div class="d-flex align-items-center justify-content-center position-relative mb-2">
+            <button
+              class="btn position-absolute start-0"
+              @click="backToList('country')"
+            >
+              <font-awesome-icon :icon="['fas', 'chevron-left']" />
+            </button>
+
+            <h6 class="fw-bold mb-0 text-center"> City of {{ selectedCountry.name }}</h6>
+          </div>
+          <ul class="list-group">
+            <li
+              class="list-group-item d-flex justify-content-between align-items-start"
+              v-for="city in sidebarCities"
+              :key="city.id"
+              @click="loadSidebarReportSummary(selectedCountry.id, city.id, city.name)"
+            >
+              <div class="ms-2 me-auto">{{ city.name }}</div>
+              <span class="badge text-bg-primary rounded-pill">{{ city.scamCnt }}</span>
+            </li>
+          </ul>
+        </template>
+
+        <template v-else-if="viewState === 'scam'">
+          <div class="d-flex align-items-center justify-content-center position-relative mb-2">
+            <button
+              class="btn position-absolute start-0"
+              @click="backToList('city')"
+            >
+              <font-awesome-icon :icon="['fas', 'chevron-left']" />
+            </button>
+
+            <h6 class="fw-bold mb-0 text-center"> Scam of {{ selectedCity.name }}</h6>
+          </div>
+          <ul class="list-group">
+            <li
+              class="list-group-item d-flex justify-content-between align-items-start"
+              v-for="report in sidebarReports"
+              :key="report.id"
+            >
+                <div class="ms-2 me-auto">{{ report.title }}</div>
+                <span class="badge text-bg-primary rounded-pill">{{ report.scam }}</span>
+            </li>
+          </ul>
+        </template>
       </div>
     </div>
 
@@ -98,15 +88,156 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
+import axios from 'axios'
 
 const isOpen = ref(false);
 const searchText = ref('');
 
+const viewState = ref('country') // 'country' 또는 'city' 또는 'scam'
+
+const sidebarCountries = ref([]);
+const sidebarCities = ref([]);
+const sidebarReports = ref([]);
+
+const selectedCountry = reactive({
+  id: null,
+  name: ''
+});
+
+const selectedCity = reactive({
+  id: null,
+  name: ''
+});
+
+const size = 10;
+
+const countryPage = ref(0);
+const isLastCountryPage = ref(false);
+const isLoadingCountry = ref(false);
+
+const cityPage = ref(0);
+const isLastCityPage = ref(false);
+const isLoadingCity = ref(false);
+
+const reportPage = ref(0);
+const isLastReportPage = ref(false);
+const isLoadingReport = ref(false);
+
+const sidebarRef = ref(null);
+
+const loadSidebarCountrySummary = async () => {
+  if (isLoadingCountry.value || isLastCountryPage.value) return;
+
+  isLoadingCountry.value = true;
+  try {
+    const response = await axios.get('http://localhost:8080/reports/sidebar-summary/counties', {
+      params: {
+        page: countryPage.value,
+        size: size
+      }
+    });
+
+    const content = response.data.result.content;
+    const last = response.data.result.last;
+    // 기존 데이터에 추가
+    sidebarCountries.value.push(...content);
+    isLastCountryPage.value = last;
+    countryPage.value += 1;
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  } finally {
+    isLoadingCountry.value = false;
+  }
+}
+
+const loadSidebarCitySummary = async (countryId, countryName) => {
+  if (isLoadingCity.value || isLastCityPage.value) return;
+
+  isLoadingCity.value = true;
+
+  selectedCountry.id = countryId;
+  selectedCountry.name = countryName;
+
+  try {
+    const response = await axios.get(`http://localhost:8080/reports/sidebar-summary/cities`, {
+      params: {
+        countryId: countryId,
+        page: cityPage.value,
+        size: size
+      }
+    });
+    const content = response.data.result.content;
+    const last = response.data.result.last;
+
+    sidebarCities.value.push(...content);
+    isLastCityPage.value = last;
+    cityPage.value += 1;
+
+    viewState.value = 'city';
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  } finally {
+    isLoadingCity.value = false;
+  }
+}
+
+const loadSidebarReportSummary = async (countryId, cityId, cityName) => {
+  if (isLoadingReport.value || isLastReportPage.value) return;
+
+  isLoadingReport.value = true;
+
+  selectedCity.id = cityId;
+  selectedCity.name = cityName;
+
+  try {
+    const response = await axios.get('http://localhost:8080/reports/sidebar-summary/reports', {
+      params: {
+        countryId: countryId,
+        cityId: cityId,
+        page: reportPage,
+        size: size
+      }
+    });
+    const content = response.data.result.content;
+    const last = response.data.result.last;
+
+    sidebarReports.value.push(...content);
+    isLastReportPage.value = last;
+    reportPage.value += 1;
+
+    viewState.value = 'scam';
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  } finally {
+    isLoadingReport.value = false;
+  }
+}
+
+
+const backToList = (type) => {
+  viewState.value = type;
+}
 
 const toggleSidebar = () => {
   isOpen.value = !isOpen.value;
 };
+
+// 스크롤 감지
+const onSidebarScroll = () => {
+  const sidebarEl = sidebarRef.value;
+  if (!sidebarEl) return;
+
+  const scrollBottom = sidebarEl.scrollTop + sidebarEl.clientHeight >= sidebarEl.scrollHeight - 100;
+  if (scrollBottom) {
+    loadSidebarCountrySummary();
+  }
+};
+
+onMounted(() => {
+  loadSidebarCountrySummary();
+})
+
 </script>
 
 <style scoped lang="scss">
