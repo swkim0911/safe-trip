@@ -8,7 +8,7 @@ import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.LocationSummaryItem;
 import com.swkim.safetrip.dto.response.LocationSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
-import com.swkim.safetrip.dto.response.ScamSummaryItem;
+import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.exception.CoordinatesNotValidException;
 import com.swkim.safetrip.exception.ReportNotFoundException;
@@ -95,8 +95,8 @@ public class ReportService {
     }
 
     @Transactional
-    public Slice<ScamSummaryItem> getScamSummaryPage(Long countryId, Long cityId, Pageable pageable) {
-        return reportRepository.findScamSummarySliceByCountryAndCity(countryId, cityId, pageable);
+    public Slice<ReportSummaryItem> getReportSummaryPage(Long countryId, Long cityId, Pageable pageable) {
+        return reportRepository.findReportSummarySliceByCountryAndCity(countryId, cityId, pageable);
     }
 
     @Transactional
