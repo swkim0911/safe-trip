@@ -1,5 +1,5 @@
 <template>
-  <div class="modal fade" id = "reportDetailsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal fade" id = "reportDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
       <div class="modal-content">
           <div class="modal-header">
@@ -33,7 +33,7 @@ defineProps({
 
 
 const setupModalEventListener = () => {
-  const modal = document.getElementById('reportDetailsModal');
+  const modal = document.getElementById('reportDetailModal');
 
   if (modal) {
     modal.addEventListener('hide.bs.modal', () => {

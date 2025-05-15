@@ -72,7 +72,7 @@
               :key="report.reportId"
               @click="openReportDetailModal(report.reportId)"
               data-bs-toggle="modal"
-              data-bs-target="#reportDetailsModal"
+              data-bs-target="#reportDetailModal"
             >
                 <div class="ms-2 me-auto">{{ report.title }}</div>
                 <span class="badge text-bg-primary rounded-pill">{{ report.scam }}</span>
@@ -88,14 +88,14 @@
       <span v-else>◀</span>
     </button>
   </div>
-  <ReportDetailsModal :report="selectedReport"/>
+  <ReportDetailModal :report="selectedReport"/>
 
 </template>
 
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 import axios from 'axios'
-import ReportDetailsModal from './ReportDetailsModal.vue'
+import ReportDetailModal from './ReportDetailModal.vue'
 
 const isOpen = ref(false);
 const searchText = ref('');
