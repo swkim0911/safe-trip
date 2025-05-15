@@ -191,7 +191,7 @@ const loadSidebarReportSummary = async (countryId, cityId, cityName) => {
   selectedCity.name = cityName;
 
   try {
-    const response = await axios.get('http://localhost:8080/reports/sidebar-summary/scams', {
+    const response = await axios.get('http://localhost:8080/reports/sidebar-summary/reports', {
       params: {
         countryId: countryId,
         cityId: cityId,
