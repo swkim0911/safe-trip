@@ -34,7 +34,21 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+
+const setupModalEventListener = () => {
+  const modal = document.getElementById('reportDetailsModal');
+
+  if (modal) {
+    modal.addEventListener('hide.bs.modal', () => {
+      document.activeElement.blur();
+    });
+  }
+}
+
+onMounted(() => {
+  setupModalEventListener()
+})
 
 </script>
 <style scoped lang="scss">
