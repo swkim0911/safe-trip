@@ -28,11 +28,11 @@
     type="button" 
     class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3" 
     data-bs-toggle="modal"
-    data-bs-target="#reportModal">
+    data-bs-target="#reportFormModal">
       <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
       제보하기
     </button>
-    <ReportModal/>
+    <ReportFormModal/>
     
     <button class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn">
       <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
@@ -48,7 +48,7 @@ import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker } from
 import axios from 'axios'
 
 
-import ReportModal from './ReportModal.vue'
+import ReportFormModal from './ReportFormModal.vue'
 
 const zoom = ref(3);
 const center = ref({ "lat": 42.8333, "lng": 12.8333 });

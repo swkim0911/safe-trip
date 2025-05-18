@@ -54,7 +54,7 @@
           </ul>
         </template>
 
-        <template v-else-if="viewState === 'scam'">
+        <template v-else-if="viewState === 'report'">
           <div class="d-flex align-items-center justify-content-center position-relative mb-2">
             <button
               class="btn position-absolute start-0"
@@ -69,7 +69,10 @@
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="report in sidebarReports"
-              :key="report.id"
+              :key="report.reportId"
+              @click="openReportDetailModal(report.reportId)"
+              data-bs-toggle="modal"
+              data-bs-target="#reportDetailModal"
             >
                 <div class="ms-2 me-auto">{{ report.title }}</div>
                 <span class="badge text-bg-primary rounded-pill">{{ report.scam }}</span>
@@ -85,16 +88,19 @@
       <span v-else>◀</span>
     </button>
   </div>
+  <ReportDetailModal :report="selectedReport"/>
+
 </template>
 
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 import axios from 'axios'
+import ReportDetailModal from './ReportDetailModal.vue'
 
 const isOpen = ref(false);
 const searchText = ref('');
 
-const viewState = ref('country') // 'country' 또는 'city' 또는 'scam'
+const viewState = ref('country') // 'country' 또는 'city' 또는 'report'
 
 const sidebarCountries = ref([]);
 const sidebarCities = ref([]);
@@ -109,6 +115,15 @@ const selectedCity = reactive({
   id: null,
   name: ''
 });
+
+const selectedReport = reactive({
+  title: '',
+  scam: '',
+  address: '',
+  description: '',
+  advice: '',
+  createdAt: ''
+})
 
 const size = 10;
 
@@ -126,8 +141,30 @@ const isLoadingReport = ref(false);
 
 const sidebarRef = ref(null);
 
-const loadSidebarCountrySummary = async () => {
-  if (isLoadingCountry.value || isLastCountryPage.value) return;
+const openReportDetailModal = (reportId) => {
+  loadReportDetialInfo(reportId);
+};
+
+const loadReportDetialInfo = async (reportId) => {
+  try {
+    const response = await axios.get(`http://localhost:8080/reports/${reportId}`);
+
+    const result = response.data.result;
+    selectedReport.title = result.title;
+    selectedReport.scam = result.scam;
+    selectedReport.address = result.address;
+    selectedReport.description = result.description;
+    selectedReport.advice = result.advice;
+    selectedReport.createdAt = result.createdAt;
+
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  }
+}
+
+const loadSidebarCountrySummary = async (mode = 'click') => {
+
+  if (mode === 'scroll' && (isLoadingCountry.value || isLastCountryPage.value)) return;
 
   isLoadingCountry.value = true;
   try {
@@ -140,7 +177,7 @@ const loadSidebarCountrySummary = async () => {
 
     const content = response.data.result.content;
     const last = response.data.result.last;
-    // 기존 데이터에 추가
+
     sidebarCountries.value.push(...content);
     isLastCountryPage.value = last;
     countryPage.value += 1;
@@ -151,8 +188,8 @@ const loadSidebarCountrySummary = async () => {
   }
 }
 
-const loadSidebarCitySummary = async (countryId, countryName) => {
-  if (isLoadingCity.value || isLastCityPage.value) return;
+const loadSidebarCitySummary = async (countryId, countryName, mode = 'click') => {
+  if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
 
   isLoadingCity.value = true;
 
@@ -182,8 +219,8 @@ const loadSidebarCitySummary = async (countryId, countryName) => {
   }
 }
 
-const loadSidebarReportSummary = async (countryId, cityId, cityName) => {
-  if (isLoadingReport.value || isLastReportPage.value) return;
+const loadSidebarReportSummary = async (countryId, cityId, cityName, mode = 'click') => {
+  if (mode === 'scroll' && (isLoadingReport.value || isLastReportPage.value)) return;
 
   isLoadingReport.value = true;
 
@@ -195,7 +232,7 @@ const loadSidebarReportSummary = async (countryId, cityId, cityName) => {
       params: {
         countryId: countryId,
         cityId: cityId,
-        page: reportPage,
+        page: reportPage.value,
         size: size
       }
     });
@@ -206,7 +243,7 @@ const loadSidebarReportSummary = async (countryId, cityId, cityName) => {
     isLastReportPage.value = last;
     reportPage.value += 1;
 
-    viewState.value = 'scam';
+    viewState.value = 'report';
   } catch (e) {
     console.error('API 요청 실패:', e);
   } finally {
@@ -229,8 +266,15 @@ const onSidebarScroll = () => {
   if (!sidebarEl) return;
 
   const scrollBottom = sidebarEl.scrollTop + sidebarEl.clientHeight >= sidebarEl.scrollHeight - 100;
-  if (scrollBottom) {
-    loadSidebarCountrySummary();
+
+  if (!scrollBottom) return;
+  
+  if (viewState.value === 'country') {
+    loadSidebarCountrySummary('scroll');
+  } else if (viewState.value === 'city') {
+    loadSidebarCitySummary(selectedCountry.id, selectedCountry.name, 'scroll');
+  } else if (viewState.value === 'report') {
+    loadSidebarReportSummary(selectedCountry.id, selectedCity.id, selectedCity.name, 'scroll');
   }
 };
 

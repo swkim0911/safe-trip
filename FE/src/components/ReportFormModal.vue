@@ -1,5 +1,5 @@
 <template>
-  <div class="modal fade" id = "reportModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal fade" id = "reportFormModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
       <div class="modal-content">
           <div class="modal-header">
@@ -243,7 +243,7 @@ const resetForm = () => {
 }
 
 const setupModalEventListener = () => {
-  const modal = document.getElementById('reportModal');
+  const modal = document.getElementById('reportFormModal');
 
   if (modal) {
     modal.addEventListener('hide.bs.modal', () => {
@@ -451,7 +451,7 @@ onMounted(() => {
 })
 
 </script>
-<style lang="scss">
+<style scoped lang="scss">
   .modal-icon{
     font-size: 95%;
   }
