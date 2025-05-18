@@ -50,6 +50,8 @@ import axios from 'axios'
 
 import ReportFormModal from './ReportFormModal.vue'
 
+const serverURL = import.meta.env.VITE_API_URL;
+
 const zoom = ref(3);
 const center = ref({ "lat": 42.8333, "lng": 12.8333 });
 
@@ -74,7 +76,7 @@ const getRadius = (scamCnt, zoom) => {
 
 const loadMapSummary = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/reports/map-summary', {
+    const response = await axios.get(`${serverURL}/reports/map-summary`, {
       params: {
         zoom: zoom.value
       }

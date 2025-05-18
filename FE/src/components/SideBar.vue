@@ -140,6 +140,7 @@ const isLastReportPage = ref(false);
 const isLoadingReport = ref(false);
 
 const sidebarRef = ref(null);
+const serverURL = import.meta.env.VITE_API_URL;
 
 const openReportDetailModal = (reportId) => {
   loadReportDetialInfo(reportId);
@@ -147,7 +148,7 @@ const openReportDetailModal = (reportId) => {
 
 const loadReportDetialInfo = async (reportId) => {
   try {
-    const response = await axios.get(`http://localhost:8080/reports/${reportId}`);
+    const response = await axios.get(`${serverURL}/reports/${reportId}`);
 
     const result = response.data.result;
     selectedReport.title = result.title;
@@ -168,7 +169,7 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
 
   isLoadingCountry.value = true;
   try {
-    const response = await axios.get('http://localhost:8080/reports/sidebar-summary/counties', {
+    const response = await axios.get(`${serverURL}/reports/sidebar-summary/counties`, {
       params: {
         page: countryPage.value,
         size: size
@@ -197,7 +198,7 @@ const loadSidebarCitySummary = async (countryId, countryName, mode = 'click') =>
   selectedCountry.name = countryName;
 
   try {
-    const response = await axios.get(`http://localhost:8080/reports/sidebar-summary/cities`, {
+    const response = await axios.get(`${serverURL}/reports/sidebar-summary/cities`, {
       params: {
         countryId: countryId,
         page: cityPage.value,
@@ -228,7 +229,7 @@ const loadSidebarReportSummary = async (countryId, cityId, cityName, mode = 'cli
   selectedCity.name = cityName;
 
   try {
-    const response = await axios.get('http://localhost:8080/reports/sidebar-summary/reports', {
+    const response = await axios.get(`${serverURL}/reports/sidebar-summary/reports`, {
       params: {
         countryId: countryId,
         cityId: cityId,
