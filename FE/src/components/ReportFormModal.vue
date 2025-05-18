@@ -97,6 +97,7 @@ import { Loader } from '@googlemaps/js-api-loader'
 import axios from 'axios'
 
 const googleMapApiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
+const serverURL = import.meta.env.VITE_API_URL;
 
 // 반응형 변수
 const mapRef = ref(null);
@@ -272,7 +273,7 @@ const submitForm = async () => {
       formData.append('images', form.imageFile)
     }
 
-    const response = await axios.post('http://localhost:8080/reports', formData, {
+    const response = await axios.post(`${serverURL}/reports`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
