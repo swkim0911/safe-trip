@@ -125,7 +125,7 @@ const selectedReport = reactive({
   createdAt: ''
 })
 
-const size = 10;
+const size = 12;
 
 const countryPage = ref(0);
 const isLastCountryPage = ref(false);
@@ -267,6 +267,8 @@ const onSidebarScroll = () => {
   if (!sidebarEl) return;
 
   const scrollBottom = sidebarEl.scrollTop + sidebarEl.clientHeight >= sidebarEl.scrollHeight - 100;
+  console.log(scrollBottom);
+  console.log(viewState.value);
 
   if (!scrollBottom) return;
   
@@ -314,7 +316,6 @@ onMounted(() => {
   left: 0;
 }
 
-/* 사이드바 헤더 */
 .sidebar-header {
   align-items: center;
   font-size: 18px;

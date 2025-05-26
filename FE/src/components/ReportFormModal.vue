@@ -9,12 +9,10 @@
           <div class="modal-body">
             <form @submit.prevent>
               <div class="mb-3">
-                <strong>
-                  <label for="report-title" class="col-form-label">
+                  <label for="report-title" class="col-form-label fw-bold">
                     <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
                     제목
                   </label>
-                </strong>
                 <input type="text" :class="['form-control', { 'is-invalid': errors.title }]" id="report-title" v-model="form.title" maxlength="100" placeholder="제목을 입력하세요">
               </div>
               <div class="btn-group d-flex justify-content-center ms-3 me-3" role="group">
@@ -37,12 +35,10 @@
                 {{ errors.scamId }}
               </div>
               <div class="mb-3">
-                <strong>
-                  <label for="report-address" class="col-form-label">
-                    <font-awesome-icon :icon="['far', 'map']" class="modal-icon" />
-                    주소
-                  </label>
-                </strong>
+                <label for="report-address" class="col-form-label fw-bold">
+                  <font-awesome-icon :icon="['far', 'map']" class="modal-icon" />
+                  주소
+                </label>
                 <input
                   id="report-address"
                   placeholder="주소를 검색하세요"
@@ -56,35 +52,29 @@
                 <div ref="mapRef" style="width: 100%; height: 400px; margin-top: 10px;"></div>
               </div>
               <div class="mb-3">
-                <strong>
-                  <label for="photo" class="form-label">
-                    <font-awesome-icon :icon="['fas', 'camera']" class="modal-icon"/>
-                    사진 업로드 (선택)
-                  </label>
-                </strong>
+                <label for="photo" class="form-label fw-bold">
+                  <font-awesome-icon :icon="['fas', 'camera']" class="modal-icon"/>
+                  사진 업로드 (선택)
+                </label>
                 <input ref="fileInput" class="form-control" type="file" id="photo" accept="image/*" @change="handleFileChange">
                 <div v-if="errors.imageFile" class="text-danger small mt-1">
                 {{ errors.imageFile }}
               </div>
               </div>
               <div class="mb-3">
-                <strong>
-                  <label for="report-description" class="col-form-label">
-                    <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
-                    내용
-                  </label>
-                </strong>
+                <label for="report-description" class="col-form-label fw-bold">
+                  <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
+                  내용
+                </label>
                 <textarea :class="['form-control', { 'is-invalid': errors.advice }]" id="report-description" v-model="form.description" @input="e => updateCharCnt(e, 'description')" placeholder="내용을 입력하세요"></textarea>
                 <small ref="descriptionCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
                 
               </div>
               <div class="mb-3">
-                <strong>
-                  <label for="report-advice" class="col-form-label">
-                    <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
-                    조언
-                  </label>
-                </strong>
+                <label for="report-advice" class="col-form-label fw-bold">
+                  <font-awesome-icon :icon="['far', 'message']" class="modal-icon"/>
+                  조언
+                </label>
                 <textarea :class="['form-control', { 'is-invalid': errors.advice }]" id="report-advice" v-model="form.advice" @input="e => updateCharCnt(e, 'advice')" placeholder="조언을 입력하세요"></textarea>
                 <small ref="adviceCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
               </div>
