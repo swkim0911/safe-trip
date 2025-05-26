@@ -267,8 +267,6 @@ const onSidebarScroll = () => {
   if (!sidebarEl) return;
 
   const scrollBottom = sidebarEl.scrollTop + sidebarEl.clientHeight >= sidebarEl.scrollHeight - 100;
-  console.log(scrollBottom);
-  console.log(viewState.value);
 
   if (!scrollBottom) return;
   
