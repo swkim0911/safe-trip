@@ -74,7 +74,7 @@
                     내용
                   </label>
                 </strong>
-                <textarea :class="['form-control', { 'is-invalid': errors.advice }]" id="report-description" v-model="form.description" @input="e => updateCharCnt(e, 'description')" placeholder="내용을 입력하세요."></textarea>
+                <textarea :class="['form-control', { 'is-invalid': errors.advice }]" id="report-description" v-model="form.description" @input="e => updateCharCnt(e, 'description')" placeholder="내용을 입력하세요"></textarea>
                 <small ref="descriptionCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
                 
               </div>
@@ -85,7 +85,7 @@
                     조언
                   </label>
                 </strong>
-                <textarea :class="['form-control', { 'is-invalid': errors.advice }]" id="report-advice" v-model="form.advice" @input="e => updateCharCnt(e, 'advice')" placeholder="조언을 입력하세요."></textarea>
+                <textarea :class="['form-control', { 'is-invalid': errors.advice }]" id="report-advice" v-model="form.advice" @input="e => updateCharCnt(e, 'advice')" placeholder="조언을 입력하세요"></textarea>
                 <small ref="adviceCntRef" class="d-flex justify-content-end">0 / {{ textareaLength }}</small>
               </div>
               <div class="modal-footer">
