@@ -9,24 +9,33 @@
           <div class="modal-body">
             <div class="d-flex justify-content-between mb-3">
               <div>
-                <small class="text-muted">사기 유형</small><br>
-                <strong>{{ report.scam }}</strong>
+                <strong>사기 유형</strong><br>
+                {{ report.scam }}
               </div>
               <div>
                 <small class="text-muted">작성일시</small><br>
                 <span>{{ report.createdAt }}</span>
               </div>
             </div>
+            <div class="mb-3">
+              <span class="fw-bold">설명</span>
+              <p class="text-body mt-1">{{ report.description }}</p>
+            </div>
+
+            <div class="mb-3" >
+              <span class="fw-bold">조언</span>
+              <p class="text-body mt-1">{{ report.advice }}</p>
+            </div>
 
             <!-- 장소 -->
             <div class="mb-3">
-              <small class="text-muted">장소</small><br>
-              <span class="text-body">{{ report.address }}</span>
+              <span class="fw-bold">장소</span>
+              <p class="text-body">{{ report.address }}</p>
             </div>
 
             <!-- 사진 -->
             <div class="mb-3">
-              <small class="text-muted">사진</small><br>
+              <span class="fw-bold">사진</span>
               <img 
                 v-if="report.image" 
                 :src="report.image" 
@@ -35,18 +44,6 @@
                 style="max-height: 300px;"
               />
               <p v-else class="text-muted mt-1">첨부된 이미지 없음</p>
-            </div>
-
-            <!-- 설명 -->
-            <div class="mb-3">
-              <small class="text-muted">설명</small>
-              <p class="text-body mt-1">{{ report.description }}</p>
-            </div>
-
-            <!-- 팁/조언 -->
-            <div>
-              <small class="text-muted">팁/조언</small>
-              <p class="text-body mt-1">{{ report.advice }}</p>
             </div>
           </div>
 
