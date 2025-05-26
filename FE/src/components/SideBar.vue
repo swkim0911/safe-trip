@@ -125,7 +125,7 @@ const selectedReport = reactive({
   createdAt: ''
 })
 
-const size = 10;
+const size = 12;
 
 const countryPage = ref(0);
 const isLastCountryPage = ref(false);
@@ -314,7 +314,6 @@ onMounted(() => {
   left: 0;
 }
 
-/* 사이드바 헤더 */
 .sidebar-header {
   align-items: center;
   font-size: 18px;
