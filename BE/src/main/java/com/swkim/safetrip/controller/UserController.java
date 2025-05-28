@@ -24,6 +24,6 @@ public class UserController {
     public ApiResponse<Long> signup(@RequestBody @Valid SignUpRequest signUpRequest) {
         Long userId = userService.enroll(signUpRequest);
 
-        return new ApiResponse<>(HttpStatus.CREATED.value(), "회원가입이 완료되었습니다.", userId);
+        return ApiResponse.of(HttpStatus.CREATED.value(), "회원가입이 완료되었습니다.", userId);
     }
 }
