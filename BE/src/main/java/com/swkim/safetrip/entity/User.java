@@ -1,5 +1,6 @@
 package com.swkim.safetrip.entity;
 
+import com.swkim.safetrip.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -19,27 +20,24 @@ public class User extends BaseEntity{
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "username", nullable = false)
-    private String username;
+    @Column(unique = true, nullable = false)
+    private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "nickname", nullable = false)
+    private String nickname;
 
-    @Column(name = "phone_number", nullable = false)
-    private String phoneNumber;
-
-    @Column(name = "email", nullable = false)
-    private String email;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Builder
-    public User(String username, String password, String name, String phoneNumber, String email) {
-        this.username = username;
-        this.password = password;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
+    public User(String email, String password, String nickname, Role role) {
         this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.role = role;
     }
+
 }
