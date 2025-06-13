@@ -1,6 +1,10 @@
 spring:
   profiles:
     active: dev
+    group:
+      dev: jwt
+      prod: jwt
+
   messages:
     basename: messages
     encoding: UTF-8
