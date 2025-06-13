@@ -1,7 +1,7 @@
 package com.swkim.safetrip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swkim.safetrip.dto.request.SignUpRequest;
+import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,14 +32,12 @@ public class UserControllerTest {
 
     @Test
     @DisplayName("[POST] /users 요청시 회원가입을 한다.")
-    void signup() throws Exception {
+    void 회원가입_요청시_201_응답을_반환한다() throws Exception {
         //given
-        SignUpRequest signUpRequest = SignUpRequest.builder()
-                .username("username")
+        UserSignUpRequest signUpRequest = UserSignUpRequest.builder()
+                .email("swkim@gmail.com")
                 .password("password")
-                .name("nickname")
-                .phoneNumber("010-1234-5678")
-                .email("test@gmail.com")
+                .nickname("nickname")
                 .build();
         //when
         when(userService.enroll(signUpRequest)).thenReturn(1L);
