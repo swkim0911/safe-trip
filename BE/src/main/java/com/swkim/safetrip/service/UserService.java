@@ -15,6 +15,13 @@ public class UserService {
 
     public Long signup(UserSignUpRequest signUpRequest) {
 
+        if(userRepository.existsByEmail(signUpRequest.getEmail())){
+            throw new DuplicateUserEmailException();
+        }
+
+        if (userRepository.existsByNickname(signUpRequest.getNickname())) {
+            throw new DuplicateUserNicknameException();
+        }
 
         User savedUser = userRepository.save(user);
         return savedUser.getId();
