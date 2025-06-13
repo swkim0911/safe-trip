@@ -40,7 +40,7 @@ public class UserControllerTest {
                 .nickname("nickname")
                 .build();
         //when
-        when(userService.enroll(signUpRequest)).thenReturn(1L);
+        when(userService.signup(signUpRequest)).thenReturn(1L);
         //then
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/users")

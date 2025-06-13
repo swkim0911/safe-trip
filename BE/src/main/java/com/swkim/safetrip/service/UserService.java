@@ -13,7 +13,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public Long enroll(UserSignUpRequest signUpRequest) {
+    public Long signup(UserSignUpRequest signUpRequest) {
 
         User user = UserMapper.toUser(signUpRequest);
         User savedUser = userRepository.save(user);

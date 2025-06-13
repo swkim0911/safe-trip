@@ -22,7 +22,7 @@ public class UserController {
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Long> signup(@RequestBody @Valid UserSignUpRequest signUpRequest) {
-        Long userId = userService.enroll(signUpRequest);
+        Long userId = userService.signup(signUpRequest);
 
         return ApiResponse.of(HttpStatus.CREATED.value(), "회원가입이 완료되었습니다.", userId);
     }
