@@ -8,8 +8,4 @@ public class ReportNotFoundException extends GeneralException {
     public ReportNotFoundException() {
         super(Error.REPORT_NOT_FOUND_ERROR);
     }
-
-    public ReportNotFoundException(Error error) {
-        super(error);
-    }
 }

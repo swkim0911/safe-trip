@@ -8,7 +8,4 @@ public class CoordinatesNotValidException extends GeneralException {
     public CoordinatesNotValidException() {
         super(Error.COORDINATES_NOT_VALID_ERROR);
     }
-    public CoordinatesNotValidException(Error error) {
-        super(error);
-    }
 }

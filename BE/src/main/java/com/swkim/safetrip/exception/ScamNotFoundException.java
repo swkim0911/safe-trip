@@ -8,8 +8,4 @@ public class ScamNotFoundException extends GeneralException {
     public ScamNotFoundException() {
         super(Error.SCAM_NOT_FOUND_ERROR);
     }
-
-    public ScamNotFoundException(Error error) {
-        super(error);
-    }
 }
