@@ -2,6 +2,8 @@ package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.entity.User;
+import com.swkim.safetrip.exception.DuplicateUserEmailException;
+import com.swkim.safetrip.exception.DuplicateUserNicknameException;
 import com.swkim.safetrip.mapper.UserMapper;
 import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
