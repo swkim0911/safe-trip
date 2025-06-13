@@ -15,7 +15,11 @@ public class UserService {
 
     public Long signup(UserSignUpRequest signUpRequest) {
 
+
+
         User user = UserMapper.toUser(signUpRequest);
+
+
         User savedUser = userRepository.save(user);
         return savedUser.getId();
     }
