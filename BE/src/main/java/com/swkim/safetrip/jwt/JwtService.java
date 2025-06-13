@@ -62,6 +62,13 @@ public class JwtService {
     public void sendAccessToken(HttpServletResponse response, String accessToken) {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader(accessHeader, accessToken);
-        log.info("issued Access Token: {}", accessToken);
+        log.info("Add to access token header: {}", accessToken);
+    }
+
+    public void sendRefreshToken(HttpServletResponse response, String refreshToken){
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setHeader(refreshHeader, refreshToken);
+        log.info("Add to refresh token header: {}", refreshToken);
+
     }
 }
