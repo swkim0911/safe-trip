@@ -2,7 +2,6 @@ package com.swkim.safetrip.jwt.filter;
 
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.jwt.JwtService;
-import com.swkim.safetrip.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -78,7 +77,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 .roles(user.getRole().name())
                 .build();
     }
-
 
     private boolean isNoCheckURL(HttpServletRequest request) {
         return request.getRequestURI().equals(NO_CHECK_URL);
