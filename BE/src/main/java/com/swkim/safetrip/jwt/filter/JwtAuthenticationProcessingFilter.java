@@ -9,6 +9,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -22,6 +28,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+
+    private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -62,6 +70,19 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    private void saveAuthentication(User myUser){
+        String password = myUser.getPassword();
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(myUser.getEmail())
+                .password(password)
+                .roles(myUser.getRole().name())
+                .build();
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
 
 
     private boolean isNoCheckURL(HttpServletRequest request) {
