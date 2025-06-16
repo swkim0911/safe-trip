@@ -2,6 +2,7 @@ package com.swkim.safetrip.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.login.handler.LoginFailureHandler;
 import com.swkim.safetrip.login.handler.LoginSuccessHandler;
 import com.swkim.safetrip.login.service.LoginService;
 import com.swkim.safetrip.repository.UserRepository;
@@ -66,6 +67,11 @@ public class SecurityConfig {
     @Bean
     public LoginSuccessHandler loginSuccessHandler() {
         return new LoginSuccessHandler(jwtService, userRepository);
+    }
+
+    @Bean
+    public LoginFailureHandler loginFailureHandler() {
+        return new LoginFailureHandler();
     }
 
 }
