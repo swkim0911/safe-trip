@@ -88,4 +88,9 @@ public class SecurityConfig {
         return jsonUsernamePasswordAuthenticationFilter;
     }
 
+    @Bean
+    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
+        return new JwtAuthenticationProcessingFilter(jwtService);
+    }
+
 }
