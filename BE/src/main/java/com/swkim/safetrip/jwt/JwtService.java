@@ -91,6 +91,10 @@ public class JwtService {
         return userRepository.findByRefreshToken(refreshToken);
     }
 
+    public Optional<User> getUserByEmail(String email){
+        return userRepository.findByEmail(email);
+    }
+
     public Optional<String> extractAccessToken(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(accessHeader))
                 .filter(accessToken -> accessToken.startsWith(BEARER))

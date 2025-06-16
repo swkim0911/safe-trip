@@ -26,7 +26,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private static final String NO_CHECK_URL = "/login";
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
 
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
@@ -58,7 +57,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         jwtService.extractAccessToken(request)
                 .filter(jwtService::isTokenValid)
                 .ifPresent(accessToken -> jwtService.extractEmail(accessToken)
-                        .ifPresent(email -> userRepository.findByEmail(email)
+                        .ifPresent(email -> jwtService.getUserByEmail(email)
                                 .ifPresent(myUser -> saveAuthentication(myUser)))
                 );
 
