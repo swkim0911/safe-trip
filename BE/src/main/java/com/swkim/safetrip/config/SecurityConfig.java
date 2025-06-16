@@ -2,7 +2,9 @@ package com.swkim.safetrip.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.login.handler.LoginSuccessHandler;
 import com.swkim.safetrip.login.service.LoginService;
+import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,7 @@ public class SecurityConfig {
     private final LoginService loginService;
     private final JwtService jwtService;
     private ObjectMapper objectMapper;
+    private UserRepository userRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -60,6 +63,9 @@ public class SecurityConfig {
         return new ProviderManager(provider);
     }
 
-
+    @Bean
+    public LoginSuccessHandler loginSuccessHandler() {
+        return new LoginSuccessHandler(jwtService, userRepository);
+    }
 
 }
