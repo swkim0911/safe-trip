@@ -2,6 +2,8 @@ package com.swkim.safetrip.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.jwt.filter.JwtAuthenticationProcessingFilter;
+import com.swkim.safetrip.login.filter.JsonUsernamePasswordAuthenticationFilter;
 import com.swkim.safetrip.login.handler.LoginFailureHandler;
 import com.swkim.safetrip.login.handler.LoginSuccessHandler;
 import com.swkim.safetrip.login.service.LoginService;
@@ -72,6 +74,18 @@ public class SecurityConfig {
     @Bean
     public LoginFailureHandler loginFailureHandler() {
         return new LoginFailureHandler();
+    }
+
+    @Bean
+    public JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordAuthenticationFilter() {
+        JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordAuthenticationFilter =
+                new JsonUsernamePasswordAuthenticationFilter(objectMapper);
+
+        jsonUsernamePasswordAuthenticationFilter.setAuthenticationManager(authenticationManager());
+        jsonUsernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(loginSuccessHandler());
+        jsonUsernamePasswordAuthenticationFilter.setAuthenticationFailureHandler(loginFailureHandler());
+
+        return jsonUsernamePasswordAuthenticationFilter;
     }
 
 }
