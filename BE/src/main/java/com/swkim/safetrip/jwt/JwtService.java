@@ -79,6 +79,10 @@ public class JwtService {
         return createAccessToken(email);
     }
 
+    public String issueRefreshToken(){
+        return createRefreshToken();
+    }
+
     @Transactional
     public String reIssueRefreshToken(User user){
         String reIssueRefreshToken = createRefreshToken();
