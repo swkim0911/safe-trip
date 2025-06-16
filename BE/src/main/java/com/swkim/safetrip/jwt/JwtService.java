@@ -115,6 +115,7 @@ public class JwtService {
                 );
     }
 
+    // verify: 서명, 토큰 구조, 만료 시간 검증
     public boolean isTokenValid(String token){
         try{
             JWT.require(Algorithm.HMAC512(secretKey))
