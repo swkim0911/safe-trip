@@ -106,4 +106,12 @@ public class JwtService {
     public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken){
         response.setHeader(refreshHeader, refreshToken);
     }
+
+    public void updateRefreshToken(String email, String refreshToken){
+        userRepository.findByEmail(email)
+                .ifPresentOrElse(
+                        user -> user.updateRefreshToken(refreshToken),
+                        () -> new RuntimeException()
+                );
+    }
 }
