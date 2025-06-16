@@ -58,24 +58,25 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 .filter(jwtService::isTokenValid)
                 .ifPresent(accessToken -> jwtService.extractEmail(accessToken)
                         .ifPresent(email -> jwtService.getUserByEmail(email)
-                                .ifPresent(myUser -> saveAuthentication(myUser)))
+                                .ifPresent(this::saveAuthentication))
                 );
 
         filterChain.doFilter(request, response);
     }
 
-    private void saveAuthentication(User myUser){
-        String password = myUser.getPassword();
-
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(myUser.getEmail())
-                .password(password)
-                .roles(myUser.getRole().name())
-                .build();
-
+    private void saveAuthentication(User user){
+        UserDetails userDetails = getUserDetails(user);
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private UserDetails getUserDetails(User user) {
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(user.getRole().name())
+                .build();
     }
 
 
