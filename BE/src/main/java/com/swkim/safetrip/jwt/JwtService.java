@@ -65,14 +65,13 @@ public class JwtService {
 
     public void sendAccessToken(HttpServletResponse response, String accessToken) {
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setHeader(accessHeader, accessToken);
-        log.info("Add to access token header: {}", accessToken);
+        setAccessTokenHeader(response, accessToken);
     }
 
-    public void sendRefreshToken(HttpServletResponse response, String refreshToken){
+    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken){
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setHeader(refreshHeader, refreshToken);
-        log.info("Add to refresh token header: {}", refreshToken);
+        setAccessTokenHeader(response, accessToken);
+        setRefreshTokenHeader(response, refreshToken);
     }
 
     public Optional<String> extractAccessToken(HttpServletRequest request) {
