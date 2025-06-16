@@ -3,6 +3,7 @@ package com.swkim.safetrip.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.exception.UserNotFoundException;
 import com.swkim.safetrip.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
@@ -54,7 +56,7 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-    public String createRefreshToken() {
+    private String createRefreshToken() {
         Date now = new Date();
 
         return JWT.create()
@@ -72,6 +74,14 @@ public class JwtService {
         response.setStatus(HttpServletResponse.SC_OK);
         setAccessTokenHeader(response, accessToken);
         setRefreshTokenHeader(response, refreshToken);
+    }
+
+    @Transactional
+    public String reIssueRefreshToken(User user){
+        String reIssueRefreshToken = createRefreshToken();
+        user.updateRefreshToken(reIssueRefreshToken);
+
+        return reIssueRefreshToken;
     }
 
     public Optional<String> extractAccessToken(HttpServletRequest request) {
@@ -107,6 +117,7 @@ public class JwtService {
         response.setHeader(refreshHeader, refreshToken);
     }
 
+    @Transactional
     public void updateRefreshToken(String email, String refreshToken){
         userRepository.findByEmail(email)
                 .ifPresentOrElse(

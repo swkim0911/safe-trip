@@ -1,5 +1,6 @@
 package com.swkim.safetrip.jwt.filter;
 
+import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -40,7 +41,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
         userRepository.findByRefreshToken(refreshToken)
                 .ifPresent(user -> {
-                    String reIssuedRefreshToken = reIssueRefreshToken(user);
+                    String reIssuedRefreshToken = jwtService.reIssueRefreshToken(user);
                     jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getEmail()), reIssuedRefreshToken);
                 });
     }
