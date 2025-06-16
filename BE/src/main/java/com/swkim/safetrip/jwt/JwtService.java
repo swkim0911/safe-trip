@@ -115,4 +115,16 @@ public class JwtService {
                         UserNotFoundException::new
                 );
     }
+
+    public boolean isTokenValid(String token){
+        try{
+            JWT.require(Algorithm.HMAC512(secretKey))
+                    .build()
+                    .verify(token);
+            return true;
+        }catch (JWTVerificationException e){
+            log.error("Token is not valid");
+            return false;
+        }
+    }
 }
