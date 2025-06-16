@@ -2,6 +2,7 @@ package com.swkim.safetrip.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.swkim.safetrip.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -83,5 +84,18 @@ public class JwtService {
         return Optional.ofNullable(request.getHeader(refreshHeader))
                 .filter(refreshToken -> refreshToken.startsWith(BEARER))
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
+    }
+
+    public Optional<String> extractEmail(String accessToken) {
+        try {
+            return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretKey))
+                    .build()
+                    .verify(accessToken)
+                    .getClaim(EMAIL_CLAIM)
+                    .asString());
+        }catch(JWTVerificationException e){
+            log.error("Access Token is not valid.");
+            return Optional.empty();
+        }
     }
 }
