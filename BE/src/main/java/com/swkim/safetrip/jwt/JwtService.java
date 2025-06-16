@@ -20,7 +20,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Getter
 @Slf4j
 public class JwtService {
 
@@ -46,7 +45,7 @@ public class JwtService {
 
     private final UserRepository userRepository;
 
-    public String createAccessToken(String email) {
+    private String createAccessToken(String email) {
         Date now = new Date();
 
         return JWT.create()
@@ -76,12 +75,20 @@ public class JwtService {
         setRefreshTokenHeader(response, refreshToken);
     }
 
+    public String issueAccessToken(String email){
+        return createAccessToken(email);
+    }
+
     @Transactional
     public String reIssueRefreshToken(User user){
         String reIssueRefreshToken = createRefreshToken();
         user.updateRefreshToken(reIssueRefreshToken);
 
         return reIssueRefreshToken;
+    }
+
+    public Optional<User> getUserByRefreshToken(String refreshToken) {
+        return userRepository.findByRefreshToken(refreshToken);
     }
 
     public Optional<String> extractAccessToken(HttpServletRequest request) {
