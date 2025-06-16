@@ -1,5 +1,6 @@
 package com.swkim.safetrip.jwt.filter;
 
+import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -32,24 +34,37 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         jwtService.extractRefreshToken(request)
                 .filter(jwtService::isTokenValid)
                 .ifPresentOrElse(
-                        token -> checkRefreshTokenAndReIssueAccessToken(response, token),
+                        token -> checkRefreshTokenAndSetReIssuedAccessAndRefreshTokens(response, token),
                         () -> checkAccessTokenAndAuthentication(request, response, filterChain)
                 );
     }
 
-    private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
-        userRepository.findByRefreshToken(refreshToken)
+    private void checkRefreshTokenAndSetReIssuedAccessAndRefreshTokens(HttpServletResponse response, String refreshToken) {
+        checkRefreshToken(refreshToken)
                 .ifPresent(user -> {
                     String reIssuedRefreshToken = jwtService.reIssueRefreshToken(user);
                     jwtService.setAccessAndRefreshToken(response, jwtService.createAccessToken(user.getEmail()), reIssuedRefreshToken);
                 });
     }
 
-    private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
-
+    private Optional<User> checkRefreshToken(String refreshToken) {
+        return userRepository.findByRefreshToken(refreshToken);
     }
 
-    private static boolean isNoCheckURL(HttpServletRequest request) {
+    private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        jwtService.extractAccessToken(request)
+                .filter(jwtService::isTokenValid)
+                .ifPresent(accessToken -> jwtService.extractEmail(accessToken)
+                        .ifPresent(email -> userRepository.findByEmail(email)
+                                .ifPresent(myUser -> saveAuthentication(myUser)))
+                );
+
+        filterChain.doFilter(request, response);
+    }
+
+
+
+    private boolean isNoCheckURL(HttpServletRequest request) {
         return request.getRequestURI().equals(NO_CHECK_URL);
     }
 }
