@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,25 +50,25 @@ public class UserControllerTest {
     private JwtService jwtService;
 
     @Test
-    @DisplayName("[POST] /users 요청시 회원가입을 한다.")
-    void 회원가입_요청시_201_응답을_반환한다() throws Exception {
+    @DisplayName("회원가입 요청시 201 응답을 반환한다.")
+    void returns_201_when_signup_request_is_valid() throws Exception {
         //given
         UserSignUpRequest signUpRequest = UserSignUpRequest.builder()
                 .email("swkim@gmail.com")
                 .password("password")
                 .nickname("nickname")
                 .build();
+
         //when
         when(userService.signup(any(UserSignUpRequest.class))).thenReturn(1L);
+
         //then
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/users")
-                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(signUpRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value(201))
                 .andExpect(jsonPath("$.result").value(1L));
     }
-
 }
