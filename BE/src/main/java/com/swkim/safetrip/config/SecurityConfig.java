@@ -7,7 +7,6 @@ import com.swkim.safetrip.login.filter.JsonUsernamePasswordAuthenticationFilter;
 import com.swkim.safetrip.login.handler.LoginFailureHandler;
 import com.swkim.safetrip.login.handler.LoginSuccessHandler;
 import com.swkim.safetrip.login.service.LoginService;
-import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,8 +29,7 @@ public class SecurityConfig {
 
     private final LoginService loginService;
     private final JwtService jwtService;
-    private ObjectMapper objectMapper;
-    private UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -68,7 +66,7 @@ public class SecurityConfig {
 
     @Bean
     public LoginSuccessHandler loginSuccessHandler() {
-        return new LoginSuccessHandler(jwtService, userRepository);
+        return new LoginSuccessHandler(jwtService);
     }
 
     @Bean
