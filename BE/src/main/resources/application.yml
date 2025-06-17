@@ -8,6 +8,7 @@ spring:
   messages:
     basename: messages
     encoding: UTF-8
+
   servlet:
     multipart:
       max-file-size: 2MB

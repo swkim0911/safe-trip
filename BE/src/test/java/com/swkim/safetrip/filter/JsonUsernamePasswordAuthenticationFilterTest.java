@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class JsonUsernamePasswordAuthenticationFilterTest {
 
     @Autowired
@@ -43,7 +44,7 @@ public class JsonUsernamePasswordAuthenticationFilterTest {
     @BeforeEach
     void beforeEach() {
         userRepository.save(User.builder()
-                .email("swkim@gmail.com")
+                .email("swkim-test@gmail.com")
                 .password(passwordEncoder.encode("password"))
                 .nickname("swkim")
                         .role(Role.USER)
@@ -60,7 +61,7 @@ public class JsonUsernamePasswordAuthenticationFilterTest {
     void Return_access_and_refresh_tokens_in_the_response_headers_upon_successful_login_request() throws Exception {
         // given
         Map<String, String> loginRequest = Map.of(
-                "email", "swkim@gmail.com",
+                "email", "swkim-test@gmail.com",
                 "password", "password"
         );
 
