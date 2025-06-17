@@ -1,4 +1,4 @@
-package com.swkim.safetrip.exception;
+package com.swkim.safetrip.global.exception.custom;
 
 import com.swkim.safetrip.global.exception.Error;
 import com.swkim.safetrip.global.exception.GeneralException;
