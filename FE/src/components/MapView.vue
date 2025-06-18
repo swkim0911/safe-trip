@@ -34,10 +34,16 @@
     </button>
     <ReportFormModal/>
     
-    <button class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn">
+    <button 
+    type="button" 
+    class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn"
+    data-bs-toggle="modal"
+    data-bs-target="#LoginFormModal"
+    >
       <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
       LOGIN
     </button>
+    <LoginFormModal/>
   </div>
 </template>
 
@@ -47,8 +53,8 @@ import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker } from "@vue-leaflet/vue-leaflet";
 import axios from 'axios'
 
-
 import ReportFormModal from './ReportFormModal.vue'
+import LoginFormModal from './LoginFormModal.vue'
 
 const serverURL = import.meta.env.VITE_API_URL;
 
