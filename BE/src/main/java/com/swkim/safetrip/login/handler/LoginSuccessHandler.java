@@ -1,7 +1,6 @@
 package com.swkim.safetrip.login.handler;
 
 import com.swkim.safetrip.jwt.JwtService;
-import com.swkim.safetrip.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,7 +30,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         String accessToken = jwtService.issueAccessToken(email);
         String refreshToken = jwtService.issueRefreshToken();
 
-        jwtService.setAccessAndRefreshToken(response, accessToken, refreshToken);
+        jwtService.addTokensToResponseHeader(response, accessToken, refreshToken);
         jwtService.updateRefreshToken(email, refreshToken);
 
         log.info("success to sign in. email: {}", email);

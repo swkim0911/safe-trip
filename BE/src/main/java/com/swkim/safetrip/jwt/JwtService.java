@@ -63,7 +63,7 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-    public void setAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken){
+    public void addTokensToResponseHeader(HttpServletResponse response, String accessToken, String refreshToken){
         response.setStatus(HttpServletResponse.SC_OK);
         setAccessTokenHeader(response, accessToken);
         setRefreshTokenHeader(response, refreshToken);
