@@ -35,10 +35,15 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 리프레시 토큰이 있고 유효성 검증을 통과하면 액세스/리프레시 토큰 재발급
-        jwtService.extractRefreshToken(request)
+        String refreshToken = jwtService.extractRefreshToken(request)
                 .filter(jwtService::isTokenValid)
-                .ifPresent(refreshToken -> reIssueAccessAndRefreshToken(response, refreshToken));
+                .orElse(null);
+
+        // 리프레시 토큰이 있고 유효성 검증을 통과하면 액세스/리프레시 토큰 재발급
+        if(refreshToken != null){
+            reIssueAccessAndRefreshToken(response, refreshToken);
+            return;
+        }
 
         checkAccessTokenAndAuthentication(request, response, filterChain);
     }
