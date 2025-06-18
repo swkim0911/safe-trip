@@ -1,5 +1,7 @@
-package com.swkim.safetrip.global.exception;
+package com.swkim.safetrip.global.exception.handler;
 
+import com.swkim.safetrip.global.exception.Error;
+import com.swkim.safetrip.global.exception.GeneralException;
 import com.swkim.safetrip.global.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

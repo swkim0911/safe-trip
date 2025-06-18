@@ -1,9 +1,14 @@
 spring:
   profiles:
     active: dev
+    group:
+      dev: jwt
+      prod: jwt
+
   messages:
     basename: messages
     encoding: UTF-8
+
   servlet:
     multipart:
       max-file-size: 2MB

@@ -1,6 +1,6 @@
 package com.swkim.safetrip.controller;
 
-import com.swkim.safetrip.dto.request.SignUpRequest;
+import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.service.UserService;
 import jakarta.validation.Valid;
@@ -21,9 +21,9 @@ public class UserController {
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<Long> signup(@RequestBody @Valid SignUpRequest signUpRequest) {
-        Long userId = userService.enroll(signUpRequest);
+    public ApiResponse<Long> signup(@RequestBody @Valid UserSignUpRequest signUpRequest) {
+        Long userId = userService.signup(signUpRequest);
 
-        return new ApiResponse<>(HttpStatus.CREATED.value(), "회원가입이 완료되었습니다.", userId);
+        return ApiResponse.of(HttpStatus.CREATED.value(), "Your membership has been registered.", userId);
     }
 }

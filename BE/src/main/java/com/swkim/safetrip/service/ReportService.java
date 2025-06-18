@@ -10,10 +10,10 @@ import com.swkim.safetrip.dto.response.LocationSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.*;
-import com.swkim.safetrip.exception.CoordinatesNotValidException;
-import com.swkim.safetrip.exception.ReportNotFoundException;
-import com.swkim.safetrip.exception.S3UploadException;
-import com.swkim.safetrip.exception.ScamNotFoundException;
+import com.swkim.safetrip.global.exception.custom.CoordinatesNotValidException;
+import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
+import com.swkim.safetrip.global.exception.custom.S3UploadException;
+import com.swkim.safetrip.global.exception.custom.ScamNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.*;
 import com.swkim.safetrip.vo.CountryCityData;
@@ -213,7 +213,7 @@ public class ReportService {
                 .queryParam("city",city)
                 .queryParam("format", "json")
                 .queryParam("addressdetails", "1")
-                .queryParam("accept-language", "ko")
+                .queryParam("accept-language", "en")
                 .toUriString();
 
         return restClient.get()

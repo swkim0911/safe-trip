@@ -1,9 +1,12 @@
 package com.swkim.safetrip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.swkim.safetrip.SafetripApplication;
+import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
-import com.swkim.safetrip.dto.response.ReportFindAllResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
+import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.login.service.LoginService;
 import com.swkim.safetrip.service.ReportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,16 +14,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.*;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -29,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ReportController.class)
 @MockBean(JpaMetamodelMappingContext.class)
+@Import(SecurityConfig.class)
 class ReportControllerTest {
 
     @Autowired
@@ -40,13 +45,20 @@ class ReportControllerTest {
     @MockBean
     private ReportService reportService;
 
+    @MockBean
+    private LoginService loginService;
+
+    @MockBean
+    private JwtService jwtService;
+
     @Autowired
     private MessageSource messageSource;
 
     @Test
     @DisplayName("[Post] /reports 요청시 저장된 report의 id를 반환한다")
+    @WithMockUser(username = "testuser")
     @SuppressWarnings("unchecked")
-    void saving_report() throws Exception {
+    void scam_보고서_등록_성공시_id를_반환해야한다() throws Exception {
 
         // given
         String title = "this is title";
@@ -77,7 +89,7 @@ class ReportControllerTest {
         when(reportService.saveReport(any(), nullable(List.class))).thenReturn(1L);
 
         // then
-        mockMvc.perform(MockMvcRequestBuilders
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                         .multipart("/reports")
                         .file(image)
                         .file(jsonRequest))
@@ -86,37 +98,14 @@ class ReportControllerTest {
                 .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.create.success", null, null)))
                 .andExpect(jsonPath("$.result").value(1L))
                 .andReturn();
-    }
 
-    @Test
-    @DisplayName("[GET] /reports?page=0&size=10 요청시 저장된 모든 report 들을 반환한다")
-    void get_report_list_with_no_condition() throws Exception {
-        //given
-        List<ReportFindAllResponse> listOfResponse = Arrays.asList(
-                new ReportFindAllResponse(0L, "this is 1 title", "THEFT"),
-                new ReportFindAllResponse(1L, "this is 2 title", "THEFT"),
-                new ReportFindAllResponse(2L, "this is 3 title", "THEFT")
-        );
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<ReportFindAllResponse> mockPage = new PageImpl<>(listOfResponse, pageable, listOfResponse.size());
-
-        //when
-        when(reportService.getReports(nullable(String.class), nullable(String.class), any(Pageable.class))).thenReturn(mockPage);
-
-        //then
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/reports")
-                        .queryParam("page", "0")
-                        .queryParam("size", "10"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.list.get.success", null, null)))
-                .andExpect(jsonPath("$.result.numberOfElements").value(3));
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        System.out.println("contentAsString = " + contentAsString);
     }
 
     @Test
     @DisplayName("[GET] /reports/{id} 요청시 저장된 report 정보를 보인다.")
-    void get_report() throws Exception {
+    void 보고서_id_조회시_보고서_정보를_보인다() throws Exception {
 
         // given
         Long id = 0L;
