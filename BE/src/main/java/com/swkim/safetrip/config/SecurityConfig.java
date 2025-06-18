@@ -44,8 +44,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**").permitAll()
+                        .requestMatchers("/error", "/reports/**", "/h2-console/**").permitAll()
                         .requestMatchers("/users", "/auth/login").permitAll()
+                        .requestMatchers("/reports").authenticated()
                         .anyRequest().authenticated()
                 );
 

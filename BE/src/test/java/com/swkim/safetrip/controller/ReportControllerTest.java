@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ReportController.class)
 @MockBean(JpaMetamodelMappingContext.class)
+//@ContextConfiguration(classes = SafetripApplication.class)
 class ReportControllerTest {
 
     @Autowired
