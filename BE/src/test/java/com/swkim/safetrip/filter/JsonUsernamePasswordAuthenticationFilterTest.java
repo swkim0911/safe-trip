@@ -59,6 +59,24 @@ public class JsonUsernamePasswordAuthenticationFilterTest {
     }
 
     @Test
+    @DisplayName("로그인 요청시, 잘못된 아이디를 입력한 경우 401 에러가 발생한다.")
+    void return_401_when_email_is_incorrect() throws Exception{
+        Map<String, String> loginRequest = Map.of(
+                "email", "wrong-email@gmail.com",
+                "password", "password"
+        );
+
+        // when then
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message").value("Bad credentials"));
+
+    }
+
+    @Test
     @DisplayName("로그인 요청시, 잘못된 비밀번호를 입력한 경우 401 에러가 발생한다.")
     void return_401_when_password_is_incorrect() throws Exception {
         Map<String, String> loginRequest = Map.of(
