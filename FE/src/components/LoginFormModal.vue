@@ -1,16 +1,31 @@
 <template>
   <div class="modal fade" id = "LoginFormModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
       <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">Log In</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <p>Body</p>
-          </div>
+            <form @submit.prevent>
+              <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" id="email" v-model="email" class="form-control" required />
+              </div>
 
-        </div>    
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" v-model="password" class="form-control" required />
+              </div>
+            </form>
+            <div class="d-grid mb-2">
+              <button type="button" class="btn btn-primary">Log In</button>
+            </div>
+            <div class="text-center">
+              <button type="button" class="btn btn-link" @click="openSignupModal">Sign Up</button>
+            </div>
+          </div>
+        </div>  
     </div>
   </div>
 </template>
@@ -19,5 +34,10 @@
 
 </script>
 <style scoped lang="scss">
-  
+  .modal-dialog.modal-fullsize {
+  width: 50%;
+  height: 50%;
+  margin: 0;
+  padding: 0;
+}
 </style>
