@@ -2,8 +2,11 @@ package com.swkim.safetrip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.SafetripApplication;
+import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
+import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.login.service.LoginService;
 import com.swkim.safetrip.service.ReportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -29,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ReportController.class)
 @MockBean(JpaMetamodelMappingContext.class)
-//@ContextConfiguration(classes = SafetripApplication.class)
+@Import(SecurityConfig.class)
 class ReportControllerTest {
 
     @Autowired
@@ -41,11 +45,18 @@ class ReportControllerTest {
     @MockBean
     private ReportService reportService;
 
+    @MockBean
+    private LoginService loginService;
+
+    @MockBean
+    private JwtService jwtService;
+
     @Autowired
     private MessageSource messageSource;
 
     @Test
     @DisplayName("[Post] /reports 요청시 저장된 report의 id를 반환한다")
+    @WithMockUser(username = "testuser")
     @SuppressWarnings("unchecked")
     void scam_보고서_등록_성공시_id를_반환해야한다() throws Exception {
 

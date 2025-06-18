@@ -213,7 +213,7 @@ public class ReportService {
                 .queryParam("city",city)
                 .queryParam("format", "json")
                 .queryParam("addressdetails", "1")
-                .queryParam("accept-language", "ko")
+                .queryParam("accept-language", "en")
                 .toUriString();
 
         return restClient.get()

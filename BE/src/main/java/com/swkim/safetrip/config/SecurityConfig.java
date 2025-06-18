@@ -10,6 +10,7 @@ import com.swkim.safetrip.login.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -44,9 +45,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error", "/reports/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/error", "/h2-console/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/reports/**").permitAll()
                         .requestMatchers("/users", "/auth/login").permitAll()
-                        .requestMatchers("/reports").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/reports").authenticated()
                         .anyRequest().authenticated()
                 );
 
