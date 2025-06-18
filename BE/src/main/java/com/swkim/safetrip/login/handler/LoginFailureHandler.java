@@ -1,5 +1,7 @@
 package com.swkim.safetrip.login.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.swkim.safetrip.global.response.ApiResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,13 +14,21 @@ import java.io.IOException;
 @Slf4j
 public class LoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+        ApiResponse<String> apiResponse = ApiResponse.of(
+                401,
+                exception.getMessage(),
+                "Request Failed"
+        );
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/plain;charset=UTF-8");
-        response.getWriter().write("Login Failure. Please check email or password");
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
         log.info("login failure. exception message: {}", exception.getMessage());
     }
 }
