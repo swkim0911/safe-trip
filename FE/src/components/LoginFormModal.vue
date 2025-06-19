@@ -42,10 +42,5 @@ const loginForm = reactive({
 
 </script>
 <style scoped lang="scss">
-  .modal-dialog.modal-fullsize {
-  width: 50%;
-  height: 50%;
-  margin: 0;
-  padding: 0;
-}
+
 </style>
