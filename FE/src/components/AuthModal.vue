@@ -24,8 +24,8 @@
               </div>
             </div>
             <div v-else>
-              <form @submit.prevent class="px-4 py-4 rounded-4" style="max-width: 400px; margin: 0 auto;">
-              <h3 class="text-center mb-4 fw-bold">Create Your Account</h3>
+              <form @submit.prevent class="px-3 py-3" style="max-width: 400px; margin: 0 auto;">
+              <h3 class="text-center mb-3 fw-bold">Create Your Account</h3>
 
               <div class="mb-3">
                 <label for="email" class="form-label fw-bold">Email</label>
@@ -33,6 +33,7 @@
                   type="email"
                   id="email"
                   class="form-control"
+                  v-model="signUpForm.email"
                   placeholder="example@gmail.com"
                   required
                 />
@@ -44,6 +45,7 @@
                   type="password"
                   id="password"
                   class="form-control"
+                  v-model="signUpForm.password"
                   placeholder="Enter your password"
                   required
                 />
@@ -56,16 +58,17 @@
                   id="nickname"
                   class="form-control"
                   placeholder="Enter your nickname"
+                  v-model="signUpForm.nickname"
                   required
                 />
               </div>
               <button type="submit" class="btn btn-primary w-100 py-2">Sign Up</button>
             </form>
 
-  <p class="text-center mt-3 mb-0">
-    Already have an account?
-    <a href="#" class="text-decoration-none" role="button" @click.prevent="mode = 'login'">Log In</a>
-  </p>
+            <p class="text-center mt-3 mb-0">
+              Already have an account?
+              <a href="#" class="text-decoration-none" role="button" @click.prevent="mode = 'login'">Log In</a>
+            </p>
               
             </div>
           </div>
@@ -82,6 +85,12 @@ const mode = ref('login')
 const loginForm = reactive({
   email: '',
   password: ''
+})
+
+const signUpForm = reactive({
+  email: '',
+  password: '',
+  nickname: ''
 })
 
 </script>
