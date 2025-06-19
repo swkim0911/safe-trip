@@ -56,6 +56,19 @@ import axios from 'axios'
 import ReportFormModal from './ReportFormModal.vue'
 import LoginFormModal from './LoginFormModal.vue'
 
+const showLogin = ref(true)
+const showSignup = ref(false)
+
+function openSignup() {
+  showLogin.value = false
+  showSignup.value = true
+}
+
+function openLogin() {
+  showSignup.value = false
+  showLogin.value = true
+}
+
 const serverURL = import.meta.env.VITE_API_URL;
 
 const zoom = ref(3);

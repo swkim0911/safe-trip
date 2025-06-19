@@ -8,23 +8,21 @@
           </div>
 
           <div class="modal-body">
-            <form @submit.prevent>
+            <form @submit.prevent class="px-3 py-3">
               <div class="mb-3">
-                <label for="email" class="form-label">Email address</label>
-                <input type="email" id="email" v-model="loginForm.email" class="form-control" required placeholder="email"/>
+                <input type="email" v-model="loginForm.email" class="form-control" placeholder="Email" required />
               </div>
-
-              <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" id="password" v-model="loginForm.password" class="form-control" required  placeholder="password"/>
+              <div class="mb-4">
+                <input type="password" v-model="loginForm.password" class="form-control" placeholder="Password" required />
               </div>
             </form>
             <div class="d-grid mb-2">
               <button type="button" class="btn btn-primary">Log In</button>
             </div>
             <div class="text-center">
-              <button type="button" class="btn btn-link">Sign Up</button>
+              <button type="button" class="btn btn-link"  @click="$emit('switch-to-signup')" >Sign Up</button>
             </div>
+    
           </div>
         </div>  
     </div>
@@ -33,12 +31,10 @@
 <script setup>
 
 import { ref, reactive } from 'vue'
-
 const loginForm = reactive({
   email: '',
   password: ''
 })
-
 
 </script>
 <style scoped lang="scss">
