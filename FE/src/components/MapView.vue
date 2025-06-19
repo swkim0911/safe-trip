@@ -38,7 +38,7 @@
     type="button" 
     class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn"
     data-bs-toggle="modal"
-    data-bs-target="#LoginFormModal"
+    data-bs-target="#AuthModal"
     >
       <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
       LOGIN
