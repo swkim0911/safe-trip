@@ -43,7 +43,7 @@
       <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
       LOGIN
     </button>
-    <LoginFormModal/>
+    <AuthModal/>
   </div>
 </template>
 
@@ -54,7 +54,7 @@ import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker } from
 import axios from 'axios'
 
 import ReportFormModal from './ReportFormModal.vue'
-import LoginFormModal from './LoginFormModal.vue'
+import AuthModal from './AuthModal.vue'
 
 const showLogin = ref(true)
 const showSignup = ref(false)
