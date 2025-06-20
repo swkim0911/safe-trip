@@ -11,9 +11,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 
@@ -123,7 +126,15 @@ public class JwtService {
     }
 
     public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken){
-        response.setHeader(refreshHeader, refreshToken);
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)             // JS에서 접근 불가
+                .secure(true)               // HTTPS 환경에서만 전송 (개발 중엔 false로 설정 가능)
+                .path("/")                  // 모든 경로에 대해 전송됨
+                .maxAge(Duration.ofDays(14))// 유효 기간
+                .sameSite("Strict")        // CSRF 보호 (필요 시 "Lax"도 가능)
+                .build();
+
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     @Transactional
