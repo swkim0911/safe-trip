@@ -16,6 +16,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-    public void addTokensToResponseHeader(HttpServletResponse response, String accessToken, String refreshToken){
+    public void addTokensToResponseHeader(HttpServletResponse response, String accessToken, String refreshToken) throws IOException{
         response.setStatus(HttpServletResponse.SC_OK);
         setAccessTokenHeader(response, accessToken);
         setRefreshTokenHeader(response, refreshToken);
@@ -121,8 +122,12 @@ public class JwtService {
         }
     }
 
-    public void setAccessTokenHeader(HttpServletResponse response, String accessToken){
-        response.setHeader(accessHeader, accessToken);
+    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) throws IOException {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
+
+        String json = String.format("{\"accessToken\": \"%s\"}", accessToken);
+        response.getWriter().write(json);
     }
 
     public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken){

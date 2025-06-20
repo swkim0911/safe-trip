@@ -17,7 +17,7 @@ public class LoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
 
         ApiResponse<String> apiResponse = ApiResponse.of(
                 401,
