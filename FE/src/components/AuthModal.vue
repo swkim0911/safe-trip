@@ -5,10 +5,11 @@
           <div class="modal-header border-bottom-0">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-
           <div class="modal-body">
             <div v-if="mode === 'login'">
-              <form @submit.prevent class="px-3 py-3">
+              <form @submit.prevent class="px-3 py-3" style="max-width: 400px; margin: 0 auto;">
+              <h3 class="text-center mb-3 fw-bold">Welcome</h3>
+
                 <div class="mb-3">
                   <input type="email" v-model="loginForm.email" class="form-control" placeholder="example@gmail.com" required />
                 </div>
@@ -62,7 +63,7 @@
                   required
                 />
               </div>
-              <button type="submit" class="btn btn-primary w-100 py-2">Sign Up</button>
+              <button type="submit" class="btn btn-primary w-100 py-2" @click="submitSignUpForm">Sign Up</button>
             </form>
 
             <p class="text-center mt-3 mb-0">
@@ -79,8 +80,10 @@
 <script setup>
 
 import { ref, reactive } from 'vue'
+import axios from 'axios'
 
 const mode = ref('login')
+const serverURL = import.meta.env.VITE_API_URL;
 
 const loginForm = reactive({
   email: '',
@@ -92,6 +95,27 @@ const signUpForm = reactive({
   password: '',
   nickname: ''
 })
+
+const resetSignUpForm = () => {
+  signUpForm.email = ''
+  signUpForm.password = ''
+  signUpForm.nickname = ''
+}
+
+const submitSignUpForm = async () => {
+  
+  try {
+    const response = await axios.post(`${serverURL}/users`, {
+      email: signUpForm.email,
+      password: signUpForm.password,
+      nickname: signUpForm.nickname
+    })
+    resetSignUpForm()
+    console.log('회원가입 성공:', response.data)
+  } catch (error) {
+    console.error('회원가입 실패:', error.response?.data || error.message)
+  }
+}
 
 </script>
 <style scoped lang="scss">
