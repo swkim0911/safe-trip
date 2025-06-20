@@ -65,7 +65,7 @@
               </div>
               <button type="submit" class="btn btn-primary w-100 py-2" @click="submitSignUpForm">Sign Up</button>
             </form>
-            <p class="text-center text-success fw-bold" v-if="successMessage">{{ successMessage }}</p>
+            <p class="text-center text-success fw-bold" v-if="signUpSuccessMessage">{{ signUpSuccessMessage }}</p>
             <p class="text-center mt-3 mb-0">
               Already have an account?
               <a href="#" class="text-decoration-none" role="button" @click.prevent="mode = 'login'">Log In</a>
@@ -79,12 +79,12 @@
 </template>
 <script setup>
 
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import axios from 'axios'
 
 const mode = ref('login')
 const serverURL = import.meta.env.VITE_API_URL;
-const successMessage = ref('')
+const signUpSuccessMessage = ref('')
 
 const loginForm = reactive({
   email: '',
@@ -96,8 +96,6 @@ const signUpForm = reactive({
   password: '',
   nickname: ''
 })
-
-
 
 const resetSignUpForm = () => {
   signUpForm.email = ''
@@ -115,12 +113,22 @@ const submitSignUpForm = async () => {
     })
 
     resetSignUpForm()
-    successMessage.value = '회원가입이 완료되었습니다. 로그인 해주세요.';
+    signUpSuccessMessage.value = '회원가입이 완료되었습니다. 로그인 해주세요.';
     console.log('회원가입 성공:', response.data)
   } catch (error) {
     console.error('회원가입 실패:', error.response?.data || error.message)
   }
 }
+
+watch(mode, (newMode) => {
+  if (newMode === 'login') {
+    // 회원가입 폼 초기화
+    signUpForm.email = '';
+    signUpForm.password = '';
+    signUpForm.nickname = '';
+    signUpSuccessMessage.value = '';
+  }
+});
 
 </script>
 <style scoped lang="scss">
