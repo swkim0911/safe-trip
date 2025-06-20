@@ -8,18 +8,34 @@
           <div class="modal-body">
             <div v-if="mode === 'login'">
               <form @submit.prevent class="px-3 py-3" style="max-width: 400px; margin: 0 auto;">
-              <h3 class="text-center mb-3 fw-bold">Welcome</h3>
+                <h3 class="text-center mb-3 fw-bold">Welcome</h3>
+                <div class="mb-3">
+                <label for="email" class="form-label fw-bold">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  class="form-control"
+                  v-model="loginForm.email"
+                  placeholder="example@gmail.com"
+                  required
+                />
+                </div>
 
                 <div class="mb-3">
-                  <input type="email" v-model="loginForm.email" class="form-control" placeholder="example@gmail.com" required />
+                  <label for="password" class="form-label fw-bold">Password</label>
+                  <input
+                    type="password"
+                    id="password"
+                    class="form-control"
+                    v-model="loginForm.password"
+                    placeholder="Enter your password"
+                    required
+                  />
                 </div>
-                <div class="mb-4">
-                  <input type="password" v-model="loginForm.password" class="form-control" placeholder="Enter your Password" required />
+                <div class="mb-2">
+                  <button type="submit" class="btn btn-primary w-100 py-2 mt-2" @click="submitLoginForm">Log In</button>
                 </div>
               </form>
-              <div class="d-grid mb-2">
-                <button type="button" class="btn btn-primary">Log In</button>
-              </div>
               <div class="text-center">
                 <button type="button" class="btn btn-link" @click="mode = 'signup'">Sign Up</button>
               </div>
@@ -101,6 +117,18 @@ const resetSignupForm = () => {
   signupForm.email = ''
   signupForm.password = ''
   signupForm.nickname = ''
+}
+
+const submitLoginForm = async () => {
+  try {
+    const response = await axios.post(`${serverURL}/auth/login`, {
+      email: loginForm.email,
+      password: loginForm.password,
+    })
+    console.log('로그인 성공:', response.data)
+  } catch (error) {
+    console.error('로그인 실패:', error.response?.data || error.message)
+  }
 }
 
 const submitSignupForm = async () => {
