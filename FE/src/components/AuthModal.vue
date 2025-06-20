@@ -34,7 +34,7 @@
                   type="email"
                   id="email"
                   class="form-control"
-                  v-model="signUpForm.email"
+                  v-model="signupForm.email"
                   placeholder="example@gmail.com"
                   required
                 />
@@ -46,7 +46,7 @@
                   type="password"
                   id="password"
                   class="form-control"
-                  v-model="signUpForm.password"
+                  v-model="signupForm.password"
                   placeholder="Enter your password"
                   required
                 />
@@ -59,13 +59,13 @@
                   id="nickname"
                   class="form-control"
                   placeholder="Enter your nickname"
-                  v-model="signUpForm.nickname"
+                  v-model="signupForm.nickname"
                   required
                 />
               </div>
-              <button type="submit" class="btn btn-primary w-100 py-2" @click="submitSignUpForm">Sign Up</button>
+              <button type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
             </form>
-            <p class="text-center text-success fw-bold" v-if="signUpSuccessMessage">{{ signUpSuccessMessage }}</p>
+            <p class="text-center text-success fw-bold" v-if="signupSuccessMessage">{{ signupSuccessMessage }}</p>
             <p class="text-center mt-3 mb-0">
               Already have an account?
               <a href="#" class="text-decoration-none" role="button" @click.prevent="mode = 'login'">Log In</a>
@@ -84,36 +84,36 @@ import axios from 'axios'
 
 const mode = ref('login')
 const serverURL = import.meta.env.VITE_API_URL;
-const signUpSuccessMessage = ref('')
+const signupSuccessMessage = ref('')
 
 const loginForm = reactive({
   email: '',
   password: ''
 })
 
-const signUpForm = reactive({
+const signupForm = reactive({
   email: '',
   password: '',
   nickname: ''
 })
 
-const resetSignUpForm = () => {
-  signUpForm.email = ''
-  signUpForm.password = ''
-  signUpForm.nickname = ''
+const resetSignupForm = () => {
+  signupForm.email = ''
+  signupForm.password = ''
+  signupForm.nickname = ''
 }
 
-const submitSignUpForm = async () => {
+const submitSignupForm = async () => {
   
   try {
     const response = await axios.post(`${serverURL}/users`, {
-      email: signUpForm.email,
-      password: signUpForm.password,
-      nickname: signUpForm.nickname
+      email: signupForm.email,
+      password: signupForm.password,
+      nickname: signupForm.nickname
     })
 
-    resetSignUpForm()
-    signUpSuccessMessage.value = '회원가입이 완료되었습니다. 로그인 해주세요.';
+    resetSignupForm()
+    signupSuccessMessage.value = '회원가입이 완료되었습니다. 로그인 해주세요.';
     console.log('회원가입 성공:', response.data)
   } catch (error) {
     console.error('회원가입 실패:', error.response?.data || error.message)
@@ -123,10 +123,10 @@ const submitSignUpForm = async () => {
 watch(mode, (newMode) => {
   if (newMode === 'login') {
     // 회원가입 폼 초기화
-    signUpForm.email = '';
-    signUpForm.password = '';
-    signUpForm.nickname = '';
-    signUpSuccessMessage.value = '';
+    signupForm.email = '';
+    signupForm.password = '';
+    signupForm.nickname = '';
+    signupSuccessMessage.value = '';
   }
 });
 
