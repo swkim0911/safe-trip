@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -48,13 +49,21 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         checkAccessTokenAndAuthentication(request, response, filterChain);
     }
 
-    private void reIssueAccessAndRefreshToken(HttpServletResponse response, String refreshToken) {
+    private void reIssueAccessAndRefreshToken(HttpServletResponse response, String refreshToken) throws IOException{
 
-        jwtService.getUserByRefreshToken(refreshToken)
-                .ifPresent(user -> {
-                    String reIssuedRefreshToken = jwtService.reIssueRefreshToken(user);
-                    jwtService.addTokensToResponseHeader(response, jwtService.issueAccessToken(user.getEmail()), reIssuedRefreshToken);
-                });
+        Optional<User> optionalUser = jwtService.getUserByRefreshToken(refreshToken);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String reIssuedRefreshToken = jwtService.reIssueRefreshToken(user);
+            String reIssuedAccessToken = jwtService.issueAccessToken(user.getEmail());
+
+            jwtService.addTokensToResponseHeader(
+                    response,
+                    reIssuedAccessToken,
+                    reIssuedRefreshToken
+            );
+        }
     }
 
     private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
