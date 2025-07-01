@@ -39,9 +39,7 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
             throw new AuthenticationServiceException("Authentication Content-Type not supported: " + request.getContentType());
         }
 
-        String requestBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
-
-        Map<String, String> signInMap = objectMapper.readValue(requestBody, Map.class);
+        Map<String, String> signInMap = getSignInMapData(request);
 
         String email = signInMap.get(USERNAME_KEY);
         String password = signInMap.get(PASSWORD_KEY);
@@ -49,5 +47,10 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
         UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(email, password);
 
         return this.getAuthenticationManager().authenticate(authRequest);
+    }
+
+    private Map<String, String> getSignInMapData(HttpServletRequest request) throws IOException {
+        String requestBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
+        return objectMapper.readValue(requestBody, Map.class);
     }
 }
