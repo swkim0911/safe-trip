@@ -24,7 +24,7 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
     private static final String USERNAME_KEY = "email";
     private static final String PASSWORD_KEY = "password";
     private static final AntPathRequestMatcher DEFAULT_LOGIN_PATH_REQUEST_MATCHER =
-            new AntPathRequestMatcher(DEFAULT_LOGIN_REQUEST_URL, HTTP_METHOD);
+            new AntPathRequestMatcher(DEFAULT_LOGIN_REQUEST_URL, HTTP_METHOD); // /auth/login 경로의 POST 요청만 이 필터가 처리하도록 요청 매칭 조건을 설정
 
     private final ObjectMapper objectMapper;
 

@@ -28,14 +28,10 @@ public class UserService {
         }
 
         User user = UserMapper.toUser(signUpRequest);
-
+        // 비밀번호 암호화
         user.passwordEncode(passwordEncoder);
 
         User savedUser = userRepository.save(user);
         return savedUser.getId();
     }
-
-
-
-
 }

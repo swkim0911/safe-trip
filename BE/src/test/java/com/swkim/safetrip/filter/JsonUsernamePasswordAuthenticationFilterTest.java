@@ -1,6 +1,5 @@
 package com.swkim.safetrip.filter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
