@@ -144,11 +144,14 @@ public class JwtService {
 
     @Transactional
     public void updateRefreshToken(String email, String refreshToken){
-        userRepository.findByEmail(email)
-                .ifPresentOrElse(
-                        user -> user.updateRefreshToken(refreshToken),
-                        UserNotFoundException::new
-                );
+        User user = findUser(email);
+        user.updateRefreshToken(refreshToken);
+    }
+
+    @Transactional(readOnly = true)
+    private User findUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
     }
 
     // verify: 서명, 토큰 구조, 만료 시간 검증
