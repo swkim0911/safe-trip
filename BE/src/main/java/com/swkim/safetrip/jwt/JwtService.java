@@ -69,8 +69,8 @@ public class JwtService {
 
     public void addTokensToResponse(HttpServletResponse response, String accessToken, String refreshToken) throws IOException{
         response.setStatus(HttpServletResponse.SC_OK);
-        setAccessTokenHeader(response, accessToken);
-        setRefreshTokenHeader(response, refreshToken);
+        addAccessTokenToResponse(response, accessToken);
+        addRefreshTokenToResponse(response, refreshToken);
     }
 
     public String issueAccessToken(String email){
@@ -122,7 +122,7 @@ public class JwtService {
         }
     }
 
-    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) throws IOException {
+    public void addAccessTokenToResponse(HttpServletResponse response, String accessToken) throws IOException {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
 
@@ -130,7 +130,7 @@ public class JwtService {
         response.getWriter().write(json);
     }
 
-    public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken){
+    public void addRefreshTokenToResponse(HttpServletResponse response, String refreshToken){
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)             // JS에서 접근 불가
                 .secure(true)               // HTTPS 환경에서만 전송 (개발 중엔 false로 설정 가능)
