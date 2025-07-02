@@ -67,7 +67,7 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-    public void addTokensToResponseHeader(HttpServletResponse response, String accessToken, String refreshToken) throws IOException{
+    public void addTokensToResponse(HttpServletResponse response, String accessToken, String refreshToken) throws IOException{
         response.setStatus(HttpServletResponse.SC_OK);
         setAccessTokenHeader(response, accessToken);
         setRefreshTokenHeader(response, refreshToken);

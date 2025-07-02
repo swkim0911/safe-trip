@@ -58,7 +58,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             String reIssuedRefreshToken = jwtService.reIssueRefreshToken(user);
             String reIssuedAccessToken = jwtService.issueAccessToken(user.getEmail());
 
-            jwtService.addTokensToResponseHeader(
+            jwtService.addTokensToResponse(
                     response,
                     reIssuedAccessToken,
                     reIssuedRefreshToken
