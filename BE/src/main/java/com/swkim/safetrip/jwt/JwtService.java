@@ -143,7 +143,7 @@ public class JwtService {
     }
 
     @Transactional
-    public void updateRefreshToken(String email, String refreshToken){
+    public void saveRefreshToken(String email, String refreshToken){
         User user = findUser(email);
         user.updateRefreshToken(refreshToken);
     }
