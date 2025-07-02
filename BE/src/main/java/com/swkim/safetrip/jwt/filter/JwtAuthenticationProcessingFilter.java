@@ -23,15 +23,13 @@ import java.util.Optional;
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
-    private static final String NO_CHECK_URL = "/auth/login";
-
     private final JwtService jwtService;
 
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (isNoCheckURL(request)) {
+        if(!requiresAuthentication(request)){
             filterChain.doFilter(request, response);
             return;
         }
@@ -92,7 +90,10 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 .build();
     }
 
-    private boolean isNoCheckURL(HttpServletRequest request) {
-        return request.getRequestURI().equals(NO_CHECK_URL);
+    private boolean requiresAuthentication(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        String method = request.getMethod();
+
+        return "/reports".equals(requestURI) && "POST".equalsIgnoreCase(method);
     }
 }
