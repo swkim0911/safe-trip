@@ -30,7 +30,6 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         jwtService.saveRefreshToken(email, refreshToken);
 
         log.info("success to sign in. email: {}", email);
-        log.info("success to sign in. accessToken: {}", accessToken);
     }
 
     private String extractUsername(Authentication authentication) {
