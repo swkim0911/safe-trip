@@ -1,6 +1,7 @@
 package com.swkim.safetrip.jwt.filter;
 
 import com.swkim.safetrip.entity.User;
+import com.swkim.safetrip.global.exception.custom.AuthenticatedUserNotFoundException;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -46,8 +47,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             // todo 예외 처리 401
             String email = jwtService.extractEmail(accessToken).orElse(null);
             if (email != null) {
-                // todo 예외 처리 401
-                User findUser = userService.getUserByEmail(email).orElse(null);
+                User findUser = userService.getUserByEmail(email).orElseThrow(AuthenticatedUserNotFoundException::new);
                 if (findUser != null) {
                     saveAuthentication(findUser);
                 }

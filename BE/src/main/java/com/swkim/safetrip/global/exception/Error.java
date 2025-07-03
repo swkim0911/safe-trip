@@ -16,7 +16,9 @@ public enum Error {
     S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "s3 버킷에 이미지를 업로드할 수 없습니다."),
     DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "You cannot sign up due to duplicate e-mail."),
     DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "You cannot sing up due to duplicate nickname"),
-    USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "The user could not be found by email.");
+    USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email."),
+
+    AUTHENTICATED_USER_NOT_FOUND_ERROR(HttpStatus.UNAUTHORIZED.value(), "User not found by email for authentication");
 
     private final int statusCode;
     private final String message;
