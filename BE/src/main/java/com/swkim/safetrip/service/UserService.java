@@ -9,6 +9,9 @@ import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +36,10 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
         return savedUser.getId();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> getUserByEmail(String email){
+        return userRepository.findByEmail(email);
     }
 }

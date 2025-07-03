@@ -2,6 +2,7 @@ package com.swkim.safetrip.jwt.filter;
 
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import java.util.Optional;
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UserService userService;
 
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
@@ -41,11 +43,13 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
         // 1. 요청에 accesstoken 토큰이 valid 하면 authentication 저장 (secretKey, exp 체크)
         if(accessToken != null){
+            // todo 예외 처리 401
             String email = jwtService.extractEmail(accessToken).orElse(null);
             if (email != null) {
-                User user = jwtService.getUserByEmail(email).orElse(null);
-                if (user != null) {
-                    saveAuthentication(user);
+                // todo 예외 처리 401
+                User findUser = userService.getUserByEmail(email).orElse(null);
+                if (findUser != null) {
+                    saveAuthentication(findUser);
                 }
             }
             filterChain.doFilter(request, response);
