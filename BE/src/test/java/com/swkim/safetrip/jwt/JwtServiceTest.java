@@ -104,6 +104,19 @@ class JwtServiceTest {
     }
 
     @Test
+    void 요청_헤더에_액세스_토큰이_없다면_empty를_반환한다() {
+        // given
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getHeader("Authorization")).thenReturn(null);
+
+        // when
+        Optional<String> result =jwtService.extractAccessToken(request);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
     void 리프레시_토큰을_요청으로부터_정상_추출한다() {
         // given
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
