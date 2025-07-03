@@ -208,4 +208,19 @@ class JwtServiceTest {
         assertThat(tokenValid).isFalse();
     }
 
+    @Test
+    void 액세스_토큰으로부터_email을_성공적으로_반환한다() {
+        // given
+        String email = "test@email.com";
+        String accessToken = jwtService.issueAccessToken(email);
+
+        // when
+        Optional<String> extractedEmail = jwtService.extractEmail(accessToken);
+
+        // then
+        assertThat(extractedEmail).isPresent();
+        assertThat(extractedEmail.get()).isEqualTo(email);
+
+    }
+
 }

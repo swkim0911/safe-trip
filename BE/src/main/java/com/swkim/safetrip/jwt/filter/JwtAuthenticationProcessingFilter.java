@@ -34,13 +34,21 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        // 1. 요청에 accesstoken 토큰이 valid 한지 확인
+
         String accessToken = jwtService.extractAccessToken(request)
                 .filter(jwtService::isTokenValid)
                 .orElse(null);
 
+        // 1. 요청에 accesstoken 토큰이 valid 하면 authentication 저장 (secretKey, exp 체크)
         if(accessToken != null){
-            // 3. 유효기간 내에 있으면 saveAuthentication
+            String email = jwtService.extractEmail(accessToken).orElse(null);
+            if (email != null) {
+                User user = jwtService.getUserByEmail(email).orElse(null);
+                if (user != null) {
+                    saveAuthentication(user);
+                }
+            }
+            filterChain.doFilter(request, response);
         }
 
 
