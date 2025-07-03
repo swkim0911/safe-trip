@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,10 +37,13 @@ class JwtServiceTest {
         Long accessTokenExpirationPeriod = 3600000L;
         Long refreshTokenExpirationPeriod = 86400000L;
         String accessHeader = "Authorization";
+        String refreshName = "refreshToken";
 
         ReflectionTestUtils.setField(jwtService, "accessTokenExpirationPeriod", accessTokenExpirationPeriod);
         ReflectionTestUtils.setField(jwtService, "refreshTokenExpirationPeriod", refreshTokenExpirationPeriod);
         ReflectionTestUtils.setField(jwtService, "accessHeader", accessHeader);
+        ReflectionTestUtils.setField(jwtService, "refreshName", refreshName);
+
 
         ReflectionTestUtils.setField(jwtService, "secretKey", secretKey);
     }
@@ -96,8 +100,33 @@ class JwtServiceTest {
         // then
         assertThat(result).isPresent();
         String extractedAccessToken = result.get();
-        System.out.println("extractedAccessToken = " + extractedAccessToken);
         assertThat(extractedAccessToken).isEqualTo(accessToken);
+    }
+
+    @Test
+    void 리프레시_토큰을_요청으로부터_정상_추출한다() {
+        // given
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        String refreshToken = jwtService.issueRefreshToken();
+        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+        Cookie[] cookies = new Cookie[]{refreshTokenCookie};
+        Mockito.when(request.getCookies()).thenReturn(cookies);
+
+        // when
+        Optional<String> result = jwtService.extractRefreshToken(request);
+
+        // then
+        assertThat(result).isPresent();
+        String extractedRefreshToken = result.get();
+        assertThat(extractedRefreshToken).isEqualTo(refreshToken);
+    }
+
+    void 쿠키가_null이면_empty반환() {
+
+    }
+
+    void 리프레쉬_토큰이_없으면_empty반환() {
+
     }
 
 }
