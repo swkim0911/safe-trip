@@ -6,7 +6,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -162,6 +161,18 @@ class JwtServiceTest {
 
         //then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void 유효한_secretKey로_서명된_토큰은_검증에_통과한다() {
+        // given
+        String token = jwtService.issueRefreshToken();
+
+        // when
+        boolean tokenValid = jwtService.isTokenValid(token);
+
+        // then
+        assertThat(tokenValid).isTrue();
     }
 
 }
