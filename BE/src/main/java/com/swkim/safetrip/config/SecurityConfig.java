@@ -7,6 +7,7 @@ import com.swkim.safetrip.login.filter.JsonUsernamePasswordAuthenticationFilter;
 import com.swkim.safetrip.login.handler.LoginFailureHandler;
 import com.swkim.safetrip.login.handler.LoginSuccessHandler;
 import com.swkim.safetrip.login.service.LoginService;
+import com.swkim.safetrip.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,8 +34,10 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final LoginService loginService;
+    private final UserService userService;
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
@@ -63,14 +66,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    @Bean
     public AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(passwordEncoder);
         provider.setUserDetailsService(loginService);
         return new ProviderManager(provider);
     }
@@ -99,6 +97,6 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
-        return new JwtAuthenticationProcessingFilter(jwtService);
+        return new JwtAuthenticationProcessingFilter(jwtService, userService);
     }
 }
