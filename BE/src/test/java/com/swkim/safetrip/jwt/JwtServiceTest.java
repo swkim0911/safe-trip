@@ -121,8 +121,17 @@ class JwtServiceTest {
         assertThat(extractedRefreshToken).isEqualTo(refreshToken);
     }
 
-    void 쿠키가_null이면_empty반환() {
+    @Test
+    void 요청에_쿠키가_없다면_empty를_반환한다() {
+        // given
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getCookies()).thenReturn(null);
 
+        //when
+        Optional<String> result = jwtService.extractRefreshToken(request);
+
+        //then
+        assertThat(result).isEmpty();
     }
 
     void 리프레쉬_토큰이_없으면_empty반환() {
