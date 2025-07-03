@@ -15,8 +15,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Date;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -179,11 +181,28 @@ class JwtServiceTest {
     void 유효하지_않은_secretKey로_서명된_토큰은_검증에_실패한다() {
         // given
         String strangeToken = JWT.create()
-                .withSubject("Token")
+                .withSubject("testToken")
                 .sign(Algorithm.HMAC512("invalidSecretKey"));
 
         // when
         boolean tokenValid = jwtService.isTokenValid(strangeToken);
+
+        // then
+        assertThat(tokenValid).isFalse();
+    }
+
+    @Test
+    void 만료된_토큰은_검증에_실패한다() {
+        // given
+        Date now = new Date();
+        Date expiredAt = new Date(now.getTime() - 1000);
+        String expiredToken = JWT.create()
+                .withSubject("testToken")
+                .withExpiresAt(expiredAt)
+                .sign(Algorithm.HMAC512(secretKey));
+
+        // when
+        boolean tokenValid = jwtService.isTokenValid(expiredToken);
 
         // then
         assertThat(tokenValid).isFalse();
