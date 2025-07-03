@@ -223,7 +223,7 @@ class JwtServiceTest {
     }
 
     @Test
-    void email_클레임이_없는_액세스_토큰으로부터_email을_반환하려하면_empty를_반환한다() {
+    void email_클레임이_없는_액세스_토큰으로부터_email을_추출하려하면_empty를_반환한다() {
         // given
         String noEmailAccessToken = JWT.create()
                 .withSubject("noEmailToken")
