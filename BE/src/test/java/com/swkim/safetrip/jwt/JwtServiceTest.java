@@ -15,6 +15,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.*;
 
 
@@ -33,13 +35,13 @@ class JwtServiceTest {
     void setUp() {
         Long accessTokenExpirationPeriod = 3600000L;
         Long refreshTokenExpirationPeriod = 86400000L;
+        String accessHeader = "Authorization";
 
         ReflectionTestUtils.setField(jwtService, "accessTokenExpirationPeriod", accessTokenExpirationPeriod);
         ReflectionTestUtils.setField(jwtService, "refreshTokenExpirationPeriod", refreshTokenExpirationPeriod);
-
+        ReflectionTestUtils.setField(jwtService, "accessHeader", accessHeader);
 
         ReflectionTestUtils.setField(jwtService, "secretKey", secretKey);
-
     }
 
     @Test
@@ -78,6 +80,24 @@ class JwtServiceTest {
 
         String subject = decodedJWT.getSubject();
         assertThat(subject).isEqualTo("RefreshToken");
+    }
+
+    @Test
+    void 액세스_토큰을_요청으로부터_정상_추출한다() {
+        // given
+        String email = "test@gmail.com";
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        String accessToken = jwtService.issueAccessToken(email);
+        Mockito.when(request.getHeader("Authorization")).thenReturn("Bearer " + accessToken);
+
+        // when
+        Optional<String> result =jwtService.extractAccessToken(request);
+
+        // then
+        assertThat(result).isPresent();
+        String extractedAccessToken = result.get();
+        System.out.println("extractedAccessToken = " + extractedAccessToken);
+        assertThat(extractedAccessToken).isEqualTo(accessToken);
     }
 
 }
