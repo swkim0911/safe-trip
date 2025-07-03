@@ -175,4 +175,18 @@ class JwtServiceTest {
         assertThat(tokenValid).isTrue();
     }
 
+    @Test
+    void 유효하지_않은_secretKey로_서명된_토큰은_검증에_실패한다() {
+        // given
+        String strangeToken = JWT.create()
+                .withSubject("Token")
+                .sign(Algorithm.HMAC512("invalidSecretKey"));
+
+        // when
+        boolean tokenValid = jwtService.isTokenValid(strangeToken);
+
+        // then
+        assertThat(tokenValid).isFalse();
+    }
+
 }
