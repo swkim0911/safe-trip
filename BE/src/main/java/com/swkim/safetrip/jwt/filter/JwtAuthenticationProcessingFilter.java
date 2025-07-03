@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.naming.factory.SendMailFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -40,11 +41,24 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
         // 리프레시 토큰이 있고 유효성 검증을 통과하면 액세스/리프레시 토큰 재발급
         if(refreshToken != null){
-            reIssueAccessAndRefreshToken(response, refreshToken);
+            reIssueAccessAndRefreshToken(response, refreshToken); // 리프래시 토큰이 있을 때는 왜 filter로 보내지 않지
             return;
         }
+        String accessToken = jwtService.extractAccessToken(request)
+                .filter(jwtService::isTokenValid)
+                .orElse(null);
 
-        checkAccessTokenAndAuthentication(request, response, filterChain);
+        if (accessToken != null) {
+            String email = jwtService.extractEmail(accessToken).orElse(null);
+            if (email != null) {
+                User user = jwtService.getUserByEmail(email).orElse(null);
+                if (user != null) {
+                    saveAuthentication(user);
+                }
+            }
+            filterChain.doFilter(request, response);
+        }
+        // "/report" post 요청인데 accessToken이 없는 경우에는 로그인 화면을 띄워야 한다.
     }
 
     private void reIssueAccessAndRefreshToken(HttpServletResponse response, String refreshToken) throws IOException{

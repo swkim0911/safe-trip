@@ -56,8 +56,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-        http.addFilterAfter(jsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class);
-        http.addFilterBefore(jwtAuthenticationProcessingFilter(), JsonUsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(jsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class); // LogoutFilter ➔ jsonUsernamePasswordAuthenticationFilter
+        http.addFilterBefore(jwtAuthenticationProcessingFilter(), JsonUsernamePasswordAuthenticationFilter.class); // jwtAuthenticationProcessingFilter ➔ JsonUsernamePasswordAuthenticationFilter
 
         return http.build();
     }
