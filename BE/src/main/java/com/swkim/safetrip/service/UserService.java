@@ -53,7 +53,7 @@ public class UserService {
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
 
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        authenticationManager.authenticate(authenticationToken);
 
         String accessToken = jwtService.issueAccessToken(email);
         String refreshToken = jwtService.issueRefreshToken();
