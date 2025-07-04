@@ -1,8 +1,13 @@
 package com.swkim.safetrip.controller;
 
+import com.swkim.safetrip.dto.JwtDto;
+import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
+import com.swkim.safetrip.dto.response.UserLoginResponse;
 import com.swkim.safetrip.global.response.ApiResponse;
+import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
@@ -25,5 +31,18 @@ public class UserController {
         Long userId = userService.signup(signUpRequest);
 
         return ApiResponse.of(HttpStatus.CREATED.value(), "Your membership has been registered.", userId);
+    }
+
+    @PostMapping("/auth/login")
+    public ApiResponse<UserLoginResponse> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse response) {
+        JwtDto jwtDto = userService.login(loginRequest);
+        jwtService.addRefreshTokenToResponse(response, jwtDto.getRefreshToken());
+
+        UserLoginResponse loginResponse = UserLoginResponse
+                .builder()
+                .accessToken(jwtDto.getAccessToken())
+                .build();
+
+        return ApiResponse.of(HttpStatus.OK.value(), "Login successful", loginResponse);
     }
 }

@@ -1,4 +1,4 @@
-package com.swkim.safetrip.dto;
+package com.swkim.safetrip.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-public class JwtDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserLoginResponse {
 
     private String accessToken;
-
-    private String refreshToken;
 }
