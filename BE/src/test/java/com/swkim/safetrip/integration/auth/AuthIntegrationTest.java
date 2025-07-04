@@ -1,4 +1,4 @@
-package com.swkim.safetrip.auth;
+package com.swkim.safetrip.integration.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
