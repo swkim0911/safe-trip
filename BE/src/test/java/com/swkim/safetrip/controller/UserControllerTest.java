@@ -98,15 +98,14 @@ public class UserControllerTest {
         // when
         when(userService.login(any(UserLoginRequest.class))).thenReturn(jwtDto);
 
-        MockHttpServletResponse loginResponse = mockMvc.perform(MockMvcRequestBuilders
+        mockMvc.perform(MockMvcRequestBuilders
                         .post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("Login successful"))
-                .andExpect(jsonPath("$.result.accessToken").value(accessToken))
-                .andReturn().getResponse();
+                .andExpect(jsonPath("$.result.accessToken").value(accessToken));
 
         verify(userService).login(any(UserLoginRequest.class));
         verify(jwtService).addRefreshTokenToResponse(any(HttpServletResponse.class), eq("im.refresh.token"));

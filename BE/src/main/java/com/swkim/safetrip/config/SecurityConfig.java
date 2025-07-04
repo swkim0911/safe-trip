@@ -34,11 +34,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final LoginService loginService;
     private final UserService userService;
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
-    private final PasswordEncoder passwordEncoder;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
@@ -66,23 +64,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public AuthenticationManager authenticationManager() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder);
-        provider.setUserDetailsService(loginService);
-        return new ProviderManager(provider);
-    }
-
-    @Bean
-    public LoginSuccessHandler loginSuccessHandler() {
-        return new LoginSuccessHandler(jwtService);
-    }
-
-    @Bean
-    public LoginFailureHandler loginFailureHandler() {
-        return new LoginFailureHandler(objectMapper);
-    }
+//    @Bean
+//    public LoginSuccessHandler loginSuccessHandler() {
+//        return new LoginSuccessHandler(jwtService);
+//    }
+//
+//    @Bean
+//    public LoginFailureHandler loginFailureHandler() {
+//        return new LoginFailureHandler(objectMapper);
+//    }
 
 //    @Bean
 //    public JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordAuthenticationFilter() {
