@@ -86,6 +86,9 @@ class UserServiceTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> userService.signup(signUpRequest)).isInstanceOf(DuplicateUserEmailException.class);
+
+        // verify
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -101,6 +104,9 @@ class UserServiceTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> userService.signup(signUpRequest)).isInstanceOf(DuplicateUserNicknameException.class);
+
+        // verify
+        verify(userRepository, never()).save(any());
     }
 
     @Test
