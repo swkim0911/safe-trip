@@ -15,7 +15,7 @@ public enum Error {
     SCAM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "report를 찾을 수 없습니다."),
     S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "s3 버킷에 이미지를 업로드할 수 없습니다."),
     DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
-    DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "You cannot sing up due to duplicate nickname"),
+    DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "This nickname is already in use"),
     USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email."),
 
     AUTHENTICATED_USER_NOT_FOUND_ERROR(HttpStatus.UNAUTHORIZED.value(), "User not found by email for authentication");

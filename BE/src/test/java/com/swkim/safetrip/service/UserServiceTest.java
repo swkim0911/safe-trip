@@ -5,6 +5,7 @@ import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
+import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.repository.UserRepository;
 import org.assertj.core.api.Assertions;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -85,6 +85,21 @@ class UserServiceTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> userService.signup(signUpRequest)).isInstanceOf(DuplicateUserEmailException.class);
+    }
+
+    @Test
+    void 회원가입_요청에_닉네임이_중복된_경우_예외가_발생한다() {
+        // given
+        UserSignUpRequest signUpRequest = new UserSignUpRequest(
+                "test@gmail.com",
+                "password",
+                "duplicatedNickname"
+        );
+
+        when(userRepository.existsByNickname(signUpRequest.getNickname())).thenReturn(true);
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> userService.signup(signUpRequest)).isInstanceOf(DuplicateUserNicknameException.class);
     }
 
     @Test
