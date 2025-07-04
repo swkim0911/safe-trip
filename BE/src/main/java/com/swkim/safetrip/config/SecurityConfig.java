@@ -4,25 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.jwt.filter.JwtAuthenticationProcessingFilter;
-import com.swkim.safetrip.login.filter.JsonUsernamePasswordAuthenticationFilter;
-import com.swkim.safetrip.login.handler.LoginFailureHandler;
-import com.swkim.safetrip.login.handler.LoginSuccessHandler;
-import com.swkim.safetrip.login.service.LoginService;
 import com.swkim.safetrip.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -63,28 +54,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-//    @Bean
-//    public LoginSuccessHandler loginSuccessHandler() {
-//        return new LoginSuccessHandler(jwtService);
-//    }
-//
-//    @Bean
-//    public LoginFailureHandler loginFailureHandler() {
-//        return new LoginFailureHandler(objectMapper);
-//    }
-
-//    @Bean
-//    public JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordAuthenticationFilter() {
-//        JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordAuthenticationFilter =
-//                new JsonUsernamePasswordAuthenticationFilter(objectMapper);
-//
-//        jsonUsernamePasswordAuthenticationFilter.setAuthenticationManager(authenticationManager());
-//        jsonUsernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(loginSuccessHandler());
-//        jsonUsernamePasswordAuthenticationFilter.setAuthenticationFailureHandler(loginFailureHandler());
-//
-//        return jsonUsernamePasswordAuthenticationFilter;
-//    }
 
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
