@@ -2,10 +2,13 @@ package com.swkim.safetrip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.config.SecurityConfig;
+import com.swkim.safetrip.dto.JwtDto;
+import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.login.service.LoginService;
 import com.swkim.safetrip.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +17,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,6 +49,9 @@ public class UserControllerTest {
     @MockBean
     private JwtService jwtService;
 
+    @MockBean
+    private PasswordEncoder passwordEncoder;
+
     @Test
     @DisplayName("회원가입 요청시 201 응답을 반환한다.")
     void returns_201_when_signup_request_is_valid() throws Exception {
@@ -63,5 +73,42 @@ public class UserControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value(201))
                 .andExpect(jsonPath("$.result").value(1L));
+    }
+
+    @Test
+    void 로그인_요청_성공시_리프레시_토큰은_쿠키_액세스_토큰은_바디로_반환한다() throws Exception {
+        // given
+        String email = "test@gmail.com";
+        String password = "password";
+
+        UserLoginRequest loginRequest = UserLoginRequest
+                .builder()
+                .email(email)
+                .password(password)
+                .build();
+
+        String accessToken = "im.access.token";
+        String refreshToken = "im.refresh.token";
+
+        JwtDto jwtDto = JwtDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+        // when
+        when(userService.login(any(UserLoginRequest.class))).thenReturn(jwtDto);
+
+        MockHttpServletResponse loginResponse = mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("Login successful"))
+                .andExpect(jsonPath("$.result.accessToken").value(accessToken))
+                .andReturn().getResponse();
+
+        verify(userService).login(any(UserLoginRequest.class));
+        verify(jwtService).addRefreshTokenToResponse(any(HttpServletResponse.class), eq("im.refresh.token"));
     }
 }

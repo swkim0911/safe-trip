@@ -61,8 +61,7 @@ public class SecurityConfig {
                 ).exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint()));
 
-        http.addFilterAfter(jsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class); // LogoutFilter ➔ jsonUsernamePasswordAuthenticationFilter
-        http.addFilterBefore(jwtAuthenticationProcessingFilter(), JsonUsernamePasswordAuthenticationFilter.class); // jwtAuthenticationProcessingFilter ➔ JsonUsernamePasswordAuthenticationFilter
+        http.addFilterAfter(jwtAuthenticationProcessingFilter(), LogoutFilter.class); // LogoutFilter ➔ jsonUsernamePasswordAuthenticationFilter
 
         return http.build();
     }
@@ -85,17 +84,17 @@ public class SecurityConfig {
         return new LoginFailureHandler(objectMapper);
     }
 
-    @Bean
-    public JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordAuthenticationFilter() {
-        JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordAuthenticationFilter =
-                new JsonUsernamePasswordAuthenticationFilter(objectMapper);
-
-        jsonUsernamePasswordAuthenticationFilter.setAuthenticationManager(authenticationManager());
-        jsonUsernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(loginSuccessHandler());
-        jsonUsernamePasswordAuthenticationFilter.setAuthenticationFailureHandler(loginFailureHandler());
-
-        return jsonUsernamePasswordAuthenticationFilter;
-    }
+//    @Bean
+//    public JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordAuthenticationFilter() {
+//        JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordAuthenticationFilter =
+//                new JsonUsernamePasswordAuthenticationFilter(objectMapper);
+//
+//        jsonUsernamePasswordAuthenticationFilter.setAuthenticationManager(authenticationManager());
+//        jsonUsernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(loginSuccessHandler());
+//        jsonUsernamePasswordAuthenticationFilter.setAuthenticationFailureHandler(loginFailureHandler());
+//
+//        return jsonUsernamePasswordAuthenticationFilter;
+//    }
 
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
