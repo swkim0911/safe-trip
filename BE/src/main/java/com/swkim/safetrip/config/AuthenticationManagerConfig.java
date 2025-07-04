@@ -1,6 +1,6 @@
 package com.swkim.safetrip.config;
 
-import com.swkim.safetrip.login.service.LoginService;
+import com.swkim.safetrip.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

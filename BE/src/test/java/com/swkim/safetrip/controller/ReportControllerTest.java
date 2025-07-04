@@ -5,7 +5,7 @@ import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.jwt.JwtService;
-import com.swkim.safetrip.login.service.LoginService;
+import com.swkim.safetrip.service.LoginService;
 import com.swkim.safetrip.service.ReportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

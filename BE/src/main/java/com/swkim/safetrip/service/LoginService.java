@@ -1,4 +1,4 @@
-package com.swkim.safetrip.login.service;
+package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.repository.UserRepository;
