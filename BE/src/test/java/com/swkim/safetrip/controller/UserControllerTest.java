@@ -52,8 +52,7 @@ public class UserControllerTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    @DisplayName("회원가입 요청시 201 응답을 반환한다.")
-    void returns_201_when_signup_request_is_valid() throws Exception {
+    void 회원가입_요청_성공시_201_응답을_반환한다() throws Exception {
         //given
         UserSignUpRequest signUpRequest = UserSignUpRequest.builder()
                 .email("swkim@gmail.com")
