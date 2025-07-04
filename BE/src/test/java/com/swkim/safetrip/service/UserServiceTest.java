@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -128,6 +129,24 @@ class UserServiceTest {
         // then
         Assertions.assertThat(jwtDto.getAccessToken()).isEqualTo(accessToken);
         Assertions.assertThat(jwtDto.getRefreshToken()).isEqualTo(refreshToken);
+    }
+
+    @Test
+    void 로그인_요청에_존재하지_않은_이메일_입력시_예외가_발생한다() {
+        // given
+        UserLoginRequest loginRequest = new UserLoginRequest(
+                "notfound@email.com",
+                "password"
+        );
+
+        // when & then
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new UsernameNotFoundException("The email does not exist"));
+        Assertions.assertThatThrownBy(() -> userService.login(loginRequest)).isInstanceOf(UsernameNotFoundException.class);
+
+        // verify
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(jwtService, never()).issueAccessToken(any());
+        verify(jwtService, never()).issueRefreshToken();
     }
 
 }
