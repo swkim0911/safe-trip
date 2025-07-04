@@ -1,6 +1,7 @@
 package com.swkim.safetrip.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.jwt.filter.JwtAuthenticationProcessingFilter;
 import com.swkim.safetrip.login.filter.JsonUsernamePasswordAuthenticationFilter;
@@ -57,7 +58,8 @@ public class SecurityConfig {
                         .requestMatchers("/users", "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/reports").authenticated()
                         .anyRequest().authenticated()
-                );
+                ).exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint()));
 
         http.addFilterAfter(jsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class); // LogoutFilter ➔ jsonUsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtAuthenticationProcessingFilter(), JsonUsernamePasswordAuthenticationFilter.class); // jwtAuthenticationProcessingFilter ➔ JsonUsernamePasswordAuthenticationFilter
@@ -98,5 +100,10 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
         return new JwtAuthenticationProcessingFilter(jwtService, userService);
+    }
+
+    @Bean
+    public CustomAuthenticationEntryPoint customAuthenticationEntryPoint() {
+        return new CustomAuthenticationEntryPoint(objectMapper);
     }
 }
