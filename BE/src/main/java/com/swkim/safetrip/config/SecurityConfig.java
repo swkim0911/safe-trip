@@ -59,7 +59,7 @@ public class SecurityConfig {
                 ).exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint()));
 
-        http.addFilterAfter(jwtAuthenticationProcessingFilter(), LogoutFilter.class); // LogoutFilter ➔ jsonUsernamePasswordAuthenticationFilter
+        http.addFilterAfter(jwtAuthenticationProcessingFilter(), LogoutFilter.class); // LogoutFilter ➔ JwtAuthenticationProcessingFilter
 
         return http.build();
     }
