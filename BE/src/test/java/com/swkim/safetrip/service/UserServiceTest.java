@@ -4,6 +4,7 @@ import com.swkim.safetrip.dto.JwtDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.entity.User;
+import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.repository.UserRepository;
 import org.assertj.core.api.Assertions;
@@ -67,9 +68,23 @@ class UserServiceTest {
         // when
         Long savedId = userService.signup(signUpRequest);
 
-
         // then
         Assertions.assertThat(savedId).isEqualTo(1L);
+    }
+
+    @Test
+    void 회원가입_요청에_이메일이_중복된_경우_예외가_발생한다() {
+        // given
+        UserSignUpRequest signUpRequest = new UserSignUpRequest(
+                "duplicatedEmail@gmail.com",
+                "password",
+                "nickname"
+        );
+
+        when(userRepository.existsByEmail(signUpRequest.getEmail())).thenReturn(true);
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> userService.signup(signUpRequest)).isInstanceOf(DuplicateUserEmailException.class);
     }
 
     @Test

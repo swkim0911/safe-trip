@@ -14,7 +14,7 @@ public enum Error {
     REPORT_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "report를 찾을 수 없습니다."),
     SCAM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "report를 찾을 수 없습니다."),
     S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "s3 버킷에 이미지를 업로드할 수 없습니다."),
-    DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "You cannot sign up due to duplicate e-mail."),
+    DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
     DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "You cannot sing up due to duplicate nickname"),
     USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email."),
 
