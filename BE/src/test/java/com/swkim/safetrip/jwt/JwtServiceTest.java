@@ -18,7 +18,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Date;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
