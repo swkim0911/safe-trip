@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -44,19 +45,19 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
         // 1. 요청에 accesstoken 토큰이 valid 하면 authentication 저장 (secretKey, exp 체크)
         if(accessToken != null){
-            // todo 예외 처리 401
-            String email = jwtService.extractEmail(accessToken).orElse(null);
-            if (email != null) {
-                try{
-                    User findUser = userService.getUserByEmail(email);
-                    saveAuthentication(findUser);
-                }catch(UserNotFoundException e){
-                    throw new UsernameNotFoundException("The email does not exist");
-                }
+            String email = jwtService.extractEmail(accessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
 
+            try{
+                User findUser = userService.getUserByEmail(email);
+                saveAuthentication(findUser);
+            }catch(UserNotFoundException e){
+                throw new UsernameNotFoundException("The email does not exist");
             }
+
             filterChain.doFilter(request, response);
         }
+
+        // acceess 토큰 만료 혹은 Authorization 헤더 누락/오타
 
 
 //        String refreshToken = jwtService.extractRefreshToken(request)
