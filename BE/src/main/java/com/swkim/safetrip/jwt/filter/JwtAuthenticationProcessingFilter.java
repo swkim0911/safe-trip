@@ -1,7 +1,7 @@
 package com.swkim.safetrip.jwt.filter;
 
 import com.swkim.safetrip.entity.User;
-import com.swkim.safetrip.global.exception.custom.AuthenticatedUserNotFoundException;
+import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -10,13 +10,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.naming.factory.SendMailFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -47,10 +47,13 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             // todo 예외 처리 401
             String email = jwtService.extractEmail(accessToken).orElse(null);
             if (email != null) {
-                User findUser = userService.getUserByEmail(email).orElseThrow(AuthenticatedUserNotFoundException::new);
-                if (findUser != null) {
+                try{
+                    User findUser = userService.getUserByEmail(email);
                     saveAuthentication(findUser);
+                }catch(UserNotFoundException e){
+                    throw new UsernameNotFoundException("The email does not exist");
                 }
+
             }
             filterChain.doFilter(request, response);
         }
