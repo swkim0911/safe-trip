@@ -15,9 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -146,8 +146,26 @@ class UserServiceTest {
         );
 
         // when & then
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new UsernameNotFoundException("The email does not exist"));
-        Assertions.assertThatThrownBy(() -> userService.login(loginRequest)).isInstanceOf(UsernameNotFoundException.class);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new BadCredentialsException("Bad credentials"));
+        Assertions.assertThatThrownBy(() -> userService.login(loginRequest)).isInstanceOf(BadCredentialsException.class);
+
+        // verify
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(jwtService, never()).issueAccessToken(any());
+        verify(jwtService, never()).issueRefreshToken();
+    }
+
+    @Test
+    void 로그인_요청에_잘못된_비밀번호_입력시_예외가_발생한다() {
+        // given
+        UserLoginRequest loginRequest = new UserLoginRequest(
+                "test@email.com",
+                "wrongPassword"
+        );
+
+        // when & then
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new BadCredentialsException("Bad credentials"));
+        Assertions.assertThatThrownBy(() -> userService.login(loginRequest)).isInstanceOf(BadCredentialsException.class);
 
         // verify
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
