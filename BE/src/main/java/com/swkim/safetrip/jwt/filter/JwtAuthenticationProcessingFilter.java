@@ -38,6 +38,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        // 글 등록 요청에만 동작하는 필터
 
         String accessToken = jwtService.extractAccessToken(request)
                 .filter(jwtService::isTokenValid)
