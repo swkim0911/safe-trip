@@ -7,18 +7,15 @@ import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
-import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.mapper.UserMapper;
 import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +23,7 @@ public class UserService {
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -56,8 +53,8 @@ public class UserService {
 
         authenticationManager.authenticate(authenticationToken);
 
-        String accessToken = jwtService.issueAccessToken(email);
-        String refreshToken = jwtService.issueRefreshToken();
+        String accessToken = jwtUtils.issueAccessToken(email);
+        String refreshToken = jwtUtils.issueRefreshToken();
 
         return JwtDto.builder()
                 .accessToken(accessToken)

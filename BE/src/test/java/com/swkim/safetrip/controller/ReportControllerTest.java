@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
-import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.LoginService;
 import com.swkim.safetrip.service.ReportService;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +47,7 @@ class ReportControllerTest {
     private LoginService loginService;
 
     @MockBean
-    private JwtService jwtService;
+    private JwtUtils jwtUtils;
 
     @Autowired
     private MessageSource messageSource;

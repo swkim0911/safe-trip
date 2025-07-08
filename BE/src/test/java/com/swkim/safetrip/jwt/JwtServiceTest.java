@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JwtServiceTest {
 
     @InjectMocks
-    private JwtService jwtService;
+    private JwtUtils jwtUtils;
 
     @Mock
     private UserRepository userRepository;
@@ -39,13 +39,13 @@ class JwtServiceTest {
         String accessHeader = "Authorization";
         String refreshName = "refreshToken";
 
-        ReflectionTestUtils.setField(jwtService, "accessTokenExpirationPeriod", accessTokenExpirationPeriod);
-        ReflectionTestUtils.setField(jwtService, "refreshTokenExpirationPeriod", refreshTokenExpirationPeriod);
-        ReflectionTestUtils.setField(jwtService, "accessHeader", accessHeader);
-        ReflectionTestUtils.setField(jwtService, "refreshName", refreshName);
+        ReflectionTestUtils.setField(jwtUtils, "accessTokenExpirationPeriod", accessTokenExpirationPeriod);
+        ReflectionTestUtils.setField(jwtUtils, "refreshTokenExpirationPeriod", refreshTokenExpirationPeriod);
+        ReflectionTestUtils.setField(jwtUtils, "accessHeader", accessHeader);
+        ReflectionTestUtils.setField(jwtUtils, "refreshName", refreshName);
 
 
-        ReflectionTestUtils.setField(jwtService, "secretKey", secretKey);
+        ReflectionTestUtils.setField(jwtUtils, "secretKey", secretKey);
     }
 
     @Test
@@ -54,7 +54,7 @@ class JwtServiceTest {
         String email = "test@gmail.com";
 
         // when
-        String accessToken = jwtService.issueAccessToken(email);
+        String accessToken = jwtUtils.issueAccessToken(email);
 
         // then
         assertThat(accessToken).isNotNull();
@@ -72,7 +72,7 @@ class JwtServiceTest {
     void 리프레시_토큰을_정상_발급한다() {
 
         // given, when
-        String refreshToken = jwtService.issueRefreshToken();
+        String refreshToken = jwtUtils.issueRefreshToken();
 
         // then
         assertThat(refreshToken).isNotNull();
@@ -91,11 +91,11 @@ class JwtServiceTest {
         // given
         String email = "test@gmail.com";
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        String accessToken = jwtService.issueAccessToken(email);
+        String accessToken = jwtUtils.issueAccessToken(email);
         Mockito.when(request.getHeader("Authorization")).thenReturn("Bearer " + accessToken);
 
         // when
-        Optional<String> result =jwtService.extractAccessToken(request);
+        Optional<String> result = jwtUtils.extractAccessToken(request);
 
         // then
         assertThat(result).isPresent();
@@ -110,7 +110,7 @@ class JwtServiceTest {
         Mockito.when(request.getHeader("Authorization")).thenReturn(null);
 
         // when
-        Optional<String> result =jwtService.extractAccessToken(request);
+        Optional<String> result = jwtUtils.extractAccessToken(request);
 
         // then
         assertThat(result).isEmpty();
@@ -120,13 +120,13 @@ class JwtServiceTest {
     void 리프레시_토큰을_요청으로부터_정상_추출한다() {
         // given
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        String refreshToken = jwtService.issueRefreshToken();
+        String refreshToken = jwtUtils.issueRefreshToken();
         Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
         Cookie[] cookies = new Cookie[]{refreshTokenCookie};
         Mockito.when(request.getCookies()).thenReturn(cookies);
 
         // when
-        Optional<String> result = jwtService.extractRefreshToken(request);
+        Optional<String> result = jwtUtils.extractRefreshToken(request);
 
         // then
         assertThat(result).isPresent();
@@ -141,7 +141,7 @@ class JwtServiceTest {
         Mockito.when(request.getCookies()).thenReturn(null);
 
         //when
-        Optional<String> result = jwtService.extractRefreshToken(request);
+        Optional<String> result = jwtUtils.extractRefreshToken(request);
 
         //then
         assertThat(result).isEmpty();
@@ -158,7 +158,7 @@ class JwtServiceTest {
         Mockito.when(request.getCookies()).thenReturn(cookies);
 
         //when
-        Optional<String> result = jwtService.extractRefreshToken(request);
+        Optional<String> result = jwtUtils.extractRefreshToken(request);
 
         //then
         assertThat(result).isEmpty();
@@ -167,10 +167,10 @@ class JwtServiceTest {
     @Test
     void 유효한_secretKey로_서명된_토큰은_검증에_통과한다() {
         // given
-        String token = jwtService.issueRefreshToken();
+        String token = jwtUtils.issueRefreshToken();
 
         // when
-        boolean tokenValid = jwtService.isTokenValid(token);
+        boolean tokenValid = jwtUtils.isTokenValid(token);
 
         // then
         assertThat(tokenValid).isTrue();
@@ -184,7 +184,7 @@ class JwtServiceTest {
                 .sign(Algorithm.HMAC512("invalidSecretKey"));
 
         // when
-        boolean tokenValid = jwtService.isTokenValid(strangeToken);
+        boolean tokenValid = jwtUtils.isTokenValid(strangeToken);
 
         // then
         assertThat(tokenValid).isFalse();
@@ -201,7 +201,7 @@ class JwtServiceTest {
                 .sign(Algorithm.HMAC512(secretKey));
 
         // when
-        boolean tokenValid = jwtService.isTokenValid(expiredToken);
+        boolean tokenValid = jwtUtils.isTokenValid(expiredToken);
 
         // then
         assertThat(tokenValid).isFalse();
@@ -211,10 +211,10 @@ class JwtServiceTest {
     void 액세스_토큰으로부터_email을_성공적으로_반환한다() {
         // given
         String email = "test@email.com";
-        String accessToken = jwtService.issueAccessToken(email);
+        String accessToken = jwtUtils.issueAccessToken(email);
 
         // when
-        Optional<String> extractedEmail = jwtService.extractEmail(accessToken);
+        Optional<String> extractedEmail = jwtUtils.extractEmail(accessToken);
 
         // then
         assertThat(extractedEmail).isPresent();
@@ -229,7 +229,7 @@ class JwtServiceTest {
                 .sign(Algorithm.HMAC512(secretKey));
 
         // when
-        Optional<String> extractedEmail = jwtService.extractEmail(noEmailAccessToken);
+        Optional<String> extractedEmail = jwtUtils.extractEmail(noEmailAccessToken);
 
         // then
         assertThat(extractedEmail).isEmpty();

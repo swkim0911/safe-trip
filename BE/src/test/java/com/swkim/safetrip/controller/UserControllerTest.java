@@ -5,11 +5,10 @@ import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.JwtDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
-import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.LoginService;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -46,7 +45,7 @@ public class UserControllerTest {
     private LoginService loginService;
 
     @MockBean
-    private JwtService jwtService;
+    private JwtUtils jwtUtils;
 
     @MockBean
     private PasswordEncoder passwordEncoder;
@@ -106,6 +105,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.result.accessToken").value(accessToken));
 
         verify(userService).login(any(UserLoginRequest.class));
-        verify(jwtService).addRefreshTokenToResponse(any(HttpServletResponse.class), eq("im.refresh.token"));
+        verify(jwtUtils).addRefreshTokenToResponse(any(HttpServletResponse.class), eq("im.refresh.token"));
     }
 }

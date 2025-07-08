@@ -5,7 +5,7 @@ import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.global.response.ApiResponse;
-import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final JwtService jwtService; // todo: 의존하지 않기
+    private final JwtUtils jwtUtils; // todo: 의존하지 않기
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
@@ -33,7 +33,7 @@ public class UserController {
     @PostMapping("/auth/login")
     public ApiResponse<AccessTokenResponse> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         JwtDto jwtDto = userService.login(loginRequest);
-        jwtService.addRefreshTokenToResponse(httpServletResponse, jwtDto.getRefreshToken());
+        jwtUtils.addRefreshTokenToResponse(httpServletResponse, jwtDto.getRefreshToken());
 
         AccessTokenResponse loginResponse = AccessTokenResponse
                 .builder()

@@ -5,7 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
-import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -38,7 +38,7 @@ class JwtAuthenticationProcessingFilterTest {
     JwtAuthenticationProcessingFilter filter;
 
     @Mock
-    JwtService jwtService;
+    JwtUtils jwtUtils;
 
     @Mock
     UserService userService;
@@ -67,7 +67,7 @@ class JwtAuthenticationProcessingFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         // then (jwtService가 호출되지 않았고, filterChain이 동작하는지 확인)
-        verify(jwtService, never()).extractAccessToken(any());
+        verify(jwtUtils, never()).extractAccessToken(any());
         verify(filterChain).doFilter(request, response);
     }
 
@@ -81,7 +81,7 @@ class JwtAuthenticationProcessingFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         // then (jwtService가 accessToken을 추출하는지 검증한다)
-        verify(jwtService).extractAccessToken(any());
+        verify(jwtUtils).extractAccessToken(any());
     }
 
     @Test
@@ -98,11 +98,11 @@ class JwtAuthenticationProcessingFilterTest {
         when(request.getRequestURI()).thenReturn("/reports");
         when(request.getMethod()).thenReturn("POST");
 
-        when(jwtService.extractAccessToken(request)).thenReturn(Optional.of(accessTokenWithoutEmailClaim));
-        when(jwtService.isTokenValid(accessTokenWithoutEmailClaim)).thenReturn(true);
+        when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessTokenWithoutEmailClaim));
+        when(jwtUtils.isTokenValid(accessTokenWithoutEmailClaim)).thenReturn(true);
 
         // when
-        when(jwtService.extractEmail(accessTokenWithoutEmailClaim)).thenReturn(Optional.empty());
+        when(jwtUtils.extractEmail(accessTokenWithoutEmailClaim)).thenReturn(Optional.empty());
 
         // then
         Assertions.assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
@@ -124,9 +124,9 @@ class JwtAuthenticationProcessingFilterTest {
         when(request.getRequestURI()).thenReturn("/reports");
         when(request.getMethod()).thenReturn("POST");
 
-        when(jwtService.extractAccessToken(request)).thenReturn(Optional.of(accessToken));
-        when(jwtService.isTokenValid(accessToken)).thenReturn(true);
-        when(jwtService.extractEmail(accessToken)).thenReturn(Optional.of(email));
+        when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessToken));
+        when(jwtUtils.isTokenValid(accessToken)).thenReturn(true);
+        when(jwtUtils.extractEmail(accessToken)).thenReturn(Optional.of(email));
 
         User user = User.builder()
                 .email(email)
@@ -159,9 +159,9 @@ class JwtAuthenticationProcessingFilterTest {
         when(request.getRequestURI()).thenReturn("/reports");
         when(request.getMethod()).thenReturn("POST");
 
-        when(jwtService.extractAccessToken(request)).thenReturn(Optional.of(accessToken));
-        when(jwtService.isTokenValid(accessToken)).thenReturn(true);
-        when(jwtService.extractEmail(accessToken)).thenReturn(Optional.of(email));
+        when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessToken));
+        when(jwtUtils.isTokenValid(accessToken)).thenReturn(true);
+        when(jwtUtils.extractEmail(accessToken)).thenReturn(Optional.of(email));
 
         // when
         when(userService.getUserByEmail(email)).thenThrow(UserNotFoundException.class);

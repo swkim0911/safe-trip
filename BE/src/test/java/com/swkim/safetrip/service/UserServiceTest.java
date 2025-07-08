@@ -6,7 +6,7 @@ import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
-import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class UserServiceTest {
     private AuthenticationManager authenticationManager;
 
     @Mock
-    private JwtService jwtService;
+    private JwtUtils jwtUtils;
 
     @Mock
     private UserRepository userRepository;
@@ -126,8 +126,8 @@ class UserServiceTest {
         String accessToken = "im.access.token";
         String refreshToken = "im.refresh.token";
 
-        when(jwtService.issueAccessToken(email)).thenReturn(accessToken);
-        when(jwtService.issueRefreshToken()).thenReturn(refreshToken);
+        when(jwtUtils.issueAccessToken(email)).thenReturn(accessToken);
+        when(jwtUtils.issueRefreshToken()).thenReturn(refreshToken);
 
         // when
         JwtDto jwtDto = userService.login(loginRequest);
@@ -151,8 +151,8 @@ class UserServiceTest {
 
         // verify
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtService, never()).issueAccessToken(any());
-        verify(jwtService, never()).issueRefreshToken();
+        verify(jwtUtils, never()).issueAccessToken(any());
+        verify(jwtUtils, never()).issueRefreshToken();
     }
 
     @Test
@@ -169,8 +169,8 @@ class UserServiceTest {
 
         // verify
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtService, never()).issueAccessToken(any());
-        verify(jwtService, never()).issueRefreshToken();
+        verify(jwtUtils, never()).issueAccessToken(any());
+        verify(jwtUtils, never()).issueRefreshToken();
     }
 
 }

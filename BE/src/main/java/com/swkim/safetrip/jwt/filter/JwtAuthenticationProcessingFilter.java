@@ -2,7 +2,7 @@ package com.swkim.safetrip.jwt.filter;
 
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
-import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,7 +27,7 @@ import java.util.Optional;
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
     private final UserService userService;
 
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
@@ -39,13 +39,13 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             return;
         }
 
-        String accessToken = jwtService.extractAccessToken(request)
-                .filter(jwtService::isTokenValid)
+        String accessToken = jwtUtils.extractAccessToken(request)
+                .filter(jwtUtils::isTokenValid)
                 .orElse(null);
 
         // 1. 요청에 accesstoken 토큰이 valid (secretKey, exp 체크) 하면 authentication 저장
         if(accessToken != null){
-            String email = jwtService.extractEmail(accessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
+            String email = jwtUtils.extractEmail(accessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
             try{
                 User findUser = userService.getUserByEmail(email);
                 saveAuthentication(findUser);
@@ -57,8 +57,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         // access 토큰이 만료된 경우.
         // access 토큰이 not valid한 경우
         // access 토큰이 없는 경우
-        String refreshToken = jwtService.extractRefreshToken(request)
-                .filter(jwtService::isTokenValid)
+        String refreshToken = jwtUtils.extractRefreshToken(request)
+                .filter(jwtUtils::isTokenValid)
                 .orElse(null);
 
 //        // 리프레시 토큰이 있고 유효성 검증을 통과하면 액세스/리프레시 토큰 재발급
@@ -72,14 +72,14 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private void reIssueAccessAndRefreshToken(HttpServletResponse response, String refreshToken) throws IOException{
 
-        Optional<User> optionalUser = jwtService.getUserByRefreshToken(refreshToken);
+        Optional<User> optionalUser = jwtUtils.getUserByRefreshToken(refreshToken);
 
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            String reIssuedRefreshToken = jwtService.reIssueRefreshToken(user);
-            String reIssuedAccessToken = jwtService.issueAccessToken(user.getEmail());
+            String reIssuedRefreshToken = jwtUtils.reIssueRefreshToken(user);
+            String reIssuedAccessToken = jwtUtils.issueAccessToken(user.getEmail());
 
-            jwtService.addTokensToResponse(
+            jwtUtils.addTokensToResponse(
                     response,
                     reIssuedAccessToken,
                     reIssuedRefreshToken

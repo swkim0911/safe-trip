@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +24,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 
-@Service
+@Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtService {
+public class JwtUtils {
 
     @Value("${jwt.secretKey}")
     private String secretKey;
