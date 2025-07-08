@@ -31,9 +31,9 @@ public class UserController {
     }
 
     @PostMapping("/auth/login")
-    public ApiResponse<AccessTokenResponse> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse response) {
+    public ApiResponse<AccessTokenResponse> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         JwtDto jwtDto = userService.login(loginRequest);
-        jwtService.addRefreshTokenToResponse(response, jwtDto.getRefreshToken());
+        jwtService.addRefreshTokenToResponse(httpServletResponse, jwtDto.getRefreshToken());
 
         AccessTokenResponse loginResponse = AccessTokenResponse
                 .builder()
@@ -44,13 +44,13 @@ public class UserController {
     }
 
     @PostMapping("/auth/refreshToken")
-    public ApiResponse<AccessTokenResponse> reIssueAccessToken(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+    public ApiResponse<AccessTokenResponse> reIssueAccessToken(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse httpServletResponse) {
 
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new MissingRefreshTokenException("Refresh token is Empty");
         }
 
-        AccessTokenResponse accessTokenResponse = userService.reIssueAccessToken(refreshToken, response);
+        AccessTokenResponse accessTokenResponse = userService.reIssueAccessToken(refreshToken, httpServletResponse);
         return ApiResponse.of(HttpStatus.OK.value(), "Access Token is Reissued with RTR", accessTokenResponse);
     }
 }
