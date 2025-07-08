@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
+import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -21,6 +22,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.io.IOException;
 import java.util.Date;
@@ -140,5 +142,32 @@ class JwtAuthenticationProcessingFilterTest {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Assertions.assertThat(authentication).isNotNull();
         Assertions.assertThat(((UserDetails) authentication.getPrincipal()).getUsername()).isEqualTo(email);
+    }
+
+    @Test
+    void valid_액세스_토큰이_이메일_클레임이_있지만_이메일로부터_유저를_찾을_수_없을_때_예외가_발생한다() throws ServletException, IOException {
+        // given
+        String secretKey = "eijnv329asic";
+        String email = "test@gmail.com";
+
+        String accessToken = JWT.create()
+                .withSubject("AccessToken")
+                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
+                .withClaim("email", email)
+                .sign(Algorithm.HMAC512(secretKey));
+
+        when(request.getRequestURI()).thenReturn("/reports");
+        when(request.getMethod()).thenReturn("POST");
+
+        when(jwtService.extractAccessToken(request)).thenReturn(Optional.of(accessToken));
+        when(jwtService.isTokenValid(accessToken)).thenReturn(true);
+        when(jwtService.extractEmail(accessToken)).thenReturn(Optional.of(email));
+
+        // when
+        when(userService.getUserByEmail(email)).thenThrow(UserNotFoundException.class);
+
+        // then
+        Assertions.assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
+                .isInstanceOf(UsernameNotFoundException.class);
     }
 }
