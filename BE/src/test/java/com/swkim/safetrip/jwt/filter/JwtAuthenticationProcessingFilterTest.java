@@ -1,18 +1,24 @@
 package com.swkim.safetrip.jwt.filter;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -63,5 +69,30 @@ class JwtAuthenticationProcessingFilterTest {
 
         // then (jwtService가 accessToken을 추출하는지 검증한다)
         verify(jwtService).extractAccessToken(any());
+    }
+
+    @Test
+    void 액세스_토큰이_valid_하지만_이메일_claim이_없을_때_bad_credential_예외가_발생한다() throws ServletException, IOException {
+        // given
+
+        String secretKey = "eijnv329asic";
+
+        String accessTokenWithoutEmailClaim = JWT.create()
+                .withSubject("AccessToken")
+                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
+                .sign(Algorithm.HMAC512(secretKey));
+
+        when(request.getRequestURI()).thenReturn("/reports");
+        when(request.getMethod()).thenReturn("POST");
+
+        when(jwtService.extractAccessToken(request)).thenReturn(Optional.of(accessTokenWithoutEmailClaim));
+        when(jwtService.isTokenValid(accessTokenWithoutEmailClaim)).thenReturn(true);
+
+        // when
+        when(jwtService.extractEmail(accessTokenWithoutEmailClaim)).thenReturn(Optional.empty());
+
+        // then
+        Assertions.assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
+                .isInstanceOf(BadCredentialsException.class);
     }
 }

@@ -38,16 +38,14 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        // 글 등록 요청에만 동작하는 필터
 
         String accessToken = jwtService.extractAccessToken(request)
                 .filter(jwtService::isTokenValid)
                 .orElse(null);
 
-        // 1. 요청에 accesstoken 토큰이 valid 하면 authentication 저장 (secretKey, exp 체크)
+        // 1. 요청에 accesstoken 토큰이 valid (secretKey, exp 체크) 하면 authentication 저장
         if(accessToken != null){
             String email = jwtService.extractEmail(accessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
-
             try{
                 User findUser = userService.getUserByEmail(email);
                 saveAuthentication(findUser);
