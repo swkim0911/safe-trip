@@ -54,33 +54,21 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         }
+        // access 토큰이 만료된 경우.
+        // access 토큰이 not valid한 경우
+        // access 토큰이 없는 경우
+        String refreshToken = jwtService.extractRefreshToken(request)
+                .filter(jwtService::isTokenValid)
+                .orElse(null);
 
-        // acceess 토큰 만료 혹은 Authorization 헤더 누락/오타
-
-
-//        String refreshToken = jwtService.extractRefreshToken(request)
-//                .filter(jwtService::isTokenValid)
-//                .orElse(null);
-//
 //        // 리프레시 토큰이 있고 유효성 검증을 통과하면 액세스/리프레시 토큰 재발급
-//        if(refreshToken != null){
-//            reIssueAccessAndRefreshToken(response, refreshToken); // 리프래시 토큰이 있을 때는 왜 filter로 보내지 않지
-//            return;
-//        }
-//        String accessToken = jwtService.extractAccessToken(request)
-//                .filter(jwtService::isTokenValid)
-//                .orElse(null);
-//
-//        if (accessToken != null) {
-//            String email = jwtService.extractEmail(accessToken).orElse(null);
-//            if (email != null) {
-//                User user = jwtService.getUserByEmail(email).orElse(null);
-//                if (user != null) {
-//                    saveAuthentication(user);
-//                }
-//            }
-//            filterChain.doFilter(request, response);
-//        }
+        if(refreshToken != null){
+            reIssueAccessAndRefreshToken(response, refreshToken); // 리프래시 토큰이 있을 때는 왜 filter로 보내지 않지
+            filterChain.doFilter(request, response);
+        }
+
+
+
         // "/report" post 요청인데 accessToken이 없는 경우에는 로그인 화면을 띄워야 한다.
     }
 
@@ -99,17 +87,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                     reIssuedRefreshToken
             );
         }
-    }
-
-    private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        jwtService.extractAccessToken(request)
-                .filter(jwtService::isTokenValid)
-                .ifPresent(accessToken -> jwtService.extractEmail(accessToken)
-                        .ifPresent(email -> jwtService.getUserByEmail(email)
-                                .ifPresent(this::saveAuthentication))
-                );
-
-        filterChain.doFilter(request, response);
     }
 
     private void saveAuthentication(User user){
