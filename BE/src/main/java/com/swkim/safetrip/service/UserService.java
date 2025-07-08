@@ -45,6 +45,7 @@ public class UserService {
         return savedUser.getId();
     }
 
+    @Transactional
     public JwtDto login(UserLoginRequest loginRequest) {
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
@@ -55,6 +56,9 @@ public class UserService {
 
         String accessToken = jwtUtils.issueAccessToken(email);
         String refreshToken = jwtUtils.issueRefreshToken();
+
+        User findUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        findUser.updateRefreshToken(refreshToken);
 
         return JwtDto.builder()
                 .accessToken(accessToken)

@@ -40,7 +40,6 @@ public class UserController {
         // todo 리팩토링
         ResponseCookie cookie = jwtUtils.createRefreshTokenCookie(jwtDto.getRefreshToken());
 
-
         AccessTokenResponse loginResponse = AccessTokenResponse
                 .builder()
                 .accessToken(jwtDto.getAccessToken())
@@ -61,7 +60,8 @@ public class UserController {
             throw new MissingRefreshTokenException();
         }
 
-        AccessTokenResponse accessTokenResponse = userService.reIssueAccessToken(refreshToken, httpServletResponse);
+        AccessTokenResponse accessTokenResponse = userService.reIssueAccessToken(refreshToken);
+
         return ApiResponse.of(HttpStatus.OK.value(), "Access Token is Reissued with RTR", accessTokenResponse);
     }
 }
