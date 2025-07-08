@@ -12,10 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -23,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
-    private final JwtService jwtService;
+    private final JwtService jwtService; // todo: 의존하지 않기
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
@@ -46,8 +43,14 @@ public class UserController {
         return ApiResponse.of(HttpStatus.OK.value(), "Login successful", loginResponse);
     }
 
-    @PostMapping("/auth/reissue")
-    public ApiResponse<AccessTokenResponse> reIssueRefreshToken() {
+    @PostMapping("/auth/refreshToken")
+    public ApiResponse<AccessTokenResponse> reIssueAccessToken(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
 
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new MissingRefreshTokenException("Refresh token is Empty");
+        }
+
+        AccessTokenResponse accessTokenResponse = userService.reIssueAccessToken(refreshToken, response);
+        return ApiResponse.of(HttpStatus.OK.value(), "Access Token is Reissued with RTR", accessTokenResponse);
     }
 }
