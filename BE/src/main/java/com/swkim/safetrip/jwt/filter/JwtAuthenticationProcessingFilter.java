@@ -67,8 +67,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         }
 
-
-
         // "/report" post 요청인데 accessToken이 없는 경우에는 로그인 화면을 띄워야 한다.
     }
 
