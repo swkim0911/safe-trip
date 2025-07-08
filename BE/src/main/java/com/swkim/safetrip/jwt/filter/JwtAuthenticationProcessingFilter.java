@@ -52,7 +52,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             }catch(UserNotFoundException e){
                 throw new UsernameNotFoundException("The email does not exist");
             }
-
             filterChain.doFilter(request, response);
         }
 
