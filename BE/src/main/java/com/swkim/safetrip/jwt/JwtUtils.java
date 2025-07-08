@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -73,7 +72,7 @@ public class JwtUtils {
     public void addTokensToResponse(HttpServletResponse response, String accessToken, String refreshToken) throws IOException{
         response.setStatus(HttpServletResponse.SC_OK);
         addAccessTokenToResponse(response, accessToken);
-        addRefreshTokenToResponse(response, refreshToken);
+        createRefreshTokenCookie(response, refreshToken);
     }
 
     public String issueAccessToken(String email){
@@ -139,8 +138,8 @@ public class JwtUtils {
         response.getWriter().write(json);
     }
 
-    public void addRefreshTokenToResponse(HttpServletResponse response, String refreshToken){
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+    public ResponseCookie createRefreshTokenCookie(String refreshToken){
+        return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)             // JS에서 접근 불가
                 .secure(true)               // HTTPS 환경에서만 전송 (개발 중엔 false로 설정 가능)
                 .path("/")                  // 모든 경로에 대해 전송됨
@@ -148,7 +147,6 @@ public class JwtUtils {
                 .sameSite("Strict")        // CSRF 보호 (필요 시 "Lax"도 가능)
                 .build();
 
-        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     @Transactional

@@ -105,6 +105,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.result.accessToken").value(accessToken));
 
         verify(userService).login(any(UserLoginRequest.class));
-        verify(jwtUtils).addRefreshTokenToResponse(any(HttpServletResponse.class), eq("im.refresh.token"));
+        verify(jwtUtils).createRefreshTokenCookie(eq("im.refresh.token"));
     }
 }

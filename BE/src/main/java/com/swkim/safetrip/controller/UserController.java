@@ -4,6 +4,7 @@ import com.swkim.safetrip.dto.JwtDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
+import com.swkim.safetrip.global.exception.custom.MissingRefreshTokenException;
 import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.UserService;
@@ -11,7 +12,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -20,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final JwtUtils jwtUtils; // todo: 의존하지 않기
+    private final JwtUtils jwtUtils;
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
@@ -31,23 +35,30 @@ public class UserController {
     }
 
     @PostMapping("/auth/login")
-    public ApiResponse<AccessTokenResponse> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<ApiResponse<AccessTokenResponse>> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         JwtDto jwtDto = userService.login(loginRequest);
-        jwtUtils.addRefreshTokenToResponse(httpServletResponse, jwtDto.getRefreshToken());
+        // todo 리팩토링
+        ResponseCookie cookie = jwtUtils.createRefreshTokenCookie(jwtDto.getRefreshToken());
+
 
         AccessTokenResponse loginResponse = AccessTokenResponse
                 .builder()
                 .accessToken(jwtDto.getAccessToken())
                 .build();
 
-        return ApiResponse.of(HttpStatus.OK.value(), "Login successful", loginResponse);
+        ApiResponse<AccessTokenResponse> apiResponse =
+                ApiResponse.of(HttpStatus.OK.value(), "Login successful", loginResponse);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(apiResponse);
     }
 
     @PostMapping("/auth/refreshToken")
     public ApiResponse<AccessTokenResponse> reIssueAccessToken(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse httpServletResponse) {
 
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new MissingRefreshTokenException("Refresh token is Empty");
+            throw new MissingRefreshTokenException();
         }
 
         AccessTokenResponse accessTokenResponse = userService.reIssueAccessToken(refreshToken, httpServletResponse);
