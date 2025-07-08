@@ -3,7 +3,7 @@ package com.swkim.safetrip.controller;
 import com.swkim.safetrip.dto.JwtDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
-import com.swkim.safetrip.dto.response.UserLoginResponse;
+import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.jwt.JwtService;
 import com.swkim.safetrip.service.UserService;
@@ -34,15 +34,20 @@ public class UserController {
     }
 
     @PostMapping("/auth/login")
-    public ApiResponse<UserLoginResponse> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse response) {
+    public ApiResponse<AccessTokenResponse> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse response) {
         JwtDto jwtDto = userService.login(loginRequest);
         jwtService.addRefreshTokenToResponse(response, jwtDto.getRefreshToken());
 
-        UserLoginResponse loginResponse = UserLoginResponse
+        AccessTokenResponse loginResponse = AccessTokenResponse
                 .builder()
                 .accessToken(jwtDto.getAccessToken())
                 .build();
 
         return ApiResponse.of(HttpStatus.OK.value(), "Login successful", loginResponse);
+    }
+
+    @PostMapping("/auth/reissue")
+    public ApiResponse<AccessTokenResponse> reIssueRefreshToken() {
+
     }
 }
