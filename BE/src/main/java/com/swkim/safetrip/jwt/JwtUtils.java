@@ -3,9 +3,6 @@ package com.swkim.safetrip.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.swkim.safetrip.entity.User;
-import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
-import com.swkim.safetrip.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -46,8 +42,6 @@ public class JwtUtils {
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String EMAIL_CLAIM = "email";
     private static final String BEARER = "Bearer ";
-
-    private final UserRepository userRepository;
 
     private String createAccessToken(String email) {
         Date now = new Date();
@@ -124,18 +118,6 @@ public class JwtUtils {
                 .sameSite("Strict")        // CSRF 보호 (필요 시 "Lax"도 가능)
                 .build();
 
-    }
-
-    @Transactional
-    public void saveRefreshToken(String email, String refreshToken){
-        User user = findUser(email);
-        user.updateRefreshToken(refreshToken);
-    }
-
-    @Transactional(readOnly = true)
-    private User findUser(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(UserNotFoundException::new);
     }
 
     // verify: 서명, 토큰 구조, 만료 시간 검증
