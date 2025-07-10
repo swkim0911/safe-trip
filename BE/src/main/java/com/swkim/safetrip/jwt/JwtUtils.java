@@ -5,14 +5,12 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
@@ -99,14 +97,6 @@ public class JwtUtils {
             log.error("Access Token is not valid.");
             return Optional.empty();
         }
-    }
-
-    public void addAccessTokenToResponse(HttpServletResponse response, String accessToken) throws IOException {
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json;charset=UTF-8");
-
-        String json = String.format("{\"accessToken\": \"%s\"}", accessToken);
-        response.getWriter().write(json);
     }
 
     public ResponseCookie createRefreshTokenCookie(String refreshToken){
