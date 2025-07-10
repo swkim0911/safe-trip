@@ -3,7 +3,9 @@ package com.swkim.safetrip.service;
 import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
+import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.entity.User;
+import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
 import com.swkim.safetrip.jwt.JwtUtils;
@@ -14,12 +16,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -126,15 +131,27 @@ class UserServiceTest {
         String accessToken = "im.access.token";
         String refreshToken = "im.refresh.token";
 
+        User mockUser = User.builder()
+                .email(email)
+                .password(password)
+                .nickname("nickname")
+                .role(Role.USER)
+                .build();
+
         when(jwtUtils.issueAccessToken(email)).thenReturn(accessToken);
         when(jwtUtils.issueRefreshToken()).thenReturn(refreshToken);
+        when(jwtUtils.createRefreshTokenCookie(refreshToken)).thenReturn(ResponseCookie.from("refreshToken", refreshToken).build());
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(mockUser));
 
         // when
         AuthTokensResponseDto authTokensResponseDto = userService.login(loginRequest);
+        AccessTokenResponse accessTokenResponse = authTokensResponseDto.getAccessTokenResponse();
+        ResponseCookie refreshTokenCookie = authTokensResponseDto.getRefreshTokenCookie();
+
 
         // then
-        Assertions.assertThat(authTokensResponseDto.getAccessToken()).isEqualTo(accessToken);
-        Assertions.assertThat(authTokensResponseDto.getRefreshToken()).isEqualTo(refreshToken);
+        Assertions.assertThat(accessTokenResponse.getAccessToken()).isEqualTo(accessToken);
+        Assertions.assertThat(refreshTokenCookie.getValue()).isEqualTo(refreshToken);
     }
 
     @Test
