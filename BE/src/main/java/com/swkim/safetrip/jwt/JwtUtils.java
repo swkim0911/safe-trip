@@ -68,23 +68,12 @@ public class JwtUtils {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-    // todo: 매개변수에 쓰임 당하는 객체(Response.. ex: StringBuilder)를 두는게 맞나? 뭔가 어색한데
-    public void addTokensToResponse(HttpServletResponse response, String accessToken, String refreshToken) throws IOException{
-        response.setStatus(HttpServletResponse.SC_OK);
-        addAccessTokenToResponse(response, accessToken);
-        createRefreshTokenCookie(response, refreshToken);
-    }
-
     public String issueAccessToken(String email){
         return createAccessToken(email);
     }
 
     public String issueRefreshToken(){
         return createRefreshToken();
-    }
-
-    public Optional<User> getUserByEmail(String email){
-        return userRepository.findByEmail(email);
     }
 
     public Optional<String> extractAccessToken(HttpServletRequest request) {
