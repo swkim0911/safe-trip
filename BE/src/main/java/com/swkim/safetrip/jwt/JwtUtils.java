@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +68,7 @@ public class JwtUtils {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
+    // todo: 매개변수에 쓰임 당하는 객체(Response.. ex: StringBuilder)를 두는게 맞나? 뭔가 어색한데
     public void addTokensToResponse(HttpServletResponse response, String accessToken, String refreshToken) throws IOException{
         response.setStatus(HttpServletResponse.SC_OK);
         addAccessTokenToResponse(response, accessToken);

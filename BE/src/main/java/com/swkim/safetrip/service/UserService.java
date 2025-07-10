@@ -1,8 +1,9 @@
 package com.swkim.safetrip.service;
 
-import com.swkim.safetrip.dto.JwtDto;
+import com.swkim.safetrip.dto.LoginResultDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
+import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
@@ -11,6 +12,7 @@ import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.mapper.UserMapper;
 import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,7 +48,7 @@ public class UserService {
     }
 
     @Transactional
-    public JwtDto login(UserLoginRequest loginRequest) {
+    public LoginResultDto login(UserLoginRequest loginRequest) {
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
 
@@ -60,9 +62,15 @@ public class UserService {
         User findUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         findUser.updateRefreshToken(refreshToken);
 
-        return JwtDto.builder()
+        ResponseCookie refreshTokenCookie = jwtUtils.createRefreshTokenCookie(refreshToken);
+        AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken).build();
+                .build();
+
+        return LoginResultDto.builder()
+                .accessTokenResponse(accessTokenResponse)
+                .refreshTokenCookie(refreshTokenCookie)
+                .build();
 
     }
 

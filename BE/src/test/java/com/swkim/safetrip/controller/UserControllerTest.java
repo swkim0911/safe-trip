@@ -2,13 +2,13 @@ package com.swkim.safetrip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.config.SecurityConfig;
-import com.swkim.safetrip.dto.JwtDto;
+import com.swkim.safetrip.dto.LoginResultDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
+import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.LoginService;
 import com.swkim.safetrip.service.UserService;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -87,13 +88,17 @@ public class UserControllerTest {
         String accessToken = "im.access.token";
         String refreshToken = "im.refresh.token";
 
-        JwtDto jwtDto = JwtDto.builder()
+        AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .build();
+
+        LoginResultDto loginResultDto = LoginResultDto.builder()
+                .accessTokenResponse(accessTokenResponse)
+                .refreshTokenCookie(ResponseCookie.from("refreshToken", refreshToken).build())
                 .build();
 
         // when
-        when(userService.login(any(UserLoginRequest.class))).thenReturn(jwtDto);
+        when(userService.login(any(UserLoginRequest.class))).thenReturn(loginResultDto);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/auth/login")

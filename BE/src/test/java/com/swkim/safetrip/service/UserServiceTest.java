@@ -1,6 +1,6 @@
 package com.swkim.safetrip.service;
 
-import com.swkim.safetrip.dto.JwtDto;
+import com.swkim.safetrip.dto.LoginResultDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.entity.User;
@@ -130,11 +130,11 @@ class UserServiceTest {
         when(jwtUtils.issueRefreshToken()).thenReturn(refreshToken);
 
         // when
-        JwtDto jwtDto = userService.login(loginRequest);
+        LoginResultDto loginResultDto = userService.login(loginRequest);
 
         // then
-        Assertions.assertThat(jwtDto.getAccessToken()).isEqualTo(accessToken);
-        Assertions.assertThat(jwtDto.getRefreshToken()).isEqualTo(refreshToken);
+        Assertions.assertThat(loginResultDto.getAccessToken()).isEqualTo(accessToken);
+        Assertions.assertThat(loginResultDto.getRefreshToken()).isEqualTo(refreshToken);
     }
 
     @Test

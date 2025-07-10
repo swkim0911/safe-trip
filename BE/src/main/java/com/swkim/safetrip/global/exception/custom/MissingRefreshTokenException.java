@@ -5,7 +5,7 @@ import com.swkim.safetrip.global.exception.GeneralException;
 
 public class MissingRefreshTokenException extends GeneralException {
 
-    public MissingRefreshTokenException {
+    public MissingRefreshTokenException() {
         super(Error.MISSING_REFRESH_TOKEN_ERROR);
     }
 }
