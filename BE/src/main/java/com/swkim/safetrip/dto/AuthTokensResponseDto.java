@@ -7,7 +7,7 @@ import org.springframework.http.ResponseCookie;
 
 @Getter
 @Builder
-public class LoginResultDto {
+public class AuthTokensResponseDto {
 
     private AccessTokenResponse accessTokenResponse;
 

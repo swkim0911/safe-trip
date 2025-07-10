@@ -1,6 +1,6 @@
 package com.swkim.safetrip.service;
 
-import com.swkim.safetrip.dto.LoginResultDto;
+import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
@@ -48,7 +48,7 @@ public class UserService {
     }
 
     @Transactional
-    public LoginResultDto login(UserLoginRequest loginRequest) {
+    public AuthTokensResponseDto login(UserLoginRequest loginRequest) {
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
 
@@ -67,11 +67,30 @@ public class UserService {
                 .accessToken(accessToken)
                 .build();
 
-        return LoginResultDto.builder()
+        return AuthTokensResponseDto.builder()
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();
 
+    }
+    @Transactional
+    public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
+        User findUser = getUserByRefreshToken(refreshToken);
+
+        String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail());
+        String reIssuedRefreshToken = jwtUtils.issueRefreshToken();
+
+        findUser.updateRefreshToken(reIssuedRefreshToken);
+
+        ResponseCookie refreshTokenCookie = jwtUtils.createRefreshTokenCookie(reIssuedRefreshToken);
+        AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
+                .accessToken(reIssuedAccessToken)
+                .build();
+
+        return AuthTokensResponseDto.builder()
+                .accessTokenResponse(accessTokenResponse)
+                .refreshTokenCookie(refreshTokenCookie)
+                .build();
     }
 
 
@@ -79,5 +98,10 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getUserByEmail(String email){
         return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserByRefreshToken(String refreshToken) {
+        return userRepository.findByRefreshToken(refreshToken).orElseThrow(UserNotFoundException::new);
     }
 }

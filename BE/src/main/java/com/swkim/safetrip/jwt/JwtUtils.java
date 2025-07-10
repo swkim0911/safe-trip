@@ -83,18 +83,6 @@ public class JwtUtils {
         return createRefreshToken();
     }
 
-    @Transactional
-    public String reIssueRefreshToken(User user){
-        String reIssueRefreshToken = createRefreshToken();
-        user.updateRefreshToken(reIssueRefreshToken);
-
-        return reIssueRefreshToken;
-    }
-
-    public Optional<User> getUserByRefreshToken(String refreshToken) {
-        return userRepository.findByRefreshToken(refreshToken);
-    }
-
     public Optional<User> getUserByEmail(String email){
         return userRepository.findByEmail(email);
     }

@@ -2,7 +2,7 @@ package com.swkim.safetrip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.config.SecurityConfig;
-import com.swkim.safetrip.dto.LoginResultDto;
+import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
@@ -92,13 +92,13 @@ public class UserControllerTest {
                 .accessToken(accessToken)
                 .build();
 
-        LoginResultDto loginResultDto = LoginResultDto.builder()
+        AuthTokensResponseDto authTokensResponseDto = AuthTokensResponseDto.builder()
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(ResponseCookie.from("refreshToken", refreshToken).build())
                 .build();
 
         // when
-        when(userService.login(any(UserLoginRequest.class))).thenReturn(loginResultDto);
+        when(userService.login(any(UserLoginRequest.class))).thenReturn(authTokensResponseDto);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/auth/login")
