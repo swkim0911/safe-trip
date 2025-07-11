@@ -7,6 +7,7 @@ import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
+import com.swkim.safetrip.global.exception.custom.RefreshTokenReuseDetectedException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.mapper.UserMapper;
@@ -78,7 +79,7 @@ public class UserService {
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
         jwtUtils.validateRefreshToken(refreshToken);
 
-        User findUser = getUserByRefreshToken(refreshToken); //todo 여기서 사용자를 찾지 못하면. usernotfound 에러가 아닌 reused 에러를 발생
+        User findUser = getUserByRefreshToken(refreshToken);
 
         String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail());
         String reIssuedRefreshToken = jwtUtils.issueRefreshToken();
@@ -105,6 +106,6 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User getUserByRefreshToken(String refreshToken) {
-        return userRepository.findByRefreshToken(refreshToken).orElseThrow(UserNotFoundException::new);
+        return userRepository.findByRefreshToken(refreshToken).orElseThrow(RefreshTokenReuseDetectedException::new);
     }
 }

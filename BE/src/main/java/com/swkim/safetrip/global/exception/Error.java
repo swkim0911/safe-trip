@@ -20,7 +20,8 @@ public enum Error {
 
     MISSING_REFRESH_TOKEN_ERROR(HttpStatus.BAD_REQUEST.value(), "Refresh token is Empty"),
     REFRESH_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is expired"),
-    INVALID_REFRESH_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is invalid");
+    INVALID_REFRESH_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is invalid"),
+    REFRESH_TOKEN_REUSE_DETECTED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refrash token reuse detected");
 
     private final int statusCode;
     private final String message;
