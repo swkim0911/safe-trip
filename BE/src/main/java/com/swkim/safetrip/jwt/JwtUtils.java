@@ -4,6 +4,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
+import com.swkim.safetrip.global.exception.custom.InvalidAccessTokenException;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
 import jakarta.servlet.http.Cookie;
@@ -137,6 +139,20 @@ public class JwtUtils {
         } catch (JWTVerificationException e) {
             log.warn("Invalid refresh token detected: {}", refreshToken);
             throw new InvalidRefreshTokenException();
+        }
+    }
+
+    public void validateAccessToken(String accessToken) {
+        try {
+            JWT.require(Algorithm.HMAC512(secretKey))
+                    .build()
+                    .verify(accessToken);
+        } catch (TokenExpiredException e) {
+            log.info("Access token expired for user: {}", accessToken);
+            throw new AccessTokenExpiredException();
+        } catch (JWTVerificationException e) {
+            log.warn("Invalid access token detected: {}", accessToken);
+            throw new InvalidAccessTokenException();
         }
     }
 }

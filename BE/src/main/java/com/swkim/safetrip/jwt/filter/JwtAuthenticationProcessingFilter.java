@@ -1,6 +1,7 @@
 package com.swkim.safetrip.jwt.filter;
 
 import com.swkim.safetrip.entity.User;
+import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.UserService;
@@ -37,26 +38,20 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
         String accessToken = jwtUtils.extractAccessToken(request)
-                .filter(jwtUtils::isTokenValid)
-                .orElse(null);
+                .orElseThrow(AccessTokenMissingException::new);
+
+        jwtUtils.validateAccessToken(accessToken);
 
         // 1. 요청에 accesstoken 토큰이 valid (secretKey, exp 체크) 하면 authentication 저장
-        if(accessToken != null){
-            String email = jwtUtils.extractEmail(accessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
-            try{
-                User findUser = userService.getUserByEmail(email);
-                saveAuthentication(findUser);
-            }catch(UserNotFoundException e){
-                throw new UsernameNotFoundException("The email does not exist");
-            }
-            filterChain.doFilter(request, response);
+        String email = jwtUtils.extractEmail(accessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
+        try{
+            User findUser = userService.getUserByEmail(email);
+            saveAuthentication(findUser);
+        }catch(UserNotFoundException e){
+            throw new UsernameNotFoundException("The email does not exist");
         }
-        // access 토큰이 만료된 경우.
-        // access 토큰이 not valid한 경우
-        // access 토큰이 없는 경우
-        // "/report" post 요청인데 accessToken이 없는 경우에는 로그인 화면을 띄워야 한다.
+        filterChain.doFilter(request, response);
     }
 
     private void saveAuthentication(User user){
