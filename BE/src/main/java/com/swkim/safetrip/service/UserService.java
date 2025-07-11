@@ -76,7 +76,9 @@ public class UserService {
 
     @Transactional
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
-        User findUser = getUserByRefreshToken(refreshToken);
+        jwtUtils.validateRefreshToken(refreshToken);
+
+        User findUser = getUserByRefreshToken(refreshToken); //todo 여기서 사용자를 찾지 못하면. usernotfound 에러가 아닌 reused 에러를 발생
 
         String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail());
         String reIssuedRefreshToken = jwtUtils.issueRefreshToken();

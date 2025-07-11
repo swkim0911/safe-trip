@@ -17,8 +17,10 @@ public enum Error {
     DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
     DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "This nickname is already in use"),
     USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email."),
+
     MISSING_REFRESH_TOKEN_ERROR(HttpStatus.BAD_REQUEST.value(), "Refresh token is Empty"),
-    AUTHENTICATED_USER_NOT_FOUND_ERROR(HttpStatus.UNAUTHORIZED.value(), "User not found by email for authentication");
+    REFRESH_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is expired"),
+    INVALID_REFRESH_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is invalid");
 
     private final int statusCode;
     private final String message;
