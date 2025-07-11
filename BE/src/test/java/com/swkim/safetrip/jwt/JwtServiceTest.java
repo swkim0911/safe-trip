@@ -3,6 +3,8 @@ package com.swkim.safetrip.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
+import com.swkim.safetrip.global.exception.custom.InvalidAccessTokenException;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
 import com.swkim.safetrip.repository.UserRepository;
@@ -176,6 +178,15 @@ class JwtServiceTest {
     }
 
     @Test
+    void 유효한_secretKey로_서명된_액세스_토큰은_검증에_통과한다() {
+        // given
+        String refreshToken = jwtUtils.issueAccessToken("test@gmail.com");
+
+        // when & then
+        assertThatCode(() -> jwtUtils.validateRefreshToken(refreshToken)).doesNotThrowAnyException();
+    }
+
+    @Test
     void 유효하지_않은_secretKey로_서명된_리프레시_토큰은_검증에_실패한다() {
         // given
         String strangeRefreshToken = JWT.create()
@@ -185,6 +196,18 @@ class JwtServiceTest {
         // when & then
         assertThatThrownBy(() -> jwtUtils.validateRefreshToken(strangeRefreshToken))
                 .isInstanceOf(InvalidRefreshTokenException.class);
+    }
+
+    @Test
+    void 유효하지_않은_secretKey로_서명된_액세스_토큰은_검증에_실패한다() {
+        // given
+        String strangeAccessToken = JWT.create()
+                .withSubject("testToken")
+                .sign(Algorithm.HMAC512("invalidSecretKey"));
+
+        // when & then
+        assertThatThrownBy(() -> jwtUtils.validateAccessToken(strangeAccessToken))
+                .isInstanceOf(InvalidAccessTokenException.class);
     }
 
     @Test
@@ -200,6 +223,21 @@ class JwtServiceTest {
         // when & then
         assertThatThrownBy(() -> jwtUtils.validateRefreshToken(expiredRefreshToken))
                 .isInstanceOf(RefreshTokenExpiredException.class);
+    }
+
+    @Test
+    void 만료된_액세스_토큰은_검증에_실패한다() {
+        // given
+        Date now = new Date();
+        Date expiredAt = new Date(now.getTime() - 1000);
+        String expiredAccessToken = JWT.create()
+                .withSubject("testToken")
+                .withExpiresAt(expiredAt)
+                .sign(Algorithm.HMAC512(secretKey));
+
+        // when & then
+        assertThatThrownBy(() -> jwtUtils.validateAccessToken(expiredAccessToken))
+                .isInstanceOf(AccessTokenExpiredException.class);
     }
 
     @Test
