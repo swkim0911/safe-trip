@@ -72,44 +72,6 @@ class JwtAuthenticationProcessingFilterTest {
     }
 
     @Test
-    void 글_등록_요청이라면_JWT_검증이_실행된다() throws ServletException, IOException {
-        // given
-        when(request.getRequestURI()).thenReturn("/reports");
-        when(request.getMethod()).thenReturn("POST");
-
-        // when
-        filter.doFilterInternal(request, response, filterChain);
-
-        // then (jwtService가 accessToken을 추출하는지 검증한다)
-        verify(jwtUtils).extractAccessToken(any());
-    }
-
-    @Test
-    void 액세스_토큰이_valid_하지만_이메일_클레임이_없을_때_bad_credential_예외가_발생한다() throws ServletException, IOException {
-        // given
-
-        String secretKey = "eijnv329asic";
-
-        String accessTokenWithoutEmailClaim = JWT.create()
-                .withSubject("AccessToken")
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
-                .sign(Algorithm.HMAC512(secretKey));
-
-        when(request.getRequestURI()).thenReturn("/reports");
-        when(request.getMethod()).thenReturn("POST");
-
-        when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessTokenWithoutEmailClaim));
-        when(jwtUtils.isTokenValid(accessTokenWithoutEmailClaim)).thenReturn(true);
-
-        // when
-        when(jwtUtils.extractEmail(accessTokenWithoutEmailClaim)).thenReturn(Optional.empty());
-
-        // then
-        Assertions.assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
-                .isInstanceOf(BadCredentialsException.class);
-    }
-
-    @Test
     void valid_액세스_토큰이_이메일_클레임이_있고_이메일로부터_유저를_찾을_수_있을_때_Authentication을_저장한다() throws ServletException, IOException {
         // given
         String secretKey = "eijnv329asic";
@@ -125,7 +87,6 @@ class JwtAuthenticationProcessingFilterTest {
         when(request.getMethod()).thenReturn("POST");
 
         when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessToken));
-        when(jwtUtils.isTokenValid(accessToken)).thenReturn(true);
         when(jwtUtils.extractEmail(accessToken)).thenReturn(Optional.of(email));
 
         User user = User.builder()
@@ -145,6 +106,30 @@ class JwtAuthenticationProcessingFilterTest {
     }
 
     @Test
+    void 액세스_토큰이_valid_하지만_이메일_클레임이_없을_때_bad_credential_예외가_발생한다() throws ServletException, IOException {
+        // given
+
+        String secretKey = "eijnv329asic";
+
+        String accessTokenWithoutEmailClaim = JWT.create()
+                .withSubject("AccessToken")
+                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
+                .sign(Algorithm.HMAC512(secretKey));
+
+        when(request.getRequestURI()).thenReturn("/reports");
+        when(request.getMethod()).thenReturn("POST");
+
+        when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessTokenWithoutEmailClaim));
+
+        // when
+        when(jwtUtils.extractEmail(accessTokenWithoutEmailClaim)).thenReturn(Optional.empty());
+
+        // then
+        Assertions.assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
+                .isInstanceOf(BadCredentialsException.class);
+    }
+
+    @Test
     void valid_액세스_토큰이_이메일_클레임이_있지만_이메일로부터_유저를_찾을_수_없을_때_예외가_발생한다() throws ServletException, IOException {
         // given
         String secretKey = "eijnv329asic";
@@ -160,7 +145,6 @@ class JwtAuthenticationProcessingFilterTest {
         when(request.getMethod()).thenReturn("POST");
 
         when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessToken));
-        when(jwtUtils.isTokenValid(accessToken)).thenReturn(true);
         when(jwtUtils.extractEmail(accessToken)).thenReturn(Optional.of(email));
 
         // when
