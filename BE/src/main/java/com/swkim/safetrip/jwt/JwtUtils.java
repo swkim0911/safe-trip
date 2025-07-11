@@ -116,18 +116,6 @@ public class JwtUtils {
     }
 
     // verify: 서명, 토큰 구조, 만료 시간 검증
-    public boolean isTokenValid(String token){
-        try{
-            JWT.require(Algorithm.HMAC512(secretKey))
-                    .build()
-                    .verify(token);
-            return true;
-        }catch (JWTVerificationException e){
-            log.error("Token is not valid");
-            return false;
-        }
-    }
-
     public void validateRefreshToken(String refreshToken) {
         try {
             JWT.require(Algorithm.HMAC512(secretKey))

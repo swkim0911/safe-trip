@@ -3,6 +3,8 @@ package com.swkim.safetrip.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
+import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
 import com.swkim.safetrip.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Date;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -165,46 +167,39 @@ class JwtServiceTest {
     }
 
     @Test
-    void 유효한_secretKey로_서명된_토큰은_검증에_통과한다() {
+    void 유효한_secretKey로_서명된_리프레시_토큰은_검증에_통과한다() {
         // given
-        String token = jwtUtils.issueRefreshToken();
+        String refreshToken = jwtUtils.issueRefreshToken();
 
-        // when
-        boolean tokenValid = jwtUtils.isTokenValid(token);
-
-        // then
-        assertThat(tokenValid).isTrue();
+        // when & then
+        assertThatCode(() -> jwtUtils.validateRefreshToken(refreshToken)).doesNotThrowAnyException();
     }
 
     @Test
-    void 유효하지_않은_secretKey로_서명된_토큰은_검증에_실패한다() {
+    void 유효하지_않은_secretKey로_서명된_리프레시_토큰은_검증에_실패한다() {
         // given
-        String strangeToken = JWT.create()
+        String strangeRefreshToken = JWT.create()
                 .withSubject("testToken")
                 .sign(Algorithm.HMAC512("invalidSecretKey"));
 
-        // when
-        boolean tokenValid = jwtUtils.isTokenValid(strangeToken);
-
-        // then
-        assertThat(tokenValid).isFalse();
+        // when & then
+        assertThatThrownBy(() -> jwtUtils.validateRefreshToken(strangeRefreshToken))
+                .isInstanceOf(InvalidRefreshTokenException.class);
     }
 
     @Test
-    void 만료된_토큰은_검증에_실패한다() {
+    void 만료된_리프레시_토큰은_검증에_실패한다() {
         // given
         Date now = new Date();
         Date expiredAt = new Date(now.getTime() - 1000);
-        String expiredToken = JWT.create()
+        String expiredRefreshToken = JWT.create()
                 .withSubject("testToken")
                 .withExpiresAt(expiredAt)
                 .sign(Algorithm.HMAC512(secretKey));
 
-        // when
-        boolean tokenValid = jwtUtils.isTokenValid(expiredToken);
-
-        // then
-        assertThat(tokenValid).isFalse();
+        // when & then
+        assertThatThrownBy(() -> jwtUtils.validateRefreshToken(expiredRefreshToken))
+                .isInstanceOf(RefreshTokenExpiredException.class);
     }
 
     @Test
