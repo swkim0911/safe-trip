@@ -4,7 +4,7 @@ import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
-import com.swkim.safetrip.global.exception.custom.MissingRefreshTokenException;
+import com.swkim.safetrip.global.exception.custom.RefreshTokenMissingException;
 import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.UserService;
@@ -43,7 +43,7 @@ public class UserController {
     public ApiResponse<AccessTokenResponse> refreshTokens(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse httpServletResponse) {
 
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new MissingRefreshTokenException();
+            throw new RefreshTokenMissingException();
         }
         AuthTokensResponseDto authTokensResponseDto = userService.reIssueAccessToken(refreshToken);
         httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.getRefreshTokenCookie().toString());

@@ -18,7 +18,7 @@ public enum Error {
     DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "This nickname is already in use"),
     USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email."),
 
-    MISSING_REFRESH_TOKEN_ERROR(HttpStatus.BAD_REQUEST.value(), "Refresh token is Empty"),
+    REFRESH_TOKEN_MISSING_ERROR(HttpStatus.BAD_REQUEST.value(), "Refresh token is empty"),
     REFRESH_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is expired"),
     INVALID_REFRESH_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is invalid"),
     REFRESH_TOKEN_REUSE_DETECTED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token reuse detected"),

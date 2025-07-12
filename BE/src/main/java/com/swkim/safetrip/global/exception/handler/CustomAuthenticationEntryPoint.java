@@ -11,6 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @RequiredArgsConstructor
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -27,6 +28,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         response.setStatus(code);
         response.setContentType("application/json;charset=UTF-8");
+        PrintWriter writer = response.getWriter();
+
+
         response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
     }
 }
