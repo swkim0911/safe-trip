@@ -7,6 +7,7 @@ import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.AuthService;
+import com.swkim.safetrip.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -18,12 +19,10 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
 @MockBean(JpaMetamodelMappingContext.class)
@@ -40,10 +39,13 @@ class AuthControllerTest {
     private AuthService authService;
 
     @MockBean
+    private UserService userService;
+
+    @MockBean
     private JwtUtils jwtUtils;
 
     @Test
-    void 로그인_요청_성공시_리프레시_토큰은_쿠키_액세스_토큰은_바디로_반환한다() throws Exception {
+    void 로그인_요청_성공시_리프레시_토큰은_쿠키로_반환하고_액세스_토큰은_바디로_반환한다() throws Exception {
         // given
         String email = "test@gmail.com";
         String password = "password";
@@ -76,10 +78,9 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("Login successful"))
-                .andExpect(jsonPath("$.result.accessToken").value(accessToken));
+                .andExpect(jsonPath("$.result.accessToken").value(accessToken))
+                .andExpect(header().string("Set-Cookie", containsString("refreshToken=im.refresh.token")));
 
-        verify(authService).login(any(UserLoginRequest.class));
-        verify(jwtUtils).createRefreshTokenCookie(eq("im.refresh.token"));
     }
 
 }
