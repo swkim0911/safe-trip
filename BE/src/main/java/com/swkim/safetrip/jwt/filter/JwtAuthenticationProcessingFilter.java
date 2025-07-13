@@ -14,11 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -29,6 +31,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
     private final UserService userService;
+    private final AuthenticationEntryPoint entryPoint;
 
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
@@ -38,20 +41,25 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        String accessToken = jwtUtils.extractAccessToken(request)
-                .orElseThrow(AccessTokenMissingException::new);
+        try {
+            String accessToken = jwtUtils.extractAccessToken(request)
+                    .orElseThrow(AccessTokenMissingException::new);
 
-        jwtUtils.validateAccessToken(accessToken);
+            jwtUtils.validateAccessToken(accessToken);
 
-        // 1. 요청에 accesstoken 토큰이 valid (secretKey, exp 체크) 하면 authentication 저장
-        String email = jwtUtils.extractEmail(accessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
-        try{
-            User findUser = userService.getUserByEmail(email);
-            saveAuthentication(findUser);
-        }catch(UserNotFoundException e){
-            throw new UsernameNotFoundException("The email does not exist");
+            // 1. 요청에 accesstoken 토큰이 valid (secretKey, exp 체크) 하면 authentication 저장
+            String email = jwtUtils.extractEmail(accessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
+            try {
+                User findUser = userService.getUserByEmail(email);
+                saveAuthentication(findUser);
+            } catch (UserNotFoundException e) {
+                throw new UsernameNotFoundException("The email does not exist");
+            }
+            filterChain.doFilter(request, response);
+        } catch (AuthenticationException ex) {
+            entryPoint.commence(request, response, ex);
         }
-        filterChain.doFilter(request, response);
+
     }
 
     private void saveAuthentication(User user){
