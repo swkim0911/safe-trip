@@ -5,6 +5,7 @@ import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
+import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenMissingException;
 import com.swkim.safetrip.jwt.JwtUtils;
@@ -88,9 +89,8 @@ class AuthControllerTest {
     }
 
     @Test
-    void 액세스_토큰_재발급_요청시_리프레시_토큰이_없다면_예외가_발생한다() throws Exception {
+    void 액세스_토큰_재발급_요청시_리프레시_토큰이_없다면_400_예외가_발생한다() throws Exception {
 
-        // given & when & then
         mockMvc.perform(post("/auth/refresh"))
                 .andExpect(status().isBadRequest()) // 예외에 따라 상태코드 조정
                 .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()))
@@ -99,7 +99,8 @@ class AuthControllerTest {
     }
 
     @Test
-    void 액세스_토큰_재발급_요청시_쿠키에_리프레시_토큰이_없다면_예외가_발생한다() throws Exception {
+    void 액세스_토큰_재발급_요청시_쿠키에_리프레시_토큰이_없다면_400_예외가_발생한다() throws Exception {
+
         mockMvc.perform(post("/auth/refresh")
                         .cookie(new Cookie("refreshToken", ""))) // 빈 문자열 전달
                 .andExpect(status().isBadRequest()) // 예외 매핑에 따라 조정
@@ -107,7 +108,8 @@ class AuthControllerTest {
     }
 
     @Test
-    void 액세스_토큰_재발급_요청시_쿠키의_이름이_refreshToken이_아니면_예외가_발생한다() throws Exception {
+    void 액세스_토큰_재발급_요청시_쿠키의_이름이_refreshToken이_아니면_400_예외가_발생한다() throws Exception {
+
         mockMvc.perform(post("/auth/refresh")
                         .cookie(new Cookie("wrongName", "im.refresh.token"))) // 빈 문자열 전달
                 .andExpect(status().isBadRequest()) // 예외 매핑에 따라 조정
@@ -130,6 +132,25 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.code").value(401))
                 .andExpect(jsonPath("$.message").value("Refresh token is expired"));
     }
+
+    @Test
+    void 액세스_토큰_재발급_요청시_리프레시_토큰이_유효하지_않다면_401_예외가_발생한다() throws Exception {
+        // given
+        String inValidRefreshToken = "invalid.refresh.token";
+
+        given(authService.reIssueAccessToken(inValidRefreshToken))
+                .willThrow(new InvalidRefreshTokenException());
+
+        // when & then
+        mockMvc.perform(post("/auth/refresh")
+                .cookie(new Cookie("refreshToken", inValidRefreshToken)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(result -> assertInstanceOf(InvalidRefreshTokenException.class, result.getResolvedException()))
+                .andExpect(jsonPath("$.code").value(401))
+                .andExpect(jsonPath("$.message").value("Refresh token is invalid"));
+    }
+
+
 
 
 }
