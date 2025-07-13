@@ -38,6 +38,6 @@ public class AuthController {
         AuthTokensResponseDto authTokensResponseDto = authService.reIssueAccessToken(refreshToken);
         httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.getRefreshTokenCookie().toString());
 
-        return ApiResponse.of(HttpStatus.OK.value(), "Access Token is Reissued with in RTR", authTokensResponseDto.getAccessTokenResponse());
+        return ApiResponse.of(HttpStatus.OK.value(), "Access Token is reissued under RTR", authTokensResponseDto.getAccessTokenResponse());
     }
 }

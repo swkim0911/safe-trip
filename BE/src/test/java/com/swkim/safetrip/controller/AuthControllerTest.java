@@ -5,6 +5,7 @@ import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
+import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenMissingException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.AuthService;
@@ -19,11 +20,12 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
@@ -74,8 +76,7 @@ class AuthControllerTest {
         when(authService.login(any(UserLoginRequest.class))).thenReturn(authTokensResponseDto);
 
         // then
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/auth/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
@@ -90,7 +91,7 @@ class AuthControllerTest {
     void 액세스_토큰_재발급_요청시_리프레시_토큰이_없다면_예외가_발생한다() throws Exception {
 
         // given & when & then
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/refresh"))
+        mockMvc.perform(post("/auth/refresh"))
                 .andExpect(status().isBadRequest()) // 예외에 따라 상태코드 조정
                 .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.code").value(400))
@@ -98,8 +99,8 @@ class AuthControllerTest {
     }
 
     @Test
-    void 액세스_토큰_재발급_요청시_쿠키에_리프래시_토큰이_없다면_예외가_발생한다() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/refresh")
+    void 액세스_토큰_재발급_요청시_쿠키에_리프레시_토큰이_없다면_예외가_발생한다() throws Exception {
+        mockMvc.perform(post("/auth/refresh")
                         .cookie(new Cookie("refreshToken", ""))) // 빈 문자열 전달
                 .andExpect(status().isBadRequest()) // 예외 매핑에 따라 조정
                 .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()));
@@ -107,13 +108,28 @@ class AuthControllerTest {
 
     @Test
     void 액세스_토큰_재발급_요청시_쿠키의_이름이_refreshToken이_아니면_예외가_발생한다() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/refresh")
+        mockMvc.perform(post("/auth/refresh")
                         .cookie(new Cookie("wrongName", "im.refresh.token"))) // 빈 문자열 전달
                 .andExpect(status().isBadRequest()) // 예외 매핑에 따라 조정
                 .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()));
     }
 
+    @Test
+    void 액세스_토큰_재발급_요청시_리프레시_토큰이_만료되었다면_401_예외가_발생한다() throws Exception {
+        // given
+        String expiredRefreshToken = "expired.refresh.token";
 
+        given(authService.reIssueAccessToken(expiredRefreshToken))
+                .willThrow(new RefreshTokenExpiredException());
+
+        // when & then
+        mockMvc.perform(post("/auth/refresh")
+                        .cookie(new Cookie("refreshToken", expiredRefreshToken)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(result -> assertInstanceOf(RefreshTokenExpiredException.class, result.getResolvedException()))
+                .andExpect(jsonPath("$.code").value(401))
+                .andExpect(jsonPath("$.message").value("Refresh token is expired"));
+    }
 
 
 }
