@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error", "/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/reports/**").permitAll()
-                        .requestMatchers("/users", "/auth/login").permitAll()
+                        .requestMatchers("/users", "/auth/login", "/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/reports").authenticated()
                         .anyRequest().authenticated()
                 ).exceptionHandling(exception -> exception

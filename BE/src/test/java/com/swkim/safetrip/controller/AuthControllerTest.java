@@ -5,6 +5,7 @@ import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
+import com.swkim.safetrip.global.exception.custom.RefreshTokenMissingException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.AuthService;
 import com.swkim.safetrip.service.UserService;
@@ -19,7 +20,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -71,6 +72,7 @@ class AuthControllerTest {
         // when
         when(authService.login(any(UserLoginRequest.class))).thenReturn(authTokensResponseDto);
 
+        // then
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -79,8 +81,20 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("Login successful"))
                 .andExpect(jsonPath("$.result.accessToken").value(accessToken))
-                .andExpect(header().string("Set-Cookie", containsString("refreshToken=im.refresh.token")));
+                .andExpect(cookie().value("refreshToken", refreshToken));
 
     }
+
+    @Test
+    void 액세스_토큰_재발급_요청시_리프레시_토큰이_없다면_예외가_발생한다() throws Exception {
+
+        // given & when & then
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/refresh"))
+                .andExpect(status().isBadRequest()) // 예외에 따라 상태코드 조정
+                .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()))
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value("Refresh token is empty"));
+    }
+
 
 }
