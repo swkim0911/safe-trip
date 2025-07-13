@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
+import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.UserService;
@@ -69,6 +70,18 @@ class JwtAuthenticationProcessingFilterTest {
         // then (jwtService가 호출되지 않았고, filterChain이 동작하는지 확인)
         verify(jwtUtils, never()).extractAccessToken(any());
         verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void 글_등록_요청에_액세스_토큰이_없다면_401_예외가_발생한다() {
+        // givne
+        when(request.getRequestURI()).thenReturn("/reports");
+        when(request.getMethod()).thenReturn("POST");
+        when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.empty());
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
+                .isInstanceOf(AccessTokenMissingException.class);
     }
 
     @Test
