@@ -105,6 +105,14 @@ class AuthControllerTest {
                 .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()));
     }
 
+    @Test
+    void 액세스_토큰_재발급_요청시_쿠키의_이름이_refreshToken이_아니면_예외가_발생한다() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/refresh")
+                        .cookie(new Cookie("wrongName", "im.refresh.token"))) // 빈 문자열 전달
+                .andExpect(status().isBadRequest()) // 예외 매핑에 따라 조정
+                .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()));
+    }
+
 
 
 
