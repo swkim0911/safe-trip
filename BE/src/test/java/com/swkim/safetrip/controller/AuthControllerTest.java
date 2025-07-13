@@ -9,6 +9,7 @@ import com.swkim.safetrip.global.exception.custom.RefreshTokenMissingException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.AuthService;
 import com.swkim.safetrip.service.UserService;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -95,6 +96,16 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.code").value(400))
                 .andExpect(jsonPath("$.message").value("Refresh token is empty"));
     }
+
+    @Test
+    void 액세스_토큰_재발급_요청시_쿠키에_리프래시_토큰이_없다면_예외가_발생한다() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/refresh")
+                        .cookie(new Cookie("refreshToken", ""))) // 빈 문자열 전달
+                .andExpect(status().isBadRequest()) // 예외 매핑에 따라 조정
+                .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()));
+    }
+
+
 
 
 }
