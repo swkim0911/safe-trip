@@ -166,10 +166,36 @@ class AuthControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401))
                 .andExpect(jsonPath("$.message").value("Refresh token reuse detected"));
-
     }
 
+    @Test
+    void 액세스_토큰_재발급_요청이_성공일_경우_200_응답을_보낸다() throws Exception {
+        // given
+        String validRefreshToken = "valid.refresh.token";
+        String reIssuedAccessToken = "new.access.token";
+        String reIssuedRefreshToken = "new.refresh.token";
 
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", reIssuedRefreshToken).build();
+
+        AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
+                .accessToken(reIssuedAccessToken)
+                .build();
+
+        AuthTokensResponseDto tokensResponseDto = AuthTokensResponseDto.builder()
+                .accessTokenResponse(accessTokenResponse)
+                .refreshTokenCookie(refreshTokenCookie)
+                .build();
+
+        when(authService.reIssueAccessToken(validRefreshToken)).thenReturn(tokensResponseDto);
+
+        // when & then
+        mockMvc.perform(post("/auth/refresh")
+                        .cookie(new Cookie("refreshToken", validRefreshToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("Access Token is reissued under RTR"))
+                .andExpect(jsonPath("$.result.accessToken").value(reIssuedAccessToken));
+    }
 
 
 }
