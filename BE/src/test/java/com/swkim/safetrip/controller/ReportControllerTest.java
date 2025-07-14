@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
+import com.swkim.safetrip.entity.User;
+import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.jwt.JwtUtils;
-import com.swkim.safetrip.service.LoginService;
 import com.swkim.safetrip.service.ReportService;
+import com.swkim.safetrip.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +21,15 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,14 +47,14 @@ class ReportControllerTest {
     @MockBean
     private ReportService reportService;
 
+    @Autowired
+    private MessageSource messageSource;
+
     @MockBean
-    private LoginService loginService;
+    private UserService userService;
 
     @MockBean
     private JwtUtils jwtUtils;
-
-    @Autowired
-    private MessageSource messageSource;
 
     @Test
     @DisplayName("[Post] /reports 요청시 저장된 report의 id를 반환한다")
@@ -80,25 +84,36 @@ class ReportControllerTest {
                 .description(description)
                 .advice(advice).build();
 
-        MockMultipartFile jsonRequest = new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(reportSaveRequest));
-        MockMultipartFile image = new MockMultipartFile("image", "my_image.jpg", MediaType.IMAGE_JPEG_VALUE, "this is image".getBytes());
+        MockMultipartFile request = new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(reportSaveRequest));
+        MockMultipartFile images = new MockMultipartFile("images", "my_image.jpg", MediaType.IMAGE_JPEG_VALUE, "this is image".getBytes());
+
+        String accessToken = "im.access.token";
+        String email = "test@gmail.com";
+        User mockUser = User.builder()
+                .email(email)
+                .password("password")
+                .nickname("nickname")
+                .role(Role.USER).build();
+
+        given(jwtUtils.extractAccessToken(any())).willReturn(Optional.of(accessToken));
+        doNothing().when(jwtUtils).validateAccessToken(accessToken);
+        given(jwtUtils.extractEmail(eq(accessToken))).willReturn(Optional.of(email));
+        given(userService.getUserByEmail(email)).willReturn(mockUser);
+        given(reportService.saveReport(any(ReportSaveRequest.class), anyList())).willReturn(1L);
 
         // when
-        when(reportService.saveReport(any(), nullable(List.class))).thenReturn(1L);
+        ResultActions resultActions = mockMvc.perform(multipart("/reports")
+                .file(images)
+                .file(request)
+                .header("Authorization", "Bearer valid.token.here"));
 
         // then
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                        .multipart("/reports")
-                        .file(image)
-                        .file(jsonRequest))
+        resultActions
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value(201))
                 .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.create.success", null, null)))
-                .andExpect(jsonPath("$.result").value(1L))
-                .andReturn();
+                .andExpect(jsonPath("$.result").value(1L));
 
-        String contentAsString = mvcResult.getResponse().getContentAsString();
-        System.out.println("contentAsString = " + contentAsString);
     }
 
     @Test
@@ -121,10 +136,18 @@ class ReportControllerTest {
         // when
         when(reportService.getReport(id)).thenReturn(response);
         // then
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/reports/" + "{id}", id))
+        mockMvc.perform(get("/reports/" + "{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.get.success", null, null)));
     }
+
+//    @Test
+//    void 글_등록_요청에_액세스_토큰이_없는_경우_401_에러가_발생한다() throws Exception {
+//
+//        mockMvc.perform(post("/reports"))
+//                .andExpect(status().isUnauthorized())
+//                .andExpect(jsonPath("$.code").value(401))
+//                .andExpect(jsonPath("$message").value("Access token is missing"));
+//    }
 }

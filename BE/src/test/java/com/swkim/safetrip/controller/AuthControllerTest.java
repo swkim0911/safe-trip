@@ -197,5 +197,4 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.result.accessToken").value(reIssuedAccessToken));
     }
 
-
 }
