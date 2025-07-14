@@ -7,6 +7,7 @@ import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
+import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.InvalidAccessTokenException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.ReportService;
@@ -146,12 +147,12 @@ class ReportControllerTest {
         // given
         ReportSaveRequest reportSaveRequest = getMockReportSaveRequest();
         MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
-        String invalidToken = "Bearer im.invalid.token";
+        String invalidAccessToken = "im.invalid.token";
 
         given(jwtUtils.extractAccessToken(any(HttpServletRequest.class)))
-                .willReturn(Optional.of(invalidToken));
+                .willReturn(Optional.of(invalidAccessToken));
 
-        doThrow(new InvalidAccessTokenException()).when(jwtUtils).validateAccessToken(invalidToken);
+        doThrow(new InvalidAccessTokenException()).when(jwtUtils).validateAccessToken(invalidAccessToken);
 
         // when & then
         mockMvc.perform(multipart("/reports")
@@ -159,6 +160,26 @@ class ReportControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401))
                 .andExpect(jsonPath("$.message").value("Access token is invalid"));
+    }
+
+    @Test
+    void 액세스_토큰이_만료된_상태에서_글_등록_요청시_40101_응답을_반환한다() throws Exception {
+        // given
+        ReportSaveRequest reportSaveRequest = getMockReportSaveRequest();
+        MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
+        String expiredAccessToken = "im.expired.token";
+
+        given(jwtUtils.extractAccessToken(any(HttpServletRequest.class)))
+                .willReturn(Optional.of(expiredAccessToken));
+
+        doThrow(new AccessTokenExpiredException()).when(jwtUtils).validateAccessToken(expiredAccessToken);
+
+        // when & then
+        mockMvc.perform(multipart("/reports")
+                        .file(request))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(40101))
+                .andExpect(jsonPath("$.message").value("Access token is expired"));
     }
 
     private ReportSaveRequest getMockReportSaveRequest() {
