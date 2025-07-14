@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.InvalidAccessTokenException;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
@@ -91,17 +92,9 @@ public class JwtUtils {
                 .findFirst();
     }
 
-    public Optional<String> extractEmail(String accessToken) {
-        try {
-            return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretKey))
-                    .build()
-                    .verify(accessToken)
-                    .getClaim(EMAIL_CLAIM)
-                    .asString());
-        }catch(JWTVerificationException e){
-            log.error("Access Token is not valid."); // todo email claim이 없는 경우
-            return Optional.empty();
-        }
+    public Optional<String> extractEmail(DecodedJWT decodedAccessToken) {
+        return Optional.ofNullable(decodedAccessToken.getClaim(EMAIL_CLAIM)
+                .asString());
     }
 
     public ResponseCookie createRefreshTokenCookie(String refreshToken){
@@ -130,9 +123,9 @@ public class JwtUtils {
         }
     }
 
-    public void validateAccessToken(String accessToken) {
+    public DecodedJWT validateAccessToken(String accessToken) {
         try {
-            JWT.require(Algorithm.HMAC512(secretKey))
+            return JWT.require(Algorithm.HMAC512(secretKey))
                     .build()
                     .verify(accessToken);
         } catch (TokenExpiredException e) {

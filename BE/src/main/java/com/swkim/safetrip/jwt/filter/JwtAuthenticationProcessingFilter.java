@@ -1,5 +1,6 @@
 package com.swkim.safetrip.jwt.filter;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
@@ -45,10 +46,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             String accessToken = jwtUtils.extractAccessToken(request)
                     .orElseThrow(AccessTokenMissingException::new);
 
-            jwtUtils.validateAccessToken(accessToken);
-
-            // 1. 요청에 accesstoken 토큰이 valid (secretKey, exp 체크) 하면 authentication 저장
-            String email = jwtUtils.extractEmail(accessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
+            DecodedJWT decodedAccessToken = jwtUtils.validateAccessToken(accessToken);
+            String email = jwtUtils.extractEmail(decodedAccessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
             try {
                 User findUser = userService.getUserByEmail(email);
                 saveAuthentication(findUser);
