@@ -1,6 +1,7 @@
 package com.swkim.safetrip.global.exception.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.swkim.safetrip.global.exception.GeneralAuthenticationException;
 import com.swkim.safetrip.global.response.ApiResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +13,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,21 +23,22 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
 
-        int code = HttpStatus.UNAUTHORIZED.value();
-        String message = authException.getMessage();
-        String result = "Authentication Failed";
+        final int errorCode = (authException instanceof GeneralAuthenticationException)
+                ? ((GeneralAuthenticationException) authException).getError().getStatusCode()
+                : HttpStatus.UNAUTHORIZED.value();
+
+        final String message = authException.getMessage();
+        final String data = "Authentication Failed";
 
         log.warn("Unauthorized access attempt: {} {} - Reason: {}",
                 request.getMethod(),
                 request.getRequestURI(),
                 message);
 
-        ApiResponse<String> apiResponse = ApiResponse.of(code, message, result);
+        ApiResponse<String> apiResponse = ApiResponse.of(errorCode, message, data);
 
-        response.setStatus(code);
+        response.setStatus(HttpStatus.UNAUTHORIZED.value()); // HTTP 상태는 401로 고정
         response.setContentType("application/json;charset=UTF-8");
-        PrintWriter writer = response.getWriter();
-
         response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
     }
 }
