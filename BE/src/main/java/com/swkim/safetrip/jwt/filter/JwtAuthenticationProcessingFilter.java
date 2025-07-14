@@ -46,7 +46,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             String accessToken = jwtUtils.extractAccessToken(request)
                     .orElseThrow(AccessTokenMissingException::new);
 
-            DecodedJWT decodedAccessToken = jwtUtils.validateAccessToken(accessToken);
+            DecodedJWT decodedAccessToken = jwtUtils.verifyAccessToken(accessToken);
             String email = jwtUtils.extractEmail(decodedAccessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
             try {
                 User findUser = userService.getUserByEmail(email);

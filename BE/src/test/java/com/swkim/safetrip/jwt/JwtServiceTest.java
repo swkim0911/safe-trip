@@ -206,7 +206,7 @@ class JwtServiceTest {
                 .sign(Algorithm.HMAC512("invalidSecretKey"));
 
         // when & then
-        assertThatThrownBy(() -> jwtUtils.validateAccessToken(strangeAccessToken))
+        assertThatThrownBy(() -> jwtUtils.verifyAccessToken(strangeAccessToken))
                 .isInstanceOf(InvalidAccessTokenException.class);
     }
 
@@ -236,7 +236,7 @@ class JwtServiceTest {
                 .sign(Algorithm.HMAC512(secretKey));
 
         // when & then
-        assertThatThrownBy(() -> jwtUtils.validateAccessToken(expiredAccessToken))
+        assertThatThrownBy(() -> jwtUtils.verifyAccessToken(expiredAccessToken))
                 .isInstanceOf(AccessTokenExpiredException.class);
     }
 

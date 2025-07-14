@@ -123,7 +123,7 @@ public class JwtUtils {
         }
     }
 
-    public DecodedJWT validateAccessToken(String accessToken) {
+    public DecodedJWT verifyAccessToken(String accessToken) {
         try {
             return JWT.require(Algorithm.HMAC512(secretKey))
                     .build()

@@ -81,7 +81,7 @@ class ReportControllerTest {
                 .role(Role.USER).build();
 
         given(jwtUtils.extractAccessToken(any())).willReturn(Optional.of(accessToken));
-        doNothing().when(jwtUtils).validateAccessToken(accessToken);
+        doNothing().when(jwtUtils).verifyAccessToken(accessToken);
         given(jwtUtils.extractEmail(eq(accessToken))).willReturn(Optional.of(email));
         given(userService.getUserByEmail(email)).willReturn(mockUser);
         given(reportService.saveReport(any(ReportSaveRequest.class), anyList())).willReturn(1L);
@@ -152,7 +152,7 @@ class ReportControllerTest {
         given(jwtUtils.extractAccessToken(any(HttpServletRequest.class)))
                 .willReturn(Optional.of(invalidAccessToken));
 
-        doThrow(new InvalidAccessTokenException()).when(jwtUtils).validateAccessToken(invalidAccessToken);
+        doThrow(new InvalidAccessTokenException()).when(jwtUtils).verifyAccessToken(invalidAccessToken);
 
         // when & then
         mockMvc.perform(multipart("/reports")
@@ -172,7 +172,7 @@ class ReportControllerTest {
         given(jwtUtils.extractAccessToken(any(HttpServletRequest.class)))
                 .willReturn(Optional.of(expiredAccessToken));
 
-        doThrow(new AccessTokenExpiredException()).when(jwtUtils).validateAccessToken(expiredAccessToken);
+        doThrow(new AccessTokenExpiredException()).when(jwtUtils).verifyAccessToken(expiredAccessToken);
 
         // when & then
         mockMvc.perform(multipart("/reports")
