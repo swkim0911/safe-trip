@@ -1,11 +1,11 @@
 package com.swkim.safetrip.global.exception.custom;
 
 import com.swkim.safetrip.global.exception.Error;
-import org.springframework.security.core.AuthenticationException;
+import com.swkim.safetrip.global.exception.GeneralAuthenticationException;
 
-public class AccessTokenMissingException extends AuthenticationException {
+public class AccessTokenMissingException extends GeneralAuthenticationException {
 
     public AccessTokenMissingException() {
-        super(Error.ACCESS_TOKEN_MISSING_ERROR.getMessage());
+        super(Error.ACCESS_TOKEN_MISSING_ERROR);
     }
 }

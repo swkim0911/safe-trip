@@ -23,7 +23,7 @@ public enum Error {
     INVALID_REFRESH_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is invalid"),
     REFRESH_TOKEN_REUSE_DETECTED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token reuse detected"),
     ACCESS_TOKEN_MISSING_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is missing"),
-    ACCESS_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is expired"),
+    ACCESS_TOKEN_EXPIRED_ERROR(40101, "Access token is expired"),
     INVALID_ACCESS_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid");
 
     private final int statusCode;
