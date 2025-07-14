@@ -3,6 +3,7 @@ package com.swkim.safetrip.jwt.filter;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
+import com.swkim.safetrip.global.exception.custom.EmailClaimMissingException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.UserService;
@@ -12,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -47,7 +47,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                     .orElseThrow(AccessTokenMissingException::new);
 
             DecodedJWT decodedAccessToken = jwtUtils.verifyAccessToken(accessToken);
-            String email = jwtUtils.extractEmail(decodedAccessToken).orElseThrow(() -> new BadCredentialsException("Invalid Token"));
+            String email = jwtUtils.extractEmail(decodedAccessToken).orElseThrow(EmailClaimMissingException::new);
+
             try {
                 User findUser = userService.getUserByEmail(email);
                 saveAuthentication(findUser);
