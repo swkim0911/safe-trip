@@ -4,11 +4,14 @@ import com.swkim.safetrip.global.exception.Error;
 import com.swkim.safetrip.global.exception.GeneralException;
 import com.swkim.safetrip.global.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +47,14 @@ public class GlobalExceptionHandler{
         return ResponseEntity
                 .status(error.getStatusCode())
                 .body(ApiResponse.of(error.getStatusCode(), error.getMessage(), "Request Failed"));
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ApiResponse<String> handle404(NoHandlerFoundException ex) {
+        log.error("error", ex);
+
+        return ApiResponse.of(404, "API that does not exist", null);
     }
 
 }
