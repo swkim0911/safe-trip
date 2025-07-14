@@ -245,9 +245,10 @@ class JwtServiceTest {
         // given
         String email = "test@email.com";
         String accessToken = jwtUtils.issueAccessToken(email);
+        DecodedJWT decodedJWT = jwtUtils.verifyAccessToken(accessToken);
 
         // when
-        Optional<String> extractedEmail = jwtUtils.extractEmail(accessToken);
+        Optional<String> extractedEmail = jwtUtils.extractEmail(decodedJWT);
 
         // then
         assertThat(extractedEmail).isPresent();
@@ -261,8 +262,10 @@ class JwtServiceTest {
                 .withSubject("noEmailToken")
                 .sign(Algorithm.HMAC512(secretKey));
 
+        DecodedJWT decodedJWT = jwtUtils.verifyAccessToken(noEmailAccessToken);
+
         // when
-        Optional<String> extractedEmail = jwtUtils.extractEmail(noEmailAccessToken);
+        Optional<String> extractedEmail = jwtUtils.extractEmail(decodedJWT);
 
         // then
         assertThat(extractedEmail).isEmpty();

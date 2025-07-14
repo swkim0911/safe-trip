@@ -1,5 +1,6 @@
 package com.swkim.safetrip.controller;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.config.SecurityConfig;
@@ -74,6 +75,7 @@ class ReportControllerTest {
 
         String accessToken = "im.access.token";
         String email = "test@gmail.com";
+        DecodedJWT decodedJwt = mock(DecodedJWT.class);
         User mockUser = User.builder()
                 .email(email)
                 .password("password")
@@ -81,8 +83,8 @@ class ReportControllerTest {
                 .role(Role.USER).build();
 
         given(jwtUtils.extractAccessToken(any())).willReturn(Optional.of(accessToken));
-        doNothing().when(jwtUtils).verifyAccessToken(accessToken);
-        given(jwtUtils.extractEmail(eq(accessToken))).willReturn(Optional.of(email));
+        given(jwtUtils.verifyAccessToken(eq(accessToken))).willReturn(decodedJwt);
+        given(jwtUtils.extractEmail(eq(decodedJwt))).willReturn(Optional.of(email));
         given(userService.getUserByEmail(email)).willReturn(mockUser);
         given(reportService.saveReport(any(ReportSaveRequest.class), anyList())).willReturn(1L);
 
