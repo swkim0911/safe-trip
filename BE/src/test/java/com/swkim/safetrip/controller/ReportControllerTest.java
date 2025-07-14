@@ -28,8 +28,7 @@ import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -142,12 +141,12 @@ class ReportControllerTest {
                 .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.get.success", null, null)));
     }
 
-//    @Test
-//    void 글_등록_요청에_액세스_토큰이_없는_경우_401_에러가_발생한다() throws Exception {
-//
-//        mockMvc.perform(post("/reports"))
-//                .andExpect(status().isUnauthorized())
-//                .andExpect(jsonPath("$.code").value(401))
-//                .andExpect(jsonPath("$message").value("Access token is missing"));
-//    }
+    @Test
+    void 글_등록_요청에_액세스_토큰이_없는_경우_401_에러가_발생한다() throws Exception {
+
+        mockMvc.perform(post("/reports"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(401))
+                .andExpect(jsonPath("$.message").value("Access token is missing"));
+    }
 }
