@@ -99,7 +99,7 @@ public class JwtUtils {
                     .getClaim(EMAIL_CLAIM)
                     .asString());
         }catch(JWTVerificationException e){
-            log.error("Access Token is not valid.");
+            log.error("Access Token is not valid."); // todo email claim이 없는 경우
             return Optional.empty();
         }
     }

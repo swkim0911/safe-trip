@@ -1,14 +1,17 @@
 package com.swkim.safetrip.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
+import com.swkim.safetrip.global.exception.custom.InvalidAccessTokenException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.ReportService;
 import com.swkim.safetrip.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,8 @@ import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,28 +66,9 @@ class ReportControllerTest {
     void scam_보고서_등록_성공시_id를_반환해야한다() throws Exception {
 
         // given
-        String title = "this is title";
-        Long scamId = 1L;
-        String address = "대한민국 서울시 남산타워";
-        String lat = "37.56711260434211";
-        String lng = "126.97911625963219";
-        String country = "Korea";
-        String city = "Seoul";
-        String description = "this is description";
-        String advice = "this is advice";
+        ReportSaveRequest reportSaveRequest = getMockReportSaveRequest();
 
-        ReportSaveRequest reportSaveRequest = ReportSaveRequest.builder()
-                .title(title)
-                .scamId(scamId)
-                .address(address)
-                .lat(lat)
-                .lng(lng)
-                .country(country)
-                .city(city)
-                .description(description)
-                .advice(advice).build();
-
-        MockMultipartFile request = new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(reportSaveRequest));
+        MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
         MockMultipartFile images = new MockMultipartFile("images", "my_image.jpg", MediaType.IMAGE_JPEG_VALUE, "this is image".getBytes());
 
         String accessToken = "im.access.token";
@@ -143,10 +128,63 @@ class ReportControllerTest {
 
     @Test
     void 글_등록_요청에_액세스_토큰이_없는_경우_401_에러가_발생한다() throws Exception {
+        // given
+        ReportSaveRequest reportSaveRequest = getMockReportSaveRequest();
+        MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
 
-        mockMvc.perform(post("/reports"))
+        // when & then
+        mockMvc.perform(multipart("/reports")
+                .file(request))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401))
                 .andExpect(jsonPath("$.message").value("Access token is missing"));
+    }
+
+
+    @Test
+    void 글_등록_요청에_액세스_토큰이_invalid한_경우_401_에러가_발생한다() throws Exception {
+        // given
+        ReportSaveRequest reportSaveRequest = getMockReportSaveRequest();
+        MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
+        String invalidToken = "Bearer im.invalid.token";
+
+        given(jwtUtils.extractAccessToken(any(HttpServletRequest.class)))
+                .willReturn(Optional.of(invalidToken));
+
+        doThrow(new InvalidAccessTokenException()).when(jwtUtils).validateAccessToken(invalidToken);
+
+        // when & then
+        mockMvc.perform(multipart("/reports")
+                        .file(request))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(401))
+                .andExpect(jsonPath("$.message").value("Access token is invalid"));
+    }
+
+    private ReportSaveRequest getMockReportSaveRequest() {
+        String title = "this is title";
+        Long scamId = 1L;
+        String address = "대한민국 서울시 남산타워";
+        String lat = "37.56711260434211";
+        String lng = "126.97911625963219";
+        String country = "Korea";
+        String city = "Seoul";
+        String description = "this is description";
+        String advice = "this is advice";
+
+        return ReportSaveRequest.builder()
+                .title(title)
+                .scamId(scamId)
+                .address(address)
+                .lat(lat)
+                .lng(lng)
+                .country(country)
+                .city(city)
+                .description(description)
+                .advice(advice).build();
+    }
+
+    private MockMultipartFile getMockMultipartFile(ReportSaveRequest reportSaveRequest) throws JsonProcessingException {
+        return new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(reportSaveRequest));
     }
 }
