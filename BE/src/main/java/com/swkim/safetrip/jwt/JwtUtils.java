@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.InvalidAccessTokenException;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
@@ -46,16 +47,17 @@ public class JwtUtils {
 
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
-    private static final String EMAIL_CLAIM = "email";
+    private static final String ROLE_CLAIM = "role";
     private static final String BEARER = "Bearer ";
 
-    private String createAccessToken(String email) {
+    private String createAccessToken(String email, Role role) {
         Date now = new Date();
+        String roleName = role.getKey();
 
         return JWT.create()
-                .withSubject(ACCESS_TOKEN_SUBJECT)
+                .withSubject(email)
                 .withExpiresAt(new Date(now.getTime() + accessTokenExpirationMillis))
-                .withClaim(EMAIL_CLAIM, email)
+                .withClaim(ROLE_CLAIM, roleName)
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
@@ -68,8 +70,8 @@ public class JwtUtils {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-    public String issueAccessToken(String email){
-        return createAccessToken(email);
+    public String issueAccessToken(String email, Role role){
+        return createAccessToken(email, role);
     }
 
     public String issueRefreshToken(){
@@ -95,8 +97,7 @@ public class JwtUtils {
     }
 
     public Optional<String> extractEmail(DecodedJWT decodedAccessToken) {
-        return Optional.ofNullable(decodedAccessToken.getClaim(EMAIL_CLAIM)
-                .asString());
+        return Optional.ofNullable(decodedAccessToken.getSubject());
     }
 
     public ResponseCookie createRefreshTokenCookie(String refreshToken){

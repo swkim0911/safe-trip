@@ -33,10 +33,11 @@ public class AuthService {
 
         authenticationManager.authenticate(authenticationToken);
 
-        String accessToken = jwtUtils.issueAccessToken(email);
+        User findUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+
+        String accessToken = jwtUtils.issueAccessToken(email, findUser.getRole());
         String refreshToken = jwtUtils.issueRefreshToken();
 
-        User findUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         saveRefreshToken(findUser, refreshToken);
 
         ResponseCookie refreshTokenCookie = jwtUtils.createRefreshTokenCookie(refreshToken);
@@ -62,7 +63,7 @@ public class AuthService {
 
         User findUser = getUserByRefreshToken(refreshToken);
 
-        String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail());
+        String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail(), findUser.getRole());
         String reIssuedRefreshToken = jwtUtils.issueRefreshToken();
 
         findUser.updateRefreshToken(reIssuedRefreshToken);

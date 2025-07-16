@@ -39,6 +39,9 @@ class AuthServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private TokenService tokenService;
+
 
     @Test
     void 로그인_요청_성공시_액세스_토큰과_리프레시_토큰을_발급한다() {
@@ -64,7 +67,7 @@ class AuthServiceTest {
                 .role(Role.USER)
                 .build();
 
-        when(jwtUtils.issueAccessToken(email)).thenReturn(accessToken);
+        when(jwtUtils.issueAccessToken(email, Role.USER)).thenReturn(accessToken);
         when(jwtUtils.issueRefreshToken()).thenReturn(refreshToken);
         when(jwtUtils.createRefreshTokenCookie(refreshToken)).thenReturn(ResponseCookie.from("refreshToken", refreshToken).build());
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(mockUser));
@@ -94,7 +97,7 @@ class AuthServiceTest {
 
         // verify
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtUtils, never()).issueAccessToken(any());
+        verify(jwtUtils, never()).issueAccessToken(any(), any(Role.class));
         verify(jwtUtils, never()).issueRefreshToken();
     }
 
@@ -112,7 +115,7 @@ class AuthServiceTest {
 
         // verify
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtUtils, never()).issueAccessToken(any());
+        verify(jwtUtils, never()).issueAccessToken(any(), any(Role.class));
         verify(jwtUtils, never()).issueRefreshToken();
     }
 
