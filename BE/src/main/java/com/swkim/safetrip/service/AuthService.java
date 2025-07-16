@@ -5,7 +5,6 @@ import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
-import com.swkim.safetrip.global.exception.custom.RefreshTokenReuseDetectedException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.repository.UserRepository;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +49,7 @@ public class AuthService {
                 .build();
 
     }
-
+    // todo verfity 할 때 블랙리스트에 있는지 확인하기
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
         String extractedEmail = jwtUtils.verifyRefreshToken(refreshToken);
 
@@ -72,13 +70,6 @@ public class AuthService {
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();
     }
-
-
-    @Transactional(readOnly = true)
-    public User getUserByRefreshToken(String refreshToken) {
-        return userRepository.findByRefreshToken(refreshToken).orElseThrow(RefreshTokenReuseDetectedException::new);
-    }
-
 
     private void saveRefreshToken(User findUser, String refreshToken) {
         Long refreshTokenExpirationMillis = jwtUtils.getRefreshTokenExpirationMillis();
