@@ -15,4 +15,9 @@ public class TokenService {
         long expirationSeconds = expirationMillis / 1000;
         redisTemplate.opsForValue().set("refresh:" + email, refreshToken, expirationSeconds, TimeUnit.SECONDS);
     }
+
+    public void delete(String refreshToken, String email) {
+        redisTemplate.delete("refresh:" + email);
+    }
+
 }
