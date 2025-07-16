@@ -56,6 +56,7 @@ public class AuthService {
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
         jwtUtils.validateRefreshToken(refreshToken);
 
+
         User findUser = getUserByRefreshToken(refreshToken);
 
         String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail(), findUser.getRole());

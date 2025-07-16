@@ -110,9 +110,9 @@ public class JwtUtils {
     }
 
     // verify: 서명, 토큰 구조, 만료 시간 검증
-    public void validateRefreshToken(String refreshToken) {
+    public DecodedJWT verifyRefreshToken(String refreshToken) {
         try {
-            JWT.require(Algorithm.HMAC512(secretKey))
+            return JWT.require(Algorithm.HMAC512(secretKey))
                     .build()
                     .verify(refreshToken);
         } catch (TokenExpiredException e) {
