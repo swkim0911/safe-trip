@@ -37,8 +37,7 @@ public class AuthService {
         String refreshToken = jwtUtils.issueRefreshToken();
 
         User findUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-        Long refreshTokenExpirationMillis = jwtUtils.getRefreshTokenExpirationMillis();
-        tokenService.saveRefreshToken(findUser.getEmail(), refreshToken, refreshTokenExpirationMillis);
+        saveRefreshToken(findUser, refreshToken);
 
         ResponseCookie refreshTokenCookie = jwtUtils.createRefreshTokenCookie(refreshToken);
         AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
@@ -50,6 +49,11 @@ public class AuthService {
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();
 
+    }
+
+    private void saveRefreshToken(User findUser, String refreshToken) {
+        Long refreshTokenExpirationMillis = jwtUtils.getRefreshTokenExpirationMillis();
+        tokenService.saveRefreshToken(findUser.getEmail(), refreshToken, refreshTokenExpirationMillis);
     }
 
     @Transactional
