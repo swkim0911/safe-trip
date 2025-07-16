@@ -16,6 +16,10 @@ public class TokenService {
         redisTemplate.opsForValue().set("refresh:" + email, refreshToken, expirationSeconds, TimeUnit.SECONDS);
     }
 
+    public String getRefreshToken(String email) {
+        return redisTemplate.opsForValue().get("refresh:" + email);
+    }
+
     public void delete(String refreshToken, String email) {
         redisTemplate.delete("refresh:" + email);
     }
