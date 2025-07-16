@@ -68,7 +68,7 @@ class AuthServiceTest {
                 .build();
 
         when(jwtUtils.issueAccessToken(email, Role.USER)).thenReturn(accessToken);
-        when(jwtUtils.issueRefreshToken()).thenReturn(refreshToken);
+        when(jwtUtils.issueRefreshToken(email)).thenReturn(refreshToken);
         when(jwtUtils.createRefreshTokenCookie(refreshToken)).thenReturn(ResponseCookie.from("refreshToken", refreshToken).build());
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(mockUser));
 
@@ -98,7 +98,7 @@ class AuthServiceTest {
         // verify
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtUtils, never()).issueAccessToken(any(), any(Role.class));
-        verify(jwtUtils, never()).issueRefreshToken();
+        verify(jwtUtils, never()).issueRefreshToken(any());
     }
 
     @Test
@@ -116,7 +116,7 @@ class AuthServiceTest {
         // verify
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtUtils, never()).issueAccessToken(any(), any(Role.class));
-        verify(jwtUtils, never()).issueRefreshToken();
+        verify(jwtUtils, never()).issueRefreshToken(any());
     }
 
 

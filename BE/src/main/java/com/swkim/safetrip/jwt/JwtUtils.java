@@ -45,8 +45,6 @@ public class JwtUtils {
     @Value("${jwt.refresh.name}")
     private String refreshName;
 
-    private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
-    private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String ROLE_CLAIM = "role";
     private static final String BEARER = "Bearer ";
 
@@ -61,11 +59,11 @@ public class JwtUtils {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-    private String createRefreshToken() {
+    private String createRefreshToken(String email) {
         Date now = new Date();
 
         return JWT.create()
-                .withSubject(REFRESH_TOKEN_SUBJECT)
+                .withSubject(email)
                 .withExpiresAt(new Date(now.getTime() + refreshTokenExpirationMillis))
                 .sign(Algorithm.HMAC512(secretKey));
     }
@@ -74,8 +72,8 @@ public class JwtUtils {
         return createAccessToken(email, role);
     }
 
-    public String issueRefreshToken(){
-        return createRefreshToken();
+    public String issueRefreshToken(String email){
+        return createRefreshToken(email);
     }
 
     public Optional<String> extractAccessToken(HttpServletRequest request) {

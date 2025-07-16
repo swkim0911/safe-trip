@@ -36,7 +36,7 @@ public class AuthService {
         User findUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
         String accessToken = jwtUtils.issueAccessToken(email, findUser.getRole());
-        String refreshToken = jwtUtils.issueRefreshToken();
+        String refreshToken = jwtUtils.issueRefreshToken(email);
 
         saveRefreshToken(findUser, refreshToken);
 
@@ -52,11 +52,6 @@ public class AuthService {
 
     }
 
-    private void saveRefreshToken(User findUser, String refreshToken) {
-        Long refreshTokenExpirationMillis = jwtUtils.getRefreshTokenExpirationMillis();
-        tokenService.saveRefreshToken(findUser.getEmail(), refreshToken, refreshTokenExpirationMillis);
-    }
-
     @Transactional
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
         jwtUtils.validateRefreshToken(refreshToken);
@@ -64,7 +59,7 @@ public class AuthService {
         User findUser = getUserByRefreshToken(refreshToken);
 
         String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail(), findUser.getRole());
-        String reIssuedRefreshToken = jwtUtils.issueRefreshToken();
+        String reIssuedRefreshToken = jwtUtils.issueRefreshToken(findUser.getEmail());
 
         findUser.updateRefreshToken(reIssuedRefreshToken);
 
@@ -83,6 +78,12 @@ public class AuthService {
     @Transactional(readOnly = true)
     public User getUserByRefreshToken(String refreshToken) {
         return userRepository.findByRefreshToken(refreshToken).orElseThrow(RefreshTokenReuseDetectedException::new);
+    }
+
+
+    private void saveRefreshToken(User findUser, String refreshToken) {
+        Long refreshTokenExpirationMillis = jwtUtils.getRefreshTokenExpirationMillis();
+        tokenService.saveRefreshToken(findUser.getEmail(), refreshToken, refreshTokenExpirationMillis);
     }
 
 }
