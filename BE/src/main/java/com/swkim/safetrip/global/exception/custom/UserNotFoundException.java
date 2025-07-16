@@ -8,4 +8,8 @@ public class UserNotFoundException extends GeneralException {
     public UserNotFoundException() {
         super(Error.USER_NOT_FOUND_EXCEPTION);
     }
+
+    public UserNotFoundException(Error error) {
+        super(error);
+    }
 }

@@ -4,6 +4,7 @@ import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.entity.User;
+import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenReuseDetectedException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.jwt.JwtUtils;
@@ -54,7 +55,7 @@ public class AuthService {
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
         String extractedEmail = jwtUtils.verifyRefreshToken(refreshToken);
 
-        User findUser = userRepository.findByEmail(extractedEmail).orElseThrow(UserNotFoundException::new);
+        User findUser = userRepository.findByEmail(extractedEmail).orElseThrow(InvalidRefreshTokenException::new);
 
         String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail(), findUser.getRole());
         String reIssuedRefreshToken = jwtUtils.issueRefreshToken(findUser.getEmail());

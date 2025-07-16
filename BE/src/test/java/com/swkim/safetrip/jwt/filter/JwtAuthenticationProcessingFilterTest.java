@@ -6,7 +6,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
-import com.swkim.safetrip.global.exception.custom.EmailClaimMissingException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;
 import com.swkim.safetrip.jwt.JwtUtils;
@@ -22,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -150,7 +150,7 @@ class JwtAuthenticationProcessingFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         // then
-        verify(entryPoint).commence(eq(request), eq(response), argThat(ex -> ex instanceof EmailClaimMissingException));
+        verify(entryPoint).commence(eq(request), eq(response), argThat(ex -> ex instanceof BadCredentialsException));
     }
 
     @Test

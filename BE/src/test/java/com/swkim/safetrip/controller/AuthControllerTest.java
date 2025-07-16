@@ -8,7 +8,6 @@ import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenMissingException;
-import com.swkim.safetrip.global.exception.custom.RefreshTokenReuseDetectedException;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.AuthService;
 import com.swkim.safetrip.service.UserService;
@@ -26,7 +25,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -153,19 +151,20 @@ class AuthControllerTest {
     }
 
     @Test
-    void 액세스_토큰_재발급_요청시_리프레시_토큰이_유효하지만_대응하는_유저를_찾을_수_없는_경우_리프레시_토큰_재사용으로_간주하고_401_에러가_발생한다() throws Exception {
+    void 액세스_토큰_재발급_요청시_리프레시_토큰이_유효하지만_대응하는_유저를_찾을_수_없는_경우_401_에러가_발생한다() throws Exception {
         // given
-        String reUsedRefreshToken = "reused.refresh.token";
-        doNothing().when(jwtUtils).validateRefreshToken(reUsedRefreshToken);
-        when(authService.reIssueAccessToken(reUsedRefreshToken))
-                .thenThrow(new RefreshTokenReuseDetectedException());
+        String refreshToken = "im.refresh.token";
+
+        when(jwtUtils.verifyRefreshToken(refreshToken)).thenReturn(any(String.class));
+        when(authService.reIssueAccessToken(refreshToken))
+                .thenThrow(new InvalidRefreshTokenException());
 
         // when & then
         mockMvc.perform(post("/auth/refresh")
-                        .cookie(new Cookie("refreshToken", reUsedRefreshToken)))
+                        .cookie(new Cookie("refreshToken", refreshToken)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401))
-                .andExpect(jsonPath("$.message").value("Refresh token reuse detected"));
+                .andExpect(jsonPath("$.message").value("Refresh token is invalid"));
     }
 
     @Test

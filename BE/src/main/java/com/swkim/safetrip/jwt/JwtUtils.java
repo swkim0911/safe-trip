@@ -6,10 +6,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.entity.enums.Role;
-import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
-import com.swkim.safetrip.global.exception.custom.InvalidAccessTokenException;
-import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
-import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
+import com.swkim.safetrip.global.exception.custom.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
@@ -116,7 +113,7 @@ public class JwtUtils {
                     .build()
                     .verify(refreshToken);
 
-            return extractEmail(decodedJWT).orElseThrow(RuntimeException::new);
+            return extractEmail(decodedJWT).orElseThrow(EmailClaimMissingException::new);
 
         } catch (TokenExpiredException e) {
             throw new RefreshTokenExpiredException();

@@ -182,7 +182,7 @@ class JwtServiceTest {
         String refreshToken = jwtUtils.issueRefreshToken(email);
 
         // when & then
-        assertThatCode(() -> jwtUtils.validateRefreshToken(refreshToken)).doesNotThrowAnyException();
+        assertThatCode(() -> jwtUtils.verifyRefreshToken(refreshToken)).doesNotThrowAnyException();
     }
 
     @Test
@@ -191,7 +191,7 @@ class JwtServiceTest {
         String refreshToken = jwtUtils.issueAccessToken("test@gmail.com", Role.USER);
 
         // when & then
-        assertThatCode(() -> jwtUtils.validateRefreshToken(refreshToken)).doesNotThrowAnyException();
+        assertThatCode(() -> jwtUtils.verifyRefreshToken(refreshToken)).doesNotThrowAnyException();
     }
 
     @Test
@@ -202,7 +202,7 @@ class JwtServiceTest {
                 .sign(Algorithm.HMAC512("invalidSecretKey"));
 
         // when & then
-        assertThatThrownBy(() -> jwtUtils.validateRefreshToken(strangeRefreshToken))
+        assertThatThrownBy(() -> jwtUtils.verifyRefreshToken(strangeRefreshToken))
                 .isInstanceOf(InvalidRefreshTokenException.class);
     }
 
@@ -229,7 +229,7 @@ class JwtServiceTest {
                 .sign(Algorithm.HMAC512(secretKey));
 
         // when & then
-        assertThatThrownBy(() -> jwtUtils.validateRefreshToken(expiredRefreshToken))
+        assertThatThrownBy(() -> jwtUtils.verifyRefreshToken(expiredRefreshToken))
                 .isInstanceOf(RefreshTokenExpiredException.class);
     }
 
