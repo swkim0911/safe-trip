@@ -24,7 +24,6 @@ public class AuthService {
     private final TokenService tokenService;
     private final JwtUtils jwtUtils;
 
-    @Transactional
     public AuthTokensResponseDto login(UserLoginRequest loginRequest) {
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
@@ -52,17 +51,15 @@ public class AuthService {
 
     }
 
-    @Transactional
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
-        jwtUtils.validateRefreshToken(refreshToken);
+        String extractedEmail = jwtUtils.verifyRefreshToken(refreshToken);
 
-
-        User findUser = getUserByRefreshToken(refreshToken);
+        User findUser = userRepository.findByEmail(extractedEmail).orElseThrow(UserNotFoundException::new);
 
         String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail(), findUser.getRole());
         String reIssuedRefreshToken = jwtUtils.issueRefreshToken(findUser.getEmail());
 
-        findUser.updateRefreshToken(reIssuedRefreshToken);
+        saveRefreshToken(findUser, reIssuedRefreshToken);
 
         ResponseCookie refreshTokenCookie = jwtUtils.createRefreshTokenCookie(reIssuedRefreshToken);
         AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()

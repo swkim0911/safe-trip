@@ -94,8 +94,8 @@ public class JwtUtils {
                 .findFirst();
     }
 
-    public Optional<String> extractEmail(DecodedJWT decodedAccessToken) {
-        return Optional.ofNullable(decodedAccessToken.getSubject());
+    public Optional<String> extractEmail(DecodedJWT decodedJWT) {
+        return Optional.ofNullable(decodedJWT.getSubject());
     }
 
     public ResponseCookie createRefreshTokenCookie(String refreshToken){
@@ -109,17 +109,18 @@ public class JwtUtils {
 
     }
 
-    // verify: 서명, 토큰 구조, 만료 시간 검증
-    public DecodedJWT verifyRefreshToken(String refreshToken) {
+    // verify: 서명, 토큰 구조, 만료 시간 검증후 이메일 추출
+    public String verifyRefreshToken(String refreshToken) {
         try {
-            return JWT.require(Algorithm.HMAC512(secretKey))
+            DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(secretKey))
                     .build()
                     .verify(refreshToken);
+
+            return extractEmail(decodedJWT).orElseThrow(RuntimeException::new);
+
         } catch (TokenExpiredException e) {
-            log.info("Refresh token expired for user: {}", refreshToken);
             throw new RefreshTokenExpiredException();
         } catch (JWTVerificationException e) {
-            log.warn("Invalid refresh token detected: {}", refreshToken);
             throw new InvalidRefreshTokenException();
         }
     }
