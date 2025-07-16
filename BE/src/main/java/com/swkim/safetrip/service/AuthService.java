@@ -21,6 +21,7 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
+    private final TokenService tokenService;
     private final JwtUtils jwtUtils;
 
     @Transactional
@@ -36,7 +37,8 @@ public class AuthService {
         String refreshToken = jwtUtils.issueRefreshToken();
 
         User findUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-        findUser.updateRefreshToken(refreshToken);
+        Long refreshTokenExpirationMillis = jwtUtils.getRefreshTokenExpirationMillis();
+        tokenService.saveRefreshToken(findUser.getEmail(), refreshToken, refreshTokenExpirationMillis);
 
         ResponseCookie refreshTokenCookie = jwtUtils.createRefreshTokenCookie(refreshToken);
         AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()

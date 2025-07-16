@@ -11,6 +11,7 @@ import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,10 +32,11 @@ public class JwtUtils {
     private String secretKey;
 
     @Value("${jwt.access.expiration}")
-    private Long accessTokenExpirationPeriod;
+    private Long accessTokenExpirationMillis;
 
+    @Getter
     @Value("${jwt.refresh.expiration}")
-    private Long refreshTokenExpirationPeriod;
+    private Long refreshTokenExpirationMillis;
 
     @Value("${jwt.access.header}")
     private String accessHeader;
