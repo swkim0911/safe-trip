@@ -54,7 +54,7 @@ public class JwtUtils {
 
         return JWT.create()
                 .withSubject(ACCESS_TOKEN_SUBJECT)
-                .withExpiresAt(new Date(now.getTime() + accessTokenExpirationPeriod))
+                .withExpiresAt(new Date(now.getTime() + accessTokenExpirationMillis))
                 .withClaim(EMAIL_CLAIM, email)
                 .sign(Algorithm.HMAC512(secretKey));
     }
@@ -64,7 +64,7 @@ public class JwtUtils {
 
         return JWT.create()
                 .withSubject(REFRESH_TOKEN_SUBJECT)
-                .withExpiresAt(new Date(now.getTime() + refreshTokenExpirationPeriod))
+                .withExpiresAt(new Date(now.getTime() + refreshTokenExpirationMillis))
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
