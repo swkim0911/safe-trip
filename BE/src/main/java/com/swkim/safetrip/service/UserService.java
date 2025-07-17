@@ -4,13 +4,14 @@ import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
-import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.UserMapper;
 import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,9 +40,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User getUserByEmail(String email){
-        return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+    public Optional<User> getUserByEmail(String email){
+        return userRepository.findByEmail(email);
     }
+
 
 
 }

@@ -116,7 +116,7 @@ class JwtAuthenticationProcessingFilterTest {
                 .role(Role.USER)
                 .build();
 
-        when(userService.getUserByEmail(email)).thenReturn(user);
+        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
 
         // when
         filter.doFilterInternal(request, response, filterChain);

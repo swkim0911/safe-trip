@@ -7,7 +7,6 @@ import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.jwt.JwtUtils;
-import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final TokenService tokenService;
     private final JwtUtils jwtUtils;
 
@@ -31,7 +30,7 @@ public class AuthService {
 
         authenticationManager.authenticate(authenticationToken);
 
-        User findUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        User findUser = userService.getUserByEmail(email).orElseThrow(UserNotFoundException::new);
 
         String accessToken = jwtUtils.issueAccessToken(email, findUser.getRole());
         String refreshToken = jwtUtils.issueRefreshToken(email);
@@ -54,7 +53,7 @@ public class AuthService {
 
         String extractedEmail = jwtUtils.verifyRefreshToken(refreshToken);
 
-        User findUser = getUser(extractedEmail);
+        User findUser = userService.getUserByEmail(extractedEmail).orElseThrow(InvalidRefreshTokenException::new);
 
         String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail(), findUser.getRole());
         String reIssuedRefreshToken = jwtUtils.issueRefreshToken(findUser.getEmail());
@@ -73,10 +72,6 @@ public class AuthService {
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();
-    }
-
-    private User getUser(String extractedEmail) {
-        return userRepository.findByEmail(extractedEmail).orElseThrow(InvalidRefreshTokenException::new);
     }
 
     private void isBlacklisted(String refreshToken) {
