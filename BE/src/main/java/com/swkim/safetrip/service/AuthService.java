@@ -76,6 +76,20 @@ public class AuthService {
                 .build();
     }
 
+    public void logout(String refreshToken) {
+        String email = jwtUtils.verifyRefreshToken(refreshToken);
+
+        if(!tokenService.isValidRefreshToken(email, refreshToken)){
+            throw new InvalidRefreshTokenException();
+        }
+
+        long ttl = jwtUtils.getRefreshTokenRemainingMillis(refreshToken);
+        tokenService.blacklistRefreshToken(refreshToken, ttl);
+
+        tokenService.deleteRefreshToken(email);
+
+    }
+
     private void saveRefreshToken(User findUser, String refreshToken) {
         Long refreshTokenExpirationMillis = jwtUtils.getRefreshTokenExpirationMillis();
         tokenService.saveRefreshToken(findUser.getEmail(), refreshToken, refreshTokenExpirationMillis);

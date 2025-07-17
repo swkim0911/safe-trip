@@ -57,4 +57,6 @@ public class GlobalExceptionHandler{
         return ApiResponse.of(404, "API that does not exist", null);
     }
 
+    // todo MissingCookieValueException
+
 }

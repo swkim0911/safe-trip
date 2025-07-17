@@ -36,12 +36,13 @@ public class TokenService {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
-    public String getRefreshToken(String email) {
-        return redisTemplate.opsForValue().get("refresh:" + email);
-    }
-
     public void deleteRefreshToken(String email) {
         redisTemplate.delete("refresh:" + email);
+    }
+
+    public boolean isValidRefreshToken(String email, String refreshToken) {
+        String storedToken = redisTemplate.opsForValue().get("refresh:" + email);
+        return storedToken != null && storedToken.equals(refreshToken);
     }
 
     private String getBlacklistKey(String token) {
