@@ -20,13 +20,15 @@ public class TokenService {
     }
 
     public void blacklistRefreshToken(String refreshToken, long ttl) {
-        String key = getBlacklistKey(refreshToken);
-        redisTemplate.opsForValue().set(
-                key,
-                "expired",
-                ttl,
-                TimeUnit.MILLISECONDS
-        );
+        if (ttl > 0) {
+            String key = getBlacklistKey(refreshToken);
+            redisTemplate.opsForValue().set(
+                    key,
+                    "expired",
+                    ttl,
+                    TimeUnit.MILLISECONDS
+            );
+        }
     }
 
     public boolean isRefreshTokenBlacklisted(String refreshToken) {
