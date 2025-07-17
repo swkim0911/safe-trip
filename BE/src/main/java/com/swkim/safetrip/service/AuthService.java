@@ -49,14 +49,18 @@ public class AuthService {
                 .build();
 
     }
-    // todo verfity 할 때 블랙리스트에 있는지 확인하기
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
+        // todo refreshToken이 블랙리스트에 있는지 확인.
+        tokenService.
+
         String extractedEmail = jwtUtils.verifyRefreshToken(refreshToken);
 
         User findUser = userRepository.findByEmail(extractedEmail).orElseThrow(InvalidRefreshTokenException::new);
 
         String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail(), findUser.getRole());
         String reIssuedRefreshToken = jwtUtils.issueRefreshToken(findUser.getEmail());
+
+        // todo 기존 refreshToken 블랙리스트에 저장.
 
         saveRefreshToken(findUser, reIssuedRefreshToken);
 

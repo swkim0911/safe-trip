@@ -16,6 +16,10 @@ public class TokenService {
         redisTemplate.opsForValue().set("refresh:" + email, refreshToken, expirationSeconds, TimeUnit.SECONDS);
     }
 
+    public boolean isRefreshTokenBlacklisted(String refreshToken) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey("blacklist:refresh:" + refreshToken));
+    }
+
     public String getRefreshToken(String email) {
         return redisTemplate.opsForValue().get("refresh:" + email);
     }
