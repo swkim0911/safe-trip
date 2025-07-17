@@ -49,7 +49,9 @@ public class AuthService {
 
     }
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
-        isBlacklisted(refreshToken);
+        if (tokenService.isRefreshTokenBlacklisted(refreshToken)) {
+            throw new InvalidRefreshTokenException();
+        }
 
         String extractedEmail = jwtUtils.verifyRefreshToken(refreshToken);
 
@@ -72,12 +74,6 @@ public class AuthService {
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();
-    }
-
-    private void isBlacklisted(String refreshToken) {
-        if (tokenService.isRefreshTokenBlacklisted(refreshToken)) {
-            throw new InvalidRefreshTokenException();
-        }
     }
 
     private void saveRefreshToken(User findUser, String refreshToken) {
