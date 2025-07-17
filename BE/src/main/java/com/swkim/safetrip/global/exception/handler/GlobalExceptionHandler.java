@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -51,12 +52,27 @@ public class GlobalExceptionHandler{
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ApiResponse<String> handle404(NoHandlerFoundException ex) {
+    public ApiResponse<String> handleNoHandlerFoundException(NoHandlerFoundException ex) {
         log.error("error", ex);
 
-        return ApiResponse.of(404, "API that does not exist", null);
+        return ApiResponse.of(404, "API does not exist", null);
     }
 
-    // todo MissingCookieValueException
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<ApiResponse<String>> handleMissingCookie(MissingRequestCookieException ex) {
+        log.error("error", ex);
 
+        String cookieName = ex.getCookieName();
+        boolean isAuthCookie = "refreshToken".equals(cookieName);
+
+        HttpStatus status = isAuthCookie ? HttpStatus.UNAUTHORIZED : HttpStatus.BAD_REQUEST;
+
+        String message = isAuthCookie
+                ? "Authentication cookie (refreshToken) is missing."
+                : String.format("Required cookie (%s) is missing from the request.", cookieName);
+
+        ApiResponse<String> response = ApiResponse.of(status.value(), message, null);
+
+        return ResponseEntity.status(status).body(response);
+    }
 }
