@@ -91,6 +91,17 @@ public class JwtUtils {
                 .findFirst();
     }
 
+    public long getRefreshTokenRemainingMillis(String refreshToken) {
+        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(secretKey))
+                .build()
+                .verify(refreshToken);
+
+        Date expiresAt = decodedJWT.getExpiresAt();
+        long now = System.currentTimeMillis();
+
+        return Math.max(0, expiresAt.getTime() - now);
+    }
+
     public Optional<String> extractEmail(DecodedJWT decodedJWT) {
         return Optional.ofNullable(decodedJWT.getSubject());
     }

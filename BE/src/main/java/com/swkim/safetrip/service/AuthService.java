@@ -50,17 +50,17 @@ public class AuthService {
 
     }
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
-        // todo refreshToken이 블랙리스트에 있는지 확인.
-        tokenService.
+        isBlacklisted(refreshToken);
 
         String extractedEmail = jwtUtils.verifyRefreshToken(refreshToken);
 
-        User findUser = userRepository.findByEmail(extractedEmail).orElseThrow(InvalidRefreshTokenException::new);
+        User findUser = getUser(extractedEmail);
 
         String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail(), findUser.getRole());
         String reIssuedRefreshToken = jwtUtils.issueRefreshToken(findUser.getEmail());
 
-        // todo 기존 refreshToken 블랙리스트에 저장.
+        long ttl = jwtUtils.getRefreshTokenRemainingMillis(refreshToken);
+        tokenService.blacklistRefreshToken(refreshToken, ttl);
 
         saveRefreshToken(findUser, reIssuedRefreshToken);
 
@@ -73,6 +73,16 @@ public class AuthService {
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();
+    }
+
+    private User getUser(String extractedEmail) {
+        return userRepository.findByEmail(extractedEmail).orElseThrow(InvalidRefreshTokenException::new);
+    }
+
+    private void isBlacklisted(String refreshToken) {
+        if (tokenService.isRefreshTokenBlacklisted(refreshToken)) {
+            throw new InvalidRefreshTokenException();
+        }
     }
 
     private void saveRefreshToken(User findUser, String refreshToken) {

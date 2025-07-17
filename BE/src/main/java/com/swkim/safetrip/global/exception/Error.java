@@ -25,7 +25,9 @@ public enum Error {
     ACCESS_TOKEN_MISSING_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is missing"),
     ACCESS_TOKEN_EXPIRED_ERROR(40101, "Access token is expired"),
     EMAIL_CLAIM_MISSING_ERROR(HttpStatus.UNAUTHORIZED.value(), "Email claim is missing"),
-    INVALID_ACCESS_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid");
+    INVALID_ACCESS_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid"),
+
+    TOKEN_HASHING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed token hashing");
 
     private final int statusCode;
     private final String message;
