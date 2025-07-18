@@ -15,7 +15,6 @@ import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.S3UploadException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
-import com.swkim.safetrip.repository.ImageRepository;
 import com.swkim.safetrip.repository.ReportRepository;
 import com.swkim.safetrip.vo.CountryCityData;
 import lombok.RequiredArgsConstructor;
@@ -45,9 +44,8 @@ public class ReportService {
     private final UserService userService;
     private final ScamService scamService;
     private final LocationService locationService;
-    private final ImageRepository imageRepository;
+    private final ImageService imageService;
     private final ReportRepository reportRepository;
-
 
     private final AmazonS3Client amazonS3Client;
 
@@ -110,7 +108,7 @@ public class ReportService {
     public ReportFindByIdResponse getReport(Long id){
 
         Report report = reportRepository.findReportWithLocationById(id).orElseThrow(ReportNotFoundException::new);
-        List<Image> images = imageRepository.findImagesByReportId(id);
+        List<Image> images = imageService.findImagesByReportId(id);
         List<String> URLs = images.stream()
                 .map(Image::getAccessURL)
                 .toList();
