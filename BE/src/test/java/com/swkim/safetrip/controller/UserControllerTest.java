@@ -63,7 +63,7 @@ public class UserControllerTest {
         mockMvc.perform(post("/wrong-url"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(404))
-                .andExpect(jsonPath("$.message").value("API that does not exist"));
+                .andExpect(jsonPath("$.message").value("API does not exist"));
 
     }
 }
