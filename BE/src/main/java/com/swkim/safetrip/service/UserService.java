@@ -9,6 +9,9 @@ import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +20,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public Long signup(UserSignUpRequest signUpRequest) {
 
         if(userRepository.existsByEmail(signUpRequest.getEmail())){
@@ -28,13 +32,17 @@ public class UserService {
         }
 
         User user = UserMapper.toUser(signUpRequest);
-
+        // 비밀번호 암호화
         user.passwordEncode(passwordEncoder);
 
         User savedUser = userRepository.save(user);
         return savedUser.getId();
     }
 
+    @Transactional(readOnly = true)
+    public Optional<User> findUserByEmail(String email){
+        return userRepository.findByEmail(email);
+    }
 
 
 

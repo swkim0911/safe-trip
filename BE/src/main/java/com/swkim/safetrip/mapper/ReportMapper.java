@@ -8,7 +8,6 @@ import java.util.List;
 
 public class ReportMapper {
 
-    // todo User 객체 넣기
     public static Report toReport(ReportSaveRequest reportSaveRequest) {
         return Report.builder()
                 .title(reportSaveRequest.getTitle())

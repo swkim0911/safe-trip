@@ -9,18 +9,18 @@ import com.swkim.safetrip.global.response.ApiResponse;
 import com.swkim.safetrip.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class ReportController {
@@ -30,9 +30,9 @@ public class ReportController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/reports", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ApiResponse<Long> createReport(@RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
-
-        Long id = reportService.saveReport(request, images);
+    public ApiResponse<Long> createReport(@AuthenticationPrincipal UserDetails user, @RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
+        String email = user.getUsername();
+        Long id = reportService.saveReport(email, request, images);
         String message = messageSource.getMessage("report.create.success", null, null);
         return ApiResponse.of(HttpStatus.CREATED.value(), message, id);
     }

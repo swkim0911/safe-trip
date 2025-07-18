@@ -34,7 +34,7 @@ dependencies {
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'com.auth0:java-jwt:4.5.0'
-
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	// querydsl
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"

@@ -14,9 +14,20 @@ public enum Error {
     REPORT_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "report를 찾을 수 없습니다."),
     SCAM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "report를 찾을 수 없습니다."),
     S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "s3 버킷에 이미지를 업로드할 수 없습니다."),
-    DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "You cannot sign up due to duplicate e-mail."),
-    DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "You cannot sing up due to duplicate nickname"),
-    USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "The user could not be found by email.");
+    DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
+    DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "This nickname is already in use"),
+    USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email."),
+
+    REFRESH_TOKEN_MISSING_ERROR(HttpStatus.BAD_REQUEST.value(), "Refresh token is empty"),
+    REFRESH_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is expired"),
+    INVALID_REFRESH_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is invalid"),
+    REFRESH_TOKEN_REUSE_DETECTED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token reuse detected"),
+    ACCESS_TOKEN_MISSING_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is missing"),
+    ACCESS_TOKEN_EXPIRED_ERROR(40101, "Access token is expired"),
+    EMAIL_CLAIM_MISSING_ERROR(HttpStatus.UNAUTHORIZED.value(), "Email claim is missing"),
+    INVALID_ACCESS_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid"),
+
+    TOKEN_HASHING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed token hashing");
 
     private final int statusCode;
     private final String message;

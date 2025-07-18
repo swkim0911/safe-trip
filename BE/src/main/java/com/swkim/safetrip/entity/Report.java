@@ -17,9 +17,10 @@ public class Report extends BaseEntity{
     @Column(name = "id", nullable = false)
     private Long id;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id")
-//    private User user;
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Setter
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

@@ -1,19 +1,26 @@
 package com.swkim.safetrip.jwt.filter;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.entity.User;
-import com.swkim.safetrip.jwt.JwtService;
+import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
+import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -22,50 +29,33 @@ import java.io.IOException;
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
-    private static final String NO_CHECK_URL = "/auth/login";
-
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
+    private final UserService userService;
+    private final AuthenticationEntryPoint entryPoint;
 
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (isNoCheckURL(request)) {
+        if(!requiresAuthentication(request)){
             filterChain.doFilter(request, response);
             return;
         }
+        try {
+            String accessToken = jwtUtils.extractAccessToken(request)
+                    .orElseThrow(AccessTokenMissingException::new);
 
-        String refreshToken = jwtService.extractRefreshToken(request)
-                .filter(jwtService::isTokenValid)
-                .orElse(null);
+            DecodedJWT decodedAccessToken = jwtUtils.verifyAccessToken(accessToken);
+            String email = jwtUtils.extractEmail(decodedAccessToken).orElseThrow(() -> new BadCredentialsException("Email claim is missing"));
 
-        // 리프레시 토큰이 있고 유효성 검증을 통과하면 액세스/리프레시 토큰 재발급
-        if(refreshToken != null){
-            reIssueAccessAndRefreshToken(response, refreshToken);
-            return;
+            User findUser = userService.findUserByEmail(email).orElseThrow(() -> new UsernameNotFoundException("The email does not exist"));
+            saveAuthentication(findUser);
+
+            filterChain.doFilter(request, response);
+        } catch (AuthenticationException ex) {
+            entryPoint.commence(request, response, ex);
         }
 
-        checkAccessTokenAndAuthentication(request, response, filterChain);
-    }
-
-    private void reIssueAccessAndRefreshToken(HttpServletResponse response, String refreshToken) {
-
-        jwtService.getUserByRefreshToken(refreshToken)
-                .ifPresent(user -> {
-                    String reIssuedRefreshToken = jwtService.reIssueRefreshToken(user);
-                    jwtService.addTokensToResponseHeader(response, jwtService.issueAccessToken(user.getEmail()), reIssuedRefreshToken);
-                });
-    }
-
-    private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        jwtService.extractAccessToken(request)
-                .filter(jwtService::isTokenValid)
-                .ifPresent(accessToken -> jwtService.extractEmail(accessToken)
-                        .ifPresent(email -> jwtService.getUserByEmail(email)
-                                .ifPresent(this::saveAuthentication))
-                );
-
-        filterChain.doFilter(request, response);
     }
 
     private void saveAuthentication(User user){
@@ -83,7 +73,10 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 .build();
     }
 
-    private boolean isNoCheckURL(HttpServletRequest request) {
-        return request.getRequestURI().equals(NO_CHECK_URL);
+    private boolean requiresAuthentication(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        String method = request.getMethod();
+
+        return "/reports".equals(requestURI) && "POST".equalsIgnoreCase(method);
     }
 }
