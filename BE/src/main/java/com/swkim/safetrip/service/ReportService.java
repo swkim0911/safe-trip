@@ -15,8 +15,6 @@ import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.S3UploadException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
-import com.swkim.safetrip.repository.CityRepository;
-import com.swkim.safetrip.repository.CountryRepository;
 import com.swkim.safetrip.repository.ImageRepository;
 import com.swkim.safetrip.repository.ReportRepository;
 import com.swkim.safetrip.vo.CountryCityData;
@@ -45,11 +43,11 @@ public class ReportService {
     private String bucketName;
 
     private final UserService userService;
-    private final ReportRepository reportRepository;
     private final ScamService scamService;
-    private final CountryRepository countryRepository;
-    private final CityRepository cityRepository;
+    private final LocationService locationService;
     private final ImageRepository imageRepository;
+    private final ReportRepository reportRepository;
+
 
     private final AmazonS3Client amazonS3Client;
 
@@ -66,6 +64,7 @@ public class ReportService {
         Scam findScam = scamService.findScamById(reportSaveRequest.getScamId());
         report.setScam(findScam);
 
+        // CONSIDER: 이미지 업로드 방식 개선 (pre-signed URL 도입 검토)
         // 4. 이미지 S3에 전송하고 report에 추가
         List<Image> savedImageList = saveImagesInS3Bucket(files);
         savedImageList.forEach(report::addImage);
@@ -74,7 +73,7 @@ public class ReportService {
         CountryCityData countryCityData = getCountryCityData(reportSaveRequest);
 
         // 6. Country, City 엔티티 저장. address에 대한 location 객체 생성
-        Location location = saveLocationData(countryCityData, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
+        Location location = locationService.createLocationWithCityAndCountry(countryCityData, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
 
         // 7. report 저장
         return save(report, location);
@@ -126,55 +125,18 @@ public class ReportService {
         return savedReport.getId();
     }
 
-    @Transactional
-    private Location saveLocationData(CountryCityData countryCityData, String address, String locationLat, String locationLng){
 
-        String countryName = countryCityData.getCountryName();
-        String cityName = countryCityData.getCityName();
+    private List<Image> saveImagesInS3Bucket(List<MultipartFile> files) {
+        ArrayList<Image> imageList = new ArrayList<>();
 
-        Optional<Country> findCountry = countryRepository.findByName(countryName);
+        Optional.ofNullable(files)
+                .orElse(Collections.emptyList())
+                .forEach(file -> {
+                    Image image = saveImage(file);
+                    imageList.add(image);
+                });
 
-        Country country;
-        City city;
-
-        if(findCountry.isEmpty()){ // country가 없는 경우. country에 있는 city도 당연히 없으니 두 객체 모두 생성
-            country = Country.builder()
-                    .name(countryName)
-                    .build();
-
-            city = City.builder()
-                    .name(countryCityData.getCityName())
-                    .lat(countryCityData.getCityLat())
-                    .lng(countryCityData.getCityLng())
-                    .build();
-
-            country.addCity(city);
-            countryRepository.save(country);
-        }else{
-            country = findCountry.get();
-            Optional<City> findCity = cityRepository.findByNameAndCountryId(cityName, country.getId());
-
-            if(findCity.isPresent()){ // country도 있고 city도 있는 경우
-                city = findCity.get();
-            }else{
-                city = City.builder()
-                        .name(countryCityData.getCityName())
-                        .lat(countryCityData.getCityLat())
-                        .lng(countryCityData.getCityLng())
-                        .build();
-
-                country.addCity(city);
-                cityRepository.save(city);
-            }
-        }
-
-        return Location.builder()
-                .country(country)
-                .city(city)
-                .address(address)
-                .lat(locationLat)
-                .lng(locationLng)
-                .build();
+        return imageList;
     }
 
     private CountryCityData getCountryCityData(ReportSaveRequest reportSaveRequest) {
@@ -194,19 +156,6 @@ public class ReportService {
 
 
         return new CountryCityData(countryName, cityName, cityLat, cityLng);
-    }
-
-    private List<Image> saveImagesInS3Bucket(List<MultipartFile> files) {
-        ArrayList<Image> imageList = new ArrayList<>();
-
-        Optional.ofNullable(files)
-                .orElse(Collections.emptyList())
-                .forEach(file -> {
-                    Image image = saveImage(file);
-                    imageList.add(image);
-                });
-
-        return imageList;
     }
 
     /**
