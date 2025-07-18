@@ -6,7 +6,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
-import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;
 import com.swkim.safetrip.jwt.JwtUtils;
 import com.swkim.safetrip.service.UserService;
@@ -32,6 +31,8 @@ import java.util.Date;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,15 +79,17 @@ class JwtAuthenticationProcessingFilterTest {
     }
 
     @Test
-    void 글_등록_요청에_액세스_토큰이_없다면_401_예외가_발생한다() {
-        // givne
-        when(request.getRequestURI()).thenReturn("/reports");
-        when(request.getMethod()).thenReturn("POST");
-        when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.empty());
+    void 글_등록_요청에_액세스_토큰이_없다면_entryPoint가_호출된다() throws ServletException, IOException {
+        // given
+        given(request.getRequestURI()).willReturn("/reports");
+        given(request.getMethod()).willReturn("POST");
+        given(jwtUtils.extractAccessToken(request)).willReturn(Optional.empty());
 
-        // when & then
-        Assertions.assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
-                .isInstanceOf(AccessTokenMissingException.class);
+        // when
+        filter.doFilterInternal(request, response, filterChain);
+
+        // then
+        verify(entryPoint).commence(any(),any(), argThat(ex -> ex instanceof AccessTokenMissingException));
     }
 
     @Test
@@ -103,12 +106,12 @@ class JwtAuthenticationProcessingFilterTest {
 
         DecodedJWT decodedJWT = mock(DecodedJWT.class);
 
-        when(request.getRequestURI()).thenReturn("/reports");
-        when(request.getMethod()).thenReturn("POST");
+        given(request.getRequestURI()).willReturn("/reports");
+        given(request.getMethod()).willReturn("POST");
 
-        when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessToken));
-        when(jwtUtils.verifyAccessToken(eq(accessToken))).thenReturn(decodedJWT);
-        when(jwtUtils.extractEmail(eq(decodedJWT))).thenReturn(Optional.of(email));
+        given(jwtUtils.extractAccessToken(request)).willReturn(Optional.of(accessToken));
+        given(jwtUtils.verifyAccessToken(eq(accessToken))).willReturn(decodedJWT);
+        given(jwtUtils.extractEmail(eq(decodedJWT))).willReturn(Optional.of(email));
 
         User user = User.builder()
                 .email(email)
@@ -116,7 +119,7 @@ class JwtAuthenticationProcessingFilterTest {
                 .role(Role.USER)
                 .build();
 
-        when(userService.findUserByEmail(email)).thenReturn(Optional.of(user));
+        given(userService.findUserByEmail(email)).willReturn(Optional.of(user));
 
         // when
         filter.doFilterInternal(request, response, filterChain);
@@ -136,16 +139,16 @@ class JwtAuthenticationProcessingFilterTest {
                 .withSubject("AccessToken")
                 .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
                 .sign(Algorithm.HMAC512(secretKey));
+
         DecodedJWT decodedJWT = mock(DecodedJWT.class);
 
-        when(request.getRequestURI()).thenReturn("/reports");
-        when(request.getMethod()).thenReturn("POST");
+        given(request.getRequestURI()).willReturn("/reports");
+        given(request.getMethod()).willReturn("POST");
 
-        when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessTokenWithoutEmailClaim));
-        when(jwtUtils.verifyAccessToken(eq(accessTokenWithoutEmailClaim))).thenReturn(decodedJWT);
-        when(jwtUtils.extractEmail(eq(decodedJWT))).thenReturn(Optional.empty());
+        given(jwtUtils.extractAccessToken(request)).willReturn(Optional.of(accessTokenWithoutEmailClaim));
+        given(jwtUtils.verifyAccessToken(eq(accessTokenWithoutEmailClaim))).willReturn(decodedJWT);
+        given(jwtUtils.extractEmail(eq(decodedJWT))).willReturn(Optional.empty());
 
-        doNothing().when(entryPoint).commence(any(), any(), any());
         // when
         filter.doFilterInternal(request, response, filterChain);
 
@@ -167,13 +170,13 @@ class JwtAuthenticationProcessingFilterTest {
 
         DecodedJWT decodedJWT = mock(DecodedJWT.class);
 
-        when(request.getRequestURI()).thenReturn("/reports");
-        when(request.getMethod()).thenReturn("POST");
+        given(request.getRequestURI()).willReturn("/reports");
+        given(request.getMethod()).willReturn("POST");
 
-        when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessToken));
-        when(jwtUtils.verifyAccessToken(eq(accessToken))).thenReturn(decodedJWT);
-        when(jwtUtils.extractEmail(eq(decodedJWT))).thenReturn(Optional.of(email));
-        when(userService.findUserByEmail(email)).thenThrow(UserNotFoundException.class);
+        given(jwtUtils.extractAccessToken(request)).willReturn(Optional.of(accessToken));
+        given(jwtUtils.verifyAccessToken(eq(accessToken))).willReturn(decodedJWT);
+        given(jwtUtils.extractEmail(eq(decodedJWT))).willReturn(Optional.of(email));
+        given(userService.findUserByEmail(email)).willThrow(UsernameNotFoundException.class);
 
         doNothing().when(entryPoint).commence(any(), any(), any());
 
