@@ -30,7 +30,7 @@ public class AuthService {
 
         authenticationManager.authenticate(authenticationToken);
 
-        User findUser = userService.getUserByEmail(email).orElseThrow(UserNotFoundException::new);
+        User findUser = userService.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
 
         String accessToken = jwtUtils.issueAccessToken(email, findUser.getRole());
         String refreshToken = jwtUtils.issueRefreshToken(email);
@@ -55,7 +55,7 @@ public class AuthService {
 
         String extractedEmail = jwtUtils.verifyRefreshToken(refreshToken);
 
-        User findUser = userService.getUserByEmail(extractedEmail).orElseThrow(InvalidRefreshTokenException::new);
+        User findUser = userService.findUserByEmail(extractedEmail).orElseThrow(InvalidRefreshTokenException::new);
 
         String reIssuedAccessToken = jwtUtils.issueAccessToken(findUser.getEmail(), findUser.getRole());
         String reIssuedRefreshToken = jwtUtils.issueRefreshToken(findUser.getEmail());

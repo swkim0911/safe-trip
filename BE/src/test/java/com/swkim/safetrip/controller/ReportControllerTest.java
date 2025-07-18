@@ -83,7 +83,7 @@ class ReportControllerTest {
         given(jwtUtils.extractAccessToken(any())).willReturn(Optional.of(accessToken));
         given(jwtUtils.verifyAccessToken(eq(accessToken))).willReturn(decodedJwt);
         given(jwtUtils.extractEmail(eq(decodedJwt))).willReturn(Optional.of(email));
-        given(userService.getUserByEmail(email)).willReturn(Optional.of(mockUser));
+        given(userService.findUserByEmail(email)).willReturn(Optional.of(mockUser));
 
         given(reportService.saveReport(any(String.class), any(ReportSaveRequest.class), anyList())).willReturn(1L);
 

@@ -10,9 +10,15 @@ import com.swkim.safetrip.dto.response.LocationSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.*;
-import com.swkim.safetrip.global.exception.custom.*;
+import com.swkim.safetrip.global.exception.custom.CoordinatesNotValidException;
+import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
+import com.swkim.safetrip.global.exception.custom.S3UploadException;
+import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
-import com.swkim.safetrip.repository.*;
+import com.swkim.safetrip.repository.CityRepository;
+import com.swkim.safetrip.repository.CountryRepository;
+import com.swkim.safetrip.repository.ImageRepository;
+import com.swkim.safetrip.repository.ReportRepository;
 import com.swkim.safetrip.vo.CountryCityData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,14 +45,40 @@ public class ReportService {
     private String bucketName;
 
     private final UserService userService;
-    // TODO
     private final ReportRepository reportRepository;
-    private final ScamRepository scamRepository;
+    private final ScamService scamService;
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
     private final ImageRepository imageRepository;
 
     private final AmazonS3Client amazonS3Client;
+
+    public Long saveReport(String email, ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
+
+        // 1. reportRequest -> Report Mapping
+        Report report = ReportMapper.toReport(reportSaveRequest);
+
+        // 2. User 객체 report에 추가
+        User findUser = userService.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
+        report.setUser(findUser);
+
+        // 3. scam 객체 report에 추가
+        Scam findScam = scamService.findScamById(reportSaveRequest.getScamId());
+        report.setScam(findScam);
+
+        // 4. 이미지 S3에 전송하고 report에 추가
+        List<Image> savedImageList = saveImagesInS3Bucket(files);
+        savedImageList.forEach(report::addImage);
+
+        // 5. Country, City 정보 Get
+        CountryCityData countryCityData = getCountryCityData(reportSaveRequest);
+
+        // 6. Country, City 엔티티 저장. address에 대한 location 객체 생성
+        Location location = saveLocationData(countryCityData, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
+
+        // 7. report 저장
+        return save(report, location);
+    }
 
     @Transactional(readOnly = true)
     public LocationSummaryResponse getCountrySummary(){
@@ -68,33 +100,6 @@ public class ReportService {
     @Transactional(readOnly = true)
     public Slice<LocationSummaryItem> getCitySummaryPage(Long countryId, Pageable pageable) {
         return reportRepository.findCitySummarySlice(countryId, pageable);
-    }
-
-    public Long saveReport(String email, ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
-
-        // 1. reportRequest -> Report Mapping
-        Report report = ReportMapper.toReport(reportSaveRequest);
-
-        // 2. User 객체 report에 추가
-        User findUser = userService.getUserByEmail(email).orElseThrow(UserNotFoundException::new);
-        report.setUser(findUser);
-
-        // 3. scam 객체 report에 추가
-        Scam findScam = scamRepository.findById(reportSaveRequest.getScamId()).orElseThrow(ScamNotFoundException::new);
-        report.setScam(findScam);
-
-        // 4. 이미지 S3에 전송하고 report에 추가
-        List<Image> savedImageList = saveImagesInS3Bucket(files);
-        savedImageList.forEach(report::addImage);
-
-        // 5. Country, City 정보 Get
-        CountryCityData countryCityData = getCountryCityData(reportSaveRequest);
-
-        // 6. Country, City 엔티티 저장. address에 대한 location 객체 생성
-        Location location = saveLocationData(countryCityData, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
-
-        // 7. report 저장
-        return save(report, location);
     }
 
     @Transactional

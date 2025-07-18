@@ -48,7 +48,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             DecodedJWT decodedAccessToken = jwtUtils.verifyAccessToken(accessToken);
             String email = jwtUtils.extractEmail(decodedAccessToken).orElseThrow(() -> new BadCredentialsException("Email claim is missing"));
 
-            User findUser = userService.getUserByEmail(email).orElseThrow(() -> new UsernameNotFoundException("The email does not exist"));
+            User findUser = userService.findUserByEmail(email).orElseThrow(() -> new UsernameNotFoundException("The email does not exist"));
             saveAuthentication(findUser);
 
             filterChain.doFilter(request, response);

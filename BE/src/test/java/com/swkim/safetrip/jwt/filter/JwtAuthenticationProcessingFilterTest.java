@@ -116,7 +116,7 @@ class JwtAuthenticationProcessingFilterTest {
                 .role(Role.USER)
                 .build();
 
-        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
+        when(userService.findUserByEmail(email)).thenReturn(Optional.of(user));
 
         // when
         filter.doFilterInternal(request, response, filterChain);
@@ -173,7 +173,7 @@ class JwtAuthenticationProcessingFilterTest {
         when(jwtUtils.extractAccessToken(request)).thenReturn(Optional.of(accessToken));
         when(jwtUtils.verifyAccessToken(eq(accessToken))).thenReturn(decodedJWT);
         when(jwtUtils.extractEmail(eq(decodedJWT))).thenReturn(Optional.of(email));
-        when(userService.getUserByEmail(email)).thenThrow(UserNotFoundException.class);
+        when(userService.findUserByEmail(email)).thenThrow(UserNotFoundException.class);
 
         doNothing().when(entryPoint).commence(any(), any(), any());
 
