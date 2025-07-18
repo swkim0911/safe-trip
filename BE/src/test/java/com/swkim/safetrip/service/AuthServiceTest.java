@@ -6,7 +6,6 @@ import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.jwt.JwtUtils;
-import com.swkim.safetrip.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,7 +37,7 @@ class AuthServiceTest {
     private JwtUtils jwtUtils;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
     private TokenService tokenService;
@@ -54,8 +54,8 @@ class AuthServiceTest {
                 .build();
 
         Authentication authentication = mock(Authentication.class);
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(authentication);
+        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .willReturn(authentication);
 
         String accessToken = "im.access.token";
         String refreshToken = "im.refresh.token";
@@ -67,18 +67,18 @@ class AuthServiceTest {
                 .role(Role.USER)
                 .build();
 
-        when(jwtUtils.issueAccessToken(email, Role.USER)).thenReturn(accessToken);
-        when(jwtUtils.issueRefreshToken(email)).thenReturn(refreshToken);
-        when(jwtUtils.createRefreshTokenCookie(refreshToken)).thenReturn(ResponseCookie.from("refreshToken", refreshToken).build());
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(mockUser));
+        given(jwtUtils.issueAccessToken(email, Role.USER)).willReturn(accessToken);
+        given(jwtUtils.issueRefreshToken(email)).willReturn(refreshToken);
+        given(jwtUtils.createRefreshTokenCookie(refreshToken)).willReturn(ResponseCookie.from("refreshToken", refreshToken).build());
+        given(userService.findUserByEmail(email)).willReturn(Optional.of(mockUser));
 
         // when
         AuthTokensResponseDto authTokensResponseDto = authService.login(loginRequest);
+
+        // then
         AccessTokenResponse accessTokenResponse = authTokensResponseDto.getAccessTokenResponse();
         ResponseCookie refreshTokenCookie = authTokensResponseDto.getRefreshTokenCookie();
 
-
-        // then
         Assertions.assertThat(accessTokenResponse.getAccessToken()).isEqualTo(accessToken);
         Assertions.assertThat(refreshTokenCookie.getValue()).isEqualTo(refreshToken);
     }
@@ -90,9 +90,9 @@ class AuthServiceTest {
                 "notfound@email.com",
                 "password"
         );
+        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).willThrow(new BadCredentialsException("Bad credentials"));
 
         // when & then
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new BadCredentialsException("Bad credentials"));
         Assertions.assertThatThrownBy(() -> authService.login(loginRequest)).isInstanceOf(BadCredentialsException.class);
 
         // verify
@@ -109,8 +109,9 @@ class AuthServiceTest {
                 "wrongPassword"
         );
 
+        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).willThrow(new BadCredentialsException("Bad credentials"));
+
         // when & then
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new BadCredentialsException("Bad credentials"));
         Assertions.assertThatThrownBy(() -> authService.login(loginRequest)).isInstanceOf(BadCredentialsException.class);
 
         // verify
