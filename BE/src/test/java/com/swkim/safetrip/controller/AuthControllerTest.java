@@ -21,6 +21,7 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
@@ -90,8 +91,11 @@ class AuthControllerTest {
 
     @Test
     void 액세스_토큰_재발급_요청시_리프레시_토큰이_없다면_400_예외가_발생한다() throws Exception {
+        // give & when
+        ResultActions resultActions = mockMvc.perform(post("/auth/refresh"));
 
-        mockMvc.perform(post("/auth/refresh"))
+        // then
+        resultActions
                 .andExpect(status().isBadRequest()) // 예외에 따라 상태코드 조정
                 .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.code").value(400))
@@ -100,18 +104,22 @@ class AuthControllerTest {
 
     @Test
     void 액세스_토큰_재발급_요청시_쿠키에_리프레시_토큰이_없다면_400_예외가_발생한다() throws Exception {
-
-        mockMvc.perform(post("/auth/refresh")
-                        .cookie(new Cookie("refreshToken", ""))) // 빈 문자열 전달
+        // give & when
+        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+                .cookie(new Cookie("refreshToken", ""))); // 빈 문자열 전달
+        // when
+        resultActions
                 .andExpect(status().isBadRequest()) // 예외 매핑에 따라 조정
                 .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()));
     }
 
     @Test
     void 액세스_토큰_재발급_요청시_쿠키의_이름이_refreshToken이_아니면_400_예외가_발생한다() throws Exception {
-
-        mockMvc.perform(post("/auth/refresh")
-                        .cookie(new Cookie("wrongName", "im.refresh.token"))) // 빈 문자열 전달
+        // give & when
+        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+                .cookie(new Cookie("wrongName", "im.refresh.token")));
+        // when
+        resultActions
                 .andExpect(status().isBadRequest()) // 예외 매핑에 따라 조정
                 .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()));
     }
@@ -124,9 +132,12 @@ class AuthControllerTest {
         given(authService.reIssueAccessToken(expiredRefreshToken))
                 .willThrow(new RefreshTokenExpiredException());
 
-        // when & then
-        mockMvc.perform(post("/auth/refresh")
-                        .cookie(new Cookie("refreshToken", expiredRefreshToken)))
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+                .cookie(new Cookie("refreshToken", expiredRefreshToken)));
+
+        // then
+        resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(result -> assertInstanceOf(RefreshTokenExpiredException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.code").value(401))
@@ -141,9 +152,11 @@ class AuthControllerTest {
         given(authService.reIssueAccessToken(inValidRefreshToken))
                 .willThrow(new InvalidRefreshTokenException());
 
-        // when & then
-        mockMvc.perform(post("/auth/refresh")
-                .cookie(new Cookie("refreshToken", inValidRefreshToken)))
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+                .cookie(new Cookie("refreshToken", inValidRefreshToken)));
+        // then
+        resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(result -> assertInstanceOf(InvalidRefreshTokenException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.code").value(401))
@@ -155,13 +168,15 @@ class AuthControllerTest {
         // given
         String refreshToken = "im.refresh.token";
 
-        when(jwtUtils.verifyRefreshToken(refreshToken)).thenReturn(any(String.class));
-        when(authService.reIssueAccessToken(refreshToken))
-                .thenThrow(new InvalidRefreshTokenException());
+        given(jwtUtils.verifyRefreshToken(refreshToken)).willReturn(any(String.class));
+        given(authService.reIssueAccessToken(refreshToken))
+                .willThrow(new InvalidRefreshTokenException());
 
-        // when & then
-        mockMvc.perform(post("/auth/refresh")
-                        .cookie(new Cookie("refreshToken", refreshToken)))
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+                .cookie(new Cookie("refreshToken", refreshToken)));
+        // then
+        resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401))
                 .andExpect(jsonPath("$.message").value("Refresh token is invalid"));
@@ -184,12 +199,13 @@ class AuthControllerTest {
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();
+        given(authService.reIssueAccessToken(validRefreshToken)).willReturn(tokensResponseDto);
 
-        when(authService.reIssueAccessToken(validRefreshToken)).thenReturn(tokensResponseDto);
-
-        // when & then
-        mockMvc.perform(post("/auth/refresh")
-                        .cookie(new Cookie("refreshToken", validRefreshToken)))
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+                .cookie(new Cookie("refreshToken", validRefreshToken)));
+        // then
+        resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("Access Token is reissued under RTR"))
