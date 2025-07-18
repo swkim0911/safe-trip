@@ -10,10 +10,7 @@ import com.swkim.safetrip.dto.response.LocationSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.*;
-import com.swkim.safetrip.global.exception.custom.CoordinatesNotValidException;
-import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
-import com.swkim.safetrip.global.exception.custom.S3UploadException;
-import com.swkim.safetrip.global.exception.custom.ScamNotFoundException;
+import com.swkim.safetrip.global.exception.custom.*;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.*;
 import com.swkim.safetrip.vo.CountryCityData;
@@ -41,6 +38,8 @@ public class ReportService {
     @Value("${cloud.aws.s3.bucket-name}")
     private String bucketName;
 
+    private final UserService userService;
+    // TODO
     private final ReportRepository reportRepository;
     private final ScamRepository scamRepository;
     private final CountryRepository countryRepository;
@@ -71,26 +70,30 @@ public class ReportService {
         return reportRepository.findCitySummarySlice(countryId, pageable);
     }
 
-    public Long saveReport(ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
+    public Long saveReport(String email, ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
 
         // 1. reportRequest -> Report Mapping
         Report report = ReportMapper.toReport(reportSaveRequest);
 
-        // 2. scam 객체 report에 추가
+        // 2. User 객체 report에 추가
+        User findUser = userService.getUserByEmail(email).orElseThrow(UserNotFoundException::new);
+        report.setUser(findUser);
+
+        // 3. scam 객체 report에 추가
         Scam findScam = scamRepository.findById(reportSaveRequest.getScamId()).orElseThrow(ScamNotFoundException::new);
         report.setScam(findScam);
 
-        // 3. 이미지 S3에 전송하고 report에 추가
+        // 4. 이미지 S3에 전송하고 report에 추가
         List<Image> savedImageList = saveImagesInS3Bucket(files);
         savedImageList.forEach(report::addImage);
 
-        // 4. Country, City 정보 Get
+        // 5. Country, City 정보 Get
         CountryCityData countryCityData = getCountryCityData(reportSaveRequest);
 
-        // 5. Country, City 엔티티 저장. address에 대한 location 객체 생성
+        // 6. Country, City 엔티티 저장. address에 대한 location 객체 생성
         Location location = saveLocationData(countryCityData, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
 
-        // 6. report 저장
+        // 7. report 저장
         return save(report, location);
     }
 

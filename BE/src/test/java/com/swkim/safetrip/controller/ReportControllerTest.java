@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -63,7 +62,6 @@ class ReportControllerTest {
 
     @Test
     @DisplayName("[Post] /reports 요청시 저장된 report의 id를 반환한다")
-    @WithMockUser(username = "testuser")
     @SuppressWarnings("unchecked")
     void scam_보고서_등록_성공시_id를_반환해야한다() throws Exception {
 
@@ -86,7 +84,8 @@ class ReportControllerTest {
         given(jwtUtils.verifyAccessToken(eq(accessToken))).willReturn(decodedJwt);
         given(jwtUtils.extractEmail(eq(decodedJwt))).willReturn(Optional.of(email));
         given(userService.getUserByEmail(email)).willReturn(Optional.of(mockUser));
-        given(reportService.saveReport(any(ReportSaveRequest.class), anyList())).willReturn(1L);
+
+        given(reportService.saveReport(any(String.class), any(ReportSaveRequest.class), anyList())).willReturn(1L);
 
         // when
         ResultActions resultActions = mockMvc.perform(multipart("/reports")
