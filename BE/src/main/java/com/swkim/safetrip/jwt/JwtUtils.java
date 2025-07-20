@@ -47,12 +47,12 @@ public class JwtUtils {
 
     private String createAccessToken(String email, Role role) {
         Date now = new Date();
-        String roleName = role.getKey();
+        String authority = role.getAuthority();
 
         return JWT.create()
                 .withSubject(email)
                 .withExpiresAt(new Date(now.getTime() + accessTokenExpirationMillis))
-                .withClaim(ROLE_CLAIM, roleName)
+                .withClaim(ROLE_CLAIM, authority)
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
