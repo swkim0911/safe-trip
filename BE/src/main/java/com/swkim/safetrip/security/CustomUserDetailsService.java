@@ -1,4 +1,4 @@
-package com.swkim.safetrip.service;
+package com.swkim.safetrip.security;
 
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.repository.UserRepository;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class LoginService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 

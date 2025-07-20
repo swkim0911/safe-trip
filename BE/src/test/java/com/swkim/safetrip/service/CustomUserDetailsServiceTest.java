@@ -1,6 +1,7 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.repository.UserRepository;
+import com.swkim.safetrip.security.CustomUserDetailsService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,10 +12,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
-class LoginServiceTest {
+class CustomUserDetailsServiceTest {
 
     @InjectMocks
-    private LoginService userService;
+    private CustomUserDetailsService userService;
 
     @Mock
     private UserRepository userRepository;

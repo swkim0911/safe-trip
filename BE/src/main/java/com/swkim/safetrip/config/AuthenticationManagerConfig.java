@@ -1,6 +1,6 @@
 package com.swkim.safetrip.config;
 
-import com.swkim.safetrip.service.LoginService;
+import com.swkim.safetrip.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,13 +14,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class AuthenticationManagerConfig {
 
     private final PasswordEncoder passwordEncoder;
-    private final LoginService loginService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder);
-        provider.setUserDetailsService(loginService);
+        provider.setUserDetailsService(customUserDetailsService);
         return new ProviderManager(provider);
     }
 }
