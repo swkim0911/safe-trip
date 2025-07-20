@@ -1,6 +1,7 @@
 package com.swkim.safetrip.security;
 
 import com.swkim.safetrip.entity.User;
+import com.swkim.safetrip.entity.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,5 +28,9 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         return user.getEmail();
+    }
+
+    public Role getRole(){
+        return user.getRole();
     }
 }

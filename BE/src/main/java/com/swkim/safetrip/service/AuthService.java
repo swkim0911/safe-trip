@@ -6,6 +6,7 @@ import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,10 +31,9 @@ public class AuthService {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
 
-        UserDetails userDetails = (UserDetails) authenticate.getPrincipal();
-        String authority = getAuthority(userDetails);
+        CustomUserDetails userDetails = (CustomUserDetails) authenticate.getPrincipal();
 
-        String accessToken = jwtUtils.issueAccessToken(email, authority);
+        String accessToken = jwtUtils.issueAccessToken(email, userDetails.getRole());
         String refreshToken = jwtUtils.issueRefreshToken(email);
 
         saveRefreshToken(email, refreshToken);
