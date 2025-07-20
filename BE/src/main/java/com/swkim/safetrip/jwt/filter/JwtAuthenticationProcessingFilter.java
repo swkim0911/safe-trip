@@ -4,6 +4,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
 import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.security.CustomUserDetails;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -59,8 +60,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     }
 
     private void saveAuthentication(User user){
-        UserDetails userDetails = getUserDetails(user);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
+        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, authoritiesMapper.mapAuthorities(customUserDetails.getAuthorities()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
