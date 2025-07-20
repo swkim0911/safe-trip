@@ -2,7 +2,7 @@ package com.swkim.safetrip.global.exception.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.global.exception.GeneralAuthenticationException;
-import com.swkim.safetrip.global.response.ApiResponse;
+import com.swkim.safetrip.global.response.ApiResult;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,10 +35,10 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                 request.getRequestURI(),
                 message);
 
-        ApiResponse<String> apiResponse = ApiResponse.of(errorCode, message, data);
+        ApiResult<String> apiResult = ApiResult.of(errorCode, message, data);
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value()); // HTTP 상태는 401로 고정
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        response.getWriter().write(objectMapper.writeValueAsString(apiResult));
     }
 }

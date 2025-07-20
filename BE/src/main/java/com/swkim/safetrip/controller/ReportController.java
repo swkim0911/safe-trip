@@ -5,7 +5,7 @@ import com.swkim.safetrip.dto.response.LocationSummaryItem;
 import com.swkim.safetrip.dto.response.LocationSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
-import com.swkim.safetrip.global.response.ApiResponse;
+import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,49 +30,49 @@ public class ReportController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/reports", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ApiResponse<Long> createReport(@AuthenticationPrincipal UserDetails user, @RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
+    public ApiResult<Long> createReport(@AuthenticationPrincipal UserDetails user, @RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
         String email = user.getUsername();
         Long id = reportService.saveReport(email, request, images);
         String message = messageSource.getMessage("report.create.success", null, null);
-        return ApiResponse.of(HttpStatus.CREATED.value(), message, id);
+        return ApiResult.of(HttpStatus.CREATED.value(), message, id);
     }
 
     @GetMapping(value = "/reports/sidebar-summary/counties")
-    public ApiResponse<Slice<LocationSummaryItem>> getSideBarCountrySummaries(Pageable pageable){
+    public ApiResult<Slice<LocationSummaryItem>> getSideBarCountrySummaries(Pageable pageable){
         Slice<LocationSummaryItem> countrySummaryPage = reportService.getCountrySummaryPage(pageable);
-        return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummaryPage);
+        return ApiResult.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummaryPage);
     }
 
     @GetMapping(value = "/reports/sidebar-summary/cities")
-    public ApiResponse<Slice<LocationSummaryItem>> getSideBarCitySummaries(@RequestParam Long countryId, Pageable pageable){
+    public ApiResult<Slice<LocationSummaryItem>> getSideBarCitySummaries(@RequestParam Long countryId, Pageable pageable){
         Slice<LocationSummaryItem> citySummaryPage = reportService.getCitySummaryPage(countryId, pageable);
-        return ApiResponse.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummaryPage);
+        return ApiResult.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummaryPage);
     }
 
     @GetMapping(value = "/reports/sidebar-summary/reports")
-    public ApiResponse<Slice<ReportSummaryItem>> getSideBarScamSummaries(@RequestParam Long countryId, @RequestParam Long cityId, Pageable pageable) {
+    public ApiResult<Slice<ReportSummaryItem>> getSideBarScamSummaries(@RequestParam Long countryId, @RequestParam Long cityId, Pageable pageable) {
         Slice<ReportSummaryItem> scamSummaryItems = reportService.getReportSummaryPage(countryId, cityId, pageable);
         String message = messageSource.getMessage("report.list.get.success", null, null);
 
-        return ApiResponse.of(HttpStatus.OK.value(), message, scamSummaryItems);
+        return ApiResult.of(HttpStatus.OK.value(), message, scamSummaryItems);
     }
 
     @GetMapping(value = "/reports/{reportId}")
-    public ApiResponse<ReportFindByIdResponse> getReport(@PathVariable Long reportId) {
+    public ApiResult<ReportFindByIdResponse> getReport(@PathVariable Long reportId) {
 
         ReportFindByIdResponse report = reportService.getReport(reportId);
         String message = messageSource.getMessage("report.get.success", null, null);
 
-        return ApiResponse.of(HttpStatus.OK.value(), message, report);
+        return ApiResult.of(HttpStatus.OK.value(), message, report);
     }
 
     @GetMapping(value = "/reports/map-summary")
-    public ApiResponse<LocationSummaryResponse> getMapCountrySummaries(@RequestParam Integer zoom){
+    public ApiResult<LocationSummaryResponse> getMapCountrySummaries(@RequestParam Integer zoom){
         if(zoom < 7){
             LocationSummaryResponse countrySummary = reportService.getCountrySummary();
-            return ApiResponse.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummary);
+            return ApiResult.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummary);
         }
         LocationSummaryResponse citySummary = reportService.getCitySummary();
-        return ApiResponse.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummary);
+        return ApiResult.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummary);
     }
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiResponse<T> {
+public class ApiResult<T> {
 
     private int code;
 
@@ -17,8 +17,8 @@ public class ApiResponse<T> {
 
     private T result;
 
-    public static <T> ApiResponse<T> of(int code, String message, T result){
-        return new ApiResponse<>(code, message, result);
+    public static <T> ApiResult<T> of(int code, String message, T result){
+        return new ApiResult<>(code, message, result);
     }
 
 }
