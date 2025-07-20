@@ -8,6 +8,7 @@ import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
 import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;
 import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.security.CustomUserDetails;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.io.IOException;
@@ -127,7 +127,7 @@ class JwtAuthenticationProcessingFilterTest {
         // then
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Assertions.assertThat(authentication).isNotNull();
-        Assertions.assertThat(((UserDetails) authentication.getPrincipal()).getUsername()).isEqualTo(email);
+        Assertions.assertThat(((CustomUserDetails) authentication.getPrincipal()).getUsername()).isEqualTo(email);
     }
 
     @Test
