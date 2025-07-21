@@ -1,4 +1,4 @@
-package com.swkim.safetrip.service;
+package com.swkim.safetrip.security;
 
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.repository.UserRepository;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class LoginService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
@@ -20,10 +20,6 @@ public class LoginService implements UserDetailsService {
         User findUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("The email does not exist"));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(findUser.getEmail())
-                .password(findUser.getPassword())
-                .roles(findUser.getRole().name())
-                .build();
+        return new CustomUserDetails(findUser);
     }
 }

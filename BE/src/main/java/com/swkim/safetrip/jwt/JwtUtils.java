@@ -47,7 +47,7 @@ public class JwtUtils {
 
     private String createAccessToken(String email, Role role) {
         Date now = new Date();
-        String roleName = role.getKey();
+        String roleName = role.name();
 
         return JWT.create()
                 .withSubject(email)

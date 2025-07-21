@@ -5,12 +5,14 @@ import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
-import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,15 +29,14 @@ public class AuthService {
         String password = loginRequest.getPassword();
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
+        Authentication authenticate = authenticationManager.authenticate(authenticationToken);
 
-        authenticationManager.authenticate(authenticationToken);
+        CustomUserDetails userDetails = (CustomUserDetails) authenticate.getPrincipal();
 
-        User findUser = userService.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
-
-        String accessToken = jwtUtils.issueAccessToken(email, findUser.getRole());
+        String accessToken = jwtUtils.issueAccessToken(email, userDetails.getRole());
         String refreshToken = jwtUtils.issueRefreshToken(email);
 
-        saveRefreshToken(findUser, refreshToken);
+        saveRefreshToken(email, refreshToken);
 
         ResponseCookie refreshTokenCookie = jwtUtils.createRefreshTokenCookie(refreshToken);
         AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
@@ -48,6 +49,7 @@ public class AuthService {
                 .build();
 
     }
+
     public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
         if (tokenService.isRefreshTokenBlacklisted(refreshToken)) {
             throw new InvalidRefreshTokenException();
@@ -63,7 +65,7 @@ public class AuthService {
         long ttl = jwtUtils.getRefreshTokenRemainingMillis(refreshToken);
         tokenService.blacklistRefreshToken(refreshToken, ttl);
 
-        saveRefreshToken(findUser, reIssuedRefreshToken);
+        saveRefreshToken(findUser.getEmail(), reIssuedRefreshToken);
 
         ResponseCookie refreshTokenCookie = jwtUtils.createRefreshTokenCookie(reIssuedRefreshToken);
         AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
@@ -75,6 +77,11 @@ public class AuthService {
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();
     }
+
+    private String getAuthority(UserDetails userDetails) {
+        return userDetails.getAuthorities().iterator().next().getAuthority();
+    }
+
 
     public void logout(String refreshToken) {
         String email = jwtUtils.verifyRefreshToken(refreshToken);
@@ -90,9 +97,9 @@ public class AuthService {
 
     }
 
-    private void saveRefreshToken(User findUser, String refreshToken) {
+    private void saveRefreshToken(String email, String refreshToken) {
         Long refreshTokenExpirationMillis = jwtUtils.getRefreshTokenExpirationMillis();
-        tokenService.saveRefreshToken(findUser.getEmail(), refreshToken, refreshTokenExpirationMillis);
+        tokenService.saveRefreshToken(email, refreshToken, refreshTokenExpirationMillis);
     }
 
 }

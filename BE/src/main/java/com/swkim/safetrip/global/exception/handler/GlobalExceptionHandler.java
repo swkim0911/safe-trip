@@ -2,7 +2,7 @@ package com.swkim.safetrip.global.exception.handler;
 
 import com.swkim.safetrip.global.exception.Error;
 import com.swkim.safetrip.global.exception.GeneralException;
-import com.swkim.safetrip.global.response.ApiResponse;
+import com.swkim.safetrip.global.response.ApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,7 @@ import static com.swkim.safetrip.global.exception.Error.METHOD_ARGUMENT_NOT_VALI
 public class GlobalExceptionHandler{
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> invalidRequestHandler(MethodArgumentNotValidException e){
+    public ResponseEntity<ApiResult<Map<String, String>>> invalidRequestHandler(MethodArgumentNotValidException e){
         log.error("error", e);
         Map<String, String> map = new HashMap<>();
         List<FieldError> fieldErrors = e.getFieldErrors();
@@ -36,30 +36,30 @@ public class GlobalExceptionHandler{
         }
         return ResponseEntity
                 .status(e.getStatusCode().value())
-                .body(ApiResponse.of(METHOD_ARGUMENT_NOT_VALID_ERROR.getStatusCode(), METHOD_ARGUMENT_NOT_VALID_ERROR.getMessage(), map));
+                .body(ApiResult.of(METHOD_ARGUMENT_NOT_VALID_ERROR.getStatusCode(), METHOD_ARGUMENT_NOT_VALID_ERROR.getMessage(), map));
     }
 
     @ExceptionHandler(GeneralException.class)
-    public ResponseEntity<ApiResponse<Object>> generalExceptionHandler(GeneralException e) {
+    public ResponseEntity<ApiResult<Object>> generalExceptionHandler(GeneralException e) {
         log.error("error", e);
 
         Error error = e.getError();
 
         return ResponseEntity
                 .status(error.getStatusCode())
-                .body(ApiResponse.of(error.getStatusCode(), error.getMessage(), "Request Failed"));
+                .body(ApiResult.of(error.getStatusCode(), error.getMessage(), "Request Failed"));
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ApiResponse<String> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+    public ApiResult<String> handleNoHandlerFoundException(NoHandlerFoundException ex) {
         log.error("error", ex);
 
-        return ApiResponse.of(404, "API does not exist", null);
+        return ApiResult.of(404, "API does not exist", null);
     }
 
     @ExceptionHandler(MissingRequestCookieException.class)
-    public ResponseEntity<ApiResponse<String>> handleMissingCookie(MissingRequestCookieException ex) {
+    public ResponseEntity<ApiResult<String>> handleMissingCookie(MissingRequestCookieException ex) {
         log.error("error", ex);
 
         String cookieName = ex.getCookieName();
@@ -71,7 +71,7 @@ public class GlobalExceptionHandler{
                 ? "Authentication cookie (refreshToken) is missing."
                 : String.format("Required cookie (%s) is missing from the request.", cookieName);
 
-        ApiResponse<String> response = ApiResponse.of(status.value(), message, null);
+        ApiResult<String> response = ApiResult.of(status.value(), message, null);
 
         return ResponseEntity.status(status).body(response);
     }
