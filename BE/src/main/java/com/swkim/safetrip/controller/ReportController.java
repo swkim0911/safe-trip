@@ -8,6 +8,7 @@ import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -29,7 +30,7 @@ public class ReportController {
     private final ReportService reportService;
     private final MessageSource messageSource;
 
-    @Operation(summary = "글 등록", description = "새로운 게시글을 작성하여 서버에 등록합니다")
+    @Operation(summary = "글 등록", description = "새로운 게시글을 작성하여 서버에 등록합니다", security = @SecurityRequirement(name = "BearerAuth"))
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/reports", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ApiResult<Long> createReport(@AuthenticationPrincipal UserDetails user, @RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
