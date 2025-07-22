@@ -1,11 +1,11 @@
-package com.swkim.safetrip.vo;
+package com.swkim.safetrip.service.command;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public class CountryCityData {
+public class CreateLocationCommand {
 
     private final String countryName;
     private final String cityName;
