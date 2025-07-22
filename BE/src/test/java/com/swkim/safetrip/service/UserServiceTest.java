@@ -2,6 +2,7 @@ package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.dto.response.EmailValidationResponse;
+import com.swkim.safetrip.dto.response.NicknameDuplicateResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
@@ -134,7 +135,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 이메일_검증_요청에_이메일이_옳바르다면_true를_반환한다() {
+    void 이메일_검증_요청에_이메일이_올바르다면_true를_반환한다() {
         // given
         String duplicatedEmail = "right@gmail.com";
         given(emailValidator.isValid(duplicatedEmail)).willReturn(true);
@@ -147,5 +148,33 @@ class UserServiceTest {
         assertThat(response.isValidFormat()).isTrue();
         assertThat(response.isAvailable()).isTrue();
         assertThat(response.getReason()).isNull();
+    }
+
+    @Test
+    void 닉네임_검증_요청에_통과하면_isDuplicated는_false를_반환한다() {
+        // given
+        String nickname = "rightName";
+        given(userRepository.existsByNickname(nickname)).willReturn(false);
+
+        // when
+        NicknameDuplicateResponse response = userService.checkNicknameDuplicate(nickname);
+
+
+        // then
+        assertThat(response.getIsDuplicated()).isFalse();
+    }
+
+    @Test
+    void 닉네임_검증_요청에_닉네임이_중복되면_isDuplicated는_true를_반환한다() {
+        // given
+        String nickname = "duplicatedNickname";
+        given(userRepository.existsByNickname(nickname)).willReturn(true);
+
+        // when
+        NicknameDuplicateResponse response = userService.checkNicknameDuplicate(nickname);
+
+
+        // then
+        assertThat(response.getIsDuplicated()).isTrue();
     }
 }
