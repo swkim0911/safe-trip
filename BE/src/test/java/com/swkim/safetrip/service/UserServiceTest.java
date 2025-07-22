@@ -132,4 +132,20 @@ class UserServiceTest {
         assertThat(response.isAvailable()).isFalse();
         assertThat(response.getReason()).isEqualTo("Email already in use");
     }
+
+    @Test
+    void 이메일_검증_요청에_이메일이_옳바르다면_true를_반환한다() {
+        // given
+        String duplicatedEmail = "right@gmail.com";
+        given(emailValidator.isValid(duplicatedEmail)).willReturn(true);
+        given(userRepository.existsByEmail(duplicatedEmail)).willReturn(false);
+
+        // when
+        EmailValidationResponse response = userService.validateEmail(duplicatedEmail);
+
+        // then
+        assertThat(response.isValidFormat()).isTrue();
+        assertThat(response.isAvailable()).isTrue();
+        assertThat(response.getReason()).isNull();
+    }
 }
