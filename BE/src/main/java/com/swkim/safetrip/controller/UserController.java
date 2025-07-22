@@ -32,13 +32,13 @@ public class UserController {
     }
 
     @Operation(summary = "이메일 중복 체크", description = "회원가입 전에, 이메일(아이디) 중복 체크를 진행합니다")
-    @GetMapping
+    @GetMapping("users/check-email")
     public ApiResult<DuplicateCheckResponse> checkEmailDuplicate(@RequestParam String email) {
         return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of email", userService.checkEmailDuplicate(email));
     }
 
     @Operation(summary = "닉네임 중복 체크", description = "회원가입 전에, 닉네임 중복 체크를 진행합니다")
-    @GetMapping
+    @GetMapping("users/check-nickname")
     public ApiResult<DuplicateCheckResponse> checkNicknameDuplicate(@RequestParam String nickname) {
         return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of nickname", userService.checkNicknameDuplicate(nickname));
     }
