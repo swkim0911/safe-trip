@@ -12,7 +12,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -77,11 +76,6 @@ public class AuthService {
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();
     }
-
-    private String getAuthority(UserDetails userDetails) {
-        return userDetails.getAuthorities().iterator().next().getAuthority();
-    }
-
 
     public void logout(String refreshToken) {
         String email = jwtUtils.verifyRefreshToken(refreshToken);

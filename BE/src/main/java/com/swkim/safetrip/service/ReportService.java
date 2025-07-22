@@ -16,7 +16,7 @@ import com.swkim.safetrip.global.exception.custom.S3UploadException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.ReportRepository;
-import com.swkim.safetrip.vo.CountryCityData;
+import com.swkim.safetrip.service.command.CreateLocationCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
@@ -68,10 +68,10 @@ public class ReportService {
         savedImageList.forEach(report::addImage);
 
         // 5. Country, City 정보 Get
-        CountryCityData countryCityData = getCountryCityData(reportSaveRequest);
+        CreateLocationCommand createLocationCommand = toCreateLocationCommand(reportSaveRequest);
 
         // 6. Country, City 엔티티 저장. address에 대한 location 객체 생성
-        Location location = locationService.createLocationWithCityAndCountry(countryCityData, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
+        Location location = locationService.createLocationWithCityAndCountry(createLocationCommand, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
 
         // 7. report 저장
         return save(report, location);
@@ -137,7 +137,7 @@ public class ReportService {
         return imageList;
     }
 
-    private CountryCityData getCountryCityData(ReportSaveRequest reportSaveRequest) {
+    private CreateLocationCommand toCreateLocationCommand(ReportSaveRequest reportSaveRequest) {
         String locationInfo = getLocationInfo(reportSaveRequest.getLat(), reportSaveRequest.getLng());
         JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
         JsonObject addressObject = locationObject.getAsJsonObject("address");
@@ -153,7 +153,7 @@ public class ReportService {
         String cityLng = cityObject.get("lon").getAsString();
 
 
-        return new CountryCityData(countryName, cityName, cityLat, cityLng);
+        return new CreateLocationCommand(countryName, cityName, cityLat, cityLng);
     }
 
     /**

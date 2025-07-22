@@ -1,9 +1,12 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
+import com.swkim.safetrip.dto.response.EmailValidationResponse;
+import com.swkim.safetrip.dto.response.NicknameDuplicateResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
+import com.swkim.safetrip.global.validation.EmailValidator;
 import com.swkim.safetrip.mapper.UserMapper;
 import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailValidator emailValidator;
 
     @Transactional
     public Long signup(UserSignUpRequest signUpRequest) {
@@ -37,6 +41,35 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
         return savedUser.getId();
+    }
+
+    @Transactional(readOnly = true)
+    public EmailValidationResponse validateEmail(String email) {
+
+        if(!emailValidator.isValid(email)) {
+            return EmailValidationResponse.builder()
+                    .isValidFormat(false)
+                    .isAvailable(false)
+                    .reason("Invalid email format")
+                    .build();
+        }
+
+        boolean isDuplicated = userRepository.existsByEmail(email);
+
+        return EmailValidationResponse.builder()
+                .isValidFormat(true)
+                .isAvailable(!isDuplicated)
+                .reason(isDuplicated ? "Email already in use" : null)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public NicknameDuplicateResponse checkNicknameDuplicate(String nickname) {
+        boolean isDuplicated = userRepository.existsByNickname(nickname);
+
+        return NicknameDuplicateResponse.builder()
+                .isDuplicated(isDuplicated).
+                build();
     }
 
     @Transactional(readOnly = true)

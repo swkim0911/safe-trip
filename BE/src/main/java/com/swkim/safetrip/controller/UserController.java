@@ -1,6 +1,8 @@
 package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
+import com.swkim.safetrip.dto.response.EmailValidationResponse;
+import com.swkim.safetrip.dto.response.NicknameDuplicateResponse;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,10 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +29,19 @@ public class UserController {
     public ApiResult<Long> signup(@RequestBody @Valid UserSignUpRequest signUpRequest) {
         Long userId = userService.signup(signUpRequest);
 
-        return ApiResult.of(HttpStatus.CREATED.value(), "Your membership has been registered.", userId);
+        return ApiResult.of(HttpStatus.CREATED.value(), "membership has been registered", userId);
+    }
+
+    @Operation(summary = "이메일 사용 가능 여부 확인", description = "입력한 이메일이 형식에 맞고, 가입 가능한지 확인합니다.")
+    @GetMapping("/users/validate-email")
+    public ApiResult<EmailValidationResponse> validateEmail(@RequestParam String email) {
+        return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of email", userService.validateEmail(email));
+    }
+
+    @Operation(summary = "닉네임 중복 체크", description = "회원가입 전에, 닉네임 중복 체크를 진행합니다")
+    @GetMapping("users/check-nickname")
+    public ApiResult<NicknameDuplicateResponse> checkNicknameDuplicate(@RequestParam String nickname) {
+        return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of nickname", userService.checkNicknameDuplicate(nickname));
     }
 
 }

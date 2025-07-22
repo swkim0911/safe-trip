@@ -5,7 +5,7 @@ import com.swkim.safetrip.entity.Country;
 import com.swkim.safetrip.entity.Location;
 import com.swkim.safetrip.repository.CityRepository;
 import com.swkim.safetrip.repository.CountryRepository;
-import com.swkim.safetrip.vo.CountryCityData;
+import com.swkim.safetrip.service.command.CreateLocationCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +20,10 @@ public class LocationService {
     private final CityRepository cityRepository;
 
     @Transactional
-    public Location createLocationWithCityAndCountry(CountryCityData countryCityData, String locationAddress, String locationLat, String locationLng) {
+    public Location createLocationWithCityAndCountry(CreateLocationCommand createLocationCommand, String locationAddress, String locationLat, String locationLng) {
 
-        String countryName = countryCityData.getCountryName();
-        String cityName = countryCityData.getCityName();
+        String countryName = createLocationCommand.getCountryName();
+        String cityName = createLocationCommand.getCityName();
 
         Optional<Country> findCountry = countryRepository.findByName(countryName);
 
@@ -36,9 +36,9 @@ public class LocationService {
                     .build();
 
             city = City.builder()
-                    .name(countryCityData.getCityName())
-                    .lat(countryCityData.getCityLat())
-                    .lng(countryCityData.getCityLng())
+                    .name(createLocationCommand.getCityName())
+                    .lat(createLocationCommand.getCityLat())
+                    .lng(createLocationCommand.getCityLng())
                     .build();
 
             country.addCity(city);
@@ -51,9 +51,9 @@ public class LocationService {
                 city = findCity.get();
             } else {
                 city = City.builder()
-                        .name(countryCityData.getCityName())
-                        .lat(countryCityData.getCityLat())
-                        .lng(countryCityData.getCityLng())
+                        .name(createLocationCommand.getCityName())
+                        .lat(createLocationCommand.getCityLat())
+                        .lng(createLocationCommand.getCityLng())
                         .build();
 
                 country.addCity(city);
