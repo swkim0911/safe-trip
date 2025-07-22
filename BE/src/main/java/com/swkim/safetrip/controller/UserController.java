@@ -1,8 +1,8 @@
 package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
-import com.swkim.safetrip.dto.response.DuplicateCheckResponse;
 import com.swkim.safetrip.dto.response.EmailValidationResponse;
+import com.swkim.safetrip.dto.response.NicknameDuplicateResponse;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,7 +40,7 @@ public class UserController {
 
     @Operation(summary = "닉네임 중복 체크", description = "회원가입 전에, 닉네임 중복 체크를 진행합니다")
     @GetMapping("users/check-nickname")
-    public ApiResult<DuplicateCheckResponse> checkNicknameDuplicate(@RequestParam String nickname) {
+    public ApiResult<NicknameDuplicateResponse> checkNicknameDuplicate(@RequestParam String nickname) {
         return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of nickname", userService.checkNicknameDuplicate(nickname));
     }
 

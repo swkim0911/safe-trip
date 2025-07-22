@@ -1,8 +1,8 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
-import com.swkim.safetrip.dto.response.DuplicateCheckResponse;
 import com.swkim.safetrip.dto.response.EmailValidationResponse;
+import com.swkim.safetrip.dto.response.NicknameDuplicateResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
@@ -64,10 +64,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public DuplicateCheckResponse checkNicknameDuplicate(String nickname) {
+    public NicknameDuplicateResponse checkNicknameDuplicate(String nickname) {
         boolean isDuplicated = userRepository.existsByNickname(nickname);
 
-        return DuplicateCheckResponse.builder()
+        return NicknameDuplicateResponse.builder()
                 .isDuplicated(isDuplicated).
                 build();
     }
