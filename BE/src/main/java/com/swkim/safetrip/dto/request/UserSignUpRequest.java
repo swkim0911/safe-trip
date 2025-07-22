@@ -15,6 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserSignUpRequest {
 
+    @Pattern(
+            regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$",
+            message = "Invalid email format. (e.g., user@example.com)"
+    )
     @Email
     @NotBlank(message = "please enter your e-mail address.")
     private String email;

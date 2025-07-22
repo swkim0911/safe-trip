@@ -2,6 +2,7 @@ package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.dto.response.DuplicateCheckResponse;
+import com.swkim.safetrip.dto.response.EmailValidationResponse;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,10 +32,10 @@ public class UserController {
         return ApiResult.of(HttpStatus.CREATED.value(), "membership has been registered", userId);
     }
 
-    @Operation(summary = "이메일 중복 체크", description = "회원가입 전에, 이메일(아이디) 중복 체크를 진행합니다")
-    @GetMapping("users/check-email")
-    public ApiResult<DuplicateCheckResponse> checkEmailDuplicate(@RequestParam String email) {
-        return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of email", userService.checkEmailDuplicate(email));
+    @Operation(summary = "이메일 사용 가능 여부 확인", description = "입력한 이메일이 형식에 맞고, 가입 가능한지 확인합니다.")
+    @GetMapping("/users/validate-email")
+    public ApiResult<EmailValidationResponse> validateEmail(@RequestParam String email) {
+        return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of email", userService.validateEmail(email));
     }
 
     @Operation(summary = "닉네임 중복 체크", description = "회원가입 전에, 닉네임 중복 체크를 진행합니다")
