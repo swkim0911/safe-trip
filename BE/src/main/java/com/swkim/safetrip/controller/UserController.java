@@ -28,13 +28,19 @@ public class UserController {
     public ApiResult<Long> signup(@RequestBody @Valid UserSignUpRequest signUpRequest) {
         Long userId = userService.signup(signUpRequest);
 
-        return ApiResult.of(HttpStatus.CREATED.value(), "Your membership has been registered.", userId);
+        return ApiResult.of(HttpStatus.CREATED.value(), "membership has been registered", userId);
     }
 
     @Operation(summary = "이메일 중복 체크", description = "회원가입 전에, 이메일(아이디) 중복 체크를 진행합니다")
     @GetMapping
     public ApiResult<DuplicateCheckResponse> checkEmailDuplicate(@RequestParam String email) {
-        return ApiResult.of(HttpStatus.OK.value(), "", userService.checkEmailDuplicate(email));
+        return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of email", userService.checkEmailDuplicate(email));
+    }
+
+    @Operation(summary = "닉네임 중복 체크", description = "회원가입 전에, 닉네임 중복 체크를 진행합니다")
+    @GetMapping
+    public ApiResult<DuplicateCheckResponse> checkNicknameDuplicate(@RequestParam String nickname) {
+        return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of nickname", userService.checkNicknameDuplicate(nickname));
     }
 
 }

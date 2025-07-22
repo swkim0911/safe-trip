@@ -40,8 +40,18 @@ public class UserService {
         return savedUser.getId();
     }
 
+    @Transactional(readOnly = true)
     public DuplicateCheckResponse checkEmailDuplicate(String email) {
         boolean isDuplicated = userRepository.existsByEmail(email);
+
+        return DuplicateCheckResponse.builder()
+                .isDuplicated(isDuplicated).
+                build();
+    }
+
+    @Transactional(readOnly = true)
+    public DuplicateCheckResponse checkNicknameDuplicate(String nickname) {
+        boolean isDuplicated = userRepository.existsByNickname(nickname);
 
         return DuplicateCheckResponse.builder()
                 .isDuplicated(isDuplicated).
