@@ -81,9 +81,26 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("Invalid request"));
     }
 
+    @Test
+    void 회원가입_요청시_닉네임이_검증에_통과하지_못하면_예외가_발생한다() throws Exception {
+        //given
+        UserSignUpRequest signUpRequest = UserSignUpRequest.builder()
+                .email("swkim@gmail.com")
+                .password("pass@word1")
+                .nickname("~!")
+                .build();
 
+        //when
+        ResultActions resultActions = mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signUpRequest)));
 
-
+        //then
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value("Invalid request"));
+    }
 
     @Test
     void 존재하지_않는_URL_요청시_404응답이_반환된다() throws Exception {
