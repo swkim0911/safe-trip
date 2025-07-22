@@ -34,7 +34,7 @@ public class UserController {
     @Operation(summary = "이메일 중복 체크", description = "회원가입 전에, 이메일(아이디) 중복 체크를 진행합니다")
     @GetMapping
     public ApiResult<DuplicateCheckResponse> checkEmailDuplicate(@RequestParam String email) {
-        return ApiResult.of(HttpStatus.OK.value(), "", userService.isEmailDuplicate(email));
+        return ApiResult.of(HttpStatus.OK.value(), "", userService.checkEmailDuplicate(email));
     }
 
 }
