@@ -1,6 +1,7 @@
 package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
+import com.swkim.safetrip.dto.response.DuplicateCheckResponse;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,10 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,6 +29,12 @@ public class UserController {
         Long userId = userService.signup(signUpRequest);
 
         return ApiResult.of(HttpStatus.CREATED.value(), "Your membership has been registered.", userId);
+    }
+
+    @Operation(summary = "이메일 중복 체크", description = "회원가입 전에, 이메일(아이디) 중복 체크를 진행합니다")
+    @GetMapping
+    public ApiResult<DuplicateCheckResponse> checkEmailDuplicate(@RequestParam String email) {
+        return ApiResult.of(HttpStatus.OK.value(), "", userService.isEmailDuplicate(email));
     }
 
 }
