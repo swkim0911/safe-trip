@@ -38,5 +38,4 @@ class CustomUserDetailsServiceTest {
                 .hasMessageContaining("cannot start with ROLE_");
     }
 
-
 }

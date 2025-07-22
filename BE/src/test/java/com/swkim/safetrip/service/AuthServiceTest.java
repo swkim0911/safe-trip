@@ -120,5 +120,4 @@ class AuthServiceTest {
         verify(jwtUtils, never()).issueRefreshToken(any());
     }
 
-
 }

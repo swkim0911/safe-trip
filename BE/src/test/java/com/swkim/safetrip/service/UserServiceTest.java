@@ -159,7 +159,6 @@ class UserServiceTest {
         // when
         NicknameDuplicateResponse response = userService.checkNicknameDuplicate(nickname);
 
-
         // then
         assertThat(response.getIsDuplicated()).isFalse();
     }
@@ -172,7 +171,6 @@ class UserServiceTest {
 
         // when
         NicknameDuplicateResponse response = userService.checkNicknameDuplicate(nickname);
-
 
         // then
         assertThat(response.getIsDuplicated()).isTrue();
