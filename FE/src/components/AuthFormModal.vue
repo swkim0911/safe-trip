@@ -70,6 +70,7 @@
                       id="password"
                       class="form-control"
                       v-model="signupForm.password"
+                      @input="validatePassword"
                       placeholder="Enter your password"
                       required
                     />
@@ -77,8 +78,24 @@
                       <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
                     </button>
                   </div>
+                  <div v-if="signupForm.password">
+                    <ul class="mt-2 small text-muted">
+                      <li :class="isValidLength ? 'text-success' : 'text-danger'">
+                        Must be between 8 and 20 characters
+                      </li>
+                      <li :class="hasLetter ? 'text-success' : 'text-danger'">
+                        Must include at least one letter
+                      </li>
+                      <li :class="hasNumber ? 'text-success' : 'text-danger'">
+                        Must include at least one number
+                      </li>
+                      <li :class="hasSpecial ? 'text-success' : 'text-danger'">
+                        Must include at least one special character (!@#$%^&*()_+=-)
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-                <div class="mb-4">
+                <div class="mb-3">
                   <label for="nickname" class="form-label fw-bold">Nickname</label>
                   <div class="input-group">
                     <input
@@ -110,7 +127,7 @@
 </template>
 <script setup>
 
-import { ref, reactive, watch, onMounted } from 'vue'
+import { ref, reactive, watch, onMounted, computed } from 'vue'
 import axios from 'axios'
 
 const mode = ref('login')
@@ -150,6 +167,12 @@ function resetForm() {
 function togglePasswordVisibility() {
   showPassword.value = !showPassword.value;
 }
+
+const isValidLength = computed(() => signupForm.password.length >= 8 && signupForm.password.length <= 20);
+const hasLetter = computed(() => /[A-Za-z]/.test(signupForm.password));
+const hasNumber = computed(() => /\d/.test(signupForm.password));
+const hasSpecial = computed(() => /[!@#$%^&*()_+=-]/.test(signupForm.password));
+
 
 const submitLoginForm = async () => {
   try {
