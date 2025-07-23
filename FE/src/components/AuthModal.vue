@@ -1,5 +1,5 @@
 <template>
-  <div class="modal fade" id = "AuthModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal fade" id = "authModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
       <div class="modal-content">
           <div class="modal-header border-bottom-0">
@@ -16,7 +16,7 @@
                   id="email"
                   class="form-control"
                   v-model="loginForm.email"
-                  placeholder="example@gmail.com"
+                  placeholder="email@example.com"
                   required
                 />
                 </div>
@@ -40,6 +40,7 @@
                 <button type="button" class="btn btn-link" @click="mode = 'signup'">Sign Up</button>
               </div>
             </div>
+            
             <div v-else>
               <form @submit.prevent class="px-3 py-3" style="max-width: 400px; margin: 0 auto;">
               <h3 class="text-center mb-3 fw-bold">Create Your Account</h3>
@@ -51,7 +52,7 @@
                   id="email"
                   class="form-control"
                   v-model="signupForm.email"
-                  placeholder="example@gmail.com"
+                  placeholder="email@example.com"
                   required
                 />
               </div>
@@ -95,7 +96,7 @@
 </template>
 <script setup>
 
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
 import axios from 'axios'
 
 const mode = ref('login')
@@ -119,6 +120,19 @@ const resetSignupForm = () => {
   signupForm.nickname = ''
 }
 
+const resetLoginForm = () => {
+  loginForm.email = '';
+  loginForm.password = '';
+}
+
+function resetForm() {
+  mode.value = 'login';
+  resetSignupForm();
+  resetLoginForm();
+  signupSuccessMessage.value = '';
+}
+
+
 const submitLoginForm = async () => {
   try {
     const response = await axios.post(`${serverURL}/auth/login`, {
@@ -140,7 +154,7 @@ const submitSignupForm = async () => {
       nickname: signupForm.nickname
     })
 
-    resetSignupForm()
+    resetSignupForm();
     signupSuccessMessage.value = '회원가입이 완료되었습니다. 로그인 해주세요.';
     console.log('회원가입 성공:', response.data)
   } catch (error) {
@@ -148,15 +162,33 @@ const submitSignupForm = async () => {
   }
 }
 
+const setupModalEventListener = () => {
+  const modal = document.getElementById('authModal');
+
+  if (modal) {
+    modal.addEventListener('hide.bs.modal', () => {
+      document.activeElement.blur(); 
+    });
+
+    modal.addEventListener('hidden.bs.modal', () => {
+      resetForm(); // 모달이 닫힐 때 form에 입력된 값들 모두 지움.
+    });
+  }
+}
+
+onMounted(() => {
+  setupModalEventListener()
+})
+
 watch(mode, (newMode) => {
   if (newMode === 'login') {
     // 회원가입 폼 초기화
-    signupForm.email = '';
-    signupForm.password = '';
-    signupForm.nickname = '';
+    resetSignupForm();
     signupSuccessMessage.value = '';
   }
 });
+
+
 
 </script>
 <style scoped lang="scss">
