@@ -1,5 +1,5 @@
 <template>
-  <div class="modal fade" id = "authModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal fade" id = "authFormModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
       <div class="modal-content">
           <div class="modal-header border-bottom-0">
@@ -163,7 +163,7 @@ const submitSignupForm = async () => {
 }
 
 const setupModalEventListener = () => {
-  const modal = document.getElementById('authModal');
+  const modal = document.getElementById('authFormModal');
 
   if (modal) {
     modal.addEventListener('hide.bs.modal', () => {

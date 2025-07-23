@@ -38,12 +38,12 @@
     type="button" 
     class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn"
     data-bs-toggle="modal"
-    data-bs-target="#authModal"
+    data-bs-target="#authFormModal"
     >
       <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
       LOGIN
     </button>
-    <AuthModal/>
+    <AuthFormModal/>
   </div>
 </template>
 
@@ -54,7 +54,7 @@ import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker } from
 import axios from 'axios'
 
 import ReportFormModal from './ReportFormModal.vue'
-import AuthModal from './AuthModal.vue'
+import AuthFormModal from './AuthFormModal.vue'
 
 const showLogin = ref(true)
 const showSignup = ref(false)
