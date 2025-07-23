@@ -16,7 +16,7 @@
                   id="email"
                   class="form-control"
                   v-model="loginForm.email"
-                  placeholder="email@example.com"
+                  placeholder="user@example.com"
                   required
                 />
                 </div>
@@ -53,12 +53,17 @@
                       id="email"
                       class="form-control"
                       v-model="signupForm.email"
-                      placeholder="email@example.com"
+                      placeholder="user@example.com"
                       required
                     />
                     <button type="button" class="btn btn-outline-secondary" @click="checkEmailDuplicate">
                       Check
                     </button>
+                  </div>
+                  <div class="mt-1">
+                    <p v-if="signupForm.email && !isValidEmail" class="text-danger small">
+                    Invalid email format. (e.g., user@example.com)
+                    </p>
                   </div>
                 </div>
 
@@ -172,6 +177,13 @@ const isValidLength = computed(() => signupForm.password.length >= 8 && signupFo
 const hasLetter = computed(() => /[A-Za-z]/.test(signupForm.password));
 const hasNumber = computed(() => /\d/.test(signupForm.password));
 const hasSpecial = computed(() => /[!@#$%^&*()_+=-]/.test(signupForm.password));
+
+const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
+
+const isValidEmail = computed(() =>
+  emailPattern.test(signupForm.email)
+);
+
 
 
 const submitLoginForm = async () => {
