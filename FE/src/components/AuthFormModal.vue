@@ -43,50 +43,64 @@
             
             <div v-else>
               <form @submit.prevent class="px-3 py-3" style="max-width: 400px; margin: 0 auto;">
-              <h3 class="text-center mb-3 fw-bold">Create Your Account</h3>
+                <h3 class="text-center mb-3 fw-bold">Create Your Account</h3>
 
-              <div class="mb-3">
-                <label for="email" class="form-label fw-bold">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  class="form-control"
-                  v-model="signupForm.email"
-                  placeholder="email@example.com"
-                  required
-                />
-              </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label fw-bold">Email</label>
+                  <div class="input-group">
+                    <input
+                      type="email"
+                      id="email"
+                      class="form-control"
+                      v-model="signupForm.email"
+                      placeholder="email@example.com"
+                      required
+                    />
+                    <button type="button" class="btn btn-outline-secondary" @click="checkEmailDuplicate">
+                      Check
+                    </button>
+                  </div>
+                </div>
 
-              <div class="mb-3">
-                <label for="password" class="form-label fw-bold">Password</label>
-                <input
-                  type="password"
-                  id="password"
-                  class="form-control"
-                  v-model="signupForm.password"
-                  placeholder="Enter your password"
-                  required
-                />
-              </div>
-
-              <div class="mb-4">
-                <label for="nickname" class="form-label fw-bold">Nickname</label>
-                <input
-                  type="text"
-                  id="nickname"
-                  class="form-control"
-                  placeholder="Enter your nickname"
-                  v-model="signupForm.nickname"
-                  required
-                />
-              </div>
-              <button type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
-            </form>
-            <p class="text-center text-success fw-bold" v-if="signupSuccessMessage">{{ signupSuccessMessage }}</p>
-            <p class="text-center mt-3 mb-0">
-              Already have an account?
-              <a href="#" class="text-decoration-none" role="button" @click.prevent="mode = 'login'">Log In</a>
-            </p>
+                <div class="mb-3">
+                  <label for="password" class="form-label fw-bold">Password</label>
+                  <div class="input-group">
+                    <input
+                      :type="showPassword ? 'text' : 'password'"
+                      id="password"
+                      class="form-control"
+                      v-model="signupForm.password"
+                      placeholder="Enter your password"
+                      required
+                    />
+                    <button type="button" class="btn btn-outline-secondary" @click="togglePasswordVisibility">
+                      <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <label for="nickname" class="form-label fw-bold">Nickname</label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      id="nickname"
+                      class="form-control"
+                      v-model="signupForm.nickname"
+                      placeholder="Enter your nickname"
+                      required
+                    />
+                    <button type="button" class="btn btn-outline-secondary" @click="checkNicknameDuplicate">
+                      Check 
+                    </button>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
+              </form>
+              <p class="text-center text-success fw-bold" v-if="signupSuccessMessage">{{ signupSuccessMessage }}</p>
+              <p class="text-center mt-3 mb-0">
+                Already have an account?
+                <a href="#" class="text-decoration-none" role="button" @click.prevent="mode = 'login'">Log In</a>
+              </p>
               
             </div>
           </div>
@@ -102,6 +116,7 @@ import axios from 'axios'
 const mode = ref('login')
 const serverURL = import.meta.env.VITE_API_URL;
 const signupSuccessMessage = ref('')
+const showPassword = ref(false);
 
 const loginForm = reactive({
   email: '',
@@ -132,6 +147,9 @@ function resetForm() {
   signupSuccessMessage.value = '';
 }
 
+function togglePasswordVisibility() {
+  showPassword.value = !showPassword.value;
+}
 
 const submitLoginForm = async () => {
   try {
