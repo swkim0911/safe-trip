@@ -51,18 +51,21 @@
                     <input
                       type="email"
                       id="email"
-                      class="form-control"
+                      :class="emailInputClass"
                       v-model="signupForm.email"
                       placeholder="user@example.com"
                       required
                     />
-                    <button type="button" class="btn btn-outline-secondary" @click="checkEmailDuplicate">
+                    <button :disabled="!isValidEmail" type="button" class="btn btn-outline-secondary" @click="validateEmail">
                       Check
                     </button>
                   </div>
                   <div class="mt-1">
-                    <p v-if="signupForm.email && !isValidEmail" class="text-danger small">
-                    Invalid email format. (e.g., user@example.com)
+                    <p v-if="emailCheckMessage" :class="['small', emailMessageColor]">
+                      {{ emailCheckMessage }}
+                    </p>
+                    <p v-if="validateEmailError" class="text-danger small">
+                      {{ validateEmailError }}
                     </p>
                   </div>
                 </div>
@@ -123,7 +126,6 @@
                 Already have an account?
                 <a href="#" class="text-decoration-none" role="button" @click.prevent="mode = 'login'">Log In</a>
               </p>
-              
             </div>
           </div>
         </div>  
@@ -184,19 +186,47 @@ const isValidEmail = computed(() =>
   emailPattern.test(signupForm.email)
 );
 
+const isEmailAvailable = ref(null);
 
+const validateEmailError = ref('');
 
-const submitLoginForm = async () => {
-  try {
-    const response = await axios.post(`${serverURL}/auth/login`, {
-      email: loginForm.email,
-      password: loginForm.password,
-    })
-    console.log('로그인 성공:', response.data)
-  } catch (error) {
-    console.error('로그인 실패:', error.response?.data || error.message)
-  }
+const emailCheckMessage = computed(() => {
+  if (!signupForm.email) return '';
+  if (!isValidEmail.value) return 'Invalid email format. (e.g., user@example.com)';
+  if (isEmailAvailable.value === false) return 'Email is already in use.';
+  if (isEmailAvailable.value === true) return 'Email is available.';
+  return '';
+});
+
+const emailMessageColor = computed(() => {
+  if (!signupForm.email || !isValidEmail.value) return 'text-danger';
+  return isEmailAvailable.value ? 'text-success' : 'text-danger';
+});
+
+const getValidationInputClass = (status) => {
+  if (status === true) return 'form-control border border-2 border-primary';
+  if (status === false) return 'form-control border border-2 border-danger';
+  return 'form-control';
 }
+
+const emailInputClass = computed(() =>
+  getValidationInputClass(isEmailAvailable.value)
+);
+
+const validateEmail = async () => {
+  try {
+    const response = await axios.get(`${serverURL}/users/validate-email`, {
+      params: { email: signupForm.email }
+    });
+    validateEmailError.value = '';
+    const result = response.data.result;
+    isEmailAvailable.value = result.available;
+
+  } catch (error) {
+    isEmailAvailable.value = null; 
+    validateEmailError.value = 'There was a problem checking your email. Please try again.'
+  }
+};
 
 const submitSignupForm = async () => {
   
@@ -212,6 +242,18 @@ const submitSignupForm = async () => {
     console.log('회원가입 성공:', response.data)
   } catch (error) {
     console.error('회원가입 실패:', error.response?.data || error.message)
+  }
+}
+
+const submitLoginForm = async () => {
+  try {
+    const response = await axios.post(`${serverURL}/auth/login`, {
+      email: loginForm.email,
+      password: loginForm.password,
+    })
+    console.log('로그인 성공:', respose.data);
+  } catch (error) {
+    console.error('로그인 실패:', error.response?.data || error.message)
   }
 }
 
@@ -235,13 +277,14 @@ onMounted(() => {
 
 watch(mode, (newMode) => {
   if (newMode === 'login') {
-    // 회원가입 폼 초기화
     resetSignupForm();
     signupSuccessMessage.value = '';
   }
 });
 
-
+watch(() => signupForm.email, () => {
+  isEmailAvailable.value = null;
+});
 
 </script>
 <style scoped lang="scss">
