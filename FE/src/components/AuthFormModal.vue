@@ -149,8 +149,9 @@
 <script setup>
 
 import { ref, reactive, watch, onMounted, computed } from 'vue'
-import axios from 'axios'
+// import axios from 'axios'
 import { useAuthStore } from '@/stores/auth';
+import apiClient from '@/lib/apiClient';
 
 const authStore = useAuthStore();
 
@@ -282,7 +283,7 @@ const nicknameValidationTextClass = computed(() => {
 
 const validateEmail = async () => {
   try {
-    const response = await axios.get(`${serverURL}/users/validate-email`, {
+    const response = await apiClient.get(`${serverURL}/users/validate-email`, {
       params: { email: signupForm.email }
     });
     validateEmailErrorMessage.value = '';
@@ -297,7 +298,7 @@ const validateEmail = async () => {
 
 const validateNickname = async () => {
   try {
-    const response = await axios.get(`${serverURL}/users/validate-nickname`, {
+    const response = await apiClient.get(`${serverURL}/users/validate-nickname`, {
       params: { nickname: signupForm.nickname }
     });
     validateNicknameErrorMessage.value = '';
@@ -313,7 +314,7 @@ const validateNickname = async () => {
 const submitSignupForm = async () => {
   if (!isSignupFormValid()) return;
   try {
-    const response = await axios.post(`${serverURL}/users`, {
+    const response = await apiClient.post(`${serverURL}/users`, {
       email: signupForm.email,
       password: signupForm.password,
       nickname: signupForm.nickname
@@ -348,17 +349,16 @@ const validateLoginForm = () => {
 const submitLoginForm = async () => {
   if (!validateLoginForm()) return;
   try {
-    const response = await axios.post(`${serverURL}/auth/login`, {
+    const response = await apiClient.post(`${serverURL}/auth/login`, {
       email: loginForm.email,
       password: loginForm.password,
     }, { withCredentials: true })
     const accessToken = response.data.result.accessToken;
     authStore.setAccessToken(accessToken);
-    console.log(authStore.accessToken);
     
   } catch (error) {
     const status = error.response?.status;
-    if (status === 401) {
+    if (status === 401 || status === 400) {
       loginFormMessage.value = 'Login failed';
     } else {
       signupFailureMessage.value = 'Server error. Please try again later.';
