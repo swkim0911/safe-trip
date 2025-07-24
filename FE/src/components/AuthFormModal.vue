@@ -171,7 +171,13 @@ function resetForm() {
   signupSuccessMessage.value = '';
 }
 
-function togglePasswordVisibility() {
+const isEmailAvailable = ref(null);
+const isNicknameAvailable = ref(null);
+
+const validateEmailError = ref('');
+const checkNicknameError = ref('');
+
+const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 }
 
@@ -185,10 +191,6 @@ const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
 const isValidEmail = computed(() =>
   emailPattern.test(signupForm.email)
 );
-
-const isEmailAvailable = ref(null);
-
-const validateEmailError = ref('');
 
 const emailCheckMessage = computed(() => {
   if (!signupForm.email) return '';
@@ -227,6 +229,22 @@ const validateEmail = async () => {
     validateEmailError.value = 'There was a problem checking your email. Please try again.'
   }
 };
+
+const checkNicknameDuplicate = async () => {
+  try {
+    const response = await axios.get(`${serverURL}/users/check-nickname`, {
+      params: { nickname: signupForm.nickname }
+    });
+    checkNicknameError.value = '';
+    const result = response.data.result;
+    isNicknameAvailable.value = !result.isDuplicated;
+    console.log(isNicknameAvailable.value);
+
+  } catch (error) {
+    isEmailAvailable.value = null; 
+    validateEmailError.value = 'There was a problem checking your email. Please try again.'
+  }
+}
 
 const submitSignupForm = async () => {
   
@@ -282,6 +300,7 @@ watch(mode, (newMode) => {
   }
 });
 
+// 회원가입란에 email이 변경되면 다시 검증이 필요하다고 판단
 watch(() => signupForm.email, () => {
   isEmailAvailable.value = null;
 });
