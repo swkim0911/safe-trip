@@ -128,6 +128,7 @@
                 <button :disabled="!isSignupFormValid()" type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
               </form>
               <p class="text-center text-success fw-bold" v-if="signupSuccessMessage">{{ signupSuccessMessage }}</p>
+              <p class="text-center text-danger fw-bold" v-if="signupFailureMessage">{{ signupFailureMessage }}</p>
               <p class="text-center mt-3 mb-0">
                 Already have an account?
                 <a href="#" class="text-decoration-none" role="button" @click.prevent="mode = 'login'">Log In</a>
@@ -145,7 +146,8 @@ import axios from 'axios'
 
 const mode = ref('login')
 const serverURL = import.meta.env.VITE_API_URL;
-const signupSuccessMessage = ref('')
+const signupSuccessMessage = ref('');
+const signupFailureMessage = ref('');
 const showPassword = ref(false);
 
 const loginForm = reactive({
@@ -175,6 +177,7 @@ function resetForm() {
   resetSignupForm();
   resetLoginForm();
   signupSuccessMessage.value = '';
+  signupFailureMessage.value = '';
 }
 
 const isEmailAvailable = ref(null);
@@ -296,19 +299,23 @@ const validateNickname = async () => {
 }
 
 const submitSignupForm = async () => {
+  if (!isSignupFormValid()) return;
   try {
     const response = await axios.post(`${serverURL}/users`, {
       email: signupForm.email,
       password: signupForm.password,
       nickname: signupForm.nickname
     })
-
-    resetSignupForm();
-    signupSuccessMessage.value = '회원가입이 완료되었습니다. 로그인 해주세요.';
-    console.log('회원가입 성공:', response.data)
+    signupSuccessMessage.value = 'Sign-up completed successfully. Please log in.';
   } catch (error) {
-    console.error('회원가입 실패:', error.response?.data || error.message)
+    const status = error.response.status;
+    if (status === 400) {
+      signupFailureMessage.value = 'Sign-up failed due to an already existing email or nickname.';
+    } else {
+      signupFailureMessage.value = 'Server error. Please try again later.';
+    }
   }
+  resetSignupForm();
 }
 
 const submitLoginForm = async () => {
@@ -345,6 +352,7 @@ watch(mode, (newMode) => {
   if (newMode === 'login') {
     resetSignupForm();
     signupSuccessMessage.value = '';
+    signupFailureMessage.value = '';
   }
 });
 
