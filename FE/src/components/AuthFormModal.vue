@@ -193,6 +193,7 @@ const hasNumber = computed(() => /\d/.test(signupForm.password));
 const hasSpecial = computed(() => /[!@#$%^&*()_+=-]/.test(signupForm.password));
 
 const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
+const nicknamePattern = /^[a-zA-Z0-9가-힣_-]+$/;
 
 const isValidEmail = computed(() =>
   emailPattern.test(signupForm.email)
@@ -225,14 +226,23 @@ const nicknameInputClass = computed(() =>
   getValidationInputClass(isNicknameAvailable.value)
 );
 
-const isValidNickname = computed(() => {
+const isValidNicknameLength = computed(() => {
   const length = signupForm.nickname.length;
   return length >= 2 && length <= 15;
-})
+});
+
+const isValidNicknamePattern = computed(() =>
+  nicknamePattern.test(signupForm.nickname)
+);
+
+const isValidNickname = computed(() =>
+  isValidNicknameLength.value && isValidNicknamePattern.value
+);
 
 const nicknameValidationMessage = computed(() => {
   if (!signupForm.nickname) return '';
-  if (!isValidNickname.value) return 'Nickname must be between 2 and 15 characters.';
+  if (!isValidNicknameLength.value) return 'Nickname must be between 2 and 15 characters.';
+  if (!isValidNicknamePattern.value) return 'Only Korean, English letters, digits, underscores (_), and hyphens (-) are allowed in nickname.';
   if (isNicknameAvailable.value === false) return 'Nickname is already in use.';
   if (isNicknameAvailable.value === true) return 'Nickname is available.';
   return '';
