@@ -32,6 +32,10 @@
                     required
                   />
                 </div>
+                <p v-if="loginFormMessage" class="text-center text-danger fw-bold">
+                      {{ loginFormMessage }}
+                </p>
+                
                 <div class="mb-2">
                   <button type="submit" class="btn btn-primary w-100 py-2 mt-2" @click="submitLoginForm">Log In</button>
                 </div>
@@ -118,12 +122,15 @@
                       Check 
                     </button>
                   </div>
-                  <p v-if="nicknameValidationMessage" :class="['small', nicknameValidationTextClass]">
-                    {{ nicknameValidationMessage }}
-                  </p>
-                  <p v-if="validateNicknameErrorMessage" class="text-danger small">
-                      {{ validateNicknameErrorMessage }}
+                  <div class="mt-1">
+                    <p v-if="nicknameValidationMessage" :class="['small', nicknameValidationTextClass]">
+                        {{ nicknameValidationMessage }}
                     </p>
+                    <p v-if="validateNicknameErrorMessage" class="text-danger small">
+                        {{ validateNicknameErrorMessage }}
+                    </p>
+                  </div>
+                
                 </div>
                 <button :disabled="!isSignupFormValid()" type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
               </form>
@@ -143,11 +150,15 @@
 
 import { ref, reactive, watch, onMounted, computed } from 'vue'
 import axios from 'axios'
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
 
 const mode = ref('login')
 const serverURL = import.meta.env.VITE_API_URL;
 const signupSuccessMessage = ref('');
 const signupFailureMessage = ref('');
+const loginFormMessage = ref('');
 const showPassword = ref(false);
 
 const loginForm = reactive({
@@ -178,6 +189,7 @@ function resetForm() {
   resetLoginForm();
   signupSuccessMessage.value = '';
   signupFailureMessage.value = '';
+  loginFormMessage.value = '';
 }
 
 const isEmailAvailable = ref(null);
@@ -308,7 +320,7 @@ const submitSignupForm = async () => {
     })
     signupSuccessMessage.value = 'Sign-up completed successfully. Please log in.';
   } catch (error) {
-    const status = error.response.status;
+    const status = error.response?.status;
     if (status === 400) {
       signupFailureMessage.value = 'Sign-up failed due to an already existing email or nickname.';
     } else {
@@ -318,15 +330,39 @@ const submitSignupForm = async () => {
   resetSignupForm();
 }
 
+const validateLoginForm = () => {
+  if (!loginForm.email) {
+    loginFormMessage.value = "Please enter your email.";
+    return false;
+  }
+  if (!loginForm.password) {
+    loginFormMessage.value = "Please enter your password.";
+    return false;
+  }
+  loginFormMessage.value = '';
+  return true;
+}
+
+
+
 const submitLoginForm = async () => {
+  if (!validateLoginForm()) return;
   try {
     const response = await axios.post(`${serverURL}/auth/login`, {
       email: loginForm.email,
       password: loginForm.password,
-    })
-    console.log('로그인 성공:', respose.data);
+    }, { withCredentials: true })
+    const accessToken = response.data.result.accessToken;
+    authStore.setAccessToken(accessToken);
+    console.log(authStore.accessToken);
+    
   } catch (error) {
-    console.error('로그인 실패:', error.response?.data || error.message)
+    const status = error.response?.status;
+    if (status === 401) {
+      loginFormMessage.value = 'Login failed';
+    } else {
+      signupFailureMessage.value = 'Server error. Please try again later.';
+    }
   }
 }
 
@@ -345,7 +381,7 @@ const setupModalEventListener = () => {
 }
 
 onMounted(() => {
-  setupModalEventListener()
+  setupModalEventListener();
 })
 
 watch(mode, (newMode) => {
@@ -353,6 +389,9 @@ watch(mode, (newMode) => {
     resetSignupForm();
     signupSuccessMessage.value = '';
     signupFailureMessage.value = '';
+  } else if (newMode == 'signup') {
+    resetLoginForm();
+    loginFormMessage.value = '';
   }
 });
 

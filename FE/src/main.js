@@ -7,6 +7,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { createPinia } from 'pinia';
+
+const pinia = createPinia();
 
 // 사용할 아이콘
 import { faUserLarge, faBullhorn, faPen, faCamera, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
@@ -16,4 +19,5 @@ library.add(faUserLarge, faBullhorn, faPen, faMessage, faMap, faCamera, faChevro
 
 createApp(App)
   .component('font-awesome-icon', FontAwesomeIcon)
+  .use(pinia)
   .mount('#app')
