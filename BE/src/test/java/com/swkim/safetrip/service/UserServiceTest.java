@@ -1,12 +1,11 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
-import com.swkim.safetrip.dto.response.EmailValidationResponse;
-import com.swkim.safetrip.dto.response.NicknameDuplicateResponse;
+import com.swkim.safetrip.dto.response.ValidationResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
-import com.swkim.safetrip.global.validation.EmailValidator;
+import com.swkim.safetrip.global.validation.SignUpValidator;
 import com.swkim.safetrip.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +34,7 @@ class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private EmailValidator emailValidator;
+    private SignUpValidator signUpValidator;
 
     @Test
     void 회원가입_요청_성공시_User_Id를_반환한다() {
@@ -108,10 +107,10 @@ class UserServiceTest {
     void 이메일_검증_요청에_형식이_잘못되었으면_isValidFormat_false을_반환한다() {
         // given
         String invalidEmail = "not-an-email";
-        given(emailValidator.isValid(invalidEmail)).willReturn(false);
+        given(signUpValidator.isValidEmail(invalidEmail)).willReturn(false);
 
         // when
-        EmailValidationResponse response = userService.validateEmail(invalidEmail);
+        ValidationResponse response = userService.validateEmail(invalidEmail);
 
         // then
         assertThat(response.isValidFormat()).isFalse();
@@ -123,11 +122,11 @@ class UserServiceTest {
     void 이메일_검증_요청에_이메일이_중복되면_isAvailable_false을_반환한다() {
         // given
         String duplicatedEmail = "duplicated@gmail.com";
-        given(emailValidator.isValid(duplicatedEmail)).willReturn(true);
+        given(signUpValidator.isValidEmail(duplicatedEmail)).willReturn(true);
         given(userRepository.existsByEmail(duplicatedEmail)).willReturn(true);
 
         // when
-        EmailValidationResponse response = userService.validateEmail(duplicatedEmail);
+        ValidationResponse response = userService.validateEmail(duplicatedEmail);
 
         // then
         assertThat(response.isAvailable()).isFalse();
@@ -137,12 +136,12 @@ class UserServiceTest {
     @Test
     void 이메일_검증_요청에_이메일이_올바르다면_true를_반환한다() {
         // given
-        String duplicatedEmail = "right@gmail.com";
-        given(emailValidator.isValid(duplicatedEmail)).willReturn(true);
-        given(userRepository.existsByEmail(duplicatedEmail)).willReturn(false);
+        String rightEmail = "right@gmail.com";
+        given(signUpValidator.isValidEmail(rightEmail)).willReturn(true);
+        given(userRepository.existsByEmail(rightEmail)).willReturn(false);
 
         // when
-        EmailValidationResponse response = userService.validateEmail(duplicatedEmail);
+        ValidationResponse response = userService.validateEmail(rightEmail);
 
         // then
         assertThat(response.isValidFormat()).isTrue();
@@ -151,28 +150,33 @@ class UserServiceTest {
     }
 
     @Test
-    void 닉네임_검증_요청에_통과하면_isDuplicated는_false를_반환한다() {
+    void 닉네임_검증_요청에_닉네임이_올바르다면_true를_반환한다() {
         // given
-        String nickname = "rightName";
-        given(userRepository.existsByNickname(nickname)).willReturn(false);
+        String rightNickname = "rightName";
+        given(signUpValidator.isValidNickname(rightNickname)).willReturn(true);
+        given(userRepository.existsByNickname(rightNickname)).willReturn(false);
 
         // when
-        NicknameDuplicateResponse response = userService.checkNicknameDuplicate(nickname);
+        ValidationResponse response = userService.validateNickname(rightNickname);
 
         // then
-        assertThat(response.getIsDuplicated()).isFalse();
+        assertThat(response.isValidFormat()).isTrue();
+        assertThat(response.isAvailable()).isTrue();
+        assertThat(response.getReason()).isNull();
     }
 
     @Test
-    void 닉네임_검증_요청에_닉네임이_중복되면_isDuplicated는_true를_반환한다() {
+    void 닉네임_검증_요청에_닉네임이_중복되면_isAvailable_false을_반환한다() {
         // given
-        String nickname = "duplicatedNickname";
-        given(userRepository.existsByNickname(nickname)).willReturn(true);
+        String duplicatedNickname = "duplicated@gmail.com";
+        given(signUpValidator.isValidNickname(duplicatedNickname)).willReturn(true);
+        given(userRepository.existsByNickname(duplicatedNickname)).willReturn(true);
 
         // when
-        NicknameDuplicateResponse response = userService.checkNicknameDuplicate(nickname);
+        ValidationResponse response = userService.validateNickname(duplicatedNickname);
 
         // then
-        assertThat(response.getIsDuplicated()).isTrue();
+        assertThat(response.isAvailable()).isFalse();
+        assertThat(response.getReason()).isEqualTo("Nickname already in use");
     }
 }
