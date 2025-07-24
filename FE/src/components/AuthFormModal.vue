@@ -61,11 +61,11 @@
                     </button>
                   </div>
                   <div class="mt-1">
-                    <p v-if="emailCheckMessage" :class="['small', emailMessageColor]">
-                      {{ emailCheckMessage }}
+                    <p v-if="emailValidationMessage" :class="['small', emailValidationTextClass]">
+                      {{ emailValidationMessage }}
                     </p>
-                    <p v-if="validateEmailError" class="text-danger small">
-                      {{ validateEmailError }}
+                    <p v-if="validateEmailErrorMessage" class="text-danger small">
+                      {{ validateEmailErrorMessage }}
                     </p>
                   </div>
                 </div>
@@ -109,15 +109,21 @@
                     <input
                       type="text"
                       id="nickname"
-                      class="form-control"
+                      :class="nicknameInputClass"
                       v-model="signupForm.nickname"
                       placeholder="Enter your nickname"
                       required
                     />
-                    <button type="button" class="btn btn-outline-secondary" @click="checkNicknameDuplicate">
+                    <button :disabled="!isValidNickname" type="button" class="btn btn-outline-secondary" @click="validateNickname">
                       Check 
                     </button>
                   </div>
+                  <p v-if="nicknameValidationMessage" :class="['small', nicknameValidationTextClass]">
+                    {{ nicknameValidationMessage }}
+                  </p>
+                  <p v-if="validateNicknameErrorMessage" class="text-danger small">
+                      {{ validateNicknameErrorMessage }}
+                    </p>
                 </div>
                 <button type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
               </form>
@@ -174,8 +180,8 @@ function resetForm() {
 const isEmailAvailable = ref(null);
 const isNicknameAvailable = ref(null);
 
-const validateEmailError = ref('');
-const checkNicknameError = ref('');
+const validateEmailErrorMessage = ref('');
+const validateNicknameErrorMessage = ref('');
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
@@ -192,7 +198,7 @@ const isValidEmail = computed(() =>
   emailPattern.test(signupForm.email)
 );
 
-const emailCheckMessage = computed(() => {
+const emailValidationMessage = computed(() => {
   if (!signupForm.email) return '';
   if (!isValidEmail.value) return 'Invalid email format. (e.g., user@example.com)';
   if (isEmailAvailable.value === false) return 'Email is already in use.';
@@ -200,7 +206,7 @@ const emailCheckMessage = computed(() => {
   return '';
 });
 
-const emailMessageColor = computed(() => {
+const emailValidationTextClass = computed(() => {
   if (!signupForm.email || !isValidEmail.value) return 'text-danger';
   return isEmailAvailable.value ? 'text-success' : 'text-danger';
 });
@@ -215,39 +221,61 @@ const emailInputClass = computed(() =>
   getValidationInputClass(isEmailAvailable.value)
 );
 
+const nicknameInputClass = computed(() =>
+  getValidationInputClass(isNicknameAvailable.value)
+);
+
+const isValidNickname = computed(() => {
+  const length = signupForm.nickname.length;
+  return length >= 2 && length <= 15;
+})
+
+const nicknameValidationMessage = computed(() => {
+  if (!signupForm.nickname) return '';
+  if (!isValidNickname.value) return 'Nickname must be between 2 and 15 characters.';
+  if (isNicknameAvailable.value === false) return 'Nickname is already in use.';
+  if (isNicknameAvailable.value === true) return 'Nickname is available.';
+  return '';
+});
+
+const nicknameValidationTextClass = computed(() => {
+  if (!signupForm.nickname || !isValidNickname.value) return 'text-danger';
+  return isNicknameAvailable.value ? 'text-success' : 'text-danger';
+});
+
+
+
 const validateEmail = async () => {
   try {
     const response = await axios.get(`${serverURL}/users/validate-email`, {
       params: { email: signupForm.email }
     });
-    validateEmailError.value = '';
+    validateEmailErrorMessage.value = '';
     const result = response.data.result;
     isEmailAvailable.value = result.available;
 
   } catch (error) {
     isEmailAvailable.value = null; 
-    validateEmailError.value = 'There was a problem checking your email. Please try again.'
+    validateEmailErrorMessage.value = 'There was a problem checking your email. Please try again.'
   }
 };
 
-const checkNicknameDuplicate = async () => {
+const validateNickname = async () => {
   try {
-    const response = await axios.get(`${serverURL}/users/check-nickname`, {
+    const response = await axios.get(`${serverURL}/users/validate-nickname`, {
       params: { nickname: signupForm.nickname }
     });
-    checkNicknameError.value = '';
+    validateNicknameErrorMessage.value = '';
     const result = response.data.result;
-    isNicknameAvailable.value = !result.isDuplicated;
-    console.log(isNicknameAvailable.value);
+    isNicknameAvailable.value = result.available;
 
   } catch (error) {
-    isEmailAvailable.value = null; 
-    validateEmailError.value = 'There was a problem checking your email. Please try again.'
+    isNicknameAvailable.value = null; 
+    validateNicknameErrorMessage.value = 'There was a problem checking your nickname. Please try again.'
   }
 }
 
 const submitSignupForm = async () => {
-  
   try {
     const response = await axios.post(`${serverURL}/users`, {
       email: signupForm.email,
@@ -304,6 +332,12 @@ watch(mode, (newMode) => {
 watch(() => signupForm.email, () => {
   isEmailAvailable.value = null;
 });
+
+// 회원가입란에 nickname이 변경되면 다시 검증이 필요하다고 판단
+watch(() => signupForm.nickname, () => {
+  isNicknameAvailable.value = null;
+});
+
 
 </script>
 <style scoped lang="scss">
