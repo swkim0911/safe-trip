@@ -125,7 +125,7 @@
                       {{ validateNicknameErrorMessage }}
                     </p>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
+                <button :disabled="!isSignupFormValid()" type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
               </form>
               <p class="text-center text-success fw-bold" v-if="signupSuccessMessage">{{ signupSuccessMessage }}</p>
               <p class="text-center mt-3 mb-0">
@@ -179,6 +179,16 @@ function resetForm() {
 
 const isEmailAvailable = ref(null);
 const isNicknameAvailable = ref(null);
+const isValidPassword = computed(() =>
+  isValidLength.value &&
+  hasLetter.value &&
+  hasNumber.value &&
+  hasSpecial.value
+);
+
+const isSignupFormValid = () => {
+  return isEmailAvailable.value && isNicknameAvailable.value && isValidPassword.value;
+}
 
 const validateEmailErrorMessage = ref('');
 const validateNicknameErrorMessage = ref('');
