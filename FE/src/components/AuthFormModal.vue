@@ -68,8 +68,8 @@
                     <p v-if="emailValidationMessage" :class="['small', emailValidationTextClass]">
                       {{ emailValidationMessage }}
                     </p>
-                    <p v-if="validateEmailErrorMessage" class="text-danger small">
-                      {{ validateEmailErrorMessage }}
+                    <p v-if="emailValidationErrorMessage" class="text-danger small">
+                      {{ emailValidationErrorMessage }}
                     </p>
                   </div>
                 </div>
@@ -82,7 +82,6 @@
                       id="password"
                       class="form-control"
                       v-model="signupForm.password"
-                      @input="validatePassword"
                       placeholder="Enter your password"
                       required
                     />
@@ -126,8 +125,8 @@
                     <p v-if="nicknameValidationMessage" :class="['small', nicknameValidationTextClass]">
                         {{ nicknameValidationMessage }}
                     </p>
-                    <p v-if="validateNicknameErrorMessage" class="text-danger small">
-                        {{ validateNicknameErrorMessage }}
+                    <p v-if="nicknameValidationErrorMessage" class="text-danger small">
+                        {{ nicknameValidationErrorMessage }}
                     </p>
                   </div>
                 
@@ -206,8 +205,8 @@ const isSignupFormValid = () => {
   return isEmailAvailable.value && isNicknameAvailable.value && isValidPassword.value;
 }
 
-const validateEmailErrorMessage = ref('');
-const validateNicknameErrorMessage = ref('');
+const emailValidationErrorMessage = ref('');
+const nicknameValidationErrorMessage = ref('');
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
@@ -286,13 +285,13 @@ const validateEmail = async () => {
     const response = await apiClient.get(`${serverURL}/users/validate-email`, {
       params: { email: signupForm.email }
     });
-    validateEmailErrorMessage.value = '';
+    emailValidationErrorMessage.value = '';
     const result = response.data.result;
     isEmailAvailable.value = result.available;
 
   } catch (error) {
     isEmailAvailable.value = null; 
-    validateEmailErrorMessage.value = 'There was a problem checking your email. Please try again.'
+    emailValidationErrorMessage.value = 'There was a problem checking your email. Please try again.'
   }
 };
 
@@ -301,13 +300,13 @@ const validateNickname = async () => {
     const response = await apiClient.get(`${serverURL}/users/validate-nickname`, {
       params: { nickname: signupForm.nickname }
     });
-    validateNicknameErrorMessage.value = '';
+    nicknameValidationErrorMessage.value = '';
     const result = response.data.result;
     isNicknameAvailable.value = result.available;
 
   } catch (error) {
     isNicknameAvailable.value = null; 
-    validateNicknameErrorMessage.value = 'There was a problem checking your nickname. Please try again.'
+    nicknameValidationErrorMessage.value = 'There was a problem checking your nickname. Please try again.'
   }
 }
 

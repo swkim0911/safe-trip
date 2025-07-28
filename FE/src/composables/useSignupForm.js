@@ -5,6 +5,12 @@ import apiClient from '@/api/apiClient';
 const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
 const NICKNAME_REGEX = /^[a-zA-Z0-9가-힣_-]+$/;
 
+const getValidationInputClass = (status) => {
+    if (status === true) return 'form-control border border-2 border-primary';
+    if (status === false) return 'form-control border border-2 border-danger';
+    return 'form-control';
+}
+
 export function useSignupForm() {
   const signupForm = reactive({
     email: '',
@@ -21,11 +27,6 @@ export function useSignupForm() {
   const signupSuccessMessage = ref('');
   const signupFailureMessage = ref('');
 
-  const getValidationInputClass = (status) => {
-    if (status === true) return 'form-control border border-2 border-primary';
-    if (status === false) return 'form-control border border-2 border-danger';
-    return 'form-control';
-  }
   // email
   const isEmailAvailable = ref(null); // 이메일 중복 여부 (사용가능 여부)
   const emailValidationErrorMessage = ref(''); // 이메일 검증시 발생한 에러 메시지
@@ -148,7 +149,7 @@ export function useSignupForm() {
   }
 
   const submitSignupForm = async () => {
-    if (!isSignupFormValid()) return;
+    // if (!isSignupFormValid()) return;
     try {
       const response = await apiClient.post(`${serverURL}/users`, {
         email: signupForm.email,
@@ -188,7 +189,7 @@ export function useSignupForm() {
       isValid: isValidEmail,
       validationMessage: emailValidationMessage,
       validationTextClass: emailValidationTextClass,
-      inputClass: emailInputClass,
+      emailInputClass: emailInputClass,
       validationErrorMessage: emailValidationErrorMessage,
     },
     password: {
@@ -209,7 +210,7 @@ export function useSignupForm() {
     submit: {
       validateEmail: validateEmail,
       validateNickname: validateNickname, 
-      submitSignupForm: submitSignupForm,
+      signupForm: submitSignupForm,
     }
 
   };
