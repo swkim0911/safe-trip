@@ -148,7 +148,6 @@
 <script setup>
 
 import { ref, reactive, watch, onMounted, computed } from 'vue'
-// import axios from 'axios'
 import { useAuthStore } from '@/stores/auth';
 import apiClient from '@/lib/apiClient';
 
