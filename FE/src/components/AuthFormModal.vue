@@ -146,10 +146,11 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, watch, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth';
-import apiClient from '@/lib/apiClient';
+
+import { ref, reactive, watch, onMounted, computed } from 'vue'
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
+import apiClient from '@/api/apiClient';
 
 const authStore = useAuthStore();
 
@@ -284,7 +285,7 @@ const nicknameValidationTextClass = computed(() => {
 
 const validateEmail = async () => {
   try {
-    const response = await apiClient.get(`${serverURL}/users/validate-email`, {
+    const response = await apiClient.get('/users/validate-email', {
       params: { email: signupForm.email }
     });
     emailValidationErrorMessage.value = '';
@@ -299,7 +300,7 @@ const validateEmail = async () => {
 
 const validateNickname = async () => {
   try {
-    const response = await apiClient.get(`${serverURL}/users/validate-nickname`, {
+    const response = await apiClient.get('/users/validate-nickname', {
       params: { nickname: signupForm.nickname }
     });
     nicknameValidationErrorMessage.value = '';
@@ -315,7 +316,7 @@ const validateNickname = async () => {
 const submitSignupForm = async () => {
   if (!isSignupFormValid()) return;
   try {
-    const response = await apiClient.post(`${serverURL}/users`, {
+    const response = await apiClient.post('/users', {
       email: signupForm.email,
       password: signupForm.password,
       nickname: signupForm.nickname
@@ -350,7 +351,7 @@ const validateLoginForm = () => {
 const submitLoginForm = async () => {
   if (!validateLoginForm()) return;
   try {
-    const response = await apiClient.post(`${serverURL}/auth/login`, {
+    const response = await apiClient.post('/auth/login', {
       email: loginForm.email,
       password: loginForm.password,
     }, { withCredentials: true })

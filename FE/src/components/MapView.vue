@@ -47,15 +47,17 @@
 </template>
 
 <script setup>
-import {ref, onMounted, watch} from 'vue'
-import "leaflet/dist/leaflet.css";
+import { useAuthStore } from '@/stores/auth';
+
+import { ref, onMounted, watch } from 'vue';
 import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker } from "@vue-leaflet/vue-leaflet";
-import axios from 'axios'
-
-import ReportFormModal from './ReportFormModal.vue'
-import AuthFormModal from './AuthFormModal.vue'
-
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
+import ReportFormModal from './ReportFormModal.vue';
+import AuthFormModal from './AuthFormModal.vue';
+import apiClient from '@/api/apiClient';
+import "leaflet/dist/leaflet.css";
+
+
 
 const { show: openAuthModal } = useBootstrapModal('#authFormModal');
 const { show: openReportFormMoodal } = useBootstrapModal('#reportFormModal');
@@ -99,7 +101,7 @@ const getRadius = (scamCnt, zoom) => {
 
 const loadMapSummary = async () => {
   try {
-    const response = await axios.get(`${serverURL}/reports/map-summary`, {
+    const response = await apiClient.get('/reports/map-summary', {
       params: {
         zoom: zoom.value
       }

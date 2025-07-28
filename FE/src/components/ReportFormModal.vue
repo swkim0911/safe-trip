@@ -95,7 +95,7 @@
 import { ref, onMounted, reactive } from 'vue'
 import { Loader } from '@googlemaps/js-api-loader'
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
-import axios from 'axios'
+import apiClient from '@/api/apiClient';
 
 const googleMapApiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
 const serverURL = import.meta.env.VITE_API_URL;
@@ -276,7 +276,7 @@ const submitForm = async () => {
       formData.append('images', form.imageFile)
     }
 
-    const response = await axios.post(`${serverURL}/reports`, formData, {
+    const response = await apiClient.post('/reports', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
