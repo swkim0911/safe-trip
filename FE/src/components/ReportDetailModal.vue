@@ -1,10 +1,10 @@
 <template>
-  <div class="modal fade" id = "reportDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal fade" ref="modalRef" id = "reportDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
       <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">{{ report.title }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <div class="d-flex justify-content-between mb-3">
@@ -53,15 +53,17 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useBootstrapModal } from '@/composables/useBootstrapModal';
+
+const modalRef = ref(null);
+const { hide } = useBootstrapModal(modalRef);
 
 defineProps({
   report: {
     type: Object,
     required: true
   }
-})
-
-
+});
 
 const setupModalEventListener = () => {
   const modal = document.getElementById('reportDetailModal');
@@ -74,7 +76,7 @@ const setupModalEventListener = () => {
 }
 
 onMounted(() => {
-  setupModalEventListener()
+  setupModalEventListener();
 })
 
 </script>

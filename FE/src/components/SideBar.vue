@@ -71,8 +71,6 @@
               v-for="report in sidebarReports"
               :key="report.reportId"
               @click="openReportDetailModal(report.reportId)"
-              data-bs-toggle="modal"
-              data-bs-target="#reportDetailModal"
             >
                 <div class="ms-2 me-auto">{{ report.title }}</div>
                 <span class="badge text-bg-primary rounded-pill">{{ report.scam }}</span>
@@ -96,6 +94,9 @@
 import { ref, onMounted, reactive } from 'vue';
 import axios from 'axios'
 import ReportDetailModal from './ReportDetailModal.vue'
+import { useBootstrapModal } from '@/composables/useBootstrapModal';
+
+const { show } = useBootstrapModal('#reportDetailModal');
 
 const isOpen = ref(false);
 const searchText = ref('');
@@ -144,7 +145,8 @@ const serverURL = import.meta.env.VITE_API_URL;
 
 const openReportDetailModal = (reportId) => {
   loadReportDetialInfo(reportId);
-};
+  show();
+}
 
 const loadReportDetialInfo = async (reportId) => {
   try {
