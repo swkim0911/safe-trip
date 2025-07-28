@@ -1,5 +1,5 @@
 <template>
-  <div class="modal fade" id = "authFormModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal fade" ref="modalRef" id="authFormModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
       <div class="modal-content">
           <div class="modal-header border-bottom-0">
@@ -146,12 +146,19 @@
   </div>
 </template>
 <script setup>
-
+import { Modal } from 'bootstrap'
 import { ref, reactive, watch, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth';
 import apiClient from '@/lib/apiClient';
 
 const authStore = useAuthStore();
+
+const modalRef = ref(null);
+
+function closeModal() {
+  const instance = Modal.getOrCreateInstance(modalRef.value);
+  instance.hide();
+}
 
 const mode = ref('login')
 const serverURL = import.meta.env.VITE_API_URL;
@@ -351,9 +358,10 @@ const submitLoginForm = async () => {
       email: loginForm.email,
       password: loginForm.password,
     }, { withCredentials: true })
+
     const accessToken = response.data.result.accessToken;
     authStore.setAccessToken(accessToken);
-    
+    closeModal();
   } catch (error) {
     const status = error.response?.status;
     if (status === 401 || status === 400) {

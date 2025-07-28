@@ -37,8 +37,7 @@
     <button 
     type="button" 
     class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn"
-    data-bs-toggle="modal"
-    data-bs-target="#authFormModal"
+    @click="openAuthModal"
     >
       <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
       LOGIN
@@ -55,6 +54,19 @@ import axios from 'axios'
 
 import ReportFormModal from './ReportFormModal.vue'
 import AuthFormModal from './AuthFormModal.vue'
+
+import { Modal } from 'bootstrap';
+
+function openAuthModal() {
+  const el = document.getElementById('authFormModal');
+  if (!el) return;
+  const modal = Modal.getOrCreateInstance(el, {
+    backdrop: 'static',
+    keyboard: false,
+  });
+  
+  modal.show();
+}
 
 const showLogin = ref(true)
 const showSignup = ref(false)
