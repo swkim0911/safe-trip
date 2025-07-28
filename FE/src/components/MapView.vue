@@ -55,18 +55,9 @@ import axios from 'axios'
 import ReportFormModal from './ReportFormModal.vue'
 import AuthFormModal from './AuthFormModal.vue'
 
-import { Modal } from 'bootstrap';
+import { useBootstrapModal } from '@/composables/useBootstrapModal';
 
-function openAuthModal() {
-  const el = document.getElementById('authFormModal');
-  if (!el) return;
-  const modal = Modal.getOrCreateInstance(el, {
-    backdrop: 'static',
-    keyboard: false,
-  });
-  
-  modal.show();
-}
+const { show: openAuthModal } = useBootstrapModal('#authFormModal');
 
 const showLogin = ref(true)
 const showSignup = ref(false)
