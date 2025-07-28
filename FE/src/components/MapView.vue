@@ -24,7 +24,7 @@
         <l-control-zoom position="bottomright"></l-control-zoom>
       </l-map>
     </div>
-    <button 
+    <button
     type="button" 
     class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3"
     @click="openReportFormMoodal"
@@ -33,15 +33,39 @@
       제보하기
     </button>
     <ReportFormModal/>
-    
-    <button 
-    type="button" 
-    class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn"
-    @click="openAuthModal"
-    >
-      <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
-      LOGIN
-    </button>
+
+    <div v-if="!isLoggedIn" >
+      <button 
+        type="button" 
+        class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn"
+        @click="openAuthModal"
+      >
+        <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
+        LOGIN
+      </button>
+    </div>
+    <div v-else class="dropdown">
+      <button
+        class="btn btn-primary dropdown-toggle position-fixed top-0 end-0 mt-4 me-4 shadow-sm dropdown-btn"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        👤 nickname
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <a class="dropdown-item" href="/#">
+            📋 Report 등록
+          </a>
+        </li>
+        <li>
+          <button class="dropdown-item" @click="logout">
+            🚪 로그아웃
+          </button>
+        </li>
+      </ul>
+    </div>
     <AuthFormModal/>
   </div>
 </template>
@@ -49,7 +73,7 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth';
 
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker } from "@vue-leaflet/vue-leaflet";
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import ReportFormModal from './ReportFormModal.vue';
@@ -57,10 +81,12 @@ import AuthFormModal from './AuthFormModal.vue';
 import apiClient from '@/api/apiClient';
 import "leaflet/dist/leaflet.css";
 
-
-
 const { show: openAuthModal } = useBootstrapModal('#authFormModal');
 const { show: openReportFormMoodal } = useBootstrapModal('#reportFormModal');
+
+const authStore = useAuthStore();
+const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
+const nickname = computed(() => authStore.nickname || 'user');
 
 const showLogin = ref(true)
 const showSignup = ref(false)
@@ -134,6 +160,14 @@ onMounted(() => {
   }
 
   .report-btn{
+    z-index: 1000; /* 다른 요소보다 위에 뜨도록 */
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 19px;
+  }
+
+  .dropdown-btn{
     z-index: 1000; /* 다른 요소보다 위에 뜨도록 */
     border: none;
     padding: 10px 14px;
