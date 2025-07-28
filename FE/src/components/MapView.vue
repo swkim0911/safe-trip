@@ -26,9 +26,9 @@
     </div>
     <button 
     type="button" 
-    class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3" 
-    data-bs-toggle="modal"
-    data-bs-target="#reportFormModal">
+    class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3"
+    @click="openReportFormMoodal"
+    >
       <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
       제보하기
     </button>
@@ -58,6 +58,7 @@ import AuthFormModal from './AuthFormModal.vue'
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 
 const { show: openAuthModal } = useBootstrapModal('#authFormModal');
+const { show: openReportFormMoodal } = useBootstrapModal('#reportFormModal');
 
 const showLogin = ref(true)
 const showSignup = ref(false)

@@ -1,10 +1,10 @@
 <template>
-  <div class="modal fade" id = "reportFormModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal fade" ref="modalRef" id = "reportFormModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
       <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">제보를 남겨주세요</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form @submit.prevent>
@@ -94,13 +94,16 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue'
 import { Loader } from '@googlemaps/js-api-loader'
+import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import axios from 'axios'
 
 const googleMapApiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
 const serverURL = import.meta.env.VITE_API_URL;
 
-// 반응형 변수
 const mapRef = ref(null);
+const modalRef = ref(null);
+
+const { hide } = useBootstrapModal(modalRef);
 
 const errorMessage = ref('');
 

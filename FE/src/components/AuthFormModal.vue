@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
       <div class="modal-content">
           <div class="modal-header border-bottom-0">
-            <button type="button" class="btn-close" @click="hideModal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <div v-if="mode === 'login'">
@@ -146,7 +146,6 @@
   </div>
 </template>
 <script setup>
-import { Modal } from 'bootstrap'
 import { ref, reactive, watch, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth';
 import apiClient from '@/lib/apiClient';
@@ -155,7 +154,7 @@ import { useBootstrapModal } from '@/composables/useBootstrapModal';
 const authStore = useAuthStore();
 
 const modalRef = ref(null);
-const { hide:hideModal } = useBootstrapModal(modalRef);
+const { hide } = useBootstrapModal(modalRef);
 
 const mode = ref('login')
 const serverURL = import.meta.env.VITE_API_URL;
@@ -358,7 +357,7 @@ const submitLoginForm = async () => {
 
     const accessToken = response.data.result.accessToken;
     authStore.setAccessToken(accessToken);
-    hideModal();
+    hide();
   } catch (error) {
     const status = error.response?.status;
     if (status === 401 || status === 400) {
