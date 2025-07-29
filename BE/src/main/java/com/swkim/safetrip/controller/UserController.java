@@ -37,13 +37,13 @@ public class UserController {
     @Operation(summary = "이메일 사용 가능 여부 확인", description = "입력한 이메일이 형식에 맞고, 중복 여부를 확인합니다.")
     @GetMapping("/users/validate-email")
     public ApiResult<ValidationResponse> validateEmail(@RequestParam String email) {
-        return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of email", userService.validateEmail(email));
+        return ApiResult.of(HttpStatus.OK.value(), "Complete email duplication check", userService.validateEmail(email));
     }
 
     @Operation(summary = "닉네임 사용 가능 여부 확인", description = "입력한 닉네임이 형식에 맞고, 중복 여부를 확인합니다.")
     @GetMapping("users/validate-nickname")
-    public ApiResult<ValidationResponse> checkNicknameDuplicate(@RequestParam String nickname) {
-        return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of nickname", userService.validateNickname(nickname));
+    public ApiResult<ValidationResponse> validateNickname(@RequestParam String nickname) {
+        return ApiResult.of(HttpStatus.OK.value(), "Complete nickname duplication check", userService.validateNickname(nickname));
     }
 
     @Operation(summary = "사용자 정보 조회", description = "로그인 후, 사용자 정보를 조회합니다")
