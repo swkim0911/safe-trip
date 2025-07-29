@@ -24,6 +24,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -67,8 +69,14 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private boolean requiresAuthentication(HttpServletRequest request) {
         String requestURI = request.getRequestURI();
-        String method = request.getMethod();
+        String method = request.getMethod().toUpperCase();
 
-        return "/reports".equals(requestURI) && "POST".equalsIgnoreCase(method);
+        return protectedEndpoints.contains(Map.entry(requestURI, method));
     }
+
+    private static final Set<Map.Entry<String, String>> protectedEndpoints = Set.of(
+            Map.entry("/reports", "POST"),
+            Map.entry("/me", "GET")
+    );
+
 }
