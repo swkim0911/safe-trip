@@ -351,13 +351,17 @@ const validateLoginForm = () => {
 const submitLoginForm = async () => {
   if (!validateLoginForm()) return;
   try {
-    const response = await apiClient.post('/auth/login', {
+    const { data: signupResponse } = await apiClient.post('/auth/login', {
       email: loginForm.email,
       password: loginForm.password,
     }, { withCredentials: true })
 
-    const accessToken = response.data.result.accessToken;
+    const accessToken = signupResponse.result.accessToken;
     authStore.setAccessToken(accessToken);
+
+    const { data: userInfoResponse } = await apiClient.get('/me');
+    authStore.setUser(userInfoResponse.result);
+
     hide();
   } catch (error) {
     const status = error.response?.status;
