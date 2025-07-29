@@ -23,34 +23,64 @@
         </l-circle-marker>
         <l-control-zoom position="bottomright"></l-control-zoom>
       </l-map>
+    </div>  
+    <div v-if="!isLoggedIn" >
+      <button 
+        type="button" 
+        class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn"
+        @click="openAuthModal"
+      >
+        <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
+        LOGIN
+      </button>
     </div>
-    <button 
-    type="button" 
-    class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3" 
-    data-bs-toggle="modal"
-    data-bs-target="#reportFormModal">
-      <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
-      제보하기
-    </button>
+    <div v-else class="dropdown">
+      <button
+        class="btn btn-primary dropdown-toggle position-fixed top-0 end-0 mt-4 me-4 shadow-sm dropdown-btn"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />  
+        {{ nickname.value }}
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <a class="dropdown-item important" @click="openReportFormModal">
+            <font-awesome-icon :icon="['fas', 'pen']" class="icon text-danger" />
+            Report Scam
+          </a>
+        </li>
+        <li>
+          <button class="dropdown-item" @click="logout">
+            <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="icon"/>
+            Logout
+          </button>
+        </li>
+      </ul>   
+    </div>
     <ReportFormModal/>
-    
-    <button class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn">
-      <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
-      LOGIN
-    </button>
+    <AuthFormModal/>
   </div>
 </template>
 
 <script setup>
-import {ref, onMounted, watch} from 'vue'
-import "leaflet/dist/leaflet.css";
+import { useAuthStore } from '@/stores/auth';
+
+import { ref, onMounted, watch, computed } from 'vue';
 import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker } from "@vue-leaflet/vue-leaflet";
-import axios from 'axios'
+import { useBootstrapModal } from '@/composables/useBootstrapModal';
+import ReportFormModal from './ReportFormModal.vue';
+import AuthFormModal from './AuthFormModal.vue';
+import apiClient from '@/api/apiClient';
+import "leaflet/dist/leaflet.css";
 
+const { show: openAuthModal } = useBootstrapModal('#authFormModal');
+const { show: openReportFormModal } = useBootstrapModal('#reportFormModal');
 
-import ReportFormModal from './ReportFormModal.vue'
-
-const serverURL = import.meta.env.VITE_API_URL;
+const authStore = useAuthStore();
+const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
+const nickname = computed(() => authStore.nickname || 'user');
 
 const zoom = ref(3);
 const center = ref({ "lat": 42.8333, "lng": 12.8333 });
@@ -76,7 +106,7 @@ const getRadius = (scamCnt, zoom) => {
 
 const loadMapSummary = async () => {
   try {
-    const response = await axios.get(`${serverURL}/reports/map-summary`, {
+    const response = await apiClient.get('/reports/map-summary', {
       params: {
         zoom: zoom.value
       }
@@ -85,7 +115,7 @@ const loadMapSummary = async () => {
     markers.value = response.data.result.locationSummaryItems;
 
   } catch (e) {
-    console.error('지도 요약 정보 로딩 실패:', e);
+    console.error('Failed to load map summary information:', e);
   }
 };
 
@@ -115,4 +145,33 @@ onMounted(() => {
     border-radius: 10px;
     font-size: 19px;
   }
+
+  .dropdown-btn{
+    z-index: 1000; /* 다른 요소보다 위에 뜨도록 */
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 19px;
+  }
+
+  .dropdown-menu {
+  background-color: white;
+}
+  .dropdown-item {
+    padding: 10px 16px;
+    font-size: 16px;
+    color: black;
+    font-weight: 500;
+    border-bottom: 1px solid black;
+    transition: background-color 0.15s ease-in-out;
+  }
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f3f5;
+  color: #000;
+}
 </style>

@@ -1,12 +1,11 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
-import com.swkim.safetrip.dto.response.EmailValidationResponse;
-import com.swkim.safetrip.dto.response.NicknameDuplicateResponse;
+import com.swkim.safetrip.dto.response.ValidationResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserEmailException;
 import com.swkim.safetrip.global.exception.custom.DuplicateUserNicknameException;
-import com.swkim.safetrip.global.validation.EmailValidator;
+import com.swkim.safetrip.global.validation.SignUpValidator;
 import com.swkim.safetrip.mapper.UserMapper;
 import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailValidator emailValidator;
+    private final SignUpValidator signUpValidator;
 
     @Transactional
     public Long signup(UserSignUpRequest signUpRequest) {
@@ -44,10 +43,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public EmailValidationResponse validateEmail(String email) {
+    public ValidationResponse validateEmail(String email) {
 
-        if(!emailValidator.isValid(email)) {
-            return EmailValidationResponse.builder()
+        if(!signUpValidator.isValidEmail(email)) {
+            return ValidationResponse.builder()
                     .isValidFormat(false)
                     .isAvailable(false)
                     .reason("Invalid email format")
@@ -56,7 +55,7 @@ public class UserService {
 
         boolean isDuplicated = userRepository.existsByEmail(email);
 
-        return EmailValidationResponse.builder()
+        return ValidationResponse.builder()
                 .isValidFormat(true)
                 .isAvailable(!isDuplicated)
                 .reason(isDuplicated ? "Email already in use" : null)
@@ -64,12 +63,23 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public NicknameDuplicateResponse checkNicknameDuplicate(String nickname) {
+    public ValidationResponse validateNickname(String nickname) {
+
+        if(!signUpValidator.isValidNickname(nickname)) {
+            return ValidationResponse.builder()
+                    .isValidFormat(false)
+                    .isAvailable(false)
+                    .reason("Invalid nickname format")
+                    .build();
+        }
+
         boolean isDuplicated = userRepository.existsByNickname(nickname);
 
-        return NicknameDuplicateResponse.builder()
-                .isDuplicated(isDuplicated).
-                build();
+        return ValidationResponse.builder()
+                .isValidFormat(true)
+                .isAvailable(!isDuplicated)
+                .reason(isDuplicated ? "Nickname already in use" : null)
+                .build();
     }
 
     @Transactional(readOnly = true)

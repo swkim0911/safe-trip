@@ -71,8 +71,6 @@
               v-for="report in sidebarReports"
               :key="report.reportId"
               @click="openReportDetailModal(report.reportId)"
-              data-bs-toggle="modal"
-              data-bs-target="#reportDetailModal"
             >
                 <div class="ms-2 me-auto">{{ report.title }}</div>
                 <span class="badge text-bg-primary rounded-pill">{{ report.scam }}</span>
@@ -94,8 +92,11 @@
 
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
-import axios from 'axios'
+import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import ReportDetailModal from './ReportDetailModal.vue'
+import apiClient from '@/api/apiClient';
+
+const { show } = useBootstrapModal('#reportDetailModal');
 
 const isOpen = ref(false);
 const searchText = ref('');
@@ -144,11 +145,12 @@ const serverURL = import.meta.env.VITE_API_URL;
 
 const openReportDetailModal = (reportId) => {
   loadReportDetialInfo(reportId);
-};
+  show();
+}
 
 const loadReportDetialInfo = async (reportId) => {
   try {
-    const response = await axios.get(`${serverURL}/reports/${reportId}`);
+    const response = await apiClient.get(`/reports/${reportId}`);
 
     const result = response.data.result;
     selectedReport.title = result.title;
@@ -169,7 +171,7 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
 
   isLoadingCountry.value = true;
   try {
-    const response = await axios.get(`${serverURL}/reports/sidebar-summary/counties`, {
+    const response = await apiClient.get('/reports/sidebar-summary/counties', {
       params: {
         page: countryPage.value,
         size: size
@@ -198,7 +200,7 @@ const loadSidebarCitySummary = async (countryId, countryName, mode = 'click') =>
   selectedCountry.name = countryName;
 
   try {
-    const response = await axios.get(`${serverURL}/reports/sidebar-summary/cities`, {
+    const response = await apiClient.get('/reports/sidebar-summary/cities', {
       params: {
         countryId: countryId,
         page: cityPage.value,
@@ -229,7 +231,7 @@ const loadSidebarReportSummary = async (countryId, cityId, cityName, mode = 'cli
   selectedCity.name = cityName;
 
   try {
-    const response = await axios.get(`${serverURL}/reports/sidebar-summary/reports`, {
+    const response = await apiClient.get('/reports/sidebar-summary/reports', {
       params: {
         countryId: countryId,
         cityId: cityId,

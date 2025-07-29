@@ -1,10 +1,10 @@
 <template>
-  <div class="modal fade" id = "reportFormModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal fade" ref="modalRef" id = "reportFormModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
       <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">제보를 남겨주세요</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form @submit.prevent>
@@ -92,15 +92,24 @@
   </div>
 </template>
 <script setup>
+import { useAuthStore } from '@/stores/auth';
+
 import { ref, onMounted, reactive } from 'vue'
 import { Loader } from '@googlemaps/js-api-loader'
-import axios from 'axios'
+import { useBootstrapModal } from '@/composables/useBootstrapModal';
+import apiClient from '@/api/apiClient';
+
+const authStore = useAuthStore();
+const isLoggedIn = () => {
+  return !!authStore.accessToken;
+}
 
 const googleMapApiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
-const serverURL = import.meta.env.VITE_API_URL;
 
-// 반응형 변수
 const mapRef = ref(null);
+const modalRef = ref(null);
+
+const { hide } = useBootstrapModal(modalRef);
 
 const errorMessage = ref('');
 
@@ -260,6 +269,12 @@ const setupModalEventListener = () => {
 }
 
 const submitForm = async () => {
+  if (!isLoggedIn()) {
+    submitMessage.value = 'Please login.';
+    submitStatus.value = 'error';
+    return;
+  }
+
   if (!checkForm() || errorMessage.value) {
     submitMessage.value = '잘못된 입력입니다. 입력을 확인해주세요.';
     submitStatus.value = 'error';
@@ -273,7 +288,7 @@ const submitForm = async () => {
       formData.append('images', form.imageFile)
     }
 
-    const response = await axios.post(`${serverURL}/reports`, formData, {
+    const response = await apiClient.post('/reports', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

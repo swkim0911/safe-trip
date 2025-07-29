@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmailValidationResponse {
+public class ValidationResponse {
 
-    @Schema(description = "이메일 형식이 유효한지 여부", example = "true")
+    @Schema(description = "형식이 유효한지 여부", example = "true")
     private boolean isValidFormat;
 
-    @Schema(description = "이메일이 중복되지 않고 사용 가능한지 여부", example = "false")
+    @Schema(description = "중복되지 않고 사용 가능한지 여부", example = "false")
     private boolean isAvailable;
 
     @Schema(description = "검사 실패 사유", example = "Email is already in use or null")
