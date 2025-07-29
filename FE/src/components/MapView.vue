@@ -42,7 +42,7 @@
         aria-expanded="false"
       >
         <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />  
-        {{ nickname }}
+        {{ nickname.value }}
       </button>
       <ul class="dropdown-menu">
         <li>
