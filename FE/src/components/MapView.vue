@@ -35,6 +35,14 @@
       </button>
     </div>
     <div v-else class="dropdown">
+      <button 
+        type="button" 
+        class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3" 
+        >
+          <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
+          Report
+      </button>
+      <ReportFormModal/>
       <button
         class="btn btn-primary dropdown-toggle position-fixed top-0 end-0 mt-4 me-4 shadow-sm dropdown-btn"
         type="button"
@@ -46,12 +54,6 @@
       </button>
       <ul class="dropdown-menu">
         <li>
-          <a class="dropdown-item important" @click="openReportFormModal">
-            <font-awesome-icon :icon="['fas', 'pen']" class="icon text-danger" />
-            Report Scam
-          </a>
-        </li>
-        <li>
           <button class="dropdown-item" @click="logout">
             <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="icon"/>
             Logout
@@ -59,7 +61,6 @@
         </li>
       </ul>   
     </div>
-    <ReportFormModal/>
     <AuthFormModal/>
   </div>
 </template>
