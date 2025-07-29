@@ -9,6 +9,7 @@ import com.swkim.safetrip.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,10 +53,19 @@ public class AuthController {
 
     @Operation(summary = "로그아웃", description = "리프레시 토큰을 무효화하여 로그아웃을 처리합니다.")
     @PostMapping("/auth/logout")
-    public ApiResult<Void> logout(@CookieValue(value = "refreshToken") String refreshToken) {
+    public ApiResult<Void> logout(@CookieValue(value = "refreshToken") String refreshToken, HttpServletResponse response) {
         authService.logout(refreshToken);
+        response.addCookie(makeExpiredRefreshTokenCookie());
 
         return ApiResult.of(HttpStatus.OK.value(), "Logout complete", null);
+    }
+
+    private Cookie makeExpiredRefreshTokenCookie() {
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        return cookie;
     }
 
 }
