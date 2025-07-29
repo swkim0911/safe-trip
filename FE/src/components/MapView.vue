@@ -52,7 +52,7 @@
         aria-expanded="false"
       >
         <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />  
-        nickname
+        {{ nickname }}
       </button>
       <ul class="dropdown-menu">
         <li>
@@ -104,8 +104,6 @@ function openLogin() {
   showSignup.value = false
   showLogin.value = true
 }
-
-const serverURL = import.meta.env.VITE_API_URL;
 
 const zoom = ref(3);
 const center = ref({ "lat": 42.8333, "lng": 12.8333 });

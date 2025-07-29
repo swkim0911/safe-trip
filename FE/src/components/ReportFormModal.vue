@@ -92,13 +92,19 @@
   </div>
 </template>
 <script setup>
+import { useAuthStore } from '@/stores/auth';
+
 import { ref, onMounted, reactive } from 'vue'
 import { Loader } from '@googlemaps/js-api-loader'
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import apiClient from '@/api/apiClient';
 
+const authStore = useAuthStore();
+const isLoggedIn = () => {
+  return !!authStore.accessToken;
+}
+
 const googleMapApiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
-const serverURL = import.meta.env.VITE_API_URL;
 
 const mapRef = ref(null);
 const modalRef = ref(null);
@@ -263,6 +269,12 @@ const setupModalEventListener = () => {
 }
 
 const submitForm = async () => {
+  if (!isLoggedIn()) {
+    submitMessage.value = 'Please login.';
+    submitStatus.value = 'error';
+    return;
+  }
+
   if (!checkForm() || errorMessage.value) {
     submitMessage.value = '잘못된 입력입니다. 입력을 확인해주세요.';
     submitStatus.value = 'error';
