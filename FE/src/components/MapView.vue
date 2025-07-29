@@ -119,6 +119,18 @@ const loadMapSummary = async () => {
   }
 };
 
+const logout = async () => {
+  try {
+    await apiClient.post('/auth/logout', {}, { withCredentials: true }); // 쿠키로 refresh token 전달
+
+    authStore.clearAccessToken();
+    authStore.clearUser();
+
+  } catch (error) {
+    console.error('Logout failed', error);
+  }
+}
+
 const restoreSession = async () => {
   
   if (!authStore.accessToken) {
