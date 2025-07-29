@@ -3,7 +3,9 @@ package com.swkim.safetrip.controller;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.dto.response.EmailValidationResponse;
 import com.swkim.safetrip.dto.response.NicknameDuplicateResponse;
+import com.swkim.safetrip.dto.response.UserInfoResponse;
 import com.swkim.safetrip.global.response.ApiResult;
+import com.swkim.safetrip.security.CustomUserDetails;
 import com.swkim.safetrip.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,13 +38,23 @@ public class UserController {
     @Operation(summary = "이메일 사용 가능 여부 확인", description = "입력한 이메일이 형식에 맞고, 가입 가능한지 확인합니다.")
     @GetMapping("/users/validate-email")
     public ApiResult<EmailValidationResponse> validateEmail(@RequestParam String email) {
-        return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of email", userService.validateEmail(email));
+        return ApiResult.of(HttpStatus.OK.value(), "Complete email duplication check", userService.validateEmail(email));
     }
 
     @Operation(summary = "닉네임 중복 체크", description = "회원가입 전에, 닉네임 중복 체크를 진행합니다")
     @GetMapping("users/check-nickname")
     public ApiResult<NicknameDuplicateResponse> checkNicknameDuplicate(@RequestParam String nickname) {
-        return ApiResult.of(HttpStatus.OK.value(), "completed duplicate check of nickname", userService.checkNicknameDuplicate(nickname));
+        return ApiResult.of(HttpStatus.OK.value(), "Complete nickname duplication check", userService.checkNicknameDuplicate(nickname));
+    }
+
+    @Operation(summary = "사용자 정보 조회", description = "로그인 후, 사용자 정보를 조회합니다")
+    @GetMapping("/me")
+    public ApiResult<UserInfoResponse> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserInfoResponse userInfoResponse = UserInfoResponse.builder()
+                .nickname(userDetails.getNickname())
+                .build();
+
+        return ApiResult.of(HttpStatus.OK.value(), "User information has been successfully retrieved", userInfoResponse);
     }
 
 }
