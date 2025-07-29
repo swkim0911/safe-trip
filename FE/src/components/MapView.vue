@@ -23,17 +23,7 @@
         </l-circle-marker>
         <l-control-zoom position="bottomright"></l-control-zoom>
       </l-map>
-    </div>
-    <!-- <button
-    type="button" 
-    class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3"
-    @click="openReportFormModal"
-    >
-      <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
-      제보하기
-    </button> -->
-  
-
+    </div>  
     <div v-if="!isLoggedIn" >
       <button 
         type="button" 
@@ -92,19 +82,6 @@ const authStore = useAuthStore();
 const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
 const nickname = computed(() => authStore.nickname || 'user');
 
-const showLogin = ref(true)
-const showSignup = ref(false)
-
-function openSignup() {
-  showLogin.value = false
-  showSignup.value = true
-}
-
-function openLogin() {
-  showSignup.value = false
-  showLogin.value = true
-}
-
 const zoom = ref(3);
 const center = ref({ "lat": 42.8333, "lng": 12.8333 });
 
@@ -138,7 +115,7 @@ const loadMapSummary = async () => {
     markers.value = response.data.result.locationSummaryItems;
 
   } catch (e) {
-    console.error('지도 요약 정보 로딩 실패:', e);
+    console.error('Failed to load map summary information:', e);
   }
 };
 
