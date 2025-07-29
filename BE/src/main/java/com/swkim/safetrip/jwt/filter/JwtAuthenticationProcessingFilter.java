@@ -3,7 +3,7 @@ package com.swkim.safetrip.jwt.filter;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
-import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.jwt.JwtProvider;
 import com.swkim.safetrip.security.CustomUserDetails;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -31,7 +31,7 @@ import java.util.Set;
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
-    private final JwtUtils jwtUtils;
+    private final JwtProvider jwtProvider;
     private final UserService userService;
     private final AuthenticationEntryPoint entryPoint;
 
@@ -44,11 +44,11 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             return;
         }
         try {
-            String accessToken = jwtUtils.extractAccessToken(request)
+            String accessToken = jwtProvider.extractAccessToken(request)
                     .orElseThrow(AccessTokenMissingException::new);
 
-            DecodedJWT decodedAccessToken = jwtUtils.verifyAccessToken(accessToken);
-            String email = jwtUtils.extractEmail(decodedAccessToken).orElseThrow(() -> new BadCredentialsException("Email claim is missing"));
+            DecodedJWT decodedAccessToken = jwtProvider.verifyAccessToken(accessToken);
+            String email = jwtProvider.extractEmail(decodedAccessToken).orElseThrow(() -> new BadCredentialsException("Email claim is missing"));
 
             User findUser = userService.findUserByEmail(email).orElseThrow(() -> new UsernameNotFoundException("The email does not exist"));
             saveAuthentication(findUser);

@@ -7,7 +7,7 @@ import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
 import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;
-import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.jwt.JwtProvider;
 import com.swkim.safetrip.security.CustomUserDetails;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -42,7 +42,7 @@ class JwtAuthenticationProcessingFilterTest {
     JwtAuthenticationProcessingFilter filter;
 
     @Mock
-    JwtUtils jwtUtils;
+    JwtProvider jwtProvider;
 
     @Mock
     UserService userService;
@@ -74,7 +74,7 @@ class JwtAuthenticationProcessingFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         // then (jwtService가 호출되지 않았고, filterChain이 동작하는지 확인)
-        verify(jwtUtils, never()).extractAccessToken(any());
+        verify(jwtProvider, never()).extractAccessToken(any());
         verify(filterChain).doFilter(request, response);
     }
 
@@ -83,7 +83,7 @@ class JwtAuthenticationProcessingFilterTest {
         // given
         given(request.getRequestURI()).willReturn("/reports");
         given(request.getMethod()).willReturn("POST");
-        given(jwtUtils.extractAccessToken(request)).willReturn(Optional.empty());
+        given(jwtProvider.extractAccessToken(request)).willReturn(Optional.empty());
 
         // when
         filter.doFilterInternal(request, response, filterChain);
@@ -109,9 +109,9 @@ class JwtAuthenticationProcessingFilterTest {
         given(request.getRequestURI()).willReturn("/reports");
         given(request.getMethod()).willReturn("POST");
 
-        given(jwtUtils.extractAccessToken(request)).willReturn(Optional.of(accessToken));
-        given(jwtUtils.verifyAccessToken(eq(accessToken))).willReturn(decodedJWT);
-        given(jwtUtils.extractEmail(eq(decodedJWT))).willReturn(Optional.of(email));
+        given(jwtProvider.extractAccessToken(request)).willReturn(Optional.of(accessToken));
+        given(jwtProvider.verifyAccessToken(eq(accessToken))).willReturn(decodedJWT);
+        given(jwtProvider.extractEmail(eq(decodedJWT))).willReturn(Optional.of(email));
 
         User user = User.builder()
                 .email(email)
@@ -145,9 +145,9 @@ class JwtAuthenticationProcessingFilterTest {
         given(request.getRequestURI()).willReturn("/reports");
         given(request.getMethod()).willReturn("POST");
 
-        given(jwtUtils.extractAccessToken(request)).willReturn(Optional.of(accessTokenWithoutEmailClaim));
-        given(jwtUtils.verifyAccessToken(eq(accessTokenWithoutEmailClaim))).willReturn(decodedJWT);
-        given(jwtUtils.extractEmail(eq(decodedJWT))).willReturn(Optional.empty());
+        given(jwtProvider.extractAccessToken(request)).willReturn(Optional.of(accessTokenWithoutEmailClaim));
+        given(jwtProvider.verifyAccessToken(eq(accessTokenWithoutEmailClaim))).willReturn(decodedJWT);
+        given(jwtProvider.extractEmail(eq(decodedJWT))).willReturn(Optional.empty());
 
         // when
         filter.doFilterInternal(request, response, filterChain);
@@ -173,9 +173,9 @@ class JwtAuthenticationProcessingFilterTest {
         given(request.getRequestURI()).willReturn("/reports");
         given(request.getMethod()).willReturn("POST");
 
-        given(jwtUtils.extractAccessToken(request)).willReturn(Optional.of(accessToken));
-        given(jwtUtils.verifyAccessToken(eq(accessToken))).willReturn(decodedJWT);
-        given(jwtUtils.extractEmail(eq(decodedJWT))).willReturn(Optional.of(email));
+        given(jwtProvider.extractAccessToken(request)).willReturn(Optional.of(accessToken));
+        given(jwtProvider.verifyAccessToken(eq(accessToken))).willReturn(decodedJWT);
+        given(jwtProvider.extractEmail(eq(decodedJWT))).willReturn(Optional.of(email));
         given(userService.findUserByEmail(email)).willThrow(UsernameNotFoundException.class);
 
         doNothing().when(entryPoint).commence(any(), any(), any());

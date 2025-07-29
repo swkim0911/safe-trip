@@ -5,7 +5,7 @@ import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
-import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.jwt.JwtProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +34,7 @@ class AuthServiceTest {
     private AuthenticationManager authenticationManager;
 
     @Mock
-    private JwtUtils jwtUtils;
+    private JwtProvider jwtProvider;
 
     @Mock
     private UserService userService;
@@ -67,9 +67,9 @@ class AuthServiceTest {
                 .role(Role.USER)
                 .build();
 
-        given(jwtUtils.issueAccessToken(email, Role.USER)).willReturn(accessToken);
-        given(jwtUtils.issueRefreshToken(email)).willReturn(refreshToken);
-        given(jwtUtils.createRefreshTokenCookie(refreshToken)).willReturn(ResponseCookie.from("refreshToken", refreshToken).build());
+        given(jwtProvider.issueAccessToken(email, Role.USER)).willReturn(accessToken);
+        given(jwtProvider.issueRefreshToken(email)).willReturn(refreshToken);
+        given(jwtProvider.createRefreshTokenCookie(refreshToken)).willReturn(ResponseCookie.from("refreshToken", refreshToken).build());
         given(userService.findUserByEmail(email)).willReturn(Optional.of(mockUser));
 
         // when
@@ -97,8 +97,8 @@ class AuthServiceTest {
 
         // verify
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtUtils, never()).issueAccessToken(any(), any(Role.class));
-        verify(jwtUtils, never()).issueRefreshToken(any());
+        verify(jwtProvider, never()).issueAccessToken(any(), any(Role.class));
+        verify(jwtProvider, never()).issueRefreshToken(any());
     }
 
     @Test
@@ -116,8 +116,8 @@ class AuthServiceTest {
 
         // verify
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtUtils, never()).issueAccessToken(any(), any(Role.class));
-        verify(jwtUtils, never()).issueRefreshToken(any());
+        verify(jwtProvider, never()).issueAccessToken(any(), any(Role.class));
+        verify(jwtProvider, never()).issueRefreshToken(any());
     }
 
 }

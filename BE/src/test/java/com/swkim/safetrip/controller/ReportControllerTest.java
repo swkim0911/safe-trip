@@ -10,7 +10,7 @@ import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.InvalidAccessTokenException;
-import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.jwt.JwtProvider;
 import com.swkim.safetrip.service.ReportService;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,7 +58,7 @@ class ReportControllerTest {
     private UserService userService;
 
     @MockBean
-    private JwtUtils jwtUtils;
+    private JwtProvider jwtProvider;
 
     @Test
     @DisplayName("[Post] /reports 요청시 저장된 report의 id를 반환한다")
@@ -80,9 +80,9 @@ class ReportControllerTest {
                 .nickname("nickname")
                 .role(Role.USER).build();
 
-        given(jwtUtils.extractAccessToken(any())).willReturn(Optional.of(accessToken));
-        given(jwtUtils.verifyAccessToken(eq(accessToken))).willReturn(decodedJwt);
-        given(jwtUtils.extractEmail(eq(decodedJwt))).willReturn(Optional.of(email));
+        given(jwtProvider.extractAccessToken(any())).willReturn(Optional.of(accessToken));
+        given(jwtProvider.verifyAccessToken(eq(accessToken))).willReturn(decodedJwt);
+        given(jwtProvider.extractEmail(eq(decodedJwt))).willReturn(Optional.of(email));
         given(userService.findUserByEmail(email)).willReturn(Optional.of(mockUser));
 
         given(reportService.saveReport(any(String.class), any(ReportSaveRequest.class), anyList())).willReturn(1L);
@@ -150,10 +150,10 @@ class ReportControllerTest {
         MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
         String invalidAccessToken = "im.invalid.token";
 
-        given(jwtUtils.extractAccessToken(any(HttpServletRequest.class)))
+        given(jwtProvider.extractAccessToken(any(HttpServletRequest.class)))
                 .willReturn(Optional.of(invalidAccessToken));
 
-        doThrow(new InvalidAccessTokenException()).when(jwtUtils).verifyAccessToken(invalidAccessToken);
+        doThrow(new InvalidAccessTokenException()).when(jwtProvider).verifyAccessToken(invalidAccessToken);
 
         // when & then
         mockMvc.perform(multipart("/reports")
@@ -170,10 +170,10 @@ class ReportControllerTest {
         MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
         String expiredAccessToken = "im.expired.token";
 
-        given(jwtUtils.extractAccessToken(any(HttpServletRequest.class)))
+        given(jwtProvider.extractAccessToken(any(HttpServletRequest.class)))
                 .willReturn(Optional.of(expiredAccessToken));
 
-        doThrow(new AccessTokenExpiredException()).when(jwtUtils).verifyAccessToken(expiredAccessToken);
+        doThrow(new AccessTokenExpiredException()).when(jwtProvider).verifyAccessToken(expiredAccessToken);
 
         // when & then
         mockMvc.perform(multipart("/reports")

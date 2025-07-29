@@ -24,7 +24,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtUtils {
+public class JwtProvider {
 
     @Value("${jwt.secretKey}")
     private String secretKey;
