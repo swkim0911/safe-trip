@@ -82,7 +82,7 @@
                 <div v-if="submitMessage" :class="['me-3 fw-bold', submitStatus === 'success' ? 'text-success' : 'text-danger']">
                   {{ submitMessage }}
                 </div>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">close</button>
+                <button type="button" class="btn btn-secondary" @click="hide">close</button>
                 <button type="button" class="btn btn-primary" @click="submitForm">send</button>
               </div>
             </form>
