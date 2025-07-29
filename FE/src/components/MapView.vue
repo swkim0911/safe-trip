@@ -42,7 +42,7 @@
         aria-expanded="false"
       >
         <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />  
-        {{ nickname.value }}
+        {{ nickname }}
       </button>
       <ul class="dropdown-menu">
         <li>
@@ -80,7 +80,7 @@ const { show: openReportFormModal } = useBootstrapModal('#reportFormModal');
 
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
-const nickname = computed(() => authStore.nickname || 'user');
+const nickname = computed(() => authStore.user?.nickname || 'user');
 
 const zoom = ref(3);
 const center = ref({ "lat": 42.8333, "lng": 12.8333 });
@@ -119,15 +119,33 @@ const loadMapSummary = async () => {
   }
 };
 
+const restoreSession = async () => {
+  
+  if (!authStore.accessToken) {
+    try {
+      const { data } = await apiClient.post('/auth/refresh', {}, { withCredentials: true });
+      authStore.setAccessToken(data.result.accessToken);
+
+      // accessToken 얻었으니 사용자 정보 요청
+      const { data: meResponse } = await apiClient.get('/me');
+      authStore.setUser(meResponse.result);
+    } catch {
+      // refreshToken도 없거나 만료된 상태 → 로그인 필요할 때 유도
+      // 하지만 여기선 아무 것도 하지 않음
+    }
+  }
+}
+
 onMounted(() => {
-  loadMapSummary();
+  loadMapSummary(),
+  restoreSession()
 })
 </script>
 
 <style scoped lang="scss">
   .icon {
     font-size: 95%;
-    margin-right: 5px;
+    margin-right: 1px;
   }
 
   .login-btn {
