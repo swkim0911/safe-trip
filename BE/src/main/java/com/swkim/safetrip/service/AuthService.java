@@ -14,6 +14,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import static com.swkim.safetrip.global.utils.CookieUtils.createRefreshTokenCookie;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -37,7 +39,7 @@ public class AuthService {
 
         saveRefreshToken(email, refreshToken);
 
-        ResponseCookie refreshTokenCookie = jwtProvider.createRefreshTokenCookie(refreshToken);
+        ResponseCookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
         AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
                 .accessToken(accessToken)
                 .build();
@@ -66,7 +68,7 @@ public class AuthService {
 
         saveRefreshToken(findUser.getEmail(), reIssuedRefreshToken);
 
-        ResponseCookie refreshTokenCookie = jwtProvider.createRefreshTokenCookie(reIssuedRefreshToken);
+        ResponseCookie refreshTokenCookie = createRefreshTokenCookie(reIssuedRefreshToken);
         AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
                 .accessToken(reIssuedAccessToken)
                 .build();

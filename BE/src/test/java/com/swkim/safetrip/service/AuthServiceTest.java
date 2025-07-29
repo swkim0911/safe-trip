@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.Optional;
 
+import static com.swkim.safetrip.global.utils.CookieUtils.createRefreshTokenCookie;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -69,7 +70,7 @@ class AuthServiceTest {
 
         given(jwtProvider.issueAccessToken(email, Role.USER)).willReturn(accessToken);
         given(jwtProvider.issueRefreshToken(email)).willReturn(refreshToken);
-        given(jwtProvider.createRefreshTokenCookie(refreshToken)).willReturn(ResponseCookie.from("refreshToken", refreshToken).build());
+        given(createRefreshTokenCookie(refreshToken)).willReturn(ResponseCookie.from("refreshToken", refreshToken).build());
         given(userService.findUserByEmail(email)).willReturn(Optional.of(mockUser));
 
         // when

@@ -9,7 +9,6 @@ import com.swkim.safetrip.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +17,8 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.swkim.safetrip.global.utils.CookieUtils.makeExpiredRefreshTokenCookie;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,13 +60,4 @@ public class AuthController {
 
         return ApiResult.of(HttpStatus.OK.value(), "Logout complete", null);
     }
-
-    private Cookie makeExpiredRefreshTokenCookie() {
-        Cookie cookie = new Cookie("refreshToken", null);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(0);
-        return cookie;
-    }
-
 }
