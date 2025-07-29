@@ -24,15 +24,15 @@
         <l-control-zoom position="bottomright"></l-control-zoom>
       </l-map>
     </div>
-    <button
+    <!-- <button
     type="button" 
     class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3"
-    @click="openReportFormMoodal"
+    @click="openReportFormModal"
     >
       <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
       제보하기
-    </button>
-    <ReportFormModal/>
+    </button> -->
+  
 
     <div v-if="!isLoggedIn" >
       <button 
@@ -51,21 +51,25 @@
         data-bs-toggle="dropdown"
         aria-expanded="false"
       >
-        👤 nickname
+        <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />  
+        nickname
       </button>
       <ul class="dropdown-menu">
         <li>
-          <a class="dropdown-item" href="/#">
-            📋 Report 등록
+          <a class="dropdown-item important" @click="openReportFormModal">
+            <font-awesome-icon :icon="['fas', 'pen']" class="icon text-danger" />
+            Report Scam
           </a>
         </li>
         <li>
           <button class="dropdown-item" @click="logout">
-            🚪 로그아웃
+            <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="icon"/>
+            Logout
           </button>
         </li>
-      </ul>
+      </ul>   
     </div>
+    <ReportFormModal/>
     <AuthFormModal/>
   </div>
 </template>
@@ -82,7 +86,7 @@ import apiClient from '@/api/apiClient';
 import "leaflet/dist/leaflet.css";
 
 const { show: openAuthModal } = useBootstrapModal('#authFormModal');
-const { show: openReportFormMoodal } = useBootstrapModal('#reportFormModal');
+const { show: openReportFormModal } = useBootstrapModal('#reportFormModal');
 
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
@@ -174,4 +178,25 @@ onMounted(() => {
     border-radius: 10px;
     font-size: 19px;
   }
+
+  .dropdown-menu {
+  background-color: white;
+}
+  .dropdown-item {
+    padding: 10px 16px;
+    font-size: 16px;
+    color: black;
+    font-weight: 500;
+    border-bottom: 1px solid black;
+    transition: background-color 0.15s ease-in-out;
+  }
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f3f5;
+  color: #000;
+}
 </style>
