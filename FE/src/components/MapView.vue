@@ -38,6 +38,7 @@
       <button 
         type="button" 
         class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3" 
+        @click="openReportFormModal"
         >
           <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
           Report
