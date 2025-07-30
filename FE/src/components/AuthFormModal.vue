@@ -360,6 +360,7 @@ const submitSignupForm = async () => {
     signupSuccessMessage.value = 'Sign-up completed successfully. Please log in.';
   } catch (error) {
     console.error(error);
+
     if (error.response) {
       const status = error.response.status;
       if (status === 400) {
@@ -415,11 +416,18 @@ const submitLoginForm = async () => {
 
     hide();
   } catch (error) {
-    const status = error.response?.status;
-    if (status === 401 || status === 400) {
-      loginFormMessage.value = 'Login failed';
+    console.error(error);
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 400) {
+        loginFormMessage.value = 'Please check your input.';
+      } else if (status === 401) {
+        loginFormMessage.value = 'Invalid email or password.';
+      }
+    } else if (error.request) {
+      loginFormMessage.value = 'No response from server. Please check your network connection.';
     } else {
-      loginFormMessage.value = 'Server error. Please try again later.';
+      loginFormMessage.value = 'An unexpected error occurred.';
     }
   } finally {
     isLoginSubmitting.value = false;
