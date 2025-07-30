@@ -282,29 +282,46 @@ const submitForm = async () => {
   }
 
   try {
-    const formData = new FormData();
-    formData.append('request', extractJsonFromForm());
-    if (form.imageFile) {
-      formData.append('images', form.imageFile)
-    }
-
-    const response = await apiClient.post('/reports', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-    
+    await submitReportForm();
     submitMessage.value = 'Your report has been successfully submitted.';
     submitStatus.value = 'success';
     resetForm();
 
   } catch (error) {
+    console.error(error);
+
     if (error.response) {
     // 서버에서 응답을 받았지만 오류 상태 코드
       const status = error.response.status;
 
       if (status === 400) {
         submitMessage.value = 'Invalid input data.';
+      } else if (status == 401) {
+        const errorCode = error.response.data?.code;
+
+        if (errorCode === 40101) {
+          // Access Token 만료 → silent refresh 시도
+          const ok = await restoreSession();
+          if (ok) {
+            try {
+              await submitReportForm();
+              submitMessage.value = 'Your report has been successfully submitted.';
+              submitStatus.value = 'success';
+              resetForm();
+            } catch (retryError) {
+              submitMessage.value = 'Submission failed after session refresh. Please try again.';
+              submitStatus.value = 'error';
+            }
+            return;
+          }
+          // 리프레시 실패 → 아래의 invalid 토큰 처리로 이어짐
+        }
+
+        // === Invalid, tampered token ===
+        authStore.clearAccessToken();
+        authStore.clearUser();
+        hide(); // 글쓰기 모달 닫기
+        return;
       } else if (status === 404) {
         submitMessage.value = 'The requested API endpoint was not found.';
       } else if (status === 500) {
@@ -319,6 +336,38 @@ const submitForm = async () => {
       submitMessage.value = 'An unknown error occurred during the request.';
     }
     submitStatus.value = 'error';
+  }
+}
+
+const submitReportForm = async () => {
+  const formData = new FormData();
+  formData.append('request', extractJsonFromForm());
+  if (form.imageFile) {
+    formData.append('images', form.imageFile);
+  }
+
+  return apiClient.post('/reports', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};
+
+const restoreSession = async () => {
+  try {
+    const { data } = await apiClient.post('/auth/refresh', {}, { withCredentials: true });
+    authStore.setAccessToken(data.result.accessToken);
+
+    // accessToken 얻었으니 사용자 정보 요청
+    const { data: meResponse } = await apiClient.get('/me');
+    authStore.setUser(meResponse.result);
+
+    return true;
+    
+  } catch (e) {
+    // refreshToken 없거나 만료된 상태
+    console.warn('Silent refresh failed:', e);
+    return false;
   }
 }
 
