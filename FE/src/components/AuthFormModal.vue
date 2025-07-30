@@ -158,7 +158,6 @@ const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
 
 const mode = ref('login')
-const serverURL = import.meta.env.VITE_API_URL;
 const signupSuccessMessage = ref('');
 const signupFailureMessage = ref('');
 const loginFormMessage = ref('');
@@ -368,7 +367,7 @@ const submitLoginForm = async () => {
     if (status === 401 || status === 400) {
       loginFormMessage.value = 'Login failed';
     } else {
-      signupFailureMessage.value = 'Server error. Please try again later.';
+      loginFormMessage.value = 'Server error. Please try again later.';
     }
   }
 }

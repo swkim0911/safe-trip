@@ -143,8 +143,7 @@ const restoreSession = async () => {
       const { data: meResponse } = await apiClient.get('/me');
       authStore.setUser(meResponse.result);
     } catch {
-      // refreshToken도 없거나 만료된 상태 → 로그인 필요할 때 유도
-      // 하지만 여기선 아무 것도 하지 않음
+      // refreshToken 없거나 만료된 상태 -> 아무것도 하지 않음.
     }
   }
 }
