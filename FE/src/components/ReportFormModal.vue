@@ -83,7 +83,7 @@
                   {{ submitMessage }}
                 </div>
                 <button type="button" class="btn btn-secondary" @click="hide">close</button>
-                <button type="button" class="btn btn-primary" @click="submitForm">send</button>
+                <button :disabled="isSubmitting" type="button" class="btn btn-primary" @click="submitForm">send</button>
               </div>
             </form>
           </div>          

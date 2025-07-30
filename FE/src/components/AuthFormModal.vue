@@ -41,7 +41,7 @@
                 </div>
               </form>
               <div class="text-center">
-                <button type="button" class="btn btn-link" @click="mode = 'signup'">Sign Up</button>
+                <button type="button" :disabled="isLoginSubmitting" class="btn btn-link" @click="mode = 'signup'">Sign Up</button>
               </div>
             </div>
             
@@ -131,7 +131,7 @@
                   </div>
                 
                 </div>
-                <button :disabled="!isSignupFormValid()" type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
+                <button :disabled="!isSignupFormValid() || isSignupSubmitting" type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
               </form>
               <p class="text-center text-success fw-bold" v-if="signupSuccessMessage">{{ signupSuccessMessage }}</p>
               <p class="text-center text-danger fw-bold" v-if="signupFailureMessage">{{ signupFailureMessage }}</p>
@@ -312,8 +312,11 @@ const validateNickname = async () => {
   }
 }
 
+const isSignupSubmitting = ref(false);
+
 const submitSignupForm = async () => {
-  if (!isSignupFormValid()) return;
+  if (!isSignupFormValid() || isSignupSubmitting.value) return;
+  isSignupSubmitting.value = true;
   try {
     const response = await apiClient.post('/users', {
       email: signupForm.email,
@@ -328,6 +331,8 @@ const submitSignupForm = async () => {
     } else {
       signupFailureMessage.value = 'Server error. Please try again later.';
     }
+  } finally {
+    isSignupSubmitting.value = false;
   }
   resetSignupForm();
 }
@@ -345,10 +350,12 @@ const validateLoginForm = () => {
   return true;
 }
 
-
+const isLoginSubmitting = ref(false);
 
 const submitLoginForm = async () => {
-  if (!validateLoginForm()) return;
+  if (!validateLoginForm() || isLoginSubmitting.value) return;
+  isLoginSubmitting.value = true;
+
   try {
     const { data: signupResponse } = await apiClient.post('/auth/login', {
       email: loginForm.email,
@@ -369,6 +376,8 @@ const submitLoginForm = async () => {
     } else {
       loginFormMessage.value = 'Server error. Please try again later.';
     }
+  } finally {
+    isLoginSubmitting.value = false;
   }
 }
 
