@@ -325,7 +325,7 @@ const validateNickname = async () => {
 
   } catch (error) {
     console.error(error);
-    
+
     isNicknameAvailable.value = null; 
     if (error.response) {
       const status = error.response.status;
@@ -359,11 +359,22 @@ const submitSignupForm = async () => {
     })
     signupSuccessMessage.value = 'Sign-up completed successfully. Please log in.';
   } catch (error) {
-    const status = error.response?.status;
-    if (status === 400) {
-      signupFailureMessage.value = 'Sign-up failed due to an already existing email or nickname.';
+    console.error(error);
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 400) {
+        signupFailureMessage.value = 'Sign-up failed due to an already existing email or nickname.';
+      } else if (status === 404){
+        signupFailureMessage.value = 'Validation endpoint not found.';
+      } else if (status === 500) {
+        signupFailureMessage.value = 'Server error. Please try again later.';
+      } else {
+        signupFailureMessage.value = `Unexpected error (code ${status}).`;
+      }
+    } else if (error.request) {
+      signupFailureMessage.value = 'No response from server. Please check your network connection.';
     } else {
-      signupFailureMessage.value = 'Server error. Please try again later.';
+      signupFailureMessage.value = 'An unexpected error occurred.';
     }
   } finally {
     isSignupSubmitting.value = false;
