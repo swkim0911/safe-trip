@@ -276,7 +276,7 @@ const submitForm = async () => {
   }
 
   if (!checkForm() || errorMessage.value) {
-    submitMessage.value = '잘못된 입력입니다. 입력을 확인해주세요.';
+    submitMessage.value = 'Invalid input. Please check your entries.';
     submitStatus.value = 'error';
     return;
   }
@@ -294,29 +294,29 @@ const submitForm = async () => {
       }
     })
     
-    submitMessage.value = '글이 등록되었습니다.';
+    submitMessage.value = 'Your report has been successfully submitted.';
     submitStatus.value = 'success';
     resetForm();
 
   } catch (error) {
     if (error.response) {
     // 서버에서 응답을 받았지만 오류 상태 코드
-    const status = error.response.status;
+      const status = error.response.status;
 
-    if (status === 400) {
-      submitMessage.value = '입력값이 잘못되었습니다.';
-    } else if (status === 404) {
-      submitMessage.value = '요청한 API를 찾을 수 없습니다.';
-    } else if (status === 500) {
-      submitMessage.value = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-    } else {
-      submitMessage.value = `알 수 없는 오류 (코드 ${status})`;
-    }
+      if (status === 400) {
+        submitMessage.value = 'Invalid input data.';
+      } else if (status === 404) {
+        submitMessage.value = 'The requested API endpoint was not found.';
+      } else if (status === 500) {
+        submitMessage.value = 'A server error occurred. Please try again later.';
+      } else {
+        submitMessage.value = `An unknown error occurred (code ${status}).`;
+      }
 
     } else if (error.request) { // 요청이 전송되었지만 응답이 없음
-      submitMessage.value = '서버로부터 응답이 없습니다. 네트워크를 확인해주세요.';
+      submitMessage.value = 'No response from the server. Please check your network connection.';
     } else { // 기타 에러
-      submitMessage.value = '요청 중 알 수 없는 오류가 발생했습니다.';
+      submitMessage.value = 'An unknown error occurred during the request.';
     }
     submitStatus.value = 'error';
   }
