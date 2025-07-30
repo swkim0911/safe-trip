@@ -8,7 +8,7 @@ import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenMissingException;
-import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.jwt.JwtProvider;
 import com.swkim.safetrip.service.AuthService;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -48,7 +48,7 @@ class AuthControllerTest {
     private UserService userService;
 
     @MockBean
-    private JwtUtils jwtUtils;
+    private JwtProvider jwtProvider;
 
     @Test
     void 로그인_요청_성공시_리프레시_토큰은_쿠키로_반환하고_액세스_토큰은_바디로_반환한다() throws Exception {
@@ -168,7 +168,7 @@ class AuthControllerTest {
         // given
         String refreshToken = "im.refresh.token";
 
-        given(jwtUtils.verifyRefreshToken(refreshToken)).willReturn(any(String.class));
+        given(jwtProvider.verifyRefreshToken(refreshToken)).willReturn(any(String.class));
         given(authService.reIssueAccessToken(refreshToken))
                 .willThrow(new InvalidRefreshTokenException());
 

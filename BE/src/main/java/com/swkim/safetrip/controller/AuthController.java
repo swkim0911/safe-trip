@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.swkim.safetrip.global.utils.CookieUtils.makeExpiredRefreshTokenCookie;
+
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
@@ -52,10 +54,10 @@ public class AuthController {
 
     @Operation(summary = "로그아웃", description = "리프레시 토큰을 무효화하여 로그아웃을 처리합니다.")
     @PostMapping("/auth/logout")
-    public ApiResult<Void> logout(@CookieValue(value = "refreshToken") String refreshToken) {
+    public ApiResult<Void> logout(@CookieValue(value = "refreshToken") String refreshToken, HttpServletResponse response) {
         authService.logout(refreshToken);
+        response.addCookie(makeExpiredRefreshTokenCookie());
 
         return ApiResult.of(HttpStatus.OK.value(), "Logout complete", null);
     }
-
 }

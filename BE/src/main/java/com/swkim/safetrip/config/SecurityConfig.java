@@ -2,7 +2,7 @@ package com.swkim.safetrip.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;
-import com.swkim.safetrip.jwt.JwtUtils;
+import com.swkim.safetrip.jwt.JwtProvider;
 import com.swkim.safetrip.jwt.filter.JwtAuthenticationProcessingFilter;
 import com.swkim.safetrip.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final UserService userService;
-    private final JwtUtils jwtUtils;
+    private final JwtProvider jwtProvider;
     private final ObjectMapper objectMapper;
 
     @Bean
@@ -56,7 +56,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
-        return new JwtAuthenticationProcessingFilter(jwtUtils, userService, customAuthenticationEntryPoint());
+        return new JwtAuthenticationProcessingFilter(jwtProvider, userService, customAuthenticationEntryPoint());
     }
 
     @Bean

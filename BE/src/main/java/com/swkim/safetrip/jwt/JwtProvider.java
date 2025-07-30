@@ -13,10 +13,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
@@ -24,7 +22,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtUtils {
+public class JwtProvider {
 
     @Value("${jwt.secretKey}")
     private String secretKey;
@@ -104,17 +102,6 @@ public class JwtUtils {
 
     public Optional<String> extractEmail(DecodedJWT decodedJWT) {
         return Optional.ofNullable(decodedJWT.getSubject());
-    }
-
-    public ResponseCookie createRefreshTokenCookie(String refreshToken){
-        return ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)             // JS에서 접근 불가
-                .secure(true)               // HTTPS 환경에서만 전송 (개발 중엔 false로 설정 가능)
-                .path("/")                  // 모든 경로에 대해 전송됨
-                .maxAge(Duration.ofDays(14))// 유효 기간
-                .sameSite("Strict")        // CSRF 보호 (필요 시 "Lax"도 가능)
-                .build();
-
     }
 
     // verify: 서명, 토큰 구조, 만료 시간 검증후 이메일 추출

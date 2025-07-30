@@ -41,7 +41,7 @@
                 </div>
               </form>
               <div class="text-center">
-                <button type="button" class="btn btn-link" @click="mode = 'signup'">Sign Up</button>
+                <button type="button" :disabled="isLoginSubmitting" class="btn btn-link" @click="mode = 'signup'">Sign Up</button>
               </div>
             </div>
             
@@ -131,7 +131,7 @@
                   </div>
                 
                 </div>
-                <button :disabled="!isSignupFormValid()" type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
+                <button :disabled="!isSignupFormValid() || isSignupSubmitting" type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
               </form>
               <p class="text-center text-success fw-bold" v-if="signupSuccessMessage">{{ signupSuccessMessage }}</p>
               <p class="text-center text-danger fw-bold" v-if="signupFailureMessage">{{ signupFailureMessage }}</p>
@@ -158,7 +158,6 @@ const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
 
 const mode = ref('login')
-const serverURL = import.meta.env.VITE_API_URL;
 const signupSuccessMessage = ref('');
 const signupFailureMessage = ref('');
 const loginFormMessage = ref('');
@@ -293,8 +292,25 @@ const validateEmail = async () => {
     isEmailAvailable.value = result.available;
 
   } catch (error) {
+    console.error(error);
     isEmailAvailable.value = null; 
-    emailValidationErrorMessage.value = 'There was a problem checking your email. Please try again.'
+
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 404) {
+        emailValidationErrorMessage.value = 'Validation endpoint not found.';
+      } else if (status === 500) {
+        emailValidationErrorMessage.value = 'Server error. Please try again later.';
+      } else {
+        emailValidationErrorMessage.value = `Unexpected error (code ${status}).`;
+      }
+
+    } else if (error.request) {
+      emailValidationErrorMessage.value = 'No response from server. Please check your network connection.';
+    } else {
+      emailValidationErrorMessage.value = 'An unexpected error occurred.';
+    }
   }
 };
 
@@ -308,13 +324,33 @@ const validateNickname = async () => {
     isNicknameAvailable.value = result.available;
 
   } catch (error) {
+    console.error(error);
+
     isNicknameAvailable.value = null; 
-    nicknameValidationErrorMessage.value = 'There was a problem checking your nickname. Please try again.'
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 404) {
+        nicknameValidationErrorMessage.value = 'Validation endpoint not found.';
+      } else if (status === 500) {
+        nicknameValidationErrorMessage.value = 'Server error. Please try again later.';
+      } else {
+        nicknameValidationErrorMessage.value = `Unexpected error (code ${status}).`;
+      }
+
+    } else if (error.request) {
+      nicknameValidationErrorMessage.value = 'No response from server. Please check your network connection.';
+    } else {
+      nicknameValidationErrorMessage.value = 'An unexpected error occurred.';
+    }
   }
 }
 
+const isSignupSubmitting = ref(false);
+
 const submitSignupForm = async () => {
-  if (!isSignupFormValid()) return;
+  if (!isSignupFormValid() || isSignupSubmitting.value) return;
+  isSignupSubmitting.value = true;
   try {
     const response = await apiClient.post('/users', {
       email: signupForm.email,
@@ -323,12 +359,26 @@ const submitSignupForm = async () => {
     })
     signupSuccessMessage.value = 'Sign-up completed successfully. Please log in.';
   } catch (error) {
-    const status = error.response?.status;
-    if (status === 400) {
-      signupFailureMessage.value = 'Sign-up failed due to an already existing email or nickname.';
+    console.error(error);
+
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 400) {
+        signupFailureMessage.value = 'Sign-up failed due to an already existing email or nickname.';
+      } else if (status === 404){
+        signupFailureMessage.value = 'Validation endpoint not found.';
+      } else if (status === 500) {
+        signupFailureMessage.value = 'Server error. Please try again later.';
+      } else {
+        signupFailureMessage.value = `Unexpected error (code ${status}).`;
+      }
+    } else if (error.request) {
+      signupFailureMessage.value = 'No response from server. Please check your network connection.';
     } else {
-      signupFailureMessage.value = 'Server error. Please try again later.';
+      signupFailureMessage.value = 'An unexpected error occurred.';
     }
+  } finally {
+    isSignupSubmitting.value = false;
   }
   resetSignupForm();
 }
@@ -346,10 +396,12 @@ const validateLoginForm = () => {
   return true;
 }
 
-
+const isLoginSubmitting = ref(false);
 
 const submitLoginForm = async () => {
-  if (!validateLoginForm()) return;
+  if (!validateLoginForm() || isLoginSubmitting.value) return;
+  isLoginSubmitting.value = true;
+
   try {
     const { data: signupResponse } = await apiClient.post('/auth/login', {
       email: loginForm.email,
@@ -364,12 +416,21 @@ const submitLoginForm = async () => {
 
     hide();
   } catch (error) {
-    const status = error.response?.status;
-    if (status === 401 || status === 400) {
-      loginFormMessage.value = 'Login failed';
+    console.error(error);
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 400) {
+        loginFormMessage.value = 'Please check your input.';
+      } else if (status === 401) {
+        loginFormMessage.value = 'Invalid email or password.';
+      }
+    } else if (error.request) {
+      loginFormMessage.value = 'No response from server. Please check your network connection.';
     } else {
-      signupFailureMessage.value = 'Server error. Please try again later.';
+      loginFormMessage.value = 'An unexpected error occurred.';
     }
+  } finally {
+    isLoginSubmitting.value = false;
   }
 }
 

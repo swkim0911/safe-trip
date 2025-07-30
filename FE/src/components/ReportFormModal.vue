@@ -82,8 +82,8 @@
                 <div v-if="submitMessage" :class="['me-3 fw-bold', submitStatus === 'success' ? 'text-success' : 'text-danger']">
                   {{ submitMessage }}
                 </div>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">close</button>
-                <button type="button" class="btn btn-primary" @click="submitForm">send</button>
+                <button type="button" class="btn btn-secondary" @click="hide">close</button>
+                <button :disabled="isSubmitting" type="button" class="btn btn-primary" @click="submitForm">send</button>
               </div>
             </form>
           </div>          
@@ -268,7 +268,10 @@ const setupModalEventListener = () => {
   }
 }
 
+const isSubmitting = ref(false); // 코드 내에서 중복 호출 방지
+
 const submitForm = async () => {
+  if (isSubmitting.value) return;
   if (!isLoggedIn()) {
     submitMessage.value = 'Please login.';
     submitStatus.value = 'error';
@@ -276,49 +279,103 @@ const submitForm = async () => {
   }
 
   if (!checkForm() || errorMessage.value) {
-    submitMessage.value = '잘못된 입력입니다. 입력을 확인해주세요.';
+    submitMessage.value = 'Invalid input. Please check your entries.';
     submitStatus.value = 'error';
     return;
   }
+  isSubmitting.value = true;
 
   try {
-    const formData = new FormData();
-    formData.append('request', extractJsonFromForm());
-    if (form.imageFile) {
-      formData.append('images', form.imageFile)
-    }
-
-    const response = await apiClient.post('/reports', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-    
-    submitMessage.value = '글이 등록되었습니다.';
+    await submitReportForm();
+    submitMessage.value = 'Your report has been successfully submitted.';
     submitStatus.value = 'success';
     resetForm();
 
   } catch (error) {
+    console.error(error);
+
     if (error.response) {
     // 서버에서 응답을 받았지만 오류 상태 코드
-    const status = error.response.status;
+      const status = error.response.status;
 
-    if (status === 400) {
-      submitMessage.value = '입력값이 잘못되었습니다.';
-    } else if (status === 404) {
-      submitMessage.value = '요청한 API를 찾을 수 없습니다.';
-    } else if (status === 500) {
-      submitMessage.value = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-    } else {
-      submitMessage.value = `알 수 없는 오류 (코드 ${status})`;
-    }
+      if (status === 400) {
+        submitMessage.value = 'Invalid input data.';
+      } else if (status == 401) {
+        const errorCode = error.response.data?.code;
+
+        if (errorCode === 40101) {
+          // Access Token 만료 → silent refresh 시도
+          const ok = await restoreSession();
+          if (ok) {
+            try {
+              await submitReportForm();
+              submitMessage.value = 'Your report has been successfully submitted.';
+              submitStatus.value = 'success';
+              resetForm();
+            } catch (retryError) {
+              submitMessage.value = 'Submission failed after session refresh. Please try again.';
+              submitStatus.value = 'error';
+            } finally {
+              isSubmitting.value = false;
+            }
+            return;
+          }
+          // 리프레시 실패 → 아래의 invalid 토큰 처리로 이어짐
+        }
+
+        // === Invalid, tampered token ===
+        authStore.clearAccessToken();
+        authStore.clearUser();
+        hide(); // 글쓰기 모달 닫기
+        return;
+      } else if (status === 404) {
+        submitMessage.value = 'The requested API endpoint was not found.';
+      } else if (status === 500) {
+        submitMessage.value = 'A server error occurred. Please try again later.';
+      } else {
+        submitMessage.value = `An unknown error occurred (code ${status}).`;
+      }
 
     } else if (error.request) { // 요청이 전송되었지만 응답이 없음
-      submitMessage.value = '서버로부터 응답이 없습니다. 네트워크를 확인해주세요.';
+      submitMessage.value = 'No response from the server. Please check your network connection.';
     } else { // 기타 에러
-      submitMessage.value = '요청 중 알 수 없는 오류가 발생했습니다.';
+      submitMessage.value = 'An unknown error occurred during the request.';
     }
     submitStatus.value = 'error';
+  } finally {
+    isSubmitting.value = false;
+  } 
+}
+
+const submitReportForm = async () => {
+  const formData = new FormData();
+  formData.append('request', extractJsonFromForm());
+  if (form.imageFile) {
+    formData.append('images', form.imageFile);
+  }
+
+  return apiClient.post('/reports', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};
+
+const restoreSession = async () => {
+  try {
+    const { data } = await apiClient.post('/auth/refresh', {}, { withCredentials: true });
+    authStore.setAccessToken(data.result.accessToken);
+
+    // accessToken 얻었으니 사용자 정보 요청
+    const { data: meResponse } = await apiClient.get('/me');
+    authStore.setUser(meResponse.result);
+
+    return true;
+    
+  } catch (e) {
+    // refreshToken 없거나 만료된 상태
+    console.warn('Silent refresh failed:', e);
+    return false;
   }
 }
 

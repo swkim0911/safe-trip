@@ -35,6 +35,15 @@
       </button>
     </div>
     <div v-else class="dropdown">
+      <button 
+        type="button" 
+        class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3" 
+        @click="openReportFormModal"
+        >
+          <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
+          Report
+      </button>
+      <ReportFormModal/>
       <button
         class="btn btn-primary dropdown-toggle position-fixed top-0 end-0 mt-4 me-4 shadow-sm dropdown-btn"
         type="button"
@@ -42,15 +51,9 @@
         aria-expanded="false"
       >
         <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />  
-        {{ nickname.value }}
+        {{ nickname }}
       </button>
       <ul class="dropdown-menu">
-        <li>
-          <a class="dropdown-item important" @click="openReportFormModal">
-            <font-awesome-icon :icon="['fas', 'pen']" class="icon text-danger" />
-            Report Scam
-          </a>
-        </li>
         <li>
           <button class="dropdown-item" @click="logout">
             <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="icon"/>
@@ -59,7 +62,6 @@
         </li>
       </ul>   
     </div>
-    <ReportFormModal/>
     <AuthFormModal/>
   </div>
 </template>
@@ -80,7 +82,7 @@ const { show: openReportFormModal } = useBootstrapModal('#reportFormModal');
 
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
-const nickname = computed(() => authStore.nickname || 'user');
+const nickname = computed(() => authStore.user?.nickname || 'user');
 
 const zoom = ref(3);
 const center = ref({ "lat": 42.8333, "lng": 12.8333 });
@@ -119,15 +121,44 @@ const loadMapSummary = async () => {
   }
 };
 
+const logout = async () => {
+  try {
+    await apiClient.post('/auth/logout', {}, { withCredentials: true }); // 쿠키로 refresh token 전달
+
+    authStore.clearAccessToken();
+    authStore.clearUser();
+
+  } catch (error) {
+    console.error('Logout failed', error);
+  }
+}
+
+const restoreSession = async () => {
+  
+  if (!authStore.accessToken) {
+    try {
+      const { data } = await apiClient.post('/auth/refresh', {}, { withCredentials: true });
+      authStore.setAccessToken(data.result.accessToken);
+
+      // accessToken 얻었으니 사용자 정보 요청
+      const { data: meResponse } = await apiClient.get('/me');
+      authStore.setUser(meResponse.result);
+    } catch {
+      // refreshToken 없거나 만료된 상태 -> 아무것도 하지 않음.
+    }
+  }
+}
+
 onMounted(() => {
-  loadMapSummary();
+  loadMapSummary(),
+  restoreSession()
 })
 </script>
 
 <style scoped lang="scss">
   .icon {
     font-size: 95%;
-    margin-right: 5px;
+    margin-right: 1px;
   }
 
   .login-btn {
