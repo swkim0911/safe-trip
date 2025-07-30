@@ -268,7 +268,10 @@ const setupModalEventListener = () => {
   }
 }
 
+const isSubmitting = ref(false); // 코드 내에서 중복 호출 방지
+
 const submitForm = async () => {
+  if (isSubmitting.value) return;
   if (!isLoggedIn()) {
     submitMessage.value = 'Please login.';
     submitStatus.value = 'error';
@@ -280,6 +283,7 @@ const submitForm = async () => {
     submitStatus.value = 'error';
     return;
   }
+  isSubmitting.value = true;
 
   try {
     await submitReportForm();
@@ -311,6 +315,8 @@ const submitForm = async () => {
             } catch (retryError) {
               submitMessage.value = 'Submission failed after session refresh. Please try again.';
               submitStatus.value = 'error';
+            } finally {
+              isSubmitting.value = false;
             }
             return;
           }
@@ -336,7 +342,9 @@ const submitForm = async () => {
       submitMessage.value = 'An unknown error occurred during the request.';
     }
     submitStatus.value = 'error';
-  }
+  } finally {
+    isSubmitting.value = false;
+  } 
 }
 
 const submitReportForm = async () => {
