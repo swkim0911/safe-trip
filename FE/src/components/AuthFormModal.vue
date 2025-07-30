@@ -324,8 +324,25 @@ const validateNickname = async () => {
     isNicknameAvailable.value = result.available;
 
   } catch (error) {
+    console.error(error);
+    
     isNicknameAvailable.value = null; 
-    nicknameValidationErrorMessage.value = 'There was a problem checking your nickname. Please try again.'
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 404) {
+        nicknameValidationErrorMessage.value = 'Validation endpoint not found.';
+      } else if (status === 500) {
+        nicknameValidationErrorMessage.value = 'Server error. Please try again later.';
+      } else {
+        nicknameValidationErrorMessage.value = `Unexpected error (code ${status}).`;
+      }
+
+    } else if (error.request) {
+      nicknameValidationErrorMessage.value = 'No response from server. Please check your network connection.';
+    } else {
+      nicknameValidationErrorMessage.value = 'An unexpected error occurred.';
+    }
   }
 }
 
