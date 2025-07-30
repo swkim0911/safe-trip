@@ -292,8 +292,25 @@ const validateEmail = async () => {
     isEmailAvailable.value = result.available;
 
   } catch (error) {
+    console.error(error);
     isEmailAvailable.value = null; 
-    emailValidationErrorMessage.value = 'There was a problem checking your email. Please try again.'
+
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 404) {
+        emailValidationErrorMessage.value = 'Validation endpoint not found.';
+      } else if (status === 500) {
+        emailValidationErrorMessage.value = 'Server error. Please try again later.';
+      } else {
+        emailValidationErrorMessage.value = `Unexpected error (code ${status}).`;
+      }
+
+    } else if (error.request) {
+      emailValidationErrorMessage.value = 'No response from server. Please check your network connection.';
+    } else {
+      emailValidationErrorMessage.value = 'An unexpected error occurred.';
+    }
   }
 };
 
