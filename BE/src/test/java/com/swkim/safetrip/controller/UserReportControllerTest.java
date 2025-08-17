@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ReportController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 @Import(SecurityConfig.class)
-class ReportControllerTest {
+class UserReportControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;

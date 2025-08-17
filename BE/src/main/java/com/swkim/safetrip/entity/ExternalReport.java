@@ -2,6 +2,8 @@ package com.swkim.safetrip.entity;
 
 import com.swkim.safetrip.entity.enums.SourceType;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +12,7 @@ import java.time.LocalDateTime;
         name = "external_report",
         uniqueConstraints = @UniqueConstraint(columnNames = {"externalId", "source"})
 )
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ExternalReport extends BaseReport {
 
     @Id

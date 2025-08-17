@@ -20,8 +20,8 @@ public abstract class BaseReport extends BaseEntity {
     private City city;
 
     @Column(name = "title", nullable = false)
-    private String title;
+    protected String title;
 
     @Column(name = "description", nullable = false, length = 1000)
-    private String description;
+    protected String description;
 }

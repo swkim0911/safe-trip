@@ -7,7 +7,7 @@ import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.swkim.safetrip.dto.response.LocationSummaryItem;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
-import com.swkim.safetrip.entity.Report;
+import com.swkim.safetrip.entity.UserReport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -110,7 +110,7 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
         for (Sort.Order sortOrder : pageable.getSort()) {
             Order direction = sortOrder.isAscending() ? Order.ASC : Order.DESC;
             String property = sortOrder.getProperty();
-            PathBuilder<?> orderByExpression = new PathBuilder<>(Report.class, "report");
+            PathBuilder<?> orderByExpression = new PathBuilder<>(UserReport.class, "report");
             list.add(new OrderSpecifier(direction, orderByExpression.get(property)));
         }
         return list;

@@ -52,20 +52,20 @@ public class ReportService {
     public Long saveReport(String email, ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
 
         // 1. reportRequest -> Report Mapping
-        Report report = ReportMapper.toReport(reportSaveRequest);
+        UserReport userReport = ReportMapper.toReport(reportSaveRequest);
 
         // 2. User 객체 report에 추가
         User findUser = userService.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
-        report.setUser(findUser);
+        userReport.setUser(findUser);
 
         // 3. scam 객체 report에 추가
         Scam findScam = scamService.findScamById(reportSaveRequest.getScamId());
-        report.setScam(findScam);
+        userReport.setScam(findScam);
 
         // CONSIDER: 이미지 업로드 방식 개선 (pre-signed URL 도입 검토)
         // 4. 이미지 S3에 전송하고 report에 추가
         List<Image> savedImageList = saveImagesInS3Bucket(files);
-        savedImageList.forEach(report::addImage);
+        savedImageList.forEach(userReport::addImage);
 
         // 5. Country, City 정보 Get
         CreateLocationCommand createLocationCommand = toCreateLocationCommand(reportSaveRequest);
@@ -74,7 +74,7 @@ public class ReportService {
         Location location = locationService.createLocationWithCityAndCountry(createLocationCommand, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
 
         // 7. report 저장
-        return save(report, location);
+        return save(userReport, location);
     }
 
     @Transactional(readOnly = true)
@@ -107,20 +107,20 @@ public class ReportService {
     @Transactional
     public ReportFindByIdResponse getReport(Long id){
 
-        Report report = reportRepository.findReportWithLocationById(id).orElseThrow(ReportNotFoundException::new);
+        UserReport userReport = reportRepository.findReportWithLocationById(id).orElseThrow(ReportNotFoundException::new);
         List<Image> images = imageService.findImagesByReportId(id);
         List<String> URLs = images.stream()
                 .map(Image::getAccessURL)
                 .toList();
 
-        return ReportMapper.toReportFindByIdResponse(report, URLs);
+        return ReportMapper.toReportFindByIdResponse(userReport, URLs);
     }
 
     @Transactional
-    private Long save(Report report, Location location) {
-        report.setLocation(location);
-        Report savedReport = reportRepository.save(report);
-        return savedReport.getId();
+    private Long save(UserReport userReport, Location location) {
+        userReport.setLocation(location);
+        UserReport savedUserReport = reportRepository.save(userReport);
+        return savedUserReport.getId();
     }
 
 

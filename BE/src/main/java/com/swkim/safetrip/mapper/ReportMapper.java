@@ -2,31 +2,30 @@ package com.swkim.safetrip.mapper;
 
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
-import com.swkim.safetrip.entity.Report;
+import com.swkim.safetrip.entity.UserReport;
 
 import java.util.List;
 
 public class ReportMapper {
 
-    public static Report toReport(ReportSaveRequest reportSaveRequest) {
-        return Report.builder()
+    public static UserReport toReport(ReportSaveRequest reportSaveRequest) {
+        return UserReport.builder()
                 .title(reportSaveRequest.getTitle())
                 .description(reportSaveRequest.getDescription())
-                .advice(reportSaveRequest.getAdvice())
                 .build();
     }
 
-    public static ReportFindByIdResponse toReportFindByIdResponse(Report report, List<String> URLs) {
+    public static ReportFindByIdResponse toReportFindByIdResponse(UserReport userReport, List<String> URLs) {
         return ReportFindByIdResponse.builder()
-                .title(report.getTitle())
-                .scam(report.getScam().getName())
-                .address(report.getLocation().getAddress())
-                .lat(String.valueOf(report.getLocation().getLat()))
-                .lng(String.valueOf(report.getLocation().getLng()))
+                .title(userReport.getTitle())
+                .scam(userReport.getScam().getName())
+                .address(userReport.getLocation().getAddress())
+                .lat(String.valueOf(userReport.getLocation().getLat()))
+                .lng(String.valueOf(userReport.getLocation().getLng()))
                 .URLs(URLs)
-                .description(report.getDescription())
-                .advice(report.getAdvice())
-                .createdAt(report.getCreatedAt())
+                .description(userReport.getDescription())
+                .advice(userReport.getAdvice())
+                .createdAt(userReport.getCreatedAt())
                 .build();
     }
 
