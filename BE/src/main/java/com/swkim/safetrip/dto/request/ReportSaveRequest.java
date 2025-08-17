@@ -13,30 +13,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReportSaveRequest {
 
-    @NotBlank(message = "제목을 입력하세요.")
+    @NotBlank(message = "Title must not be blank.")
     private String title;
 
-    @NotNull(message = "카테고리를 입력해주세요.")
+    @NotNull(message = "Scam Category must not be blank.")
     private Long scamId;
 
-    @NotBlank(message = "주소를 입력해주세요.")
-    private String address;
-
-    @NotBlank(message = "위도를 입력해주세요.")
-    private String lat;
-
-    @NotBlank(message = "경도를 입력해주세요.")
-    private String lng;
-
-    @NotBlank
+    @NotBlank(message = "Country must not be blank.")
     private String country;
 
-    @NotBlank
+    @NotBlank(message = "City must not be blank.")
     private String city;
 
-    @NotBlank(message = "설명을 해주세요.")
+    @NotBlank(message = "Description must not be blank")
     private String description;
-
-    @NotBlank(message = "조언을 해주세요.")
-    private String advice;
 }
