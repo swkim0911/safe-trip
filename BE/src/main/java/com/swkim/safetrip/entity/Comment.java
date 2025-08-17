@@ -22,27 +22,26 @@ public class Comment extends BaseEntity{
     @JoinColumn(name = "user_id")
     private User user;
 
+    // todo baseReport를 어떻게 구현하느냐에 따라 달라짐
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "report_id")
+//    private BaseReport report;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "report_id")
-    private UserReport userReport;
+    @JoinColumn(name = "parent_id")
+    private Comment parentComment;
 
     @Column(name = "content", nullable = false)
     private String content;
 
     @Column(name = "likes", nullable = false)
-    private Integer likeCnt;
-
-    @Column(name = "is_root", nullable = false)
-    private Boolean isRoot;
+    private Integer likeCnt = 0;
 
     @Column(name = "depth", nullable = false)
     private Integer depth; // 댓글 깊이
 
-    @Column(name = "order_number", nullable = false)
-    private Integer orderNumber; // 댓글 순서
-
     @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 
     @Column(name = "deleted_at", updatable = false, nullable = true)
     private LocalDateTime deletedAt;
