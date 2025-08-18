@@ -20,10 +20,10 @@ public class ReportSaveRequest {
     private Long scamId;
 
     @NotBlank(message = "Country must not be blank.")
-    private String country;
+    private Long countryId;
 
     @NotBlank(message = "City must not be blank.")
-    private String city;
+    private Long cityId;
 
     @NotBlank(message = "Description must not be blank")
     private String description;
