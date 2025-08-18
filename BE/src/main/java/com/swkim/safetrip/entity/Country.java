@@ -2,7 +2,6 @@ package com.swkim.safetrip.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,11 +18,16 @@ public class Country {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
+
+    @Column(name = "external_id", unique = true, nullable = false)
+    private Long externalId;
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "name_ko", nullable = false)
+    private String koreanName;
 
     @Column(name = "lat", nullable = false)
     private Double lat;
@@ -33,11 +37,6 @@ public class Country {
 
     @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
     private List<City> cities = new ArrayList<>();
-
-    @Builder
-    public Country(String name){
-        this.name = name;
-    }
 
     // 양방향 연관관계 편의 메서드
     public void addCity(City city){
