@@ -23,7 +23,7 @@ public class Location extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "city_id")
-    private City city;
+    private State state;
 
     @Column(name = "address", nullable = false)
     private String address;
@@ -35,10 +35,10 @@ public class Location extends BaseEntity{
     private Double lng;
 
     @Builder
-    public Location(Country country, City city, String address, String lat, String lng){
+    public Location(Country country, State state, String address, String lat, String lng){
         this.country = country;
         this.address = address;
-        this.city = city;
+        this.state = state;
         this.lat = Double.parseDouble(lat);
         this.lng = Double.parseDouble(lng);
     }

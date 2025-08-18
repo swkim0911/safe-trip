@@ -36,11 +36,11 @@ public class Country {
     private Double lng;
 
     @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
-    private List<City> cities = new ArrayList<>();
+    private List<State> cities = new ArrayList<>();
 
     // 양방향 연관관계 편의 메서드
-    public void addCity(City city){
-        cities.add(city);
-        city.setCountry(this);
+    public void addCity(State state){
+        cities.add(state);
+        state.setCountry(this);
     }
 }

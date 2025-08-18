@@ -40,7 +40,7 @@ public interface ReportRepository extends JpaRepository<UserReport, Long>, Repor
                 c.lng
             )
             FROM Location l
-            JOIN l.city c
+            JOIN l.state c
             GROUP BY c.id, c.name, c.lat, c.lng
             """)
     List<LocationSummaryItem> findCitySummary();
