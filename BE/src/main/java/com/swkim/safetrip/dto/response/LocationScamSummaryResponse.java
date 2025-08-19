@@ -13,7 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 public class LocationScamSummaryResponse {
 
-    private String type; // country or state
-    private List<LocationScamSummaryItem> locationScamSummaryItems;
+    private LocationType locationType; // country or state
+    private List<LocationScamSummaryItem> items;
 
+    public enum LocationType {
+        COUNTRY,
+        STATE
+    }
 }
+
+
