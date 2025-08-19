@@ -1,5 +1,6 @@
 package com.swkim.safetrip.entity;
 
+import com.swkim.safetrip.entity.enums.Source;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,7 +27,8 @@ public class UserReport extends BaseReport{
     private List<Image> images = new ArrayList<>();
 
     @Builder
-    public UserReport(String title, String description) {
+    public UserReport(Source source, String title, String description) {
+        this.source = source;
         this.title = title;
         this.description = description;
     }

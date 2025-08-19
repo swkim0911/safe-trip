@@ -1,6 +1,5 @@
 package com.swkim.safetrip.entity;
 
-import com.swkim.safetrip.entity.enums.SourceType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -23,14 +22,12 @@ public class ExternalReport extends BaseReport {
     @Column(nullable = false)
     private String externalId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 50, nullable = false)
-    private SourceType source;
-
     @Column(length = 500, nullable = false)
     private String link;
 
+    @Column(updatable = false)
     private LocalDateTime originalCreatedAt;
 
+    @Column(updatable = false)
     private LocalDateTime collectedAt;
 }

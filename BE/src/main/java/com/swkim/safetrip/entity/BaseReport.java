@@ -1,10 +1,16 @@
 package com.swkim.safetrip.entity;
 
+import com.swkim.safetrip.entity.enums.Source;
 import jakarta.persistence.*;
 import lombok.Setter;
 
 @MappedSuperclass
 public abstract class BaseReport extends BaseEntity {
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50, nullable = false)
+    protected Source source;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)

@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class LocationSummaryResponse {
 
-    private String Type;
+    private String Type; // country or state
     private List<LocationSummaryItem> locationSummaryItems;
 
 }

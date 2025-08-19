@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class LocationSummaryItem {
 
     private Long id;
-    private String name;
+    private String name; // country or state name
     private Long scamCnt;
     private double lat;
     private double lng;
