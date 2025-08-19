@@ -48,7 +48,7 @@ public class ReportController {
 
     @Operation(summary = "도시별 스캠 요약 정보 조회", description = "사이드바에 표현될 도시(state)별 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/reports/sidebar-summary/states")
-    public ApiResult<Slice<LocationScamSummaryItem>> getSideBarStateSummaries(@RequestParam Long countryId, Pageable pageable){
+    public ApiResult<Slice<LocationScamSummaryItem>> getStateSummariesForSidebar(@RequestParam Long countryId, Pageable pageable){
         Slice<LocationScamSummaryItem> stateSummaryPage = reportService.getStateSummaryPages(countryId, pageable);
         return ApiResult.of(HttpStatus.OK.value(), "State scam summaries for sidebar", stateSummaryPage);
     }
