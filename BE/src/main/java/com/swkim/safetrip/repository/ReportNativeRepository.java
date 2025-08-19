@@ -163,9 +163,11 @@ public class ReportNativeRepository {
         Sort sort = pageable.getSort();
 
         // 안전한 매핑
-        Map<String, String> SORT_MAPPING = Map.of( // todo 시간순 정렬 추가
-                "name", "c.name",
-                "scamCnt", "scam_cnt"
+        Map<String, String> SORT_MAPPING = Map.of(
+                "countryName", "c.name",
+                "stateName", "s.name",
+                "scamCnt", "scam_cnt",
+                "createdAt", "created_at"
         );
 
         String orderBy = sort.stream()
@@ -179,11 +181,8 @@ public class ReportNativeRepository {
                 .collect(Collectors.joining(", "));
 
         if (orderBy.isBlank()) {
-            orderBy = "c.name ASC"; // 기본값
+            orderBy = "created_at DESC"; // 기본값
         }
         return orderBy;
     }
-
-
 }
-
