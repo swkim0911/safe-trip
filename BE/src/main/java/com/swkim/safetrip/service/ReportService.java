@@ -11,6 +11,7 @@ import com.swkim.safetrip.global.exception.custom.StateCountryMismatchException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.ReportJdbcRepository;
+import com.swkim.safetrip.repository.ReportNativeRepository;
 import com.swkim.safetrip.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,7 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
     private final ReportJdbcRepository reportJdbcRepository;
+    private final ReportNativeRepository reportNativeRepository;
 
     public Long saveReport(String email, ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
 
@@ -83,8 +85,8 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
-    public Slice<LocationScamSummaryItem> getCountrySummaryPage(Pageable pageable) {
-        return reportRepository.findCountrySummarySlice(pageable);
+    public Slice<LocationScamSummaryItem> getCountrySummaryPages(Pageable pageable) {
+        return reportNativeRepository.findCountrySummarySlice(pageable);
     }
 
     @Transactional(readOnly = true)

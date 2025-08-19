@@ -41,9 +41,9 @@ public class ReportController {
 
     @Operation(summary = "국가별 스캠 요약 정보 조회", description = "사이드바에 표현될 국가별 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/reports/sidebar-summary/counties")
-    public ApiResult<Slice<LocationScamSummaryItem>> getSideBarCountrySummaries(Pageable pageable){
-        Slice<LocationScamSummaryItem> countrySummaryPage = reportService.getCountrySummaryPage(pageable);
-        return ApiResult.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummaryPage);
+    public ApiResult<Slice<LocationScamSummaryItem>> getCountrySummariesForSideBar(Pageable pageable){
+        Slice<LocationScamSummaryItem> countrySummaryPages = reportService.getCountrySummaryPages(pageable);
+        return ApiResult.of(HttpStatus.OK.value(), "Country scam summaries for sidebar", countrySummaryPages);
     }
 
     @Operation(summary = "도시별 스캠 요약 정보 조회", description = "사이드바에 표현될 도시별 스캠 요약 정보를 조회합니다")
@@ -74,7 +74,7 @@ public class ReportController {
 
     @Operation(summary = "지도에 표시될 스캠 정보 조회", description = "zoom 정도에 따라 도시에 표시될 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/reports/map-summary")
-    public ApiResult<LocationScamSummaryResponse> getLocationSummariesOfMap(@RequestParam Integer zoom){
+    public ApiResult<LocationScamSummaryResponse> getLocationSummariesForMap(@RequestParam Integer zoom){
         if(zoom < 7){
             LocationScamSummaryResponse countrySummaries = reportService.getCountrySummaries();
             return ApiResult.of(HttpStatus.OK.value(), "Country scam summaries for map display.", countrySummaries);

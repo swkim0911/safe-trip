@@ -13,7 +13,7 @@ public class LocationScamSummaryItem {
 
     private Long id;
     private String name; // country or state name
-    private Long scamCnt;
     private double lat;
     private double lng;
+    private Long scamCnt;
 }

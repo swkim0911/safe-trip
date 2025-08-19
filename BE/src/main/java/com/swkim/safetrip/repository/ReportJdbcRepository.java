@@ -41,9 +41,10 @@ public class ReportJdbcRepository {
         return jdbc.query(findCountrySummariesSQL, Map.of(), (rs, i) -> new LocationScamSummaryItem(
                         rs.getLong("id"),
                         rs.getString("name"),
-                rs.getLong("scam_cnt"),
+
                 rs.getDouble("lat"),
-                rs.getDouble("lng")
+                rs.getDouble("lng"),
+                rs.getLong("scam_cnt")
                 ));
     }
 
@@ -51,9 +52,9 @@ public class ReportJdbcRepository {
         return jdbc.query(findStateSummariesSQL, Map.of(), (rs, i) -> new LocationScamSummaryItem(
                 rs.getLong("id"),
                 rs.getString("name"),
-                rs.getLong("scam_cnt"),
                 rs.getDouble("lat"),
-                rs.getDouble("lng")
+                rs.getDouble("lng"),
+                rs.getLong("scam_cnt")
         ));
     }
 
