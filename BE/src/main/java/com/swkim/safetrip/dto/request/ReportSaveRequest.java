@@ -1,7 +1,6 @@
 package com.swkim.safetrip.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +15,7 @@ public class ReportSaveRequest {
     @NotBlank(message = "Title must not be blank.")
     private String title;
 
-    @NotNull(message = "Scam Category must not be blank.")
+    @NotBlank(message = "Scam Category must not be blank.")
     private Long scamId;
 
     @NotBlank(message = "Country must not be blank.")
