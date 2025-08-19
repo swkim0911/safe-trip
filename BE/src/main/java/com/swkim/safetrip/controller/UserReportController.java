@@ -36,7 +36,6 @@ public class UserReportController {
     @GetMapping(value = "/user-reports/{reportId}")
     public ApiResult<UserReportDetailResponse> getUserReport(@PathVariable Long reportId) {
         UserReportDetailResponse report = userReportService.getUserReport(reportId);
-
         return ApiResult.of(HttpStatus.OK.value(), "User report retrieved", report);
     }
 }
