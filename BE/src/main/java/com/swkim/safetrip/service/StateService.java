@@ -12,8 +12,8 @@ public class StateService{
 
     private final StateRepository stateRepository;
 
-    public State findStateById(Long id) {
-        return stateRepository.findById(id).orElseThrow(StateNotFoundException::new);
+    public State findStateByIdWithCountry(Long id) {
+        return stateRepository.findByIdWithCountry(id).orElseThrow(StateNotFoundException::new);
     }
 
 }

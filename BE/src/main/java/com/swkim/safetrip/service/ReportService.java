@@ -2,37 +2,27 @@ package com.swkim.safetrip.service;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.LocationSummaryItem;
 import com.swkim.safetrip.dto.response.LocationSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.*;
-import com.swkim.safetrip.global.exception.custom.CoordinatesNotValidException;
 import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.S3UploadException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.ReportRepository;
-import com.swkim.safetrip.service.command.CreateLocationCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -68,20 +58,21 @@ public class ReportService {
         List<Image> savedImageList = saveImagesInS3Bucket(files);
         savedImageList.forEach(userReport::addImage);
 
-        // 5. state 객체, country 객체 set.
+        // 5. state 객체, country 객체 set
+        Country findCountry = countryService.findCountryById(reportSaveRequest.getCountryId());
+        State findState = stateService.findStateByIdWithCountry(reportSaveRequest.getStateId());
+        if (!isMatch(findState, findCountry)) {
 
-
-
-
-
-
-        CreateLocationCommand createLocationCommand = toCreateLocationCommand(reportSaveRequest);
-
-        // 6. Country, City 엔티티 저장. address에 대한 location 객체 생성
-        Location location = locationService.createLocationWithCityAndCountry(createLocationCommand, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
+        }
+        userReport.setCountry(findCountry);
+        userReport.setState(findState);
 
         // 7. report 저장
-        return save(userReport, location);
+        return save(userReport);
+    }
+
+    private boolean isMatch(State findState, Country findCountry) {
+        return Objects.equals(findState.getCountry().getId(), findCountry.getId());
     }
 
     @Transactional(readOnly = true)
@@ -124,8 +115,7 @@ public class ReportService {
     }
 
     @Transactional
-    private Long save(UserReport userReport, Location location) {
-        userReport.setLocation(location);
+    private Long save(UserReport userReport) {
         UserReport savedUserReport = reportRepository.save(userReport);
         return savedUserReport.getId();
     }
@@ -143,75 +133,6 @@ public class ReportService {
 
         return imageList;
     }
-
-    private CreateLocationCommand toCreateLocationCommand(ReportSaveRequest reportSaveRequest) {
-        String locationInfo = getLocationInfo(reportSaveRequest.getLat(), reportSaveRequest.getLng());
-        JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
-        JsonObject addressObject = locationObject.getAsJsonObject("address");
-        String cityName = addressObject.get("city").getAsString();
-
-        String cityInfo = getCityInfo(cityName);
-        JsonObject cityObject = JsonParser.parseString(cityInfo).getAsJsonArray().get(0).getAsJsonObject();
-
-        String countryName = cityObject.getAsJsonObject("address").get("country").getAsString();
-        cityName = cityObject.getAsJsonObject("address").get("city").getAsString();
-
-        String cityLat = cityObject.get("lat").getAsString();
-        String cityLng = cityObject.get("lon").getAsString();
-
-
-        return new CreateLocationCommand(countryName, cityName, cityLat, cityLng);
-    }
-
-    /**
-     * @return 도시 이름 -> 도시 위도, 경도
-     */
-    private String getCityInfo(String city){
-        RestClient restClient = RestClient.create();
-        String uri = UriComponentsBuilder.newInstance()
-                .scheme("https")
-                .host("nominatim.openstreetmap.org")
-                .path("/search")
-                .queryParam("city",city)
-                .queryParam("format", "json")
-                .queryParam("addressdetails", "1")
-                .queryParam("accept-language", "en")
-                .toUriString();
-
-        return restClient.get()
-                .uri(uri)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, ((request, response) -> {
-                    throw new CoordinatesNotValidException();
-                }))
-                .body(String.class);
-    }
-
-    /**
-     * @return 위도 경도 -> 국가, 도시 정보
-     */
-    private String getLocationInfo(String lat, String lon) {
-        RestClient restClient = RestClient.create();
-        String uri = UriComponentsBuilder.newInstance()
-                .scheme("https")
-                .host("nominatim.openstreetmap.org")
-                .path("/reverse")
-                .queryParam("lat", lat)
-                .queryParam("lon", lon)
-                .queryParam("format", "json")
-                .queryParam("addressdetails", "1")
-                .queryParam("accept-language", "en")
-                .toUriString();
-
-        return restClient.get()
-                .uri(uri)
-                .retrieve()
-                .onStatus(HttpStatusCode :: is4xxClientError, ((request, response) -> {
-                    throw new CoordinatesNotValidException();
-                }))
-                .body(String.class);
-    }
-
 
     private Image saveImage(MultipartFile file){
         String originalFilename = file.getOriginalFilename();

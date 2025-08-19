@@ -21,8 +21,8 @@ public class ReportSaveRequest {
     @NotBlank(message = "Country must not be blank.")
     private Long countryId;
 
-    @NotBlank(message = "City must not be blank.")
-    private Long cityId;
+    @NotBlank(message = "State must not be blank.")
+    private Long stateId;
 
     @NotBlank(message = "Description must not be blank")
     private String description;
