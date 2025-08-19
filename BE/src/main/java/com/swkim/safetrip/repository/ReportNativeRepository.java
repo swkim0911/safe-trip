@@ -100,7 +100,7 @@ public class ReportNativeRepository {
         String orderBy = getOrderBy(pageable);
 
         String sql = """
-            SELECT r.report_id, r.source, r.title, s.name
+            SELECT r.report_id, r.source, r.title, s.name as scam_name
             FROM (
                 SELECT report_id, source, title, scam_id FROM user_report WHERE countryId = :countryId AND stateId = :stateId
                 UNION ALL
@@ -124,14 +124,7 @@ public class ReportNativeRepository {
         List<Object[]> results = query.getResultList();
 
         // DTO 매핑
-        List<ReportSummaryItem> items = results.stream() // todo 함수화
-                .map(row -> new ReportSummaryItem(
-                        ((Number) row[0]).longValue(),
-                        Source.valueOf(((String) row[1]).toUpperCase()), // DB 문자열 → Enum 변환 // todo 함수화
-                        (String) row[2],
-                        (String) row[3]
-                ))
-                .toList();
+        List<ReportSummaryItem> items = getReportSummaryItems(results);
 
         boolean hasNext = items.size() > pageSize;
         List<ReportSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
@@ -139,16 +132,31 @@ public class ReportNativeRepository {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
+    private List<ReportSummaryItem> getReportSummaryItems(List<Object[]> results) {
+        return results.stream()
+                .map(row -> new ReportSummaryItem(
+                        ((Number) row[0]).longValue(),
+                        toSource(row[1]), // DB 문자열 → Enum 변환
+                        (String)row[2],
+                        (String)row[3]
+                ))
+                .toList();
+    }
+
     private List<LocationScamSummaryItem> getLocationScamSummaryItems(List<Object[]> results) {
         return results.stream()
                 .map(row -> new LocationScamSummaryItem(
-                        ((Number) row[0]).longValue(), // todo row[0] -> 이름으로 받을까
+                        ((Number) row[0]).longValue(),
                         (String) row[1],
                         ((Number) row[2]).doubleValue(),
                         ((Number) row[3]).doubleValue(),
                         ((Number) row[4]).longValue()
                 ))
                 .toList();
+    }
+
+    private Source toSource(Object source) {
+        return Source.valueOf(((String) (source)).toUpperCase());
     }
 
     private String getOrderBy(Pageable pageable) {
