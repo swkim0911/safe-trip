@@ -23,7 +23,7 @@ public class ExternalReport extends BaseReport {
     private String externalId;
 
     @Column(length = 500, nullable = false)
-    private String link; // todo sourceUrl 이름 수정
+    private String sourceUrl;
 
     @Column(updatable = false)
     private LocalDateTime originalCreatedAt;
