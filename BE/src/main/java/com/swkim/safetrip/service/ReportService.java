@@ -95,7 +95,7 @@ public class ReportService {
     }
 
     @Transactional
-    public Slice<ReportSummaryItem> getReportSummaryPage(Long countryId, Long cityId, Pageable pageable) {
+    public Slice<ReportSummaryItem> getReportSummaryPages(Long countryId, Long cityId, Pageable pageable) {
         return reportRepository.findReportSummarySliceByCountryAndCity(countryId, cityId, pageable);
     }
 

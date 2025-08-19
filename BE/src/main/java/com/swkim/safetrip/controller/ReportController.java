@@ -55,11 +55,9 @@ public class ReportController {
 
     @Operation(summary = "스캠 요약 정보 조회", description = "사이드바에 표현될 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/reports/sidebar-summary/reports")
-    public ApiResult<Slice<ReportSummaryItem>> getSideBarScamSummaries(@RequestParam Long countryId, @RequestParam Long cityId, Pageable pageable) {
-        Slice<ReportSummaryItem> scamSummaryItems = reportService.getReportSummaryPage(countryId, cityId, pageable);
-        String message = messageSource.getMessage("report.list.get.success", null, null);
-
-        return ApiResult.of(HttpStatus.OK.value(), message, scamSummaryItems);
+    public ApiResult<Slice<ReportSummaryItem>> getReportSummariesForSidebar(@RequestParam Long countryId, @RequestParam Long cityId, Pageable pageable) {
+        Slice<ReportSummaryItem> reportSummaryPages = reportService.getReportSummaryPages(countryId, cityId, pageable);
+        return ApiResult.of(HttpStatus.OK.value(), "Report summaries for sidebar", reportSummaryPages);
     }
 
     @Operation(summary = "특정 리포트 조회", description = "특정 리포트를 아이디로 조회합니다")
