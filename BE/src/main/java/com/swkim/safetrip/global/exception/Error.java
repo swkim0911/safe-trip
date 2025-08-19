@@ -14,6 +14,7 @@ public enum Error {
     REPORT_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Report not found"),
     SCAM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Scam not found"),
     STATE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "State not found"),
+    COUNTRY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Country not found"),
     S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "s3 버킷에 이미지를 업로드할 수 없습니다."),
     DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
     DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "This nickname is already in use"),
