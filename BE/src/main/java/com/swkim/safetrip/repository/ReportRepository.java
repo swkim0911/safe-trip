@@ -18,15 +18,15 @@ public interface ReportRepository extends JpaRepository<UserReport, Long>, Repor
 
 
     @Query("""
-            SELECT new com.swkim.safetrip.dto.response.LocationSummaryItem(
+            SELECT new com.swkim.safetrip.dto.response.LocationScamSummaryItem(
                 c.id,
                 c.name,
                 COUNT(l),
                 c.lat,
                 c.lng
             )
-            FROM Location l
-            JOIN l.country c
+            FROM UserReport ur
+            JOIN ur.country c
             GROUP BY c.id, c.name, c.lat, c.lng
             """)
     List<LocationScamSummaryItem> findCountrySummary();

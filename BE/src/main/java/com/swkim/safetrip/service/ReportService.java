@@ -10,6 +10,7 @@ import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.StateCountryMismatchException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
+import com.swkim.safetrip.repository.ReportJdbcRepository;
 import com.swkim.safetrip.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
+
+import static com.swkim.safetrip.dto.response.LocationScamSummaryResponse.LocationType.COUNTRY;
+import static com.swkim.safetrip.dto.response.LocationScamSummaryResponse.LocationType.STATE;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class ReportService {
     private final CountryService countryService;
 
     private final ReportRepository reportRepository;
+    private final ReportJdbcRepository reportJdbcRepository;
 
     public Long saveReport(String email, ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
 
@@ -67,14 +72,14 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public LocationScamSummaryResponse getCountrySummary(){
-        List<LocationScamSummaryItem> reportMapSummaryItems = reportRepository.findCountrySummary();
-        return new LocationScamSummaryResponse("country", reportMapSummaryItems);
+        List<LocationScamSummaryItem> reportMapSummaryItems = reportJdbcRepository.findCountrySummaries();
+        return new LocationScamSummaryResponse(COUNTRY, reportMapSummaryItems);
     }
 
     @Transactional(readOnly = true)
     public LocationScamSummaryResponse getCitySummary(){
         List<LocationScamSummaryItem> reportMapSummaryItems = reportRepository.findCitySummary();
-        return new LocationScamSummaryResponse("city", reportMapSummaryItems);
+        return new LocationScamSummaryResponse(STATE, reportMapSummaryItems);
     }
 
     @Transactional(readOnly = true)
