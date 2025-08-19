@@ -1,6 +1,8 @@
 package com.swkim.safetrip.repository;
 
 import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.dto.response.ReportSummaryItem;
+import com.swkim.safetrip.entity.enums.Source;
 import com.swkim.safetrip.global.exception.custom.InvalidSortKeyException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -94,10 +96,53 @@ public class ReportNativeRepository {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
+    public Slice<ReportSummaryItem> findReportSummarySliceByCountryIdAndStateId(Long countryId, Long stateId, Pageable pageable){
+        String orderBy = getOrderBy(pageable);
+
+        String sql = """
+            SELECT r.report_id, r.source, r.title, s.name
+            FROM (
+                SELECT report_id, source, title, scam_id FROM user_report WHERE countryId = :countryId AND stateId = :stateId
+                UNION ALL
+                SELECT report_id, source, title, scam_id FROM external_report WHERE countryId = :countryId AND stateId = :stateId
+            ) r
+            JOIN scam s on r.scam_id = s.id
+            ORDER BY """ + orderBy + """
+            LIMIT :limit OFFSET :offset
+            """;
+
+        Query query = em.createNativeQuery(sql);
+        query.setParameter("countryId", countryId);
+        query.setParameter("stateId", stateId);
+
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+        query.setParameter("limit", pageSize + 1);
+        query.setParameter("offset", offset);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        // DTO 매핑
+        List<ReportSummaryItem> items = results.stream() // todo 함수화
+                .map(row -> new ReportSummaryItem(
+                        ((Number) row[0]).longValue(),
+                        Source.valueOf(((String) row[1]).toUpperCase()), // DB 문자열 → Enum 변환 // todo 함수화
+                        (String) row[2],
+                        (String) row[3]
+                ))
+                .toList();
+
+        boolean hasNext = items.size() > pageSize;
+        List<ReportSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
+
+        return new SliceImpl<>(content, pageable, hasNext);
+    }
+
     private List<LocationScamSummaryItem> getLocationScamSummaryItems(List<Object[]> results) {
         return results.stream()
                 .map(row -> new LocationScamSummaryItem(
-                        ((Number) row[0]).longValue(),
+                        ((Number) row[0]).longValue(), // todo row[0] -> 이름으로 받을까
                         (String) row[1],
                         ((Number) row[2]).doubleValue(),
                         ((Number) row[3]).doubleValue(),
@@ -110,7 +155,7 @@ public class ReportNativeRepository {
         Sort sort = pageable.getSort();
 
         // 안전한 매핑
-        Map<String, String> SORT_MAPPING = Map.of(
+        Map<String, String> SORT_MAPPING = Map.of( // todo 시간순 정렬 추가
                 "name", "c.name",
                 "scamCnt", "scam_cnt"
         );

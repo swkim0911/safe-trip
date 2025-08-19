@@ -18,5 +18,5 @@ public class ReportSummaryItem {
 
     private String title;
 
-    private String scam;
+    private String scamName;
 }
