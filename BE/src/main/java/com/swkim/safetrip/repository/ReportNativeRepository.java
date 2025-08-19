@@ -1,6 +1,7 @@
 package com.swkim.safetrip.repository;
 
 import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.global.exception.custom.InvalidSortKeyException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class ReportNativeRepository {
                 .map(order -> {
                     String column = SORT_MAPPING.get(order.getProperty());
                     if (column == null) {
-                        throw new RuntimeException("Invalid sort key: " + order.getProperty()); //todo exception 생성
+                        throw new InvalidSortKeyException();
                     }
                     return column + " " + order.getDirection().name();
                 })
