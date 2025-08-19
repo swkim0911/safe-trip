@@ -28,7 +28,7 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     join ur.country c
     join ur.state st
     where ur.id = :id
-""")
+    """)
     Optional<UserReportDetailResponse> findReportDetailById(@Param("id") Long id);
 
 }
