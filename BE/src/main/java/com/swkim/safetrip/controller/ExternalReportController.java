@@ -1,6 +1,8 @@
 package com.swkim.safetrip.controller;
 
+import com.swkim.safetrip.dto.response.ExternalReportDetailResponse;
 import com.swkim.safetrip.global.response.ApiResult;
+import com.swkim.safetrip.service.ExternalReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -66,7 +66,7 @@ public class UserReportService {
         return savedUserReport.getId();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public UserReportDetailResponse getUserReport(Long id){
         UserReportDetailResponse userReportDetailResponse
                 = userReportRepository.findReportDetailById(id).orElseThrow(ReportNotFoundException::new);// consider UserReport용 예외 만들까?
