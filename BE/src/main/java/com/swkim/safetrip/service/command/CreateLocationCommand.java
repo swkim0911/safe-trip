@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public class CreateLocationCommand {
+public class CreateLocationCommand { // todo 삭제
 
     private final String countryName;
     private final String cityName;

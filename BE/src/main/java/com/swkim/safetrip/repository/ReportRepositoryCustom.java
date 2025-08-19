@@ -6,5 +6,6 @@ import org.springframework.data.domain.Slice;
 
 public interface ReportRepositoryCustom {
 
-    Slice<ReportSummaryItem> findReportSummarySliceByCountryAndCity(Long country, Long city, Pageable pageable);
+    Slice<ReportSummaryItem> findReportSummarySliceByCountryAndCity(Long country, Long city, Pageable pageable); // todo 삭제
+
 }

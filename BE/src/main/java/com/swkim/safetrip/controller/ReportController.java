@@ -1,27 +1,21 @@
 package com.swkim.safetrip.controller;
 
-import com.swkim.safetrip.dto.request.ReportSaveRequest;
 import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
 import com.swkim.safetrip.dto.response.LocationScamSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.global.response.ApiResult;
-import com.swkim.safetrip.security.CustomUserDetails;
 import com.swkim.safetrip.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,15 +23,6 @@ public class ReportController {
 
     private final ReportService reportService;
     private final MessageSource messageSource;
-
-    @Operation(summary = "글 등록", description = "새로운 게시글을 작성하여 서버에 등록합니다", security = @SecurityRequirement(name = "BearerAuth"))
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/reports", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ApiResult<Long> createReport(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
-        String email = userDetails.getUsername();
-        Long id = reportService.saveReport(email, request, images);
-        return ApiResult.of(HttpStatus.CREATED.value(), "User report registration successful", id);
-    }
 
     @Operation(summary = "국가별 스캠 요약 정보 조회", description = "사이드바에 표현될 국가별 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/reports/sidebar-summary/counties")
