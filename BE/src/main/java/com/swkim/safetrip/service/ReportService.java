@@ -72,14 +72,14 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public LocationScamSummaryResponse getCountrySummary(){
-        List<LocationScamSummaryItem> reportMapSummaryItems = reportJdbcRepository.findCountrySummaries();
-        return new LocationScamSummaryResponse(COUNTRY, reportMapSummaryItems);
+        List<LocationScamSummaryItem> countrySummariesItems = reportJdbcRepository.findCountrySummaries();
+        return new LocationScamSummaryResponse(COUNTRY, countrySummariesItems);
     }
 
     @Transactional(readOnly = true)
-    public LocationScamSummaryResponse getCitySummary(){
-        List<LocationScamSummaryItem> reportMapSummaryItems = reportRepository.findCitySummary();
-        return new LocationScamSummaryResponse(STATE, reportMapSummaryItems);
+    public LocationScamSummaryResponse getStateSummary(){
+        List<LocationScamSummaryItem> stateSummariesItems = reportJdbcRepository.findStateSummaries();
+        return new LocationScamSummaryResponse(STATE, stateSummariesItems);
     }
 
     @Transactional(readOnly = true)

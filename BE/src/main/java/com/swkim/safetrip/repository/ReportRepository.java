@@ -16,21 +16,6 @@ public interface ReportRepository extends JpaRepository<UserReport, Long>, Repor
     @Query("SELECT r FROM Report r JOIN FETCH r.location WHERE r.id = :id")
     Optional<UserReport> findReportWithLocationById(@Param("id")Long id);
 
-
-    @Query("""
-            SELECT new com.swkim.safetrip.dto.response.LocationScamSummaryItem(
-                c.id,
-                c.name,
-                COUNT(l),
-                c.lat,
-                c.lng
-            )
-            FROM UserReport ur
-            JOIN ur.country c
-            GROUP BY c.id, c.name, c.lat, c.lng
-            """)
-    List<LocationScamSummaryItem> findCountrySummary();
-
     @Query("""
             SELECT new com.swkim.safetrip.dto.response.LocationSummaryItem(
                 c.id,
