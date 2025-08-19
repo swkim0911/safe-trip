@@ -22,28 +22,7 @@ public class ReportNativeRepository {
     private final EntityManager em;
 
     public Slice<LocationScamSummaryItem> findCountrySummarySlice(Pageable pageable) {
-        Sort sort = pageable.getSort();
-
-        // 안전한 매핑
-        Map<String, String> SORT_MAPPING = Map.of(
-                "name", "c.name",
-                "scamCnt", "scam_cnt"
-        );
-
-        String orderBy = sort.stream()
-                .map(order -> {
-                    String column = SORT_MAPPING.get(order.getProperty());
-                    if (column == null) {
-                        throw new InvalidSortKeyException();
-                    }
-                    return column + " " + order.getDirection().name();
-                })
-                .collect(Collectors.joining(", "));
-
-        if (orderBy.isBlank()) {
-            orderBy = "c.name ASC"; // 기본값
-        }
-
+        String orderBy = getOrderBy(pageable);
 
         String sql = """
             SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
@@ -70,15 +49,7 @@ public class ReportNativeRepository {
         List<Object[]> results = query.getResultList();
 
         // DTO 매핑
-        List<LocationScamSummaryItem> items = results.stream()
-                .map(row -> new LocationScamSummaryItem(
-                        ((Number) row[0]).longValue(),
-                        (String) row[1],
-                        ((Number) row[2]).doubleValue(),
-                        ((Number) row[3]).doubleValue(),
-                        ((Number) row[4]).longValue()
-                ))
-                .toList();
+        List<LocationScamSummaryItem> items = getLocationScamSummaryItems(results);
 
         boolean hasNext = items.size() > pageSize;
         List<LocationScamSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
@@ -87,28 +58,7 @@ public class ReportNativeRepository {
     }
 
     public Slice<LocationScamSummaryItem> findStateSummarySlice(Long countryId, Pageable pageable){
-        Sort sort = pageable.getSort(); //todo 공통 부분 함수화
-
-        // 안전한 매핑
-        Map<String, String> SORT_MAPPING = Map.of( // todo 공통 변수
-                "name", "c.name",
-                "scamCnt", "scam_cnt"
-        );
-
-        String orderBy = sort.stream()
-                .map(order -> {
-                    String column = SORT_MAPPING.get(order.getProperty());
-                    if (column == null) {
-                        throw new InvalidSortKeyException();
-                    }
-                    return column + " " + order.getDirection().name();
-                })
-                .collect(Collectors.joining(", "));
-
-        if (orderBy.isBlank()) {
-            orderBy = "c.name ASC"; // 기본값
-        }
-
+        String orderBy = getOrderBy(pageable);
 
         String sql = """
             SELECT s.id, s.name, s.lat, s.lng, COUNT(*) AS scam_cnt
@@ -136,7 +86,16 @@ public class ReportNativeRepository {
         List<Object[]> results = query.getResultList();
 
         // DTO 매핑
-        List<LocationScamSummaryItem> items = results.stream()
+        List<LocationScamSummaryItem> items = getLocationScamSummaryItems(results);
+
+        boolean hasNext = items.size() > pageSize;
+        List<LocationScamSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
+
+        return new SliceImpl<>(content, pageable, hasNext);
+    }
+
+    private List<LocationScamSummaryItem> getLocationScamSummaryItems(List<Object[]> results) {
+        return results.stream()
                 .map(row -> new LocationScamSummaryItem(
                         ((Number) row[0]).longValue(),
                         (String) row[1],
@@ -145,11 +104,31 @@ public class ReportNativeRepository {
                         ((Number) row[4]).longValue()
                 ))
                 .toList();
+    }
 
-        boolean hasNext = items.size() > pageSize;
-        List<LocationScamSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
+    private String getOrderBy(Pageable pageable) {
+        Sort sort = pageable.getSort();
 
-        return new SliceImpl<>(content, pageable, hasNext);
+        // 안전한 매핑
+        Map<String, String> SORT_MAPPING = Map.of(
+                "name", "c.name",
+                "scamCnt", "scam_cnt"
+        );
+
+        String orderBy = sort.stream()
+                .map(order -> {
+                    String column = SORT_MAPPING.get(order.getProperty());
+                    if (column == null) {
+                        throw new InvalidSortKeyException();
+                    }
+                    return column + " " + order.getDirection().name();
+                })
+                .collect(Collectors.joining(", "));
+
+        if (orderBy.isBlank()) {
+            orderBy = "c.name ASC"; // 기본값
+        }
+        return orderBy;
     }
 
 
