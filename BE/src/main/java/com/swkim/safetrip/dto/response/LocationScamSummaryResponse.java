@@ -5,15 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LocationSummaryItem {
+public class LocationScamSummaryResponse {
 
-    private Long id;
-    private String name; // country or state name
-    private Long scamCnt;
-    private double lat;
-    private double lng;
+    private String type; // country or state
+    private List<LocationScamSummaryItem> locationScamSummaryItems;
+
 }

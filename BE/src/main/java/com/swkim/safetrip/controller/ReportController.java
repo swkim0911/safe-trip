@@ -1,8 +1,8 @@
 package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
-import com.swkim.safetrip.dto.response.LocationSummaryItem;
-import com.swkim.safetrip.dto.response.LocationSummaryResponse;
+import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.dto.response.LocationScamSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.global.response.ApiResult;
@@ -41,15 +41,15 @@ public class ReportController {
 
     @Operation(summary = "국가별 스캠 요약 정보 조회", description = "사이드바에 표현될 국가별 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/reports/sidebar-summary/counties")
-    public ApiResult<Slice<LocationSummaryItem>> getSideBarCountrySummaries(Pageable pageable){
-        Slice<LocationSummaryItem> countrySummaryPage = reportService.getCountrySummaryPage(pageable);
+    public ApiResult<Slice<LocationScamSummaryItem>> getSideBarCountrySummaries(Pageable pageable){
+        Slice<LocationScamSummaryItem> countrySummaryPage = reportService.getCountrySummaryPage(pageable);
         return ApiResult.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummaryPage);
     }
 
     @Operation(summary = "도시별 스캠 요약 정보 조회", description = "사이드바에 표현될 도시별 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/reports/sidebar-summary/cities")
-    public ApiResult<Slice<LocationSummaryItem>> getSideBarCitySummaries(@RequestParam Long countryId, Pageable pageable){
-        Slice<LocationSummaryItem> citySummaryPage = reportService.getCitySummaryPage(countryId, pageable);
+    public ApiResult<Slice<LocationScamSummaryItem>> getSideBarCitySummaries(@RequestParam Long countryId, Pageable pageable){
+        Slice<LocationScamSummaryItem> citySummaryPage = reportService.getCitySummaryPage(countryId, pageable);
         return ApiResult.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummaryPage);
     }
 
@@ -73,12 +73,12 @@ public class ReportController {
     }
     @Operation(summary = "지도에 표시될 스캠 정보 조회", description = "zoom 정도에 따라 도시에 표시될 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/reports/map-summary")
-    public ApiResult<LocationSummaryResponse> getMapCountrySummaries(@RequestParam Integer zoom){
+    public ApiResult<LocationScamSummaryResponse> getMapCountrySummaries(@RequestParam Integer zoom){
         if(zoom < 7){
-            LocationSummaryResponse countrySummary = reportService.getCountrySummary();
+            LocationScamSummaryResponse countrySummary = reportService.getCountrySummary();
             return ApiResult.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummary);
         }
-        LocationSummaryResponse citySummary = reportService.getCitySummary();
+        LocationScamSummaryResponse citySummary = reportService.getCitySummary();
         return ApiResult.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummary);
     }
 }

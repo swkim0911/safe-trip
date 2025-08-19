@@ -5,7 +5,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.swkim.safetrip.dto.response.LocationSummaryItem;
+import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.UserReport;
 import lombok.RequiredArgsConstructor;
@@ -56,11 +56,11 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
     }
 
     @Override
-    public Slice<LocationSummaryItem> findCountrySummarySlice(Pageable pageable) {
+    public Slice<LocationScamSummaryItem> findCountrySummarySlice(Pageable pageable) {
         int pageSize = pageable.getPageSize();
 
-        List<LocationSummaryItem> locationSummaryItems = jpaQueryFactory.select(Projections.fields(
-                        LocationSummaryItem.class,
+        List<LocationScamSummaryItem> locationScamSummaryItems = jpaQueryFactory.select(Projections.fields(
+                        LocationScamSummaryItem.class,
                         country.id,
                         country.name,
                         location.count().as("scamCnt"),
@@ -73,18 +73,18 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
                 .limit(pageSize + 1)
                 .fetch();
 
-        boolean hasNext = locationSummaryItems.size() > pageSize;
-        List<LocationSummaryItem> content = hasNext ? locationSummaryItems.subList(0, pageSize) : locationSummaryItems;
+        boolean hasNext = locationScamSummaryItems.size() > pageSize;
+        List<LocationScamSummaryItem> content = hasNext ? locationScamSummaryItems.subList(0, pageSize) : locationScamSummaryItems;
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
     @Override
-    public Slice<LocationSummaryItem> findCitySummarySlice(Long countryId, Pageable pageable) {
+    public Slice<LocationScamSummaryItem> findCitySummarySlice(Long countryId, Pageable pageable) {
         int pageSize = pageable.getPageSize();
 
-        List<LocationSummaryItem> locationSummaryItems = jpaQueryFactory.select(Projections.fields(
-                        LocationSummaryItem.class,
+        List<LocationScamSummaryItem> locationScamSummaryItems = jpaQueryFactory.select(Projections.fields(
+                        LocationScamSummaryItem.class,
                         city.id,
                         city.name,
                         location.count().as("scamCnt"),
@@ -98,8 +98,8 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
                 .limit(pageSize + 1)
                 .fetch();
 
-        boolean hasNext = locationSummaryItems.size() > pageSize;
-        List<LocationSummaryItem> content = hasNext ? locationSummaryItems.subList(0, pageSize) : locationSummaryItems;
+        boolean hasNext = locationScamSummaryItems.size() > pageSize;
+        List<LocationScamSummaryItem> content = hasNext ? locationScamSummaryItems.subList(0, pageSize) : locationScamSummaryItems;
 
         return new SliceImpl<>(content, pageable, hasNext);
     }

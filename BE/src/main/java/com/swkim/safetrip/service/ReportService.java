@@ -1,8 +1,8 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
-import com.swkim.safetrip.dto.response.LocationSummaryItem;
-import com.swkim.safetrip.dto.response.LocationSummaryResponse;
+import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.dto.response.LocationScamSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.*;
@@ -66,24 +66,24 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
-    public LocationSummaryResponse getCountrySummary(){
-        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findCountrySummary();
-        return new LocationSummaryResponse("country", reportMapSummaryItems);
+    public LocationScamSummaryResponse getCountrySummary(){
+        List<LocationScamSummaryItem> reportMapSummaryItems = reportRepository.findCountrySummary();
+        return new LocationScamSummaryResponse("country", reportMapSummaryItems);
     }
 
     @Transactional(readOnly = true)
-    public LocationSummaryResponse getCitySummary(){
-        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findCitySummary();
-        return new LocationSummaryResponse("city", reportMapSummaryItems);
+    public LocationScamSummaryResponse getCitySummary(){
+        List<LocationScamSummaryItem> reportMapSummaryItems = reportRepository.findCitySummary();
+        return new LocationScamSummaryResponse("city", reportMapSummaryItems);
     }
 
     @Transactional(readOnly = true)
-    public Slice<LocationSummaryItem> getCountrySummaryPage(Pageable pageable) {
+    public Slice<LocationScamSummaryItem> getCountrySummaryPage(Pageable pageable) {
         return reportRepository.findCountrySummarySlice(pageable);
     }
 
     @Transactional(readOnly = true)
-    public Slice<LocationSummaryItem> getCitySummaryPage(Long countryId, Pageable pageable) {
+    public Slice<LocationScamSummaryItem> getCitySummaryPage(Long countryId, Pageable pageable) {
         return reportRepository.findCitySummarySlice(countryId, pageable);
     }
 

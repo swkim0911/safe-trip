@@ -1,6 +1,6 @@
 package com.swkim.safetrip.repository;
 
-import com.swkim.safetrip.dto.response.LocationSummaryItem;
+import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
 import com.swkim.safetrip.entity.UserReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,7 +29,7 @@ public interface ReportRepository extends JpaRepository<UserReport, Long>, Repor
             JOIN l.country c
             GROUP BY c.id, c.name, c.lat, c.lng
             """)
-    List<LocationSummaryItem> findCountrySummary();
+    List<LocationScamSummaryItem> findCountrySummary();
 
     @Query("""
             SELECT new com.swkim.safetrip.dto.response.LocationSummaryItem(
@@ -43,5 +43,5 @@ public interface ReportRepository extends JpaRepository<UserReport, Long>, Repor
             JOIN l.state c
             GROUP BY c.id, c.name, c.lat, c.lng
             """)
-    List<LocationSummaryItem> findCitySummary();
+    List<LocationScamSummaryItem> findCitySummary();
 }
