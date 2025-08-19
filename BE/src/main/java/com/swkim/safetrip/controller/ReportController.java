@@ -71,14 +71,15 @@ public class ReportController {
 
         return ApiResult.of(HttpStatus.OK.value(), message, report);
     }
+
     @Operation(summary = "지도에 표시될 스캠 정보 조회", description = "zoom 정도에 따라 도시에 표시될 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/reports/map-summary")
-    public ApiResult<LocationScamSummaryResponse> getMapCountrySummaries(@RequestParam Integer zoom){
+    public ApiResult<LocationScamSummaryResponse> getLocationSummariesOfMap(@RequestParam Integer zoom){
         if(zoom < 7){
-            LocationScamSummaryResponse countrySummary = reportService.getCountrySummary();
-            return ApiResult.of(HttpStatus.OK.value(), "국가별 스캠 요약 정보를 조회했습니다.", countrySummary);
+            LocationScamSummaryResponse countrySummaries = reportService.getCountrySummaries();
+            return ApiResult.of(HttpStatus.OK.value(), "Country scam summaries for map display.", countrySummaries);
         }
-        LocationScamSummaryResponse citySummary = reportService.getStateSummary();
-        return ApiResult.of(HttpStatus.OK.value(), "도시별 스캠 요약 정보를 조회했습니다.", citySummary);
+        LocationScamSummaryResponse stateSummaries = reportService.getStateSummaries();
+        return ApiResult.of(HttpStatus.OK.value(), "State scam summaries for map display.", stateSummaries);
     }
 }
