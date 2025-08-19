@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CityRepository extends JpaRepository<State, Long> {
+public interface StateRepository extends JpaRepository<State, Long> {
 
     Optional<State> findByNameAndCountryId(String name, Long countryId);
 }

@@ -11,10 +11,12 @@ public abstract class BaseReport extends BaseEntity {
     @JoinColumn(name = "scam_id")
     private Scam scam;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "country_id", nullable = false)
     private Country country;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "city_id")
     private State state;

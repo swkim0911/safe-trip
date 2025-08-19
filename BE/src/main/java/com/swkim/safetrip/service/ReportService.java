@@ -43,8 +43,9 @@ public class ReportService {
 
     private final UserService userService;
     private final ScamService scamService;
-    private final LocationService locationService;
     private final ImageService imageService;
+    private final StateService stateService;
+    private final CountryService countryService;
     private final ReportRepository reportRepository;
 
     private final AmazonS3Client amazonS3Client;
@@ -67,7 +68,13 @@ public class ReportService {
         List<Image> savedImageList = saveImagesInS3Bucket(files);
         savedImageList.forEach(userReport::addImage);
 
-        // 5. Country, City 정보 Get
+        // 5. state 객체, country 객체 set.
+
+
+
+
+
+
         CreateLocationCommand createLocationCommand = toCreateLocationCommand(reportSaveRequest);
 
         // 6. Country, City 엔티티 저장. address에 대한 location 객체 생성

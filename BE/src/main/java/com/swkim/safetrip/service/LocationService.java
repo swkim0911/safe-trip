@@ -3,8 +3,8 @@ package com.swkim.safetrip.service;
 import com.swkim.safetrip.entity.Country;
 import com.swkim.safetrip.entity.Location;
 import com.swkim.safetrip.entity.State;
-import com.swkim.safetrip.repository.CityRepository;
 import com.swkim.safetrip.repository.CountryRepository;
+import com.swkim.safetrip.repository.StateRepository;
 import com.swkim.safetrip.service.command.CreateLocationCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.util.Optional;
 public class LocationService {
 
     private final CountryRepository countryRepository;
-    private final CityRepository cityRepository;
+    private final StateRepository stateRepository;
 
     @Transactional
     public Location createLocationWithCityAndCountry(CreateLocationCommand createLocationCommand, String locationAddress, String locationLat, String locationLng) {
@@ -45,7 +45,7 @@ public class LocationService {
             countryRepository.save(country);
         } else {
             country = findCountry.get();
-            Optional<State> findCity = cityRepository.findByNameAndCountryId(cityName, country.getId());
+            Optional<State> findCity = stateRepository.findByNameAndCountryId(cityName, country.getId());
 
             if (findCity.isPresent()) { // country도 있고 city도 있는 경우
                 state = findCity.get();
@@ -57,7 +57,7 @@ public class LocationService {
                         .build();
 
                 country.addCity(state);
-                cityRepository.save(state);
+                stateRepository.save(state);
             }
         }
 
