@@ -7,6 +7,7 @@ import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
+import com.swkim.safetrip.global.exception.custom.StateCountryMismatchException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.ReportRepository;
@@ -29,6 +30,7 @@ public class ReportService {
     private final ImageService imageService;
     private final StateService stateService;
     private final CountryService countryService;
+
     private final ReportRepository reportRepository;
 
     public Long saveReport(String email, ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
@@ -52,8 +54,9 @@ public class ReportService {
         // 5. state 객체, country 객체 set
         Country findCountry = countryService.findCountryById(reportSaveRequest.getCountryId());
         State findState = stateService.findStateByIdWithCountry(reportSaveRequest.getStateId());
-        if (!isStateOfCountry(findState, findCountry)) {
 
+        if (!isStateOfCountry(findState, findCountry)) {
+            throw new StateCountryMismatchException();
         }
         userReport.setCountry(findCountry);
         userReport.setState(findState);

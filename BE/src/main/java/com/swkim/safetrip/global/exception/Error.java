@@ -15,10 +15,11 @@ public enum Error {
     SCAM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Scam not found"),
     STATE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "State not found"),
     COUNTRY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Country not found"),
-    S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "s3 버킷에 이미지를 업로드할 수 없습니다."),
+    USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email"),
+    S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "Unable to upload image to s3 bucket"),
     DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
     DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "This nickname is already in use"),
-    USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email."),
+    STATE_COUNTRY_MISMATCH_ERROR(HttpStatus.BAD_REQUEST.value(), "State and Country is mismatch"),
 
     REFRESH_TOKEN_MISSING_ERROR(HttpStatus.BAD_REQUEST.value(), "Refresh token is empty"),
     REFRESH_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is expired"),
