@@ -36,8 +36,7 @@ public class ReportController {
     public ApiResult<Long> createReport(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
         String email = userDetails.getUsername();
         Long id = reportService.saveReport(email, request, images);
-        String message = messageSource.getMessage("report.create.success", null, null);
-        return ApiResult.of(HttpStatus.CREATED.value(), message, id);
+        return ApiResult.of(HttpStatus.CREATED.value(), "User report registration successful", id);
     }
 
     @Operation(summary = "국가별 스캠 요약 정보 조회", description = "사이드바에 표현될 국가별 스캠 요약 정보를 조회합니다")
