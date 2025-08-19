@@ -7,7 +7,6 @@ import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReportController {
 
     private final ReportService reportService;
-    private final MessageSource messageSource; // todo delete
 
     @Operation(summary = "국가별 스캠 요약 정보 조회", description = "사이드바에 표현될 국가별 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/sidebar-summary/counties")
