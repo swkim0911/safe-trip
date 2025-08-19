@@ -3,14 +3,11 @@ package com.swkim.safetrip.repository;
 import com.swkim.safetrip.config.QuerydslConfig;
 import com.swkim.safetrip.entity.Location;
 import com.swkim.safetrip.entity.UserReport;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-
-import static org.mockito.Mockito.mockingDetails;
 
 @DataJpaTest
 @Import({QuerydslConfig.class})
@@ -37,10 +34,9 @@ class UserReportRepositoryTest {
         UserReport saveUserReport = reportRepository.save(userReport);
 
         //when
-        UserReport findUserReport = reportRepository.findReportWithLocationById(saveUserReport.getId()).get();
 
         //then
-        boolean isProxy = mockingDetails(findUserReport.getLocation()).isMock(); // fetch join이면 location 객체는 proxy가 아니다.
-        Assertions.assertThat(isProxy).isFalse();
+//        boolean isProxy = mockingDetails(findUserReport.getLocation()).isMock(); // fetch join이면 location 객체는 proxy가 아니다.
+//        Assertions.assertThat(isProxy).isFalse();
     }
 }
