@@ -85,5 +85,73 @@ public class ReportNativeRepository {
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
+
+    public Slice<LocationScamSummaryItem> findStateSummarySlice(Long countryId, Pageable pageable){
+        Sort sort = pageable.getSort(); //todo 공통 부분 함수화
+
+        // 안전한 매핑
+        Map<String, String> SORT_MAPPING = Map.of( // todo 공통 변수
+                "name", "c.name",
+                "scamCnt", "scam_cnt"
+        );
+
+        String orderBy = sort.stream()
+                .map(order -> {
+                    String column = SORT_MAPPING.get(order.getProperty());
+                    if (column == null) {
+                        throw new InvalidSortKeyException();
+                    }
+                    return column + " " + order.getDirection().name();
+                })
+                .collect(Collectors.joining(", "));
+
+        if (orderBy.isBlank()) {
+            orderBy = "c.name ASC"; // 기본값
+        }
+
+
+        String sql = """
+            SELECT s.id, s.name, s.lat, s.lng, COUNT(*) AS scam_cnt
+            FROM (
+                SELECT state_id FROM user_report WHERE countryId = :countryId
+                UNION ALL
+                SELECT state_id FROM external_report WHERE countryId = :countryId
+            ) r
+            JOIN state s ON r.state_id = s.id
+            WHERE s.lat IS NOT NULL AND s.lng IS NOT NULL
+            GROUP BY s.id, s.name, s.lat, s.lng
+            ORDER BY """ + orderBy + """
+            LIMIT :limit OFFSET :offset
+            """;
+
+        Query query = em.createNativeQuery(sql);
+        query.setParameter("countryId", countryId);
+
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+        query.setParameter("limit", pageSize + 1);
+        query.setParameter("offset", offset);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        // DTO 매핑
+        List<LocationScamSummaryItem> items = results.stream()
+                .map(row -> new LocationScamSummaryItem(
+                        ((Number) row[0]).longValue(),
+                        (String) row[1],
+                        ((Number) row[2]).doubleValue(),
+                        ((Number) row[3]).doubleValue(),
+                        ((Number) row[4]).longValue()
+                ))
+                .toList();
+
+        boolean hasNext = items.size() > pageSize;
+        List<LocationScamSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
+
+        return new SliceImpl<>(content, pageable, hasNext);
+    }
+
+
 }
 
