@@ -2,7 +2,6 @@ package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
 import com.swkim.safetrip.dto.response.LocationScamSummaryResponse;
-import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.service.ReportService;
@@ -12,7 +11,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/reports")
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReportController {
 
     private final ReportService reportService;
-    private final MessageSource messageSource;
+    private final MessageSource messageSource; // todo delete
 
     @Operation(summary = "국가별 스캠 요약 정보 조회", description = "사이드바에 표현될 국가별 스캠 요약 정보를 조회합니다")
     @GetMapping(value = "/sidebar-summary/counties")
@@ -41,16 +43,6 @@ public class ReportController {
     public ApiResult<Slice<ReportSummaryItem>> getReportSummariesForSidebar(@RequestParam Long countryId, @RequestParam Long cityId, Pageable pageable) {
         Slice<ReportSummaryItem> reportSummaryPages = reportService.getReportSummaryPages(countryId, cityId, pageable);
         return ApiResult.of(HttpStatus.OK.value(), "Report summaries for sidebar", reportSummaryPages);
-    }
-
-    @Operation(summary = "특정 리포트 조회", description = "특정 리포트를 아이디로 조회합니다")
-    @GetMapping(value = "/{reportId}")
-    public ApiResult<ReportFindByIdResponse> getReport(@PathVariable Long reportId) {
-
-        ReportFindByIdResponse report = reportService.getReport(reportId);
-        String message = messageSource.getMessage("report.get.success", null, null);
-
-        return ApiResult.of(HttpStatus.OK.value(), message, report);
     }
 
     @Operation(summary = "지도에 표시될 스캠 정보 조회", description = "zoom 정도에 따라 도시에 표시될 스캠 요약 정보를 조회합니다")

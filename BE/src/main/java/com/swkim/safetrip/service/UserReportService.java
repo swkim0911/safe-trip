@@ -1,7 +1,9 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
+import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.*;
+import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.StateCountryMismatchException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
@@ -64,8 +66,27 @@ public class UserReportService {
         return savedUserReport.getId();
     }
 
+    @Transactional
+    public UserReportDetailResponse getUserReport(Long id){
+        UserReportDetailResponse userReportDetailResponse
+                = userReportRepository.findReportDetailById(id).orElseThrow(ReportNotFoundException::new);// consider UserReport용 예외 만들까?
+
+        List<String> URLs = getImageUrlsById(id);
+
+        userReportDetailResponse.setURLs(URLs);
+
+        return userReportDetailResponse;
+    }
+
+    private List<String> getImageUrlsById(Long id) {
+        List<Image> images = imageService.findImagesByReportId(id);
+        return images.stream()
+                .map(Image::getAccessURL)
+                .toList();
+    }
+
     private boolean isStateOfCountry(State findState, Country findCountry) {
-        return Objects.equals(findState.getCountry().getId(), findCountry.getId());
+        return Objects.equals(findState.getCountry().getId(), findCountry.getId()); // consider findState.getCountry() 에서 추가 쿼리 나가니까 fetch join으로 한번에 할까
     }
 
 }

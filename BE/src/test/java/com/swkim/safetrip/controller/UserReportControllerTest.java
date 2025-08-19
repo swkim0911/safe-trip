@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
-import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
+import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
@@ -108,7 +108,7 @@ class UserReportControllerTest {
 
         // given
         Long id = 0L;
-        ReportFindByIdResponse response = ReportFindByIdResponse.builder()
+        UserReportDetailResponse response = UserReportDetailResponse.builder()
                 .title("this is title")
                 .scam("THEFT")
                 .lat("51.231")

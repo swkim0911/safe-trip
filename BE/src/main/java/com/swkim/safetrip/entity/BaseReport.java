@@ -2,8 +2,10 @@ package com.swkim.safetrip.entity;
 
 import com.swkim.safetrip.entity.enums.Source;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.Setter;
 
+@Getter
 @MappedSuperclass
 public abstract class BaseReport extends BaseEntity {
 

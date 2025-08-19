@@ -1,7 +1,7 @@
 package com.swkim.safetrip.mapper;
 
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
-import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
+import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.UserReport;
 import com.swkim.safetrip.entity.enums.Source;
 
@@ -17,8 +17,8 @@ public class ReportMapper {
                 .build();
     }
 
-    public static ReportFindByIdResponse toReportFindByIdResponse(UserReport userReport, List<String> URLs) {
-        return ReportFindByIdResponse.builder()
+    public static UserReportDetailResponse toReportFindByIdResponse(UserReport userReport, List<String> URLs) {
+        return UserReportDetailResponse.builder()
                 .title(userReport.getTitle())
                 .scam(userReport.getScam().getName())
                 .address(userReport.getLocation().getAddress())

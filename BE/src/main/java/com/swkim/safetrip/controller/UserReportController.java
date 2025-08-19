@@ -1,6 +1,7 @@
 package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.request.ReportSaveRequest;
+import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.security.CustomUserDetails;
 import com.swkim.safetrip.service.UserReportService;
@@ -11,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -32,5 +30,13 @@ public class UserReportController {
         String email = userDetails.getUsername();
         Long id = userReportService.saveUserReport(email, request, images);
         return ApiResult.of(HttpStatus.CREATED.value(), "User report registration successful", id);
+    }
+
+    @Operation(summary = "특정 유저 리포트 조회", description = "특정 유저 리포트를 아이디로 조회합니다")
+    @GetMapping(value = "/user-reports/{reportId}")
+    public ApiResult<UserReportDetailResponse> getUserReport(@PathVariable Long reportId) {
+        UserReportDetailResponse report = userReportService.getUserReport(reportId);
+
+        return ApiResult.of(HttpStatus.OK.value(), "User report retrieved", report);
     }
 }

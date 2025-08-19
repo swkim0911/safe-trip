@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface ReportRepository extends JpaRepository<UserReport, Long>, ReportRepositoryCustom {
 
     @Query("SELECT r FROM Report r JOIN FETCH r.location WHERE r.id = :id")
-    Optional<UserReport> findReportWithLocationById(@Param("id")Long id);
+    Optional<UserReport> findReportWithLocationById(@Param("id")Long id); // todo 삭제
 }

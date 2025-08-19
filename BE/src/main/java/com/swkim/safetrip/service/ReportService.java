@@ -2,12 +2,7 @@ package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
 import com.swkim.safetrip.dto.response.LocationScamSummaryResponse;
-import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
-import com.swkim.safetrip.entity.Image;
-import com.swkim.safetrip.entity.UserReport;
-import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
-import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.ReportJdbcRepository;
 import com.swkim.safetrip.repository.ReportNativeRepository;
 import com.swkim.safetrip.repository.ReportRepository;
@@ -57,17 +52,5 @@ public class ReportService {
     @Transactional
     public Slice<ReportSummaryItem> getReportSummaryPages(Long countryId, Long cityId, Pageable pageable) {
         return reportNativeRepository.findReportSummarySliceByCountryIdAndStateId(countryId, cityId, pageable);
-    }
-
-    @Transactional
-    public ReportFindByIdResponse getReport(Long id){
-
-        UserReport userReport = reportRepository.findReportWithLocationById(id).orElseThrow(ReportNotFoundException::new);
-        List<Image> images = imageService.findImagesByReportId(id);
-        List<String> URLs = images.stream()
-                .map(Image::getAccessURL)
-                .toList();
-
-        return ReportMapper.toReportFindByIdResponse(userReport, URLs);
     }
 }
