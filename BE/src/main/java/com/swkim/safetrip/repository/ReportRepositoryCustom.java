@@ -9,7 +9,6 @@ public interface ReportRepositoryCustom {
 
     Slice<ReportSummaryItem> findReportSummarySliceByCountryAndCity(Long country, Long city, Pageable pageable);
 
-    Slice<LocationScamSummaryItem> findCountrySummarySlice(Pageable pageable);
 
     Slice<LocationScamSummaryItem> findCitySummarySlice(Long countryId, Pageable pageable);
 }

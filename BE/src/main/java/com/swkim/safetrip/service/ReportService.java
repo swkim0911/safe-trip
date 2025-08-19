@@ -90,7 +90,7 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
-    public Slice<LocationScamSummaryItem> getCitySummaryPage(Long countryId, Pageable pageable) {
+    public Slice<LocationScamSummaryItem> getStateSummaryPages(Long countryId, Pageable pageable) {
         return reportRepository.findCitySummarySlice(countryId, pageable);
     }
 

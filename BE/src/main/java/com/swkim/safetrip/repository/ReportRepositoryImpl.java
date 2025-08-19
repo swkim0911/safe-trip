@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.swkim.safetrip.entity.QCity.city;
-import static com.swkim.safetrip.entity.QCountry.country;
 import static com.swkim.safetrip.entity.QLocation.location;
 import static com.swkim.safetrip.entity.QReport.report;
 import static com.swkim.safetrip.entity.QScam.scam;
@@ -51,30 +50,6 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 
         boolean hasNext = reportSummaryItems.size() > pageSize;
         List<ReportSummaryItem> content = hasNext ? reportSummaryItems.subList(0, pageSize) : reportSummaryItems;
-
-        return new SliceImpl<>(content, pageable, hasNext);
-    }
-
-    @Override
-    public Slice<LocationScamSummaryItem> findCountrySummarySlice(Pageable pageable) {
-        int pageSize = pageable.getPageSize();
-
-        List<LocationScamSummaryItem> locationScamSummaryItems = jpaQueryFactory.select(Projections.fields(
-                        LocationScamSummaryItem.class,
-                        country.id,
-                        country.name,
-                        location.count().as("scamCnt"),
-                        country.lat,
-                        country.lng))
-                .from(location)
-                .join(location.country, country)
-                .groupBy(country.id, country.name, country.lat, country.lng)
-                .offset(pageable.getOffset())
-                .limit(pageSize + 1)
-                .fetch();
-
-        boolean hasNext = locationScamSummaryItems.size() > pageSize;
-        List<LocationScamSummaryItem> content = hasNext ? locationScamSummaryItems.subList(0, pageSize) : locationScamSummaryItems;
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
