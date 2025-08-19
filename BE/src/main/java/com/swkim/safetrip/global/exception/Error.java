@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum Error {
 
     METHOD_ARGUMENT_NOT_VALID_ERROR(HttpStatus.BAD_REQUEST.value(), "Invalid request"),
+
     UN_AUTHENTICATION_ERROR(HttpStatus.UNAUTHORIZED.value(), "로그인이 필요합니다."),
     COORDINATES_NOT_VALID_ERROR(HttpStatus.BAD_REQUEST.value(), "잘못된 위치 정보 입력입니다."),
     REPORT_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Report not found"),
