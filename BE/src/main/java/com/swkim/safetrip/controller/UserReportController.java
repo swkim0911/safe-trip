@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
+@RequestMapping("/user-reports")
 @RequiredArgsConstructor
 public class UserReportController {
 
@@ -25,7 +26,7 @@ public class UserReportController {
 
     @Operation(summary = "글 등록", description = "새로운 게시글을 작성하여 서버에 등록합니다", security = @SecurityRequirement(name = "BearerAuth"))
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/user-reports", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ApiResult<Long> createReport(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestPart @Valid ReportSaveRequest request, @RequestPart(required = false) List<MultipartFile> images) {
         String email = userDetails.getUsername();
         Long id = userReportService.saveUserReport(email, request, images);
@@ -33,7 +34,7 @@ public class UserReportController {
     }
 
     @Operation(summary = "특정 유저 리포트 조회", description = "특정 유저 리포트를 아이디로 조회합니다")
-    @GetMapping(value = "/user-reports/{reportId}")
+    @GetMapping(value = "/{reportId}")
     public ApiResult<UserReportDetailResponse> getUserReport(@PathVariable Long reportId) {
         UserReportDetailResponse report = userReportService.getUserReport(reportId);
         return ApiResult.of(HttpStatus.OK.value(), "User report retrieved", report);
