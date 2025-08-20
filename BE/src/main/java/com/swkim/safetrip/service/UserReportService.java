@@ -86,7 +86,7 @@ public class UserReportService {
     }
 
     private boolean isStateOfCountry(State findState, Country findCountry) {
-        return Objects.equals(findState.getCountry().getId(), findCountry.getId()); // consider findState.getCountry() 에서 추가 쿼리 나가니까 fetch join으로 한번에 할까
+        return Objects.equals(findState.getCountry().getId(), findCountry.getId());
     }
 
 }
