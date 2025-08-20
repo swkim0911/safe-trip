@@ -1,4 +1,4 @@
-package com.swkim.safetrip.config;
+package com.swkim.safetrip.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

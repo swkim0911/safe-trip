@@ -1,4 +1,4 @@
-package com.swkim.safetrip.config;
+package com.swkim.safetrip.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;

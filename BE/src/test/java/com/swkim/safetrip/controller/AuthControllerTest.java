@@ -1,7 +1,6 @@
 package com.swkim.safetrip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swkim.safetrip.config.SecurityConfig;
 import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
@@ -9,6 +8,7 @@ import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenMissingException;
 import com.swkim.safetrip.jwt.JwtProvider;
+import com.swkim.safetrip.security.config.SecurityConfig;
 import com.swkim.safetrip.service.AuthService;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.http.Cookie;
