@@ -23,7 +23,7 @@ public class UserReport extends BaseReport{
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userReport", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
 
     @Builder
