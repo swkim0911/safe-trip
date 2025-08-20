@@ -17,8 +17,8 @@ public class State {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "external_id", unique = true, nullable = false)
-    private Long externalId;
+    @Column(name = "dataset_id", unique = true, nullable = false)
+    private Long datasetId;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)

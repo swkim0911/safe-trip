@@ -20,8 +20,8 @@ public class Country {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "external_id", unique = true, nullable = false)
-    private Long externalId; // consider: 외부 데이터셋에서 가져온 정보여서 그 고유 아이디인데 이름이 직관적이지 않다
+    @Column(name = "dataset_id", unique = true, nullable = false)
+    private Long datasetId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -36,11 +36,5 @@ public class Country {
     private Double lng;
 
     @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
-    private List<State> cities = new ArrayList<>();
-
-    // 양방향 연관관계 편의 메서드
-    public void addCity(State state){
-        cities.add(state);
-        state.setCountry(this);
-    }
+    private List<State> states = new ArrayList<>();
 }

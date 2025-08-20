@@ -26,7 +26,7 @@ public abstract class BaseReport extends BaseEntity {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "city_id")
+    @JoinColumn(name = "state_id")
     private State state;
 
     @Column(name = "title", nullable = false)
