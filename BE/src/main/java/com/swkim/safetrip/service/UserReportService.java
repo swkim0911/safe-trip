@@ -1,6 +1,6 @@
 package com.swkim.safetrip.service;
 
-import com.swkim.safetrip.dto.request.ReportSaveRequest;
+import com.swkim.safetrip.dto.request.UserReportSaveRequest;
 import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
@@ -28,17 +28,17 @@ public class UserReportService {
 
     private final UserReportRepository userReportRepository;
 
-    public Long saveUserReport(String email, ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
+    public Long saveUserReport(String email, UserReportSaveRequest userReportSaveRequest, List<MultipartFile> files) {
 
         // 1. reportRequest -> Report Mapping
-        UserReport userReport = ReportMapper.toReport(reportSaveRequest);
+        UserReport userReport = ReportMapper.toReport(userReportSaveRequest);
 
         // 2. User 객체 report에 추가
         User findUser = userService.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
         userReport.setUser(findUser);
 
         // 3. scam 객체 report에 추가
-        Scam findScam = scamService.findScamById(reportSaveRequest.getScamId());
+        Scam findScam = scamService.findScamById(userReportSaveRequest.getScamId());
         userReport.setScam(findScam);
 
         // CONSIDER: 이미지 업로드 방식 개선 (pre-signed URL 도입 검토)
@@ -47,8 +47,8 @@ public class UserReportService {
         savedImageList.forEach(userReport::addImage);
 
         // 5. state 객체, country 객체 set
-        Country findCountry = countryService.findCountryById(reportSaveRequest.getCountryId());
-        State findState = stateService.findStateByIdWithCountry(reportSaveRequest.getStateId());
+        Country findCountry = countryService.findCountryById(userReportSaveRequest.getCountryId());
+        State findState = stateService.findStateByIdWithCountry(userReportSaveRequest.getStateId());
 
         if (!isStateOfCountry(findState, findCountry)) {
             throw new StateCountryMismatchException();

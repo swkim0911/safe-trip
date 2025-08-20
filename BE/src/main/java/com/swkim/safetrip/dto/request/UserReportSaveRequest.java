@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportSaveRequest {
+public class UserReportSaveRequest {
 
     @NotBlank(message = "Title must not be blank.")
     private String title;

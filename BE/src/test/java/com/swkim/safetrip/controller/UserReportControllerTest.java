@@ -4,14 +4,13 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.config.SecurityConfig;
-import com.swkim.safetrip.dto.request.ReportSaveRequest;
+import com.swkim.safetrip.dto.request.UserReportSaveRequest;
 import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.InvalidAccessTokenException;
 import com.swkim.safetrip.jwt.JwtProvider;
-import com.swkim.safetrip.service.ReportService;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
@@ -37,7 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ReportController.class)
+@WebMvcTest(UserReportController.class)
 @MockBean(JpaMetamodelMappingContext.class)
 @Import(SecurityConfig.class)
 class UserReportControllerTest {
@@ -49,10 +47,7 @@ class UserReportControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ReportService reportService;
-
-    @Autowired
-    private MessageSource messageSource;
+    private UserReportController userReportController;
 
     @MockBean
     private UserService userService;
@@ -61,14 +56,14 @@ class UserReportControllerTest {
     private JwtProvider jwtProvider;
 
     @Test
-    @DisplayName("[Post] /reports 요청시 저장된 report의 id를 반환한다")
+    @DisplayName("[Post] /user-reports 요청시 저장된 report의 id를 반환한다")
     @SuppressWarnings("unchecked")
     void scam_보고서_등록_성공시_id를_반환해야한다() throws Exception {
 
         // given
-        ReportSaveRequest reportSaveRequest = getMockReportSaveRequest();
+        UserReportSaveRequest userReportSaveRequest = getMockReportSaveRequest();
 
-        MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
+        MockMultipartFile request = getMockMultipartFile(userReportSaveRequest);
         MockMultipartFile images = new MockMultipartFile("images", "my_image.jpg", MediaType.IMAGE_JPEG_VALUE, "this is image".getBytes());
 
         String accessToken = "im.access.token";
@@ -85,7 +80,7 @@ class UserReportControllerTest {
         given(jwtProvider.extractEmail(eq(decodedJwt))).willReturn(Optional.of(email));
         given(userService.findUserByEmail(email)).willReturn(Optional.of(mockUser));
 
-        given(reportService.saveReport(any(String.class), any(ReportSaveRequest.class), anyList())).willReturn(1L);
+        given(reportService.saveReport(any(String.class), any(UserReportSaveRequest.class), anyList())).willReturn(1L);
 
         // when
         ResultActions resultActions = mockMvc.perform(multipart("/reports")
@@ -131,8 +126,8 @@ class UserReportControllerTest {
     @Test
     void 글_등록_요청에_액세스_토큰이_없는_경우_401_에러가_발생한다() throws Exception {
         // given
-        ReportSaveRequest reportSaveRequest = getMockReportSaveRequest();
-        MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
+        UserReportSaveRequest userReportSaveRequest = getMockReportSaveRequest();
+        MockMultipartFile request = getMockMultipartFile(userReportSaveRequest);
 
         // when & then
         mockMvc.perform(multipart("/reports")
@@ -146,8 +141,8 @@ class UserReportControllerTest {
     @Test
     void 글_등록_요청에_액세스_토큰이_invalid한_경우_401_에러가_발생한다() throws Exception {
         // given
-        ReportSaveRequest reportSaveRequest = getMockReportSaveRequest();
-        MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
+        UserReportSaveRequest userReportSaveRequest = getMockReportSaveRequest();
+        MockMultipartFile request = getMockMultipartFile(userReportSaveRequest);
         String invalidAccessToken = "im.invalid.token";
 
         given(jwtProvider.extractAccessToken(any(HttpServletRequest.class)))
@@ -166,8 +161,8 @@ class UserReportControllerTest {
     @Test
     void 액세스_토큰이_만료된_상태에서_글_등록_요청시_40101_응답을_반환한다() throws Exception {
         // given
-        ReportSaveRequest reportSaveRequest = getMockReportSaveRequest();
-        MockMultipartFile request = getMockMultipartFile(reportSaveRequest);
+        UserReportSaveRequest userReportSaveRequest = getMockReportSaveRequest();
+        MockMultipartFile request = getMockMultipartFile(userReportSaveRequest);
         String expiredAccessToken = "im.expired.token";
 
         given(jwtProvider.extractAccessToken(any(HttpServletRequest.class)))
@@ -183,7 +178,7 @@ class UserReportControllerTest {
                 .andExpect(jsonPath("$.message").value("Access token is expired"));
     }
 
-    private ReportSaveRequest getMockReportSaveRequest() {
+    private UserReportSaveRequest getMockReportSaveRequest() {
         String title = "this is title";
         Long scamId = 1L;
         String address = "대한민국 서울시 남산타워";
@@ -194,7 +189,7 @@ class UserReportControllerTest {
         String description = "this is description";
         String advice = "this is advice";
 
-        return ReportSaveRequest.builder()
+        return UserReportSaveRequest.builder()
                 .title(title)
                 .scamId(scamId)
                 .address(address)
@@ -206,7 +201,7 @@ class UserReportControllerTest {
                 .advice(advice).build();
     }
 
-    private MockMultipartFile getMockMultipartFile(ReportSaveRequest reportSaveRequest) throws JsonProcessingException {
-        return new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(reportSaveRequest));
+    private MockMultipartFile getMockMultipartFile(UserReportSaveRequest userReportSaveRequest) throws JsonProcessingException {
+        return new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(userReportSaveRequest));
     }
 }
