@@ -31,9 +31,6 @@ public class User extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column
-    private String refreshToken; //todo 삭제
-
     @Builder
     public User(String email, String password, String nickname, Role role) {
         this.email = email;
@@ -45,9 +42,4 @@ public class User extends BaseEntity{
     public void passwordEncode(PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(this.password);
     }
-
-    public void updateRefreshToken(String updateRefreshToken) {
-        this.refreshToken = updateRefreshToken;
-    }
-
 }
