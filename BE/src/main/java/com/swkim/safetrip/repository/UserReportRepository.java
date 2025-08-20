@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface UserReportRepository extends JpaRepository<UserReport, Long>{
 
     @Query("""
-    select new com.swkim.safetrip.dto.response.ReportDetailResponse(
+    select new com.swkim.safetrip.dto.response.UserReportDetailResponse(
         u.nickname,
         ur.title,
         scam.name,

@@ -1,6 +1,7 @@
 package com.swkim.safetrip.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.swkim.safetrip.entity.enums.Source;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ExternalReportDetailResponse {
 
-    private String source;
+    private Source source;
 
     private String sourceUrl;
 
