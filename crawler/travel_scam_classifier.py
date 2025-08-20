@@ -9,6 +9,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 
+# text가 tavel scam 관련 글이라면 1, 아니면 0을 반환한다
 def classify(text: str) -> str:
     prompt = prompt_manager.generate_classification_prompt(text)
 

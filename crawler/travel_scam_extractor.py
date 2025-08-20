@@ -9,8 +9,12 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
+"""
+분류된 text에서 
+"""
 
-def analyze(text: str):
+
+def extract(text: str):
     prompt = prompt_manager.generate_extraction_prompt(text)
 
     response = client.responses.create(
