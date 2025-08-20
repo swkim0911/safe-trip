@@ -21,7 +21,7 @@ public class Country {
     private Long id;
 
     @Column(name = "external_id", unique = true, nullable = false)
-    private Long externalId;
+    private Long externalId; // consider: 외부 데이터셋에서 가져온 정보여서 그 고유 아이디인데 이름이 직관적이지 않다
 
     @Column(name = "name", nullable = false)
     private String name;

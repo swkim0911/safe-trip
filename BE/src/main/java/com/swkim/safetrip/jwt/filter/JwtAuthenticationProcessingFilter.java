@@ -75,7 +75,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     }
 
     private static final Set<Map.Entry<String, String>> protectedEndpoints = Set.of(
-            Map.entry("/reports", "POST"),
+            Map.entry("/user-reports", "POST"),
             Map.entry("/me", "GET")
     );
 

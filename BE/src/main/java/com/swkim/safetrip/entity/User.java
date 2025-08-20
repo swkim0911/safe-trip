@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDate;
-
 @Entity
 @Table(name = "users")
 @Getter
@@ -34,7 +32,7 @@ public class User extends BaseEntity{
     private Role role;
 
     @Column
-    private String refreshToken;
+    private String refreshToken; //todo 삭제
 
     @Builder
     public User(String email, String password, String nickname, Role role) {

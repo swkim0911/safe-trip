@@ -44,7 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/reports/**").permitAll()
                         .requestMatchers("/users", "/auth/login", "/auth/refresh").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/reports").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/user-reports/").authenticated()
                         .anyRequest().permitAll()
                 ).exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint()));
