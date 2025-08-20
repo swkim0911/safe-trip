@@ -1,7 +1,10 @@
 package com.swkim.safetrip.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(
@@ -20,7 +23,6 @@ public class State extends BaseEntity{
     @Column(name = "dataset_id", unique = true, nullable = false)
     private Long datasetId;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id") // 양방향
     private Country country;
@@ -38,9 +40,16 @@ public class State extends BaseEntity{
     private Double lng;
 
     @Builder
-    public State(String name, String lat, String lng) {
+    public State(Long datasetId, String name, String koreanName, Double lat, Double lng) {
+        this.datasetId = datasetId;
         this.name = name;
-        this.lat = Double.parseDouble(lat);
-        this.lng = Double.parseDouble(lng);
+        this.koreanName = koreanName;
+        this.lat = lat;
+        this.lng = lng;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+        country.getStates().add(this);
     }
 }

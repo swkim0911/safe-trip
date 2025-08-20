@@ -2,6 +2,7 @@ package com.swkim.safetrip.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,4 +38,13 @@ public class Country extends BaseEntity{
 
     @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
     private List<State> states = new ArrayList<>();
+
+    @Builder
+    public Country(Long datasetId, String name, String koreanName, Double lat, Double lng) {
+        this.datasetId = datasetId;
+        this.name = name;
+        this.koreanName = koreanName;
+        this.lat = lat;
+        this.lng = lng;
+    }
 }
