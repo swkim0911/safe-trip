@@ -30,5 +30,4 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     where ur.id = :id
     """)
     Optional<UserReportDetailResponse> findReportDetailById(@Param("id") Long id);
-
 }

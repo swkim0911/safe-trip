@@ -11,8 +11,6 @@ import java.util.Optional;
 @Repository
 public interface StateRepository extends JpaRepository<State, Long> {
 
-    Optional<State> findByNameAndCountryId(String name, Long countryId);
-
     @Query("SELECT s FROM State s JOIN FETCH s.country WHERE s.id = :id")
     Optional<State> findByIdWithCountry(@Param("id") Long id);
 }
