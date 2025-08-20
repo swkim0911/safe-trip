@@ -1,7 +1,6 @@
 package com.swkim.safetrip.repository;
 
 import com.swkim.safetrip.config.QuerydslConfig;
-import com.swkim.safetrip.entity.Location;
 import com.swkim.safetrip.entity.UserReport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
