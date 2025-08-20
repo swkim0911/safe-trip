@@ -1,10 +1,10 @@
-import praw
-import time
 import tiktoken
+import time
+import praw
+import os
 
 keywords = ["travel scam"]
-
-enc = tiktoken.encoding_for_model("gpt-4o-mini")
+enc = tiktoken.encoding_for_model(os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
 
 
 def crawl_subreddit_metadata(reddit):

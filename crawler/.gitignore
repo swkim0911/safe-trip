@@ -217,6 +217,8 @@ pyrightconfig.json
 [Ss]cripts
 pyvenv.cfg
 pip-selfcheck.json
+
+# custom
+prompt/*.txt
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,python,venv
-prompts/*.txt
-test.*
