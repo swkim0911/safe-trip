@@ -29,5 +29,5 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     join ur.state st
     where ur.id = :id
     """)
-    Optional<UserReportDetailResponse> findReportDetailById(@Param("id") Long id);
+    Optional<UserReportDetailResponse> findReportDetailById(@Param("id") Long id); // todo test 코드 작성
 }

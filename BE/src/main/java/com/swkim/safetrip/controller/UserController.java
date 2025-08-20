@@ -47,7 +47,7 @@ public class UserController {
     }
 
     @Operation(summary = "사용자 정보 조회", description = "로그인 후, 사용자 정보를 조회합니다")
-    @GetMapping("/me")
+    @GetMapping("/me") //consider url -> /users/me 로 변경할까
     public ApiResult<UserInfoResponse> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         UserInfoResponse userInfoResponse = UserInfoResponse.builder()
                 .nickname(userDetails.getNickname())

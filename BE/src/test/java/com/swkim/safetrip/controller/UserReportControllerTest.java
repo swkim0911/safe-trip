@@ -4,6 +4,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.dto.request.UserReportSaveRequest;
+import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
@@ -26,10 +27,12 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -85,29 +88,32 @@ class UserReportControllerTest {
     }
 
     @Test
-    @DisplayName("[GET] /reports/{id} 요청시 저장된 report 정보를 보인다.")
+    @DisplayName("[GET] /user-reports/{reportId} 요청시 저장된 user report 정보를 보인다.")
     void 보고서_id_조회시_보고서_정보를_보인다() throws Exception {
 
         // given
-        Long id = 0L;
-//        UserReportDetailResponse response = UserReportDetailResponse.builder()
-//                .title("this is title")
-//                .scam("THEFT")
-//                .lat("51.231")
-//                .lng("129.141")
-//                .address("대한민국 서울시 남산타워")
-//                .URLs(new ArrayList<>())
-//                .description("this is description")
-//                .advice("this is my advice")
-//                .build();
+        Long reportId = 0L;
+        UserReportDetailResponse response = UserReportDetailResponse
+                .builder()
+                .nickname("nickname")
+                .title("this is title")
+                .scamName("scam")
+                .countryName("Korea")
+                .stateName("Seoul")
+                .description("hello world")
+                .createdAt(LocalDateTime.now())
+                .build();
 
+        given(userReportService.getUserReport(reportId)).willReturn(response);
         // when
-//        when(reportService.getReport(id)).thenReturn(response);
-//        // then
-//        mockMvc.perform(get("/reports/" + "{id}", id))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.code").value(200))
-//                .andExpect(jsonPath("$.message").value(messageSource.getMessage("report.get.success", null, null)));
+        ResultActions resultActions = mockMvc.perform(get("/user-reports/" + "{reportId}", reportId));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.result.countryName").value("Korea"));
+
     }
 
     @Test
@@ -182,10 +188,6 @@ class UserReportControllerTest {
 
     }
 
-    private MockMultipartFile getMockMultipartFile(UserReportSaveRequest userReportSaveRequest) throws JsonProcessingException {
-        return new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(userReportSaveRequest));
-    }
-
     private void mockJwtAuthentication() {
         String accessToken = "im.access.token";
         String email = "test@gmail.com";
@@ -200,5 +202,9 @@ class UserReportControllerTest {
         given(jwtProvider.verifyAccessToken(eq(accessToken))).willReturn(decodedJwt);
         given(jwtProvider.extractEmail(eq(decodedJwt))).willReturn(Optional.of(email));
         given(userService.findUserByEmail(email)).willReturn(Optional.of(mockUser));
+    }
+
+    private MockMultipartFile getMockMultipartFile(UserReportSaveRequest userReportSaveRequest) throws JsonProcessingException {
+        return new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(userReportSaveRequest));
     }
 }

@@ -1,6 +1,7 @@
 package com.swkim.safetrip.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,6 +31,7 @@ public class UserReportDetailResponse {
     @Setter
     private List<String> URLs;
 
+    @Builder
     public UserReportDetailResponse(
             String nickname,
             String title,
