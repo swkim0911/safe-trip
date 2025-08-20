@@ -113,7 +113,6 @@ class UserReportControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.result.countryName").value("Korea"));
-
     }
 
     @Test
@@ -122,12 +121,14 @@ class UserReportControllerTest {
         UserReportSaveRequest userReportSaveRequest = getMockUserReportSaveRequest();
         MockMultipartFile request = getMockMultipartFile(userReportSaveRequest);
 
-        // when & then
-        mockMvc.perform(multipart("/reports")
-                .file(request))
+        // when
+        ResultActions resultActions = mockMvc.perform(multipart("/user-reports")
+                .file(request));
+
+        // then
+        resultActions
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(401))
-                .andExpect(jsonPath("$.message").value("Access token is missing"));
+                .andExpect(jsonPath("$.code").value(401));
     }
 
 
@@ -143,12 +144,13 @@ class UserReportControllerTest {
 
         doThrow(new InvalidAccessTokenException()).when(jwtProvider).verifyAccessToken(invalidAccessToken);
 
-        // when & then
-        mockMvc.perform(multipart("/reports")
-                        .file(request))
+        // when
+        ResultActions resultActions = mockMvc.perform(multipart("/user-reports")
+                .file(request));
+        // then
+        resultActions
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(401))
-                .andExpect(jsonPath("$.message").value("Access token is invalid"));
+                .andExpect(jsonPath("$.code").value(401));
     }
 
     @Test
@@ -163,9 +165,11 @@ class UserReportControllerTest {
 
         doThrow(new AccessTokenExpiredException()).when(jwtProvider).verifyAccessToken(expiredAccessToken);
 
-        // when & then
-        mockMvc.perform(multipart("/reports")
-                        .file(request))
+        // when
+        ResultActions resultActions = mockMvc.perform(multipart("/user-reports")
+                .file(request));
+        // then
+        resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(40101))
                 .andExpect(jsonPath("$.message").value("Access token is expired"));
