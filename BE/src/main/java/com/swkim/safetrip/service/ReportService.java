@@ -5,7 +5,6 @@ import com.swkim.safetrip.dto.response.LocationScamSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.repository.ReportJdbcRepository;
 import com.swkim.safetrip.repository.ReportNativeRepository;
-import com.swkim.safetrip.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -21,9 +20,6 @@ import static com.swkim.safetrip.dto.response.LocationScamSummaryResponse.Locati
 @RequiredArgsConstructor
 public class ReportService {
 
-    private final ImageService imageService;
-
-    private final ReportRepository reportRepository;
     private final ReportJdbcRepository reportJdbcRepository;
     private final ReportNativeRepository reportNativeRepository;
 
