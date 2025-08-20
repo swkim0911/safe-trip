@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -26,7 +27,7 @@ public class UserController {
             @ApiResponse(responseCode = "201", description = "회원가입 성공"),
             @ApiResponse(responseCode = "400", description = "이미 존재하는 이메일 또는 닉네임으로 인한 회원가입 실패")
     })
-    @PostMapping("/users")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResult<Long> signup(@RequestBody @Valid UserSignUpRequest signUpRequest) {
         Long userId = userService.signup(signUpRequest);
@@ -35,19 +36,19 @@ public class UserController {
     }
 
     @Operation(summary = "이메일 사용 가능 여부 확인", description = "입력한 이메일이 형식에 맞고, 중복 여부를 확인합니다.")
-    @GetMapping("/users/validate-email")
+    @GetMapping("/validate-email")
     public ApiResult<ValidationResponse> validateEmail(@RequestParam String email) {
         return ApiResult.of(HttpStatus.OK.value(), "Complete email duplication check", userService.validateEmail(email));
     }
 
     @Operation(summary = "닉네임 사용 가능 여부 확인", description = "입력한 닉네임이 형식에 맞고, 중복 여부를 확인합니다.")
-    @GetMapping("/users/validate-nickname")
+    @GetMapping("/validate-nickname")
     public ApiResult<ValidationResponse> validateNickname(@RequestParam String nickname) {
         return ApiResult.of(HttpStatus.OK.value(), "Complete nickname duplication check", userService.validateNickname(nickname));
     }
 
     @Operation(summary = "사용자 정보 조회", description = "로그인 후, 사용자 정보를 조회합니다")
-    @GetMapping("/me") //consider url -> /users/me 로 변경할까
+    @GetMapping("/me")
     public ApiResult<UserInfoResponse> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         UserInfoResponse userInfoResponse = UserInfoResponse.builder()
                 .nickname(userDetails.getNickname())
