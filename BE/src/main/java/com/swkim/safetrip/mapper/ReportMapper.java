@@ -1,33 +1,16 @@
 package com.swkim.safetrip.mapper;
 
-import com.swkim.safetrip.dto.request.ReportSaveRequest;
-import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
-import com.swkim.safetrip.entity.Report;
-
-import java.util.List;
+import com.swkim.safetrip.dto.request.UserReportSaveRequest;
+import com.swkim.safetrip.entity.UserReport;
+import com.swkim.safetrip.entity.enums.Source;
 
 public class ReportMapper {
 
-    public static Report toReport(ReportSaveRequest reportSaveRequest) {
-        return Report.builder()
-                .title(reportSaveRequest.getTitle())
-                .description(reportSaveRequest.getDescription())
-                .advice(reportSaveRequest.getAdvice())
+    public static UserReport toReport(UserReportSaveRequest userReportSaveRequest) {
+        return UserReport.builder()
+                .source(Source.SAFETRIP)
+                .title(userReportSaveRequest.getTitle())
+                .description(userReportSaveRequest.getDescription())
                 .build();
     }
-
-    public static ReportFindByIdResponse toReportFindByIdResponse(Report report, List<String> URLs) {
-        return ReportFindByIdResponse.builder()
-                .title(report.getTitle())
-                .scam(report.getScam().getName())
-                .address(report.getLocation().getAddress())
-                .lat(String.valueOf(report.getLocation().getLat()))
-                .lng(String.valueOf(report.getLocation().getLng()))
-                .URLs(URLs)
-                .description(report.getDescription())
-                .advice(report.getAdvice())
-                .createdAt(report.getCreatedAt())
-                .build();
-    }
-
 }

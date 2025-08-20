@@ -6,6 +6,7 @@ import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.jwt.JwtProvider;
+import com.swkim.safetrip.security.CustomUserDetails;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,14 +17,12 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 
-import java.util.Optional;
-
-import static com.swkim.safetrip.global.utils.CookieUtils.createRefreshTokenCookie;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -48,30 +47,28 @@ class AuthServiceTest {
     void 로그인_요청_성공시_액세스_토큰과_리프레시_토큰을_발급한다() {
         String email = "test@gmail.com";
         String password = "password";
-
-        UserLoginRequest loginRequest = UserLoginRequest.builder()
+        User mockUser = User.builder()
                 .email(email)
                 .password(password)
+                .role(Role.USER)
                 .build();
 
-        Authentication authentication = mock(Authentication.class);
+        CustomUserDetails customUserDetails = new CustomUserDetails(mockUser);
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(customUserDetails, password, customUserDetails.getAuthorities());
         given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .willReturn(authentication);
 
         String accessToken = "im.access.token";
         String refreshToken = "im.refresh.token";
 
-        User mockUser = User.builder()
-                .email(email)
-                .password(password)
-                .nickname("nickname")
-                .role(Role.USER)
-                .build();
-
         given(jwtProvider.issueAccessToken(email, Role.USER)).willReturn(accessToken);
         given(jwtProvider.issueRefreshToken(email)).willReturn(refreshToken);
-        given(createRefreshTokenCookie(refreshToken)).willReturn(ResponseCookie.from("refreshToken", refreshToken).build());
-        given(userService.findUserByEmail(email)).willReturn(Optional.of(mockUser));
+
+        UserLoginRequest loginRequest = UserLoginRequest.builder()
+                .email(email)
+                .password(password)
+                .build();
 
         // when
         AuthTokensResponseDto authTokensResponseDto = authService.login(loginRequest);
@@ -80,8 +77,9 @@ class AuthServiceTest {
         AccessTokenResponse accessTokenResponse = authTokensResponseDto.getAccessTokenResponse();
         ResponseCookie refreshTokenCookie = authTokensResponseDto.getRefreshTokenCookie();
 
-        Assertions.assertThat(accessTokenResponse.getAccessToken()).isEqualTo(accessToken);
-        Assertions.assertThat(refreshTokenCookie.getValue()).isEqualTo(refreshToken);
+        verify(tokenService).saveRefreshToken(eq(email), eq(refreshToken), anyLong());
+        assertThat(accessTokenResponse.getAccessToken()).isEqualTo(accessToken);
+        assertThat(refreshTokenCookie.getValue()).isEqualTo(refreshToken);
     }
 
     @Test

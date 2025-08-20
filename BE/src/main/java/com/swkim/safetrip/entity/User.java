@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDate;
-
 @Entity
 @Table(name = "users")
 @Getter
@@ -33,9 +31,6 @@ public class User extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column
-    private String refreshToken;
-
     @Builder
     public User(String email, String password, String nickname, Role role) {
         this.email = email;
@@ -47,9 +42,4 @@ public class User extends BaseEntity{
     public void passwordEncode(PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(this.password);
     }
-
-    public void updateRefreshToken(String updateRefreshToken) {
-        this.refreshToken = updateRefreshToken;
-    }
-
 }

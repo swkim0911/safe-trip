@@ -19,7 +19,7 @@ public class Image {
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "report_id")
-    private Report report;
+    private UserReport userReport;
 
     @Column(name = "original_name", nullable = false)
     private String originalName;

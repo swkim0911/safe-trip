@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LocationSummaryItem {
+public class LocationScamSummaryItem {
 
     private Long id;
-    private String name;
-    private Long scamCnt;
+    private String name; // country or state name
     private double lat;
     private double lng;
+    private Long scamCnt;
 }

@@ -11,9 +11,15 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LocationSummaryResponse {
+public class LocationScamSummaryResponse {
 
-    private String Type;
-    private List<LocationSummaryItem> locationSummaryItems;
+    private LocationType locationType; // country or state
+    private List<LocationScamSummaryItem> items;
 
+    public enum LocationType {
+        COUNTRY,
+        STATE
+    }
 }
+
+

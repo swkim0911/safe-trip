@@ -1,230 +1,52 @@
 package com.swkim.safetrip.service;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.swkim.safetrip.dto.request.ReportSaveRequest;
-import com.swkim.safetrip.dto.response.LocationSummaryItem;
-import com.swkim.safetrip.dto.response.LocationSummaryResponse;
-import com.swkim.safetrip.dto.response.ReportFindByIdResponse;
+import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.dto.response.LocationScamSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
-import com.swkim.safetrip.entity.*;
-import com.swkim.safetrip.global.exception.custom.CoordinatesNotValidException;
-import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
-import com.swkim.safetrip.global.exception.custom.S3UploadException;
-import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
-import com.swkim.safetrip.mapper.ReportMapper;
-import com.swkim.safetrip.repository.ReportRepository;
-import com.swkim.safetrip.service.command.CreateLocationCommand;
+import com.swkim.safetrip.repository.ReportJdbcRepository;
+import com.swkim.safetrip.repository.ReportNativeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+
+import static com.swkim.safetrip.dto.response.LocationScamSummaryResponse.LocationType.COUNTRY;
+import static com.swkim.safetrip.dto.response.LocationScamSummaryResponse.LocationType.STATE;
 
 @Service
 @RequiredArgsConstructor
 public class ReportService {
 
-    @Value("${cloud.aws.s3.bucket-name}")
-    private String bucketName;
+    private final ReportJdbcRepository reportJdbcRepository;
+    private final ReportNativeRepository reportNativeRepository;
 
-    private final UserService userService;
-    private final ScamService scamService;
-    private final LocationService locationService;
-    private final ImageService imageService;
-    private final ReportRepository reportRepository;
-
-    private final AmazonS3Client amazonS3Client;
-
-    public Long saveReport(String email, ReportSaveRequest reportSaveRequest, List<MultipartFile> files) {
-
-        // 1. reportRequest -> Report Mapping
-        Report report = ReportMapper.toReport(reportSaveRequest);
-
-        // 2. User 객체 report에 추가
-        User findUser = userService.findUserByEmail(email).orElseThrow(UserNotFoundException::new);
-        report.setUser(findUser);
-
-        // 3. scam 객체 report에 추가
-        Scam findScam = scamService.findScamById(reportSaveRequest.getScamId());
-        report.setScam(findScam);
-
-        // CONSIDER: 이미지 업로드 방식 개선 (pre-signed URL 도입 검토)
-        // 4. 이미지 S3에 전송하고 report에 추가
-        List<Image> savedImageList = saveImagesInS3Bucket(files);
-        savedImageList.forEach(report::addImage);
-
-        // 5. Country, City 정보 Get
-        CreateLocationCommand createLocationCommand = toCreateLocationCommand(reportSaveRequest);
-
-        // 6. Country, City 엔티티 저장. address에 대한 location 객체 생성
-        Location location = locationService.createLocationWithCityAndCountry(createLocationCommand, reportSaveRequest.getAddress(), reportSaveRequest.getLat(), reportSaveRequest.getLng());
-
-        // 7. report 저장
-        return save(report, location);
+    @Transactional(readOnly = true)
+    public LocationScamSummaryResponse getCountrySummaries(){
+        List<LocationScamSummaryItem> countrySummariesItems = reportJdbcRepository.findCountrySummaries();
+        return new LocationScamSummaryResponse(COUNTRY, countrySummariesItems);
     }
 
     @Transactional(readOnly = true)
-    public LocationSummaryResponse getCountrySummary(){
-        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findCountrySummary();
-        return new LocationSummaryResponse("country", reportMapSummaryItems);
+    public LocationScamSummaryResponse getStateSummaries(){
+        List<LocationScamSummaryItem> stateSummariesItems = reportJdbcRepository.findStateSummaries();
+        return new LocationScamSummaryResponse(STATE, stateSummariesItems);
     }
 
     @Transactional(readOnly = true)
-    public LocationSummaryResponse getCitySummary(){
-        List<LocationSummaryItem> reportMapSummaryItems = reportRepository.findCitySummary();
-        return new LocationSummaryResponse("city", reportMapSummaryItems);
+    public Slice<LocationScamSummaryItem> getCountrySummaryPages(Pageable pageable) {
+        return reportNativeRepository.findCountrySummarySlice(pageable);
     }
 
     @Transactional(readOnly = true)
-    public Slice<LocationSummaryItem> getCountrySummaryPage(Pageable pageable) {
-        return reportRepository.findCountrySummarySlice(pageable);
-    }
-
-    @Transactional(readOnly = true)
-    public Slice<LocationSummaryItem> getCitySummaryPage(Long countryId, Pageable pageable) {
-        return reportRepository.findCitySummarySlice(countryId, pageable);
+    public Slice<LocationScamSummaryItem> getStateSummaryPages(Long countryId, Pageable pageable) {
+        return reportNativeRepository.findStateSummarySliceByCountryId(countryId, pageable);
     }
 
     @Transactional
-    public Slice<ReportSummaryItem> getReportSummaryPage(Long countryId, Long cityId, Pageable pageable) {
-        return reportRepository.findReportSummarySliceByCountryAndCity(countryId, cityId, pageable);
-    }
-
-    @Transactional
-    public ReportFindByIdResponse getReport(Long id){
-
-        Report report = reportRepository.findReportWithLocationById(id).orElseThrow(ReportNotFoundException::new);
-        List<Image> images = imageService.findImagesByReportId(id);
-        List<String> URLs = images.stream()
-                .map(Image::getAccessURL)
-                .toList();
-
-        return ReportMapper.toReportFindByIdResponse(report, URLs);
-    }
-
-    @Transactional
-    private Long save(Report report, Location location) {
-        report.setLocation(location);
-        Report savedReport = reportRepository.save(report);
-        return savedReport.getId();
-    }
-
-
-    private List<Image> saveImagesInS3Bucket(List<MultipartFile> files) {
-        ArrayList<Image> imageList = new ArrayList<>();
-
-        Optional.ofNullable(files)
-                .orElse(Collections.emptyList())
-                .forEach(file -> {
-                    Image image = saveImage(file);
-                    imageList.add(image);
-                });
-
-        return imageList;
-    }
-
-    private CreateLocationCommand toCreateLocationCommand(ReportSaveRequest reportSaveRequest) {
-        String locationInfo = getLocationInfo(reportSaveRequest.getLat(), reportSaveRequest.getLng());
-        JsonObject locationObject = JsonParser.parseString(locationInfo).getAsJsonObject();
-        JsonObject addressObject = locationObject.getAsJsonObject("address");
-        String cityName = addressObject.get("city").getAsString();
-
-        String cityInfo = getCityInfo(cityName);
-        JsonObject cityObject = JsonParser.parseString(cityInfo).getAsJsonArray().get(0).getAsJsonObject();
-
-        String countryName = cityObject.getAsJsonObject("address").get("country").getAsString();
-        cityName = cityObject.getAsJsonObject("address").get("city").getAsString();
-
-        String cityLat = cityObject.get("lat").getAsString();
-        String cityLng = cityObject.get("lon").getAsString();
-
-
-        return new CreateLocationCommand(countryName, cityName, cityLat, cityLng);
-    }
-
-    /**
-     * @return 도시 이름 -> 도시 위도, 경도
-     */
-    private String getCityInfo(String city){
-        RestClient restClient = RestClient.create();
-        String uri = UriComponentsBuilder.newInstance()
-                .scheme("https")
-                .host("nominatim.openstreetmap.org")
-                .path("/search")
-                .queryParam("city",city)
-                .queryParam("format", "json")
-                .queryParam("addressdetails", "1")
-                .queryParam("accept-language", "en")
-                .toUriString();
-
-        return restClient.get()
-                .uri(uri)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, ((request, response) -> {
-                    throw new CoordinatesNotValidException();
-                }))
-                .body(String.class);
-    }
-
-    /**
-     * @return 위도 경도 -> 국가, 도시 정보
-     */
-    private String getLocationInfo(String lat, String lon) {
-        RestClient restClient = RestClient.create();
-        String uri = UriComponentsBuilder.newInstance()
-                .scheme("https")
-                .host("nominatim.openstreetmap.org")
-                .path("/reverse")
-                .queryParam("lat", lat)
-                .queryParam("lon", lon)
-                .queryParam("format", "json")
-                .queryParam("addressdetails", "1")
-                .queryParam("accept-language", "en")
-                .toUriString();
-
-        return restClient.get()
-                .uri(uri)
-                .retrieve()
-                .onStatus(HttpStatusCode :: is4xxClientError, ((request, response) -> {
-                    throw new CoordinatesNotValidException();
-                }))
-                .body(String.class);
-    }
-
-
-    private Image saveImage(MultipartFile file){
-        String originalFilename = file.getOriginalFilename();
-        Image image = Image.builder()
-                .originalName(originalFilename)
-                .build();
-        String fileName = image.getStoredName();
-
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentType(file.getContentType());
-        objectMetadata.setContentLength(file.getSize());
-
-        try {
-            amazonS3Client.putObject(bucketName, fileName, file.getInputStream(), objectMetadata);
-        } catch (IOException e) {
-            throw new S3UploadException();
-        }
-
-        String accessURL = amazonS3Client.getUrl(bucketName, fileName).toString();
-        image.setAccessURL(accessURL);
-        return image;
+    public Slice<ReportSummaryItem> getReportSummaryPages(Long countryId, Long stateId, Pageable pageable) {
+        return reportNativeRepository.findReportSummarySliceByCountryIdAndStateId(countryId, stateId, pageable);
     }
 }

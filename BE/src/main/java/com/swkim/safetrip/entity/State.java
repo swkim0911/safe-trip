@@ -6,23 +6,26 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
-@Table(name = "country", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "name")
-})
+@Table(
+        name = "state",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"name", "country_id"})
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Country extends BaseEntity{
+public class State extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(name = "dataset_id", unique = true, nullable = false)
     private Long datasetId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id") // 양방향
+    private Country country;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -31,20 +34,22 @@ public class Country extends BaseEntity{
     private String koreanName;
 
     @Column(name = "lat", nullable = false)
-    private Double lat;
+    private Double lat; //consider: state에는 lat, lng 정보가 없을 수도 있는데, 그럴 때는 어떻게 할지 정하기(ex: 안도라) -> 아마 그냥 null저장하고, summary 조회할 때는 생략
 
     @Column(name = "lng", nullable = false)
     private Double lng;
 
-    @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
-    private List<State> states = new ArrayList<>();
-
     @Builder
-    public Country(Long datasetId, String name, String koreanName, Double lat, Double lng) {
+    public State(Long datasetId, String name, String koreanName, Double lat, Double lng) {
         this.datasetId = datasetId;
         this.name = name;
         this.koreanName = koreanName;
         this.lat = lat;
         this.lng = lng;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+        country.getStates().add(this);
     }
 }
