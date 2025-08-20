@@ -41,7 +41,7 @@ public class UserController {
     }
 
     @Operation(summary = "닉네임 사용 가능 여부 확인", description = "입력한 닉네임이 형식에 맞고, 중복 여부를 확인합니다.")
-    @GetMapping("users/validate-nickname")
+    @GetMapping("/users/validate-nickname")
     public ApiResult<ValidationResponse> validateNickname(@RequestParam String nickname) {
         return ApiResult.of(HttpStatus.OK.value(), "Complete nickname duplication check", userService.validateNickname(nickname));
     }

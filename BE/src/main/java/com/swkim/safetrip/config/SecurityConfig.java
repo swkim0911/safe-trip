@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;
 import com.swkim.safetrip.jwt.JwtProvider;
 import com.swkim.safetrip.jwt.filter.JwtAuthenticationProcessingFilter;
+import com.swkim.safetrip.security.ProtectedEndpoint;
 import com.swkim.safetrip.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,8 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+
+import java.util.Arrays;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -40,13 +43,21 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/reports/**").permitAll()
-                        .requestMatchers("/users", "/auth/login", "/auth/refresh").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/user-reports/").authenticated()
-                        .anyRequest().permitAll()
-                ).exceptionHandling(exception -> exception
+                .authorizeHttpRequests(auth -> {
+                    // 공개 엔드포인트
+                    auth.requestMatchers("/error").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/reports/**").permitAll()
+                            .requestMatchers("/users", "/auth/login", "/auth/refresh").permitAll();
+
+                    // 보호 엔드포인트
+                    Arrays.stream(ProtectedEndpoint.values())
+                            .forEach(ep -> auth
+                                    .requestMatchers(HttpMethod.valueOf(ep.getMethod()), ep.getPath())
+                                    .authenticated()
+                            );
+                    // 나머지 기본 정책
+                    auth.anyRequest().permitAll();
+                }).exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint()));
 
         http.addFilterAfter(jwtAuthenticationProcessingFilter(), LogoutFilter.class); // LogoutFilter ➔ JwtAuthenticationProcessingFilter

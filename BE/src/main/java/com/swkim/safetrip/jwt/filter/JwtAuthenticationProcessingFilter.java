@@ -5,6 +5,7 @@ import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
 import com.swkim.safetrip.jwt.JwtProvider;
 import com.swkim.safetrip.security.CustomUserDetails;
+import com.swkim.safetrip.security.ProtectedEndpoint;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,8 +25,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
+import java.util.Arrays;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -71,12 +71,9 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
         String method = request.getMethod().toUpperCase();
 
-        return protectedEndpoints.contains(Map.entry(requestURI, method));
+        return Arrays.stream(ProtectedEndpoint.values())
+                .anyMatch(ep -> ep.getPath().equals(requestURI) && ep.getMethod().equals(method));
     }
 
-    private static final Set<Map.Entry<String, String>> protectedEndpoints = Set.of(
-            Map.entry("/user-reports", "POST"),
-            Map.entry("/me", "GET")
-    );
 
 }
