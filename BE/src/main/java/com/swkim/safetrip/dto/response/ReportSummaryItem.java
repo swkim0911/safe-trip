@@ -1,22 +1,16 @@
 package com.swkim.safetrip.dto.response;
 
 import com.swkim.safetrip.entity.enums.Source;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ReportSummaryItem {
+public record ReportSummaryItem(
+        Long reportId,
 
-    private Long reportId;
+        Source source,
 
-    private Source source;
+        String title,
 
-    private String title;
+        String scamName
 
-    private String scamName;
-}
+){}
