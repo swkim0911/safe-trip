@@ -26,8 +26,8 @@ public class AuthService {
     private final JwtProvider jwtProvider;
 
     public AuthTokensResponseDto login(UserLoginRequest loginRequest) {
-        String email = loginRequest.getEmail();
-        String password = loginRequest.getPassword();
+        String email = loginRequest.email();
+        String password = loginRequest.password();
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
