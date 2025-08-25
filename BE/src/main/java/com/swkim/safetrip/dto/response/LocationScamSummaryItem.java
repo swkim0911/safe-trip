@@ -1,19 +1,13 @@
 package com.swkim.safetrip.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class LocationScamSummaryItem {
+public record LocationScamSummaryItem (
 
-    private Long id;
-    private String name; // country or state name
-    private double lat;
-    private double lng;
-    private Long scamCnt;
-}
+    Long id,
+    String name, // country or state name
+    Double lat,
+    Double lng,
+    Long scamCnt
+){}
