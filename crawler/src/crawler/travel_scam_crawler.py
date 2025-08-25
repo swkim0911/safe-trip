@@ -1,7 +1,7 @@
 import time
 import praw
-import travel_scam_classifier
-import travel_scam_extractor
+from crawler import travel_scam_classifier
+from crawler import travel_scam_extractor
 from datetime import datetime
 
 KEYWORDS = ['"travel scam"']
@@ -23,4 +23,15 @@ def crawl_travel_scam(reddit: praw.Reddit, limit: int) -> None:
         is_travel_scam = travel_scam_classifier.classify(post_body)
         if is_travel_scam:
             travel_scam_data = travel_scam_extractor.extract(post_body)
-            print(travel_scam_data)
+            # todo: db에 저장
+
+        post.comments.replace_more(limit=0)
+
+        # depth=1 댓글만 선택 (top-level comments)
+        for i, comment in enumerate(post.comments):
+
+            comment_body = clean_text(comment.body)
+            is_travel_scam_cm = travel_scam_classifier.classify(comment_body)
+            if is_travl_scam_cm:
+                travel_scam_data = travel_scam_extractor.extract(commnet_body)
+                # todo: db에 저장
