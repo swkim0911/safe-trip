@@ -219,7 +219,6 @@ pyvenv.cfg
 pip-selfcheck.json
 
 # custom
-prompt/file/*
-test/file/*
+data/*
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,python,venv

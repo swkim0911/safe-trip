@@ -1,6 +1,6 @@
 def generate_classification_prompt(text):
 
-    with open("prompt/file/classification_prompt.txt", "r", encoding="utf-8") as f:
+    with open("data/prompt/classification_prompt.txt", "r", encoding="utf-8") as f:
         PROMPT_TEMPLATE = f.read()
 
     prompt = PROMPT_TEMPLATE.format(text=text)
@@ -9,7 +9,7 @@ def generate_classification_prompt(text):
 
 
 def generate_extraction_prompt(text):
-    with open("prompt/file/extraction_prompt.txt", "r", encoding="utf-8") as f:
+    with open("data/prompt/extraction_prompt.txt", "r", encoding="utf-8") as f:
         PROMPT_TEMPLATE = f.read()
 
     prompt = PROMPT_TEMPLATE.format(text=text)

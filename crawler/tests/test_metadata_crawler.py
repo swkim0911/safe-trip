@@ -3,7 +3,7 @@ import time
 import praw
 import os
 
-keywords = ["travel scam"]
+keywords = ['"travel scam"']
 enc = tiktoken.encoding_for_model(os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
 
 
