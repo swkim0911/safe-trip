@@ -10,7 +10,7 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 
 # text가 tavel scam 관련 글이라면 1, 아니면 0을 반환한다
-def classify(text: str) -> str:
+def classify(text: str) -> bool:
     prompt = prompt_manager.generate_classification_prompt(text)
 
     response = client.responses.create(
@@ -23,9 +23,9 @@ def classify(text: str) -> str:
 
     # 안전장치 -> 숫자 이외가 섞여오면 첫 번째 '1' 또는 '0'만 취함
     if "1" in out and "0" in out:
-        return "1" if out.index("1") < out.index("0") else "0"
+        return True if out.index("1") < out.index("0") else False
     if "1" in out:
-        return "1"
+        return True
     if "0" in out:
-        return "0"
-    return "0"
+        return False
+    return False
