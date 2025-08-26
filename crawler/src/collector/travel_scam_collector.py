@@ -1,7 +1,7 @@
 import time
 import praw
-from crawler import travel_scam_classifier
-from crawler import travel_scam_extractor
+from collector import travel_scam_classifier
+from collector import travel_scam_extractor
 from datetime import datetime
 
 KEYWORDS = ['"travel scam"']

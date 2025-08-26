@@ -1,6 +1,7 @@
+from collector import travel_scam_extractor
+from collector import travel_scam_classifier
 import praw
-from crawler import travel_scam_classifier
-from crawler import travel_scam_extractor
+
 
 KEYWORDS = ['"travel scam"']
 
