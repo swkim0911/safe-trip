@@ -18,20 +18,17 @@ def crawl_travel_scam_with_url(reddit: praw.Reddit, url: str):
 
     submission = reddit.submission(url=url)  # url로 직접 게시글 가져오기
     post_body = clean_text(submission.selftext)
-
-    int(is_travel_scam) = travel_scam_classifier.classify(post_body)
-    if is_travel_scam:
+    result = travel_scam_extractor.extract(post_body)
+    print(result)
 
 
 if __name__ == "__main__":
     start = time.time()
-    url = 'https://www.reddit.com/r/travel/comments/16xw794/whats_the_worst_airport_scam_youve_experienced/'
+    url = 'https://www.reddit.com/r/travel/comments/sm49hc/i_fell_for_a_tourist_scam_and_feel_really_stupid/'
 
     reddit = get_instance()
 
     result = crawl_travel_scam_with_url(reddit, url)
-
-    print(result)
 
     end = time.time()
 
