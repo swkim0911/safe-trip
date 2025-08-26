@@ -39,7 +39,7 @@ def test_classify_prompt_for_all_case(reddit, file_path):
 
                     is_travel_scam = crawl_travel_scam_with_url(
                         reddit, current_url)
-                    match = (int(is_travel_scam) == expected_label)
+                    match = (is_travel_scam == expected_label)
                     results.append({
                         "url": current_url,
                         "expected": expected_label,
