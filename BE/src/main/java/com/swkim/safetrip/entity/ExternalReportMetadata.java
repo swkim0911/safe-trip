@@ -1,5 +1,6 @@
 package com.swkim.safetrip.entity;
 
+import com.swkim.safetrip.entity.enums.StateMatchStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

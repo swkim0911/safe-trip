@@ -1,6 +1,5 @@
 package com.swkim.safetrip.entity.enums;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,5 +8,5 @@ import lombok.RequiredArgsConstructor;
 public enum TargetType {
     REPORT("report"), COMMENT("comment");
 
-    private final String  name;
+    private final String name;
 }
