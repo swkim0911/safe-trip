@@ -25,7 +25,7 @@ def crawl_travel_scam_with_url(reddit: praw.Reddit, url: str) -> int:
 
 if __name__ == "__main__":
     start = time.time()
-    url = 'https://www.reddit.com/r/travel/comments/16xw794/whats_the_worst_airport_scam_youve_experienced/'
+    url = 'http://reddit.com/r/travel/comments/1jheekn/some_advice_from_an_italian_living_in_italy_to/'
 
     reddit = get_instance()
 
