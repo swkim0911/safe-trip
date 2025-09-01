@@ -1,7 +1,7 @@
 import time
 import praw
-from collector import travel_scam_classifier
-from collector import travel_scam_parser
+from collector.transformer import travel_scam_classifier
+from collector.transformer import travel_scam_parser
 from datetime import datetime
 
 KEYWORDS = ["travel scam"]
@@ -17,7 +17,7 @@ def clean_text(text: str) -> str:
 [
   {
       "external_id": str,
-      "source": str(reddit),
+      "source": reddit,
       "url": str,
       "author": str,
       "title": str,
@@ -41,7 +41,7 @@ def crawl_travel_scams(reddit: praw.Reddit, limit: int) -> None:
 
         if is_post_scam:
 
-            extracted_post_scams = travel_scam_extractor.extract(post_text)
+            extracted_post_scams = travel_scam_parser.parse(post_text)
 
             for scam_record in extracted_post_scams:
                 collected_results.append({
@@ -66,7 +66,7 @@ def crawl_travel_scams(reddit: praw.Reddit, limit: int) -> None:
             is_comment_scam = travel_scam_classifier.classify(comment_text)
 
             if is_comment_scam:
-                extracted_comment_scams = travel_scam_extractor.extract(
+                extracted_comment_scams = travel_scam_parser.parse(
                     comment_text)
                 for scam_record in extracted_comment_scams:
                     collected_results.append({
