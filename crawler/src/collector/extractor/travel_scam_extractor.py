@@ -8,8 +8,12 @@ BATCH_SIZE = 100
 
 '''
 reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
+
+@param: 
+    time_filter: hour/day/week/month/year/all 중 하나
+    limit: 가져올 최대 게시글 수
 '''
-def extract(reddit: praw.Reddit, limit: int):
+def extract(reddit: praw.Reddit, tile_filter: str, limit: int):
     raw_collection = get_raw_collection()
     subreddit = reddit.subreddit("travel")
     operations = []
@@ -23,7 +27,7 @@ def extract(reddit: praw.Reddit, limit: int):
                   f"Upserted: {len(result.upserted_ids)}")
             ops.clear()
 
-    for post in subreddit.search(' OR '.join(KEYWORDS), sort="relevance", time_filter="all", limit=limit):
+    for post in subreddit.search(' OR '.join(KEYWORDS), sort="relevance", time_filter=time_filter, limit=limit):
 
         post_doc = {
             "id": f"t3_{post.id}",
