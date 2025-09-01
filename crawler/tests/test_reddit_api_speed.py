@@ -1,5 +1,3 @@
-from collector import travel_scam_classifier
-from collector import travel_scam_extractor
 from adapters.reddit_client import get_instance
 import time
 import praw

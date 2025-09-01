@@ -1,4 +1,4 @@
-from collector import travel_scam_classifier
+from collector.classfier import travel_scam_classifier
 from adapters.reddit_client import get_instance
 import time
 import praw
