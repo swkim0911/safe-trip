@@ -1,5 +1,4 @@
-from pymongo import UpdateOne
-from pymongo import MongoClient
+from pymongo import MongoClient, UpdateOne
 from datetime import datetime
 from adapters.mongo_client import get_raw_collection
 import praw
