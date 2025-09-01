@@ -1,10 +1,10 @@
 import time
 import praw
 from collector import travel_scam_classifier
-from collector import travel_scam_extractor
+from collector import travel_scam_parser
 from datetime import datetime
 
-KEYWORDS = ['"travel scam"']
+KEYWORDS = ["travel scam"]
 
 
 def clean_text(text: str) -> str:
@@ -30,8 +30,6 @@ def clean_text(text: str) -> str:
   }
 ]
 '''
-
-
 def crawl_travel_scams(reddit: praw.Reddit, limit: int) -> None:
     collected_results = []
 

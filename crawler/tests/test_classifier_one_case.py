@@ -1,4 +1,4 @@
-from collector.classfier import travel_scam_classifier
+from collector.transformer import travel_scam_classifier
 from adapters.reddit_client import get_instance
 import time
 import praw
@@ -24,7 +24,7 @@ def crawl_travel_scam_with_url(reddit: praw.Reddit, url: str) -> int:
 
 if __name__ == "__main__":
     start = time.time()
-    url = 'http://reddit.com/r/travel/comments/1jheekn/some_advice_from_an_italian_living_in_italy_to/'
+    url = 'https://www.reddit.com/r/travel/comments/1n4mdi1/weird_experience_in_hurghada_scam_or_not/'
 
     reddit = get_instance()
 

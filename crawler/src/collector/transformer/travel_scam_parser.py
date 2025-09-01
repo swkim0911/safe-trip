@@ -11,8 +11,8 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 
 # 분류된 데이터에서 필요한 데이터를 추출해서 json array를 반환한다
-def extract(text: str) -> list[dict[str, any]]:
-    prompt = prompt_manager.generate_extraction_prompt(text)
+def parse(text: str) -> list[dict[str, any]]:
+    prompt = prompt_manager.generate_parsing_prompt(text)
 
     response = client.responses.create(
         model=MODEL,
