@@ -1,9 +1,10 @@
 import tiktoken
 import time
+from adapters.reddit_client import get_instance
 import praw
 import os
 
-keywords = ['"travel scam"']
+keywords = ["travel scam"]
 enc = tiktoken.encoding_for_model(os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
 
 
@@ -31,7 +32,7 @@ def crawl_subreddit_metadata(reddit):
         post.comments.replace_more(limit=0)
 
         # depth=1 댓글만 선택 (top-level comments)
-        for comment in post.comments.list():
+        for comment in post.comments:
             if comment.parent_id.startswith('t3_'):  # t3_는 post를 의미 (depth=1)
                 comments_token += len(enc.encode(comment.body or ""))
                 comments_cnt += 1
@@ -56,3 +57,9 @@ def crawl_subreddit_metadata(reddit):
 
     end = time.time()
     print(f"응답 시간: {end - start:.3f}초")
+
+
+if __name__ == "__main__":
+
+    reddit = get_instance()
+    crawl_subreddit_metadata(reddit)
