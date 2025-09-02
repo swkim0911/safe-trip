@@ -15,3 +15,6 @@ db = client[MONGO_DB]
 
 def get_raw_collection():
     return db["raw_reddit"]
+
+def get_parsed_collection():
+    return db["parsed_reddt"]
