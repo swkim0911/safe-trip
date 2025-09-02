@@ -1,6 +1,6 @@
+from adapters.mongo_client import get_raw_collection
 from pymongo import MongoClient, UpdateOne
 from datetime import datetime
-from adapters.mongo_client import get_raw_collection
 import praw
 
 KEYWORDS = ["travel scam"]
@@ -13,7 +13,7 @@ reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
     time_filter: hour/day/week/month/year/all 중 하나
     limit: 가져올 최대 게시글 수
 '''
-def extract(reddit: praw.Reddit, tile_filter: str, limit: int):
+def extract(reddit: praw.Reddit, time_filter: str, limit: int):
     raw_collection = get_raw_collection()
     subreddit = reddit.subreddit("travel")
     operations = []
@@ -35,13 +35,22 @@ def extract(reddit: praw.Reddit, tile_filter: str, limit: int):
             "author": str(post.author) if post.author else None,
             "body": post.selftext,
             "url": f"https://reddit.com{post.permalink}",
-            "created_at": datetime.utcfromtimestamp(post.created_utc),
-            "type": "post"
+            "type": "post",
+            "posted_at": datetime.utcfromtimestamp(post.created_utc)
         }
+        now = datetime.utcnow()
         operations.append(
             UpdateOne(
                 {"id": f"t3_{post.id}"},
-                {"$set": post_doc},
+                {
+                    "$set": {
+                        **post_doc,
+                        "modified_at": now  # 매번 업데이트됨
+                    },
+                    "$setOnInsert": {
+                        "created_at": now  # 새로 insert될 때만 설정
+                    }
+                },
                 upsert=True
             )
         )
@@ -55,13 +64,22 @@ def extract(reddit: praw.Reddit, tile_filter: str, limit: int):
                     "author": str(comment.author) if comment.author else None,
                     "body": comment.body,
                     "url": f"https://reddit.com{comment.permalink}",
-                    "created_at": datetime.utcfromtimestamp(comment.created_utc),
                     "type": "comment"
+                    "posted_at": datetime.utcfromtimestamp(comment.created_utc),
                 }
+                now = datetime.utcnow()
                 operations.append(
                     UpdateOne(
                         {"id": f"t1_{comment.id}"},
-                        {"$set": comment_doc},
+                        {
+                            "$set": {
+                                **comment_doc,
+                                "modified_at": now  # 매번 업데이트됨
+                            },
+                            "$setOnInsert": {
+                                "created_at": now  # 새로 insert될 때만 설정
+                            }
+                        },
                         upsert=True
                     )
                 )
