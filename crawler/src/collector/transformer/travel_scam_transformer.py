@@ -1,10 +1,8 @@
-import time
-import praw
 from collector.transformer import travel_scam_classifier
 from collector.transformer import travel_scam_parser
-from datetime import datetime
+from datetime import datetime, timedelta
 
-KEYWORDS = ["travel scam"]
+from adapters.mongo_client import get_raw_collection
 
 
 def clean_text(text: str) -> str:
@@ -16,69 +14,69 @@ def clean_text(text: str) -> str:
 '''
 [
   {
-      "external_id": str,
-      "source": reddit,
+      "id": str,
+      "source": "reddit",
       "url": str,
       "author": str,
       "title": str,
       "scam_type": str,
-      "country": str,
-      "state": str,
-      "city": str,
+      "country": str(nullable),
+      "state": str(nullable),
+      "city": str(nullable),
       "summary": str,
-      "posted_at":
+      "posted_at": datetime,
+      "created_at": datetime,
+      "updated_at": datetime
   }
 ]
 '''
-def crawl_travel_scams(reddit: praw.Reddit, limit: int) -> None:
+
+def crawl_travel_scams(time_filter: str):
+    """
+    MongoDB에서 Reddit raw 데이터를 가져와서
+    travel scam으로 분류/추출한 뒤 정제된 결과를 반환한다.
+
+    Args:
+        time_filter (str): "all" 또는 "7d" (최근 7일)
+    Returns:
+        list[dict]: 정제된 scam 데이터 목록
+    """
+
+    raw_collection = get_raw_collection()
+
+    # time_filter 조건 설정
+    query = {}
+    if time_filter == "7d":
+        one_week_ago = datetime.utcnow() - timedelta(days=7)
+        query = {"posted_at": {"$gte": one_week_ago}}
+
+    # MongoDB에서 데이터 가져오기
+    raw_posts = raw_collection.find(query)
+
     collected_results = []
 
-    subreddit = reddit.subreddit('travel')
+    for raw_json in raw_posts:
+        body = clean_text(raw_json.get("body", ""))
+        is_scam = travel_scam_classifier.classify(body)
 
-    for post in subreddit.search(' OR '.join(KEYWORDS), sort='relevance', time_filter='all', limit=limit):
-        post_text = clean_text(post.selftext)
-        is_post_scam = travel_scam_classifier.classify(post_text)
+        if is_scam:
+            parsed_scams = travel_scam_parser.parse(body) or []
 
-        if is_post_scam:
-
-            extracted_post_scams = travel_scam_parser.parse(post_text)
-
-            for scam_record in extracted_post_scams:
+            for scam_record in parsed_scams:
                 collected_results.append({
-                    "external_id": post.id,
+                    "external_id": raw_json.get("id"),
                     "source": "reddit",
-                    "url": f"https://reddit.com{post.permalink}",
-                    "author": str(post.author) if post.author else None,
+                    "url": raw_json.get("url"),
+                    "author": raw_json.get("author"),
                     "title": scam_record.get("title"),
                     "scam_type": scam_record.get("scam_type"),
                     "country": scam_record.get("country"),
                     "state": scam_record.get("state"),
                     "city": scam_record.get("city"),
                     "summary": scam_record.get("summary"),
-                    "posted_at": datetime.utcfromtimestamp(post.created_utc).isoformat()
+                    "posted_at": raw_json.get("posted_at"),
+                    "created_at": raw_json.get("created_at"),
+                    "modified_at": raw_json.get("modified_at")
                 })
 
-        post.comments.replace_more(limit=0)
-
-        # depth=1 댓글만 선택 (top-level comments)
-        for comment in post.comments:
-            comment_text = clean_text(comment.body)
-            is_comment_scam = travel_scam_classifier.classify(comment_text)
-
-            if is_comment_scam:
-                extracted_comment_scams = travel_scam_parser.parse(
-                    comment_text)
-                for scam_record in extracted_comment_scams:
-                    collected_results.append({
-                        "external_id": comment.id,
-                        "source": "reddit",
-                        "url": f"https://reddit.com{comment.permalink}",
-                        "author": str(comment.author) if comment.author else None,
-                        "title": scam_record.get("title"),
-                        "scam_type": scam_record.get("scam_type"),
-                        "country": scam_record.get("country"),
-                        "state": scam_record.get("state"),
-                        "city": scam_record.get("city"),
-                        "summary": scam_record.get("summary"),
-                        "posted_at": datetime.utcfromtimestamp(comment.created_utc).isoformat()
-                    })
+    return collected_results

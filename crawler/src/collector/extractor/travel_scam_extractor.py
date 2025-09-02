@@ -64,7 +64,7 @@ def extract(reddit: praw.Reddit, time_filter: str, limit: int):
                     "author": str(comment.author) if comment.author else None,
                     "body": comment.body,
                     "url": f"https://reddit.com{comment.permalink}",
-                    "type": "comment"
+                    "type": "comment",
                     "posted_at": datetime.utcfromtimestamp(comment.created_utc),
                 }
                 now = datetime.utcnow()
