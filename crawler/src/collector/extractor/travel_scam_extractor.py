@@ -7,11 +7,11 @@ KEYWORDS = ["travel scam"]
 BATCH_SIZE = 100
 
 '''
-reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
+    reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
 
-@param: 
-    time_filter: hour/day/week/month/year/all 중 하나
-    limit: 가져올 최대 게시글 수
+    @Args: 
+        time_filter: hour/day/week/month/year/all 중 하나
+        limit: 가져올 최대 게시글 수
 '''
 def extract(reddit: praw.Reddit, time_filter: str, limit: int):
     raw_collection = get_raw_collection()
@@ -30,7 +30,7 @@ def extract(reddit: praw.Reddit, time_filter: str, limit: int):
     for post in subreddit.search(' OR '.join(KEYWORDS), sort="relevance", time_filter=time_filter, limit=limit):
 
         post_doc = {
-            "id": f"t3_{post.id}",
+            "reddit_id": f"t3_{post.id}",
             "source": "reddit",
             "author": str(post.author) if post.author else None,
             "body": post.selftext,
@@ -41,7 +41,7 @@ def extract(reddit: praw.Reddit, time_filter: str, limit: int):
         now = datetime.utcnow()
         operations.append(
             UpdateOne(
-                {"id": f"t3_{post.id}"},
+                {"reddit_id": f"t3_{post.id}"},
                 {
                     "$set": {
                         **post_doc,
@@ -59,7 +59,7 @@ def extract(reddit: praw.Reddit, time_filter: str, limit: int):
         for comment in post.comments:
             if comment.parent_id.startswith("t3_"):
                 comment_doc = {
-                    "id": f"t1_{comment.id}",
+                    "reddit_id": f"t1_{comment.id}",
                     "source": "reddit",
                     "author": str(comment.author) if comment.author else None,
                     "body": comment.body,
@@ -70,7 +70,7 @@ def extract(reddit: praw.Reddit, time_filter: str, limit: int):
                 now = datetime.utcnow()
                 operations.append(
                     UpdateOne(
-                        {"id": f"t1_{comment.id}"},
+                        {"reddit_id": f"t1_{comment.id}"},
                         {
                             "$set": {
                                 **comment_doc,
