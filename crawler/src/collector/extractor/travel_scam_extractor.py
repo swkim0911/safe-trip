@@ -1,6 +1,6 @@
 from adapters.mongo_client import get_raw_collection
 from pymongo import UpdateOne
-from datetime import datetime
+from datetime import datetime, UTC
 import praw
 
 KEYWORDS = ["travel scam"]
@@ -38,7 +38,7 @@ def extract(reddit: praw.Reddit, time_filter: str, limit: int):
             "type": "post",
             "posted_at": datetime.utcfromtimestamp(post.created_utc)
         }
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         operations.append(
             UpdateOne(
                 {"reddit_id": f"t3_{post.id}"},
@@ -67,7 +67,7 @@ def extract(reddit: praw.Reddit, time_filter: str, limit: int):
                     "type": "comment",
                     "posted_at": datetime.utcfromtimestamp(comment.created_utc),
                 }
-                now = datetime.utcnow()
+                now = datetime.now(UTC)
                 operations.append(
                     UpdateOne(
                         {"reddit_id": f"t1_{comment.id}"},

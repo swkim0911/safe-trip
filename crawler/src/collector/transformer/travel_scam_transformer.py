@@ -1,6 +1,6 @@
 from collector.transformer import travel_scam_classifier
 from collector.transformer import travel_scam_parser
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from adapters.mongo_client import get_parsed_collection, get_raw_collection
 from pymongo import InsertOne
@@ -62,7 +62,7 @@ def transform(time_filter: str):
 
         for scam_record in parsed_scams:
             
-            now = datetime.utcnow()
+            now = datetime.now(UTC)
 
             doc = {
                 "reddit_id": raw_json.get("reddit_id"),  # raw id (unique 아님)
