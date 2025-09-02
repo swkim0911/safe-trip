@@ -1,5 +1,5 @@
 from adapters.mongo_client import get_raw_collection
-from pymongo import MongoClient, UpdateOne
+from pymongo import UpdateOne
 from datetime import datetime
 import praw
 
