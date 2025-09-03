@@ -23,7 +23,7 @@ def crawl_travel_scam_with_url(reddit: praw.Reddit, url: str):
 
 if __name__ == "__main__":
     start = time.time()
-    url = 'https://www.reddit.com/r/travel/comments/1n4mdi1/weird_experience_in_hurghada_scam_or_not/'
+    url = 'https://www.reddit.com/r/travel/comments/sm49hc/i_fell_for_a_tourist_scam_and_feel_really_stupid/'
 
     reddit = get_instance()
 
