@@ -40,34 +40,62 @@ def transform(time_filter: str):
                 print(f"[ERROR] Bulk write failed: {e}")
             finally:
                 ops.clear()
+    ## todo: module로 빼기
 
-    # return dict{countryId: long, stateId: long, cityId: long}
     def lookup_location(country_name, state_name, city_name):
 
-        def find_city(city_name):
-            return city_collection.find_one({"name": city_name}, {"_id": 0, "country_id": 1, "state_id": 1, "city_id": 1})
+        quries = {"country:state:city": {"name": city_name, "state_name": state_name, "country_name": country_name},
+                  "country:city": {"name": city_name, "country_name": country_name},
+                  "state:city": {"name": city_name, "state_name": state_name},
+                  "country:state": {"name": state_name, "country_name": country_name},
+                  "city": {"name": city_name},
+                  "state": {"name": state_name},
+                  "country": {"name": country_name}}
 
-        def find_state(state_name):
-            return state_collection.find_one({"name": state_name},{"_id": 0, "country_id": 1, "state_id": 1})
+        def find_city(query):
+            doc = city_collection.find_one(query, {"_id": 1, "country_id": 1, "state_id": 1}, collation={
+                                            "locale": "en", "strength": 1})
+            if not doc:
+                return None
 
-        def find_country(country_name):
-            return country_collection.find_one({"name": country_name},{"_id": 0, "country_id": 1})
+            doc["city_id"] = doc.pop("_id")
+            return doc
+
+        def find_state(query):
+            doc = state_collection.find_one(query, {"_id": 1, "country_id": 1}, collation={
+                                            "locale": "en", "strength": 1})
+            if not doc:
+              return None
+
+            doc["state_id"] = doc.pop("_id")
+            return doc
+
+        def find_country(query):
+            doc = country_collection.find_one(query, {"_id": 1}, collation={
+                                              "locale": "en", "strength": 1})
+            if not doc:
+              return None
+
+            doc["country_id"] = doc.pop("_id")
+            return doc
 
         match (bool(country_name), bool(state_name), bool(city_name)):
             case (True, True, True):
-                return find_city(city_name) or find_state(state_name) or find_country(country_name)
+                return find_city(quries["country:state:city"]) or find_city(quries["country:city"]) or find_city(quries["state:city"]) or find_state(quries["country:state"]) or find_city(quries["city"]) or find_state(quries["state"]) or find_country(quries["country"])
             case (True, True, False):
-                return find_state(state_name) or find_country(country_name)
+                return find_state(quries["country:state"]) or find_state(quries["state"]) or find_country(quries["country"])
             case (True, False, True):
-                return find_city(city_name) or find_country(country_name)
+                return find_city(quries["country:city"]) or find_city(quries["city"]) or find_country(quries["country"])
             case (True, False, False):
-                return find_country(country_name)
+                return find_country(quries["country"])
             case (False, True, True):
-                return find_city(city_name) or find_state(state_name)
+                return find_city(quries["state:city"]) or find_city(quries["city"]) or find_state(quries["state"])
             case (False, True, False):
-                return find_state(state_name)
+
+                return find_state(quries["state"])
+                # 여러 개여도 저장
             case (False, False, True):
-                return find_city(city_name)
+                return find_city(quries["city"])
             case _:
                 return None
             
@@ -78,6 +106,7 @@ def transform(time_filter: str):
     if time_filter == "7d":
         one_week_ago = datetime.utcnow() - timedelta(days=7)
         query = {"posted_at": {"$gte": one_week_ago}}
+        
         existing_ids = set(parsed_collection.distinct(
             "reddit_id",
             {"posted_at": {"$gte": one_week_ago}}
