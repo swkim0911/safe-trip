@@ -1,6 +1,4 @@
 from adapters import mongo_client
-from pymongo import InsertOne
-
 
 class WorldRepository:
     def __init__(self):
