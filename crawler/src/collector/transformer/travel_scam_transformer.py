@@ -2,6 +2,7 @@ from collector.transformer import travel_scam_classifier
 from collector.transformer import travel_scam_parser
 from datetime import datetime, timedelta, UTC
 
+from repository.WorldRepository import WorldRepository
 from adapters import mongo_client
 from pymongo import InsertOne
 
@@ -22,11 +23,6 @@ def clean_text(text: str) -> str:
 '''
 
 def transform(time_filter: str):
-    raw_collection = mongo_client.get_raw_collection()
-    parsed_collection = mongo_client.get_parsed_collection()
-    country_collection = mongo_client.get_country_collection()
-    state_collection = mongo_client.get_state_collection()
-    city_collection = mongo_client.get_city_collection()
     
     operations = []
     
@@ -40,64 +36,6 @@ def transform(time_filter: str):
                 print(f"[ERROR] Bulk write failed: {e}")
             finally:
                 ops.clear()
-    ## todo: module로 빼기
-
-    def lookup_location(country_name, state_name, city_name):
-
-        quries = {"country:state:city": {"name": city_name, "state_name": state_name, "country_name": country_name},
-                  "country:city": {"name": city_name, "country_name": country_name},
-                  "state:city": {"name": city_name, "state_name": state_name},
-                  "country:state": {"name": state_name, "country_name": country_name},
-                  "city": {"name": city_name},
-                  "state": {"name": state_name},
-                  "country": {"name": country_name}}
-
-        def find_city(query):
-            doc = city_collection.find_one(query, {"_id": 1, "country_id": 1, "state_id": 1}, collation={
-                                            "locale": "en", "strength": 1})
-            if not doc:
-                return None
-
-            doc["city_id"] = doc.pop("_id")
-            return doc
-
-        def find_state(query):
-            doc = state_collection.find_one(query, {"_id": 1, "country_id": 1}, collation={
-                                            "locale": "en", "strength": 1})
-            if not doc:
-              return None
-
-            doc["state_id"] = doc.pop("_id")
-            return doc
-
-        def find_country(query):
-            doc = country_collection.find_one(query, {"_id": 1}, collation={
-                                              "locale": "en", "strength": 1})
-            if not doc:
-              return None
-
-            doc["country_id"] = doc.pop("_id")
-            return doc
-
-        match (bool(country_name), bool(state_name), bool(city_name)):
-            case (True, True, True):
-                return find_city(quries["country:state:city"]) or find_city(quries["country:city"]) or find_city(quries["state:city"]) or find_state(quries["country:state"]) or find_city(quries["city"]) or find_state(quries["state"]) or find_country(quries["country"])
-            case (True, True, False):
-                return find_state(quries["country:state"]) or find_state(quries["state"]) or find_country(quries["country"])
-            case (True, False, True):
-                return find_city(quries["country:city"]) or find_city(quries["city"]) or find_country(quries["country"])
-            case (True, False, False):
-                return find_country(quries["country"])
-            case (False, True, True):
-                return find_city(quries["state:city"]) or find_city(quries["city"]) or find_state(quries["state"])
-            case (False, True, False):
-
-                return find_state(quries["state"])
-                # 여러 개여도 저장
-            case (False, False, True):
-                return find_city(quries["city"])
-            case _:
-                return None
             
     # time_filter 조건 설정
     query = {}
