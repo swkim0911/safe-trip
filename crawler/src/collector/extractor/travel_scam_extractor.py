@@ -1,10 +1,8 @@
-from adapters.mongo_client import get_raw_collection
 from pymongo import UpdateOne
 from datetime import datetime, UTC
-import praw
 
 class TravelScamExtractor:
-    def __init__(self, reddit: praw.Reddit, redditRepository):
+    def __init__(self, reddit, redditRepository):
         self.reddit = reddit
         self.redditRepository = redditRepository 
         self.BATCH_SIZE = 100
