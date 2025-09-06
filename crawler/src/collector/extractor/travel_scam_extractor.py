@@ -1,4 +1,3 @@
-from pymongo import UpdateOne
 from datetime import datetime, UTC
 
 class TravelScamExtractor:
@@ -9,18 +8,8 @@ class TravelScamExtractor:
         self.operations = []
         self.keywords = ["travel scam"]
 
-    def __add_operation(self, reddit_id: str, doc: dict):
-        now = datetime.now(UTC)
-        self.operations.append(
-            UpdateOne(
-                {"reddit_id": reddit_id},
-                {
-                    "$set": {**doc, "modified_at": now},
-                    "$setOnInsert": {"created_at": now}
-                },
-                upsert=True
-            )
-        )
+    def __add_operation(self, doc: dict):
+        self.operations.append(doc)
         if len(self.operations) >= self.BATCH_SIZE:
             self.redditRepository.flush_raw_ops(self.operations)
     
