@@ -1,31 +1,18 @@
-import os
-from dotenv import load_dotenv
-from openai import OpenAI
 from prompt import prompt_manager
+from adapters.openai_client import call_openai
 
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+class TravelScamClassifier:
+        
+    # text가 tavel scam 관련 글이라면 1, 아니면 0을 반환한다
+    def classify(text: str) -> bool:
+        prompt = prompt_manager.generate_classification_prompt(text)
+        out = call_openai(prompt, temperature=0.0)
 
-MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-
-
-# text가 tavel scam 관련 글이라면 1, 아니면 0을 반환한다
-def classify(text: str) -> bool:
-    prompt = prompt_manager.generate_classification_prompt(text)
-
-    response = client.responses.create(
-        model=MODEL,
-        input=prompt,
-        temperature=0.0,  # 창의성 없이, 최대한 규칙에 충실하게 응답하도록 설정 -> 분류 작업에 적절
-    )
-
-    out = (response.output_text or "").strip()
-
-    # 안전장치 -> 숫자 이외가 섞여오면 첫 번째 '1' 또는 '0'만 취함
-    if "1" in out and "0" in out:
-        return True if out.index("1") < out.index("0") else False
-    if "1" in out:
-        return True
-    if "0" in out:
+        # 안전장치 -> 숫자 이외가 섞여오면 첫 번째 '1' 또는 '0'만 취함
+        if "1" in out and "0" in out:
+            return True if out.index("1") < out.index("0") else False
+        if "1" in out:
+            return True
+        if "0" in out:
+            return False
         return False
-    return False
