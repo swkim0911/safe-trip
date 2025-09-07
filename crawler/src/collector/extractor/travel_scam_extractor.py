@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import datetime
 
 class TravelScamExtractor:
     def __init__(self, reddit, redditRepository):
@@ -33,7 +33,7 @@ class TravelScamExtractor:
                 "type": "post",
                 "posted_at": datetime.utcfromtimestamp(post.created_utc)
             }
-            self.__add_operation(post_doc["reddit_id"], post_doc)
+            self.__add_operation(post_doc)
 
             post.comments.replace_more(limit=0)
             for comment in post.comments:
@@ -47,7 +47,7 @@ class TravelScamExtractor:
                         "type": "comment",
                         "posted_at": datetime.utcfromtimestamp(comment.created_utc),
                     }
-                    self.__add_operation(comment_doc["reddit_id"], comment_doc)
+                    self.__add_operation(comment_doc)
         
         # 마지막 flush
         self.redditRepository.flush_raw_ops(self.operations)
