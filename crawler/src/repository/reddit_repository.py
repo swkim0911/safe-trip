@@ -1,5 +1,5 @@
 from pymongo import UpdateOne
-
+from datetime import datetime, UTC
 
 class RedditRepository:
     def __init__(self, raw_collection, parsed_collection):
