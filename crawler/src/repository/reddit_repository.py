@@ -30,9 +30,9 @@ class RedditRepository:
             )
 
         result = self.raw_collection.bulk_write(operations, ordered=False)
-        print(f"Matched: {result.matched_count}, "
-              f"Modified: {result.modified_count}, "
-              f"Upserted: {len(result.upserted_ids)}")
+        print(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
+              f"Modified: {result.modified_count}, "  # 실제 값이 변경된 document 수
+              f"Upserted: {len(result.upserted_ids)}")  # upsert로 새로 추가된 document 수
         docs.clear()
             
     def flush_parsed_ops(self, operations):
