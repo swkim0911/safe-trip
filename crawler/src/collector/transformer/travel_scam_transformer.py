@@ -27,11 +27,11 @@ class TravelScamTransformer:
         
         operations = []
 
-        # time_filter 조건 설정 ("all, 7d")
+        # time_filter 조건 설정 ("all, week")
         query = {}
         existing_ids = set()
 
-        if time_filter == "7d":
+        if time_filter == "week":
             one_week_ago = datetime.utcnow() - timedelta(days=7)
             query = {"posted_at": {"$gte": one_week_ago}}
             existing_ids = set(parsed_collection.distinct(
