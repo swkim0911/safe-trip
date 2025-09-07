@@ -22,7 +22,7 @@ def crawl_subreddit_metadata(reddit):
     last_log_time = start
     idx = 0
 
-    for post in subreddit.search(' OR '.join(keywords), sort="relevance", time_filter="all", limit=500):
+    for post in subreddit.search(' OR '.join(keywords), sort="relevance", time_filter="week", limit=500):
         post_cnt += 1
 
         # 게시글 길이(제목 + 본문)

@@ -41,7 +41,7 @@ class TravelScamTransformer:
 
         # MongoDB에서 데이터 가져오기
         
-        raw_jsons = self.reddit_repository.find_raw_documents_with_limit(query, 20)
+        raw_jsons = self.reddit_repository.find_raw_documents_with_limit(query, 500)
         cnt = 0
         for raw_json in raw_jsons:
             # raw_json의 id가 이미 parsed 컬랙션에 있으면 continue (llm api 비용 감면을 위해)
@@ -51,7 +51,7 @@ class TravelScamTransformer:
             body = self.__clean_text(raw_json.get("body", ""))
 
             # scam 분류
-            is_scam = travel_scam_classifier.classify(body)
+            is_scam = self.travel_scam_classifier.classify(body)
             if not is_scam:
                 continue
 
@@ -87,7 +87,7 @@ class TravelScamTransformer:
                 operations.append(InsertOne(doc))
 
                 # batch 저장
-                if len(operations) >= BATCH_SIZE:
+                if len(operations) >= self.BATCH_SIZE:
                     self.reddit_repository.flush_parsed_ops(operations)
 
         # 남은 operations 처리
