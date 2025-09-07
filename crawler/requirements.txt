@@ -2,7 +2,7 @@ annotated-types==0.7.0
 anyio==4.10.0
 certifi==2025.8.3
 charset-normalizer==3.4.3
--e git+https://github.com/swkim0911/safe-trip.git@85df5addc38c154bde6dcbf21baa9794deb9f670#egg=crawler&subdirectory=crawler
+-e git+https://github.com/swkim0911/safe-trip.git@d7eeff10721be1b710925868ade17d5428e65151#egg=crawler&subdirectory=crawler
 distro==1.9.0
 dnspython==2.7.0
 h11==0.16.0
