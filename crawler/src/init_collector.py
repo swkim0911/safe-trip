@@ -26,12 +26,11 @@ if __name__ == "__main__":
     world_repository = init_world_repository()
     
     # 1. extract (전체 데이터)
-    travel_scam_extractor = TravelScamExtractor(reddit, reddit_repository)
-    travel_scam_extractor.extract("all", 500)
+    # travel_scam_extractor = TravelScamExtractor(reddit, reddit_repository)
+    # travel_scam_extractor.extract("all", 500)
     
 
     # 2. transform
     travel_scam_transformer = TravelScamTransformer(TravelScamClassifier(), TravelScamParser(), reddit_repository, world_repository)
-    
-    # travel_scam_transformer.transform("all")
+    travel_scam_transformer.transform("all")
     # 3. load -> mysql

@@ -41,7 +41,7 @@ class TravelScamTransformer:
 
         # MongoDB에서 데이터 가져오기
         
-        raw_jsons = self.redditRepository.find_raw_documents_with_limit(query, 20)
+        raw_jsons = self.reddit_repository.find_raw_documents_with_limit(query, 20)
         cnt = 0
         for raw_json in raw_jsons:
             # raw_json의 id가 이미 parsed 컬랙션에 있으면 continue (llm api 비용 감면을 위해)
