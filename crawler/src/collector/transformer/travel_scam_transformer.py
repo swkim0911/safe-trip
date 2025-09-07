@@ -2,8 +2,8 @@ from datetime import datetime, timedelta, UTC
 from pymongo import InsertOne
 
 class TravelScamTransformer:
-    def __init__(self, travel_scam_classifer, travel_scam_parser, reddit_repository, world_repository):
-        self.travel_scam_classfier = travel_scam_classfier
+    def __init__(self, travel_scam_classifier, travel_scam_parser, reddit_repository, world_repository):
+        self.travel_scam_classifier = travel_scam_classifier
         self.travel_scam_parser = travel_scam_parser
         self.reddit_repository = reddit_repository
         self.world_repository = world_repository
