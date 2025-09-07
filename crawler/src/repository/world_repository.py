@@ -1,10 +1,8 @@
-from adapters import mongo_client
-
 class WorldRepository:
-    def __init__(self):
-        self.country_collection = mongo_client.get_country_collection()
-        self.state_collection = mongo_client.get_state_collection()
-        self.city_collection = mongo_client.get_city_collection()
+    def __init__(self, country_collection, state_collection, city_collection):
+        self.country_collection = country_collection
+        self.state_collection = state_collection
+        self.city_collection = city_collection
 
     def __find_city(self, query):
         doc = self.city_collection.find_one(
