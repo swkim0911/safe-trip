@@ -23,7 +23,7 @@ class TravelScamTransformer:
         Args:
             time_filter (str): "all" 또는 "7d" (최근 7일)
     '''
-    def transform(time_filter: str):
+    def transform(self, time_filter: str):
         
         operations = []
 
@@ -41,7 +41,7 @@ class TravelScamTransformer:
 
         # MongoDB에서 데이터 가져오기
         
-        raw_jsons = self.redditRepository.find_raw_documents(query)
+        raw_jsons = self.redditRepository.find_raw_documents_with_limit(query, 20)
         cnt = 0
         for raw_json in raw_jsons:
             # raw_json의 id가 이미 parsed 컬랙션에 있으면 continue (llm api 비용 감면을 위해)
