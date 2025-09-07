@@ -12,6 +12,7 @@ class WorldRepository:
             {"_id": 1, "country_id": 1, "state_id": 1},
             collation={"locale": "en", "strength": 1},
         )
+        
         if not doc:
             return None
         doc["city_id"] = doc.pop("_id")
@@ -23,6 +24,7 @@ class WorldRepository:
             {"_id": 1, "country_id": 1},
             collation={"locale": "en", "strength": 1},
         )
+        
         if not doc:
             return None
         doc["state_id"] = doc.pop("_id")
@@ -34,6 +36,7 @@ class WorldRepository:
             {"_id": 1},
             collation={"locale": "en", "strength": 1},
         )
+        
         if not doc:
             return None
         doc["country_id"] = doc.pop("_id")

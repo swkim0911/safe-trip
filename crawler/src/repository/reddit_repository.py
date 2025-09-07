@@ -1,11 +1,14 @@
-from adapters import mongo_client
 from pymongo import UpdateOne
 
 
 class RedditRepository:
-    def __init__(self):
-        self.raw_collection = mongo_client.get_raw_collection()
-        self.parsed_collection = mongo_client.get_parsed_collection()
+    def __init__(self, raw_collection, parsed_collection):
+        self.raw_collection = raw_collection
+        self.parsed_collection = parsed_collection
+        
+    def find_raw_documents(self, query):
+        return self.raw_collection.find(query)
+    
     
     def flush_raw_ops(self, docs: list[dict]):
         if not docs:

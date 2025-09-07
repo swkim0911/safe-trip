@@ -2,6 +2,7 @@ from adapters.reddit_client import get_instance
 from collector.extractor import travel_scam_extractor
 from collector.transformer import travel_scam_transformer
 from repository.WorldRepository import WorldRepository
+from adapters import mongo_client, openai_client, reddit_client
 
 if __name__ == "__main__":
     reddit = get_instance()
