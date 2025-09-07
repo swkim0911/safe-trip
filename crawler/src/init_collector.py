@@ -2,6 +2,8 @@ from collector.extractor.travel_scam_extractor import TravelScamExtractor
 from collector.transformer.travel_scam_transformer import TravelScamTransformer
 from collector.transformer.travel_scam_classifier import TravelScamClassifier
 from collector.transformer.travel_scam_parser import TravelScamParser
+from collector.loader.travel_scam_loader import TravelScamLoader
+
 from repository.reddit_repository import RedditRepository
 from repository.world_repository import WorldRepository
 from adapters import mongo_client, openai_client, reddit_client
@@ -37,6 +39,7 @@ if __name__ == "__main__":
     travel_scam_transformer = TravelScamTransformer(TravelScamClassifier(), TravelScamParser(), reddit_repository, world_repository)
     travel_scam_transformer.transform("all")
     # 3. load -> mysql
+    travel_scam_loader = TravelScamLoader(mongo_client.get_parsed_collection())
     
     end = time.time()
 
