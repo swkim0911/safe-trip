@@ -1,6 +1,6 @@
 package com.swkim.safetrip.service;
 
-import com.swkim.safetrip.entity.State;
+import com.swkim.safetrip.entity.world.State;
 import com.swkim.safetrip.global.exception.custom.StateNotFoundException;
 import com.swkim.safetrip.repository.StateRepository;
 import lombok.RequiredArgsConstructor;

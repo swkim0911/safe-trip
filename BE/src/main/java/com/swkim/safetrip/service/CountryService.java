@@ -1,6 +1,6 @@
 package com.swkim.safetrip.service;
 
-import com.swkim.safetrip.entity.Country;
+import com.swkim.safetrip.entity.world.Country;
 import com.swkim.safetrip.global.exception.custom.CountryNotFoundException;
 import com.swkim.safetrip.repository.CountryRepository;
 import lombok.RequiredArgsConstructor;

@@ -3,6 +3,8 @@ package com.swkim.safetrip.service;
 import com.swkim.safetrip.dto.request.UserReportSaveRequest;
 import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.*;
+import com.swkim.safetrip.entity.world.Country;
+import com.swkim.safetrip.entity.world.State;
 import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.StateCountryMismatchException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;

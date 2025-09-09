@@ -1,6 +1,8 @@
 package com.swkim.safetrip.entity;
 
 import com.swkim.safetrip.entity.enums.Source;
+import com.swkim.safetrip.entity.world.Country;
+import com.swkim.safetrip.entity.world.State;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

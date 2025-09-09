@@ -1,5 +1,6 @@
-package com.swkim.safetrip.entity;
+package com.swkim.safetrip.entity.world;
 
+import com.swkim.safetrip.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "city")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class City extends BaseEntity{
+public class City extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

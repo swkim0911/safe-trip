@@ -5,6 +5,8 @@ import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.entity.enums.Source;
+import com.swkim.safetrip.entity.world.Country;
+import com.swkim.safetrip.entity.world.State;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,6 @@
-package com.swkim.safetrip.entity;
+package com.swkim.safetrip.entity.world;
 
+import com.swkim.safetrip.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import java.util.List;
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Country extends BaseEntity{
+public class Country extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
