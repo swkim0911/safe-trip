@@ -30,9 +30,9 @@ public class AuthController {
     @PostMapping("/auth/login")
     public ApiResult<AccessTokenResponse> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         AuthTokensResponseDto authTokensResponseDto = authService.login(loginRequest);
-        httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.getRefreshTokenCookie().toString());
+        httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.refreshTokenCookie().toString());
 
-        return ApiResult.of(HttpStatus.OK.value(), "Login successful", authTokensResponseDto.getAccessTokenResponse());
+        return ApiResult.of(HttpStatus.OK.value(), "Login successful", authTokensResponseDto.accessTokenResponse());
     }
 
     @Operation(summary = "액세스 토큰 재발급", description = "리프레시 토큰을 기반으로 새로운 액세스 토큰을 발급합니다. (RTR)")
@@ -47,9 +47,9 @@ public class AuthController {
         }
 
         AuthTokensResponseDto authTokensResponseDto = authService.reIssueAccessToken(refreshToken);
-        httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.getRefreshTokenCookie().toString());
+        httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.refreshTokenCookie().toString());
 
-        return ApiResult.of(HttpStatus.OK.value(), "Access Token is reissued under RTR", authTokensResponseDto.getAccessTokenResponse());
+        return ApiResult.of(HttpStatus.OK.value(), "Access Token is reissued under RTR", authTokensResponseDto.accessTokenResponse());
     }
 
     @Operation(summary = "로그아웃", description = "리프레시 토큰을 무효화하여 로그아웃을 처리합니다.")
