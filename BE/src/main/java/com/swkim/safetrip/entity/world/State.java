@@ -8,10 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(
-        name = "state",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"name", "country_id"})
-)
+@Table(name = "state")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class State extends BaseEntity {
@@ -31,13 +28,13 @@ public class State extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "name_ko", nullable = false)
+    @Column(name = "name_ko")
     private String koreanName;
 
-    @Column(name = "lat", nullable = false)
+    @Column(name = "lat")
     private Double lat; //consider: state에는 lat, lng 정보가 없을 수도 있는데, 그럴 때는 어떻게 할지 정하기(ex: 안도라) -> 아마 그냥 null저장하고, summary 조회할 때는 생략
 
-    @Column(name = "lng", nullable = false)
+    @Column(name = "lng")
     private Double lng;
 
     @Builder

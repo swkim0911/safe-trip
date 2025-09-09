@@ -11,9 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "country", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "name")
-})
+@Table(name = "country")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Country extends BaseEntity {
@@ -28,13 +26,13 @@ public class Country extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "name_ko", nullable = false)
+    @Column(name = "name_ko")
     private String koreanName;
 
-    @Column(name = "lat", nullable = false)
+    @Column(name = "lat")
     private Double lat;
 
-    @Column(name = "lng", nullable = false)
+    @Column(name = "lng")
     private Double lng;
 
     @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true) // 양방향
