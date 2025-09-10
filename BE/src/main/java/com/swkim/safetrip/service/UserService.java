@@ -26,11 +26,11 @@ public class UserService {
     @Transactional
     public Long signup(UserSignUpRequest signUpRequest) {
 
-        if(userRepository.existsByEmail(signUpRequest.getEmail())){
+        if(userRepository.existsByEmail(signUpRequest.email())){
             throw new DuplicateUserEmailException();
         }
 
-        if (userRepository.existsByNickname(signUpRequest.getNickname())) {
+        if (userRepository.existsByNickname(signUpRequest.nickname())) {
             throw new DuplicateUserNicknameException();
         }
 

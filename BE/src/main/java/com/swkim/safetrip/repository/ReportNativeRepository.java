@@ -106,7 +106,7 @@ public class ReportNativeRepository {
                 UNION ALL
                 SELECT report_id, source, title, scam_id FROM external_report WHERE countryId = :countryId AND stateId = :stateId
             ) r
-            JOIN scam s on r.scam_id = s.id
+            JOIN scamAction s on r.scam_id = s.id
             ORDER BY """ + orderBy + """
             LIMIT :limit OFFSET :offset
             """;

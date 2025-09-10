@@ -1,6 +1,8 @@
 package com.swkim.safetrip.entity;
 
 import com.swkim.safetrip.entity.enums.Source;
+import com.swkim.safetrip.entity.world.Country;
+import com.swkim.safetrip.entity.world.State;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,8 +18,13 @@ public abstract class BaseReport extends BaseEntity {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "scam_id")
-    private Scam scam;
+    @JoinColumn(name = "scam_action_id")
+    private ScamAction scamAction;
+
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "scam_context_id")
+    private ScamContext scamContext;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

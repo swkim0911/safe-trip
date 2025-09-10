@@ -22,7 +22,7 @@ public interface ExternalReportRepository extends JpaRepository<ExternalReport, 
         er.collectedAt
     )
     from ExternalReport er
-    join er.scam s
+    join er.scamAction s
     join er.country c
     join er.state st
     where er.id = :id

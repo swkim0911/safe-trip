@@ -3,6 +3,8 @@ package com.swkim.safetrip.service;
 import com.swkim.safetrip.dto.request.UserReportSaveRequest;
 import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.*;
+import com.swkim.safetrip.entity.world.Country;
+import com.swkim.safetrip.entity.world.State;
 import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.StateCountryMismatchException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
@@ -38,8 +40,8 @@ public class UserReportService {
         userReport.setUser(findUser);
 
         // 3. scam 객체 report에 추가
-        Scam findScam = scamService.findScamById(userReportSaveRequest.getScamId());
-        userReport.setScam(findScam);
+        ScamAction findScamAction = scamService.findScamById(userReportSaveRequest.scamId());
+        userReport.setScamAction(findScamAction);
 
         // CONSIDER: 이미지 업로드 방식 개선 (pre-signed URL 도입 검토)
         // 4. 이미지 S3에 전송하고 report에 추가
@@ -47,8 +49,8 @@ public class UserReportService {
         savedImageList.forEach(userReport::addImage);
 
         // 5. state 객체, country 객체 set
-        Country findCountry = countryService.findCountryById(userReportSaveRequest.getCountryId());
-        State findState = stateService.findStateByIdWithCountry(userReportSaveRequest.getStateId());
+        Country findCountry = countryService.findCountryById(userReportSaveRequest.countryId());
+        State findState = stateService.findStateByIdWithCountry(userReportSaveRequest.stateId());
 
         if (!isStateOfCountry(findState, findCountry)) {
             throw new StateCountryMismatchException();
