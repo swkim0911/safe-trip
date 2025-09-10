@@ -21,7 +21,7 @@ class TravelScamExtractor:
         limit: 가져올 최대 게시글 수
     '''
     def extract(self, time_filter: str, limit: int):
-        subreddit = self.reddit.subreddit("travel")
+        subreddit = self.reddit.subreddit("travel") ## todo: redit에 직접 의존할 필요없지 않나.
 
         for post in subreddit.search(" OR ".join(self.keywords), sort="relevance", time_filter=time_filter, limit=limit):
             post_doc = {
