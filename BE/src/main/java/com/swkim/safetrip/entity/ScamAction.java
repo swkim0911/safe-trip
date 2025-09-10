@@ -7,10 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "scam")
+@Table(name = "scam_action")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Scam extends BaseEntity{
+public class ScamAction extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +21,7 @@ public class Scam extends BaseEntity{
     private String name;
 
     @Builder
-    public Scam(String name) {
+    public ScamAction(String name) {
         this.name = name;
     }
 }

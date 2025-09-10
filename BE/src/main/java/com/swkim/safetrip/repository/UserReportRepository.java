@@ -16,7 +16,7 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     select new com.swkim.safetrip.dto.response.UserReportDetailResponse(
         u.nickname,
         ur.title,
-        scam.name,
+        scamAction.name,
         c.name,
         st.name,
         ur.description,
@@ -24,7 +24,7 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     )
     from UserReport ur
     join ur.user u
-    join ur.scam scam
+    join ur.scamAction scamAction
     join ur.country c
     join ur.state st
     where ur.id = :id

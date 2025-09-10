@@ -59,10 +59,10 @@ class UserReportRepositoryTest {
     void findReportDetailById_Success() {
         // given
         User savedUser = saveUser();
-        Scam savedScam = saveScam();
+        ScamAction savedScamAction = saveScam();
         Country savedCountry = saveCountry();
         State savedState = saveState(savedCountry);
-        UserReport savedUserReport = saveUserReport(savedUser, savedScam, savedCountry, savedState);
+        UserReport savedUserReport = saveUserReport(savedUser, savedScamAction, savedCountry, savedState);
 
         // when
         Optional<UserReportDetailResponse> result =
@@ -82,7 +82,7 @@ class UserReportRepositoryTest {
         );
     }
 
-    private UserReport saveUserReport(User user, Scam scam, Country country, State state) {
+    private UserReport saveUserReport(User user, ScamAction scamAction, Country country, State state) {
         UserReport userReport = UserReport.builder()
                 .source(Source.SAFETRIP)
                 .title("title")
@@ -91,7 +91,7 @@ class UserReportRepositoryTest {
 
         // 양방향 관계 설정
         userReport.setUser(user);
-        userReport.setScam(scam);
+        userReport.setScamAction(scamAction);
         userReport.setCountry(country);
         userReport.setState(state);
 
@@ -123,11 +123,11 @@ class UserReportRepositoryTest {
         return countryRepository.save(country);
     }
 
-    private Scam saveScam() {
-        Scam scam = Scam.builder()
+    private ScamAction saveScam() {
+        ScamAction scamAction = ScamAction.builder()
                 .name("Pickpocket")
                 .build();
-        return scamRepository.save(scam);
+        return scamRepository.save(scamAction);
     }
 
     private User saveUser() {
