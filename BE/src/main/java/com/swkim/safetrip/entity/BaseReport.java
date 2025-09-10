@@ -18,8 +18,13 @@ public abstract class BaseReport extends BaseEntity {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "scam_id")
+    @JoinColumn(name = "scam_action_id")
     private ScamAction scamAction;
+
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "scam_context_id")
+    private ScamContext scamContext;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
