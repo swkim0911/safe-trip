@@ -1,4 +1,4 @@
-from collector.transformer import travel_scam_classifier
+from collector.transformer.travel_scam_classifier import TravelScamClassifier
 from adapters.reddit_client import get_instance
 import time
 import praw
@@ -17,6 +17,8 @@ def crawl_travel_scam_with_url(reddit: praw.Reddit, url: str) -> int:
 
     submission = reddit.submission(url=url)  # url로 직접 게시글 가져오기
     post_body = clean_text(submission.selftext)
+    
+    travel_scam_classifier = TravelScamClassifier()
 
     is_travel_scam = travel_scam_classifier.classify(post_body)
     return is_travel_scam
