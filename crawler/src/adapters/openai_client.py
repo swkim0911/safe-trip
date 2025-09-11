@@ -10,16 +10,17 @@ API_KEY = os.getenv("OPENAI_API_KEY")
 
 @lru_cache(maxsize=1)
 def get_openai_client() -> OpenAI:
-    """OpenAI 클라이언트를 캐싱해서 재사용"""
-    return OpenAI(api_key=API_KEY)
+    return OpenAI(api_key=API_KEY) # OpenAI 클라이언트를 캐싱(싱글톤)해서 재사용
 
-
-def call_openai(prompt: str, temperature: float = 0.0) -> str:
-    """OpenAI API 호출 후 텍스트 응답 반환"""
+def call_openai(system_content:str, prompt: str, temperature: float = 0.0) -> str:
+    
     client = get_openai_client()
     response = client.responses.create(
         model=MODEL,
-        input=prompt,
+        input=[
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": prompt},
+        ],
         temperature=temperature,
     )
     return (response.output_text or "").strip()
