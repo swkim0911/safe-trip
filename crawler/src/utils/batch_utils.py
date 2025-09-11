@@ -1,6 +1,12 @@
 from utils import prompt_utils
 from datetime import datetime
+from pathlib import Path
 import json, os
+
+def get_batch_filename(folder: str = "data/batch_inputs") -> str:
+    Path(folder).mkdir(parents=True, exist_ok=True)  # 폴더 없으면 생성
+    filename = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
+    return str(Path(folder) / filename)
 
 """
 docs 배열을 받아 JSONL 파일로 변환한다.
@@ -12,7 +18,7 @@ def write_jsonl(jsons: list[dict[str, str]], filename: str | None = None) -> str
     system_content = prompt_utils.get_classification_system_content()
     
     if filename is None:
-            filename = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
+            filename = get_batch_filename()
     
     with open(filename, "w", encoding="utf-8") as f:
         MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
