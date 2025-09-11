@@ -8,6 +8,11 @@ class TravelScamExtractor:
         self.buffered_docs = []
         self.keywords = ["travel scam"]
 
+    def __clean_text(self, text: str) -> str:
+        if not text:
+            return ""
+        return text.replace("\u200b", "").strip()
+
     def __add_doc(self, doc: dict):
         self.buffered_docs.append(doc)
         if len(self.buffered_docs) >= self.BATCH_SIZE:
@@ -28,7 +33,7 @@ class TravelScamExtractor:
                 "reddit_id": f"t3_{post.id}",
                 "source": "reddit",
                 "author": str(post.author) if post.author else None,
-                "body": post.selftext,
+                "body": self.__clean_text(post.selftext),
                 "url": f"https://reddit.com{post.permalink}",
                 "type": "post",
                 "posted_at": datetime.utcfromtimestamp(post.created_utc)
@@ -42,7 +47,7 @@ class TravelScamExtractor:
                         "reddit_id": f"t1_{comment.id}",
                         "source": "reddit",
                         "author": str(comment.author) if comment.author else None,
-                        "body": comment.body,
+                        "body": self.__clean_text(comment.body),
                         "url": f"https://reddit.com{comment.permalink}",
                         "type": "comment",
                         "posted_at": datetime.utcfromtimestamp(comment.created_utc),
