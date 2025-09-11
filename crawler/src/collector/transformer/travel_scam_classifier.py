@@ -13,7 +13,7 @@ class TravelScamClassifier:
         system_content = prompt_utils.get_classification_system_content()
         prompt = prompt_utils.generate_classification_prompt(text)
         output_text = call_openai_api(system_content, prompt, temperature=0.0)
-        
+
         if not output_text:  # None, "" 방어
             return False
 
@@ -49,10 +49,10 @@ class TravelScamClassifier:
 
             is_travel_scam = text.strip() == "1"
             items.append({"reddit_id": reddit_id, "is_travel_scam": is_travel_scam})
-            if(len(items) >= BATCH_SIZE):
-                reddit_repository.flush_classification_results(items)
+            if len(items) >= self.BATCH_SIZE:
+                self.reddit_repository.flush_classification_results(items)
         
-        reddit_repository.flush_classification_results(items)
+        self.reddit_repository.flush_classification_results(items)
         
         # jsonl 파일 삭제
         try:
