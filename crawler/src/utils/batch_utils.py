@@ -3,10 +3,13 @@ from datetime import datetime
 from pathlib import Path
 import json, os
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent # /crawler
+
 def get_batch_filename(folder: str = "data/batch_inputs") -> str:
-    Path(folder).mkdir(parents=True, exist_ok=True)  # 폴더 없으면 생성
+    abs_folder = BASE_DIR / folder
+    abs_folder.mkdir(parents=True, exist_ok=True) # 폴더 없으면 생성
     filename = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
-    return str(Path(folder) / filename)
+    return str(Path(abs_folder) / filename)
 
 """
 docs 배열을 받아 JSONL 파일로 변환한다.
