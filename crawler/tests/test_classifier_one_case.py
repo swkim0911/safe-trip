@@ -36,4 +36,4 @@ if __name__ == "__main__":
 
     end = time.time()
 
-    print(f"테스트 실행 시간: {end - start:.2f} 초")
+    print(f"테스트 실행 시간: {end - start:.2f} 초") # 3초
