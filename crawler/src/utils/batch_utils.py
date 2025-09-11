@@ -11,12 +11,12 @@ def write_jsonl(jsons: list[dict[str, str]], filename: str | None = None) -> str
     
     system_content = prompt_manager.get_classification_system_content()
     
+    if filename is None:
+            filename = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
+    
     with open(filename, "w", encoding="utf-8") as f:
         MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-        
-        if filename is None:
-            filename = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
-        
+    
         for item in jsons:
             reddit_id = item["reddit_id"]
             body = item["body"]
