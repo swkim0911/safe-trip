@@ -11,7 +11,7 @@ class TravelScamExtractor:
     def __add_doc(self, doc: dict):
         self.buffered_docs.append(doc)
         if len(self.buffered_docs) >= self.BATCH_SIZE:
-            self.reddit_repository.flush_raw_ops(self.buffered_docs)
+            self.reddit_repository.flush_raw_documents_operations(self.buffered_docs)
     
     '''
     reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
@@ -50,4 +50,4 @@ class TravelScamExtractor:
                     self.__add_doc(comment_doc)
         
         # 마지막 flush
-        self.reddit_repository.flush_raw_ops(self.buffered_docs)
+        self.reddit_repository.flush_raw_documents_operations(self.buffered_docs)

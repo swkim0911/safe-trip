@@ -12,7 +12,7 @@ class RedditRepository:
     def find_raw_documents_with_limit(self, query, limit):
         return self.raw_collection.find(query).limit(limit)
     
-    def flush_raw_ops(self, docs: list[dict]):
+    def flush_raw_documents_operations(self, docs: list[dict]):
         if not docs:
             return
 
