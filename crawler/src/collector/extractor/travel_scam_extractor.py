@@ -4,7 +4,7 @@ class TravelScamExtractor:
     def __init__(self, reddit, redditRepository):
         self.reddit = reddit
         self.redditRepository = redditRepository 
-        self.BATCH_SIZE = 100
+        self.BATCH_SIZE = 1000
         self.operations = []
         self.keywords = ["travel scam"]
 
