@@ -5,8 +5,9 @@ class TravelScamClassifier:
         
     # text가 travel scam 관련 글이라면 1, 아니면 0을 반환한다
     def classify(self, text: str) -> bool:
+        system_content = prompt_manager.get_classification_system_content()
         prompt = prompt_manager.generate_classification_prompt(text)
-        output_text = call_openai(prompt, temperature=0.0)
+        output_text = call_openai_classifier(system_content, prompt, temperature=0.0)
         
         if not output_text:  # None, "" 방어
             return False
