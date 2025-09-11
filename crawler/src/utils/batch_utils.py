@@ -1,15 +1,15 @@
-from utils import prompt_manager
+from utils import prompt_utils
 from datetime import datetime
 import json, os
 
 """
-여러 텍스트를 받아 JSONL 파일로 변환한다.
+docs 배열을 받아 JSONL 파일로 변환한다.
 jsons: [{"reddit_id": "xxx", "body": "..."}, ...]
 return: 생성된 파일 경로
 """
 def write_jsonl(jsons: list[dict[str, str]], filename: str | None = None) -> str:
     
-    system_content = prompt_manager.get_classification_system_content()
+    system_content = prompt_utils.get_classification_system_content()
     
     if filename is None:
             filename = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
@@ -21,7 +21,7 @@ def write_jsonl(jsons: list[dict[str, str]], filename: str | None = None) -> str
             reddit_id = item["reddit_id"]
             body = item["body"]
             
-            prompt = prompt_manager.generate_classification_prompt(body)
+            prompt = prompt_utils.generate_classification_prompt(body)
 
             req = {
                 "custom_id": reddit_id, 
