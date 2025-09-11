@@ -1,17 +1,17 @@
 from datetime import datetime
 
 class TravelScamExtractor:
-    def __init__(self, reddit, redditRepository):
+    def __init__(self, reddit, reddit_repository):
         self.reddit = reddit
-        self.redditRepository = redditRepository 
+        self.reddit_repository = reddit_repository 
         self.BATCH_SIZE = 1000
-        self.operations = []
+        self.buffered_docs = []
         self.keywords = ["travel scam"]
 
-    def __add_operation(self, doc: dict):
-        self.operations.append(doc)
-        if len(self.operations) >= self.BATCH_SIZE:
-            self.redditRepository.flush_raw_ops(self.operations)
+    def __add_doc(self, doc: dict):
+        self.buffered_docs.append(doc)
+        if len(self.buffered_docs) >= self.BATCH_SIZE:
+            self.reddit_repository.flush_raw_ops(self.buffered_docs)
     
     '''
     reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
@@ -33,7 +33,7 @@ class TravelScamExtractor:
                 "type": "post",
                 "posted_at": datetime.utcfromtimestamp(post.created_utc)
             }
-            self.__add_operation(post_doc)
+            self.__add_doc(post_doc)
 
             post.comments.replace_more(limit=0)
             for comment in post.comments:
@@ -47,7 +47,7 @@ class TravelScamExtractor:
                         "type": "comment",
                         "posted_at": datetime.utcfromtimestamp(comment.created_utc),
                     }
-                    self.__add_operation(comment_doc)
+                    self.__add_doc(comment_doc)
         
         # 마지막 flush
-        self.redditRepository.flush_raw_ops(self.operations)
+        self.reddit_repository.flush_raw_ops(self.buffered_docs)
