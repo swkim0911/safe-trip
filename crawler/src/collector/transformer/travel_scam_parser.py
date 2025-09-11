@@ -1,4 +1,4 @@
-from adapters.openai_client import call_openai
+from adapters.openai_client import call_openai_api
 from prompt import prompt_manager
 from typing import Any
 import json, re
@@ -31,7 +31,7 @@ class TravelScamParser:
     # 분류된 데이터에서 필요한 데이터를 추출해서 json array를 반환한다
     def parse(self, text: str) -> list[dict[str, Any]]:
         prompt = prompt_manager.generate_parsing_prompt(text)
-        output_text = call_openai(prompt, temperature=0.0)
+        output_text = call_openai_api(prompt, temperature=0.0)
 
         try:
             data = self.__safe_json_loads(output_text)

@@ -12,7 +12,7 @@ API_KEY = os.getenv("OPENAI_API_KEY")
 def get_openai_client() -> OpenAI:
     return OpenAI(api_key=API_KEY) # OpenAI 클라이언트를 캐싱(싱글톤)해서 재사용
 
-def call_openai(system_content:str, prompt: str, temperature: float = 0.0) -> str:
+def call_openai_api(system_content:str, prompt: str, temperature: float = 0.0) -> str:
     
     client = get_openai_client()
     response = client.responses.create(
