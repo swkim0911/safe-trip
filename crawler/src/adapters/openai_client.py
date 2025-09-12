@@ -43,7 +43,7 @@ def call_openai_api_with_batch(filename: str):
     )
     batch_id = response.id
 
-    return {"input_file_id": input_file_id, "batch_id": batch_id}
+    return {"input_file_id": input_file_id, "batch_id": batch_id, "filename": filename}
 
 def get_completed_batch_result(batch_id: str):
     """
