@@ -28,3 +28,6 @@ def get_state_collection():
 
 def get_city_collection():
     return world_db["cities"]
+
+def get_batch_job_collection():
+    return safetrip_db["batch_jobs"]
