@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, UTC
 from adapters import openai_client
 from utils import batch_utils
 from pymongo import InsertOne
+import logging
 
 
 class TravelScamTransformer:
@@ -11,8 +12,11 @@ class TravelScamTransformer:
         self.reddit_repository = reddit_repository
         self.world_repository = world_repository
         self.BATCH_SIZE = 1000
+        self.logger = logging.getLogger(__name__)
 
-    ## transforming 과정에 batch classify
+    '''
+    batch classify
+    '''
     def classify_raw_documents_in_batch(self):
         # MongoDB에서 전체 raw 데이터 가져오기
         raw_jsons = self.reddit_repository.find_raw_documents({})
@@ -21,12 +25,14 @@ class TravelScamTransformer:
             batch_docs.append({"reddit_id": raw_json.get("reddit_id"), "body": raw_json.get("body")})
 
             if len(batch_docs) >= self.BATCH_SIZE:
+                self.logger.info("Batch %d개 문서 분류 요청", len(batch_docs))
                 batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
                 # batch_id 등 메타데이터를 MongoDB에 저장
                 self.reddit_repository.save_batch_job(batch_metadata)
                 batch_docs.clear()
 
         if batch_docs:
+            self.logger.info("마지막 Batch %d개 문서 분류 요청", len(batch_docs))
             batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
             self.reddit_repository.save_batch_job(batch_metadata)
             batch_docs.clear()

@@ -1,12 +1,14 @@
 from adapters.openai_client import call_openai_api, call_openai_api_with_batch, get_completed_batch_result
 from utils import prompt_utils, batch_utils
 import json, os
+import logging
 
 class TravelScamClassifier:
     
     def __init__(self, reddit_repository):
         self.reddit_repository = reddit_repository
         self.BATCH_SIZE = 1000
+        self.logger = logging.getLogger(__name__)
                 
     '''
     text가 travel scam 관련 글이라면 1, 아니면 0을 반환한다
@@ -30,6 +32,7 @@ class TravelScamClassifier:
 
         # 2. jsonl 파일을 openai api에 요청
         batch_metadata = call_openai_api_with_batch(filename)
+        self.logger.info("OpenAI API batch 요청 완료 (batch_id=%s)", batch_metadata["batch_id"])
 
         return batch_metadata
 
