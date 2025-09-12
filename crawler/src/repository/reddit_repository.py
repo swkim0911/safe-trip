@@ -36,7 +36,7 @@ class RedditRepository:
             )
 
         result = self.raw_collection.bulk_write(ops, ordered=False)
-        logging.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
+        self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
               f"Modified: {result.modified_count}, "  # 실제 값이 변경된 document 수
               f"Upserted: {len(result.upserted_ids)}")  # upsert로 새로 추가된 document 수
         
@@ -74,7 +74,7 @@ class RedditRepository:
                 )
             )
         result = self.raw_collection.bulk_write(ops, ordered=False)
-        logging.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
+        self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
               f"Modified: {result.modified_count}")  # 실제 값이 변경된 document 수
 
         items.clear()
@@ -96,8 +96,8 @@ class RedditRepository:
         if operations:
             try:
                 result = self.parsed_collection.bulk_write(operations, ordered=False)
-                logging.info(f"Inserted {len(operations)} docs into parsed_collection")
+                self.logger.info(f"Inserted {len(operations)} docs into parsed_collection")
             except Exception as e:
-                logging.info(f"[ERROR] Bulk write failed: {e}")
+                self.logger.error(f"[ERROR] Bulk write failed: {e}")
             finally:
                 operations.clear()
