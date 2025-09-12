@@ -3,9 +3,10 @@ from datetime import datetime, UTC
 import os
 
 class RedditRepository:
-    def __init__(self, raw_collection, parsed_collection):
+    def __init__(self, raw_collection, parsed_collection, batch_job_collection):
         self.raw_collection = raw_collection
         self.parsed_collection = parsed_collection
+        self.batch_job_collection = batch_job_collection
         
     def find_raw_documents(self, query):
         return self.raw_collection.find(query)
@@ -38,7 +39,7 @@ class RedditRepository:
               f"Upserted: {len(result.upserted_ids)}")  # upsert로 새로 추가된 document 수
         
         docs.clear()
-        
+
     """
         items: [{"reddit_id": "xxx", "is_travel_scam": True}, ...]
     """
@@ -61,7 +62,6 @@ class RedditRepository:
                     {
                         "$set": {
                             "classification": {
-                                "reddit_id": reddit_id,
                                 "is_travel_scam": is_travel_scam,
                                 "model_name": MODEL_NAME,
                                 "classification_prompt_version": PROMPT_VERSION,
@@ -76,6 +76,13 @@ class RedditRepository:
               f"Modified: {result.modified_count}")  # 실제 값이 변경된 document 수
 
         items.clear()
+    def save_batch_job(self, batch_metadata):
+        doc = {
+            "batch_id": batch_metadata["batch_id"],
+            "input_file_id": batch_metadata["input_file_id"],
+            "submitted_at": datetime.now(UTC),
+        }
+        self.batch_job_collection.insert_one(doc)
             
     def flush_parsed_ops(self, operations):
         # operations를 bulk_write 실행 후 비움
