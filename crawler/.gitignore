@@ -219,5 +219,6 @@ pyvenv.cfg
 pip-selfcheck.json
 
 # custom
-
+data/batch_inputs/
+logs/
 # End of https://www.toptal.com/developers/gitignore/api/macos,python,venv
