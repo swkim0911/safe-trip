@@ -1,5 +1,5 @@
 from adapters.reddit_client import get_instance
-from datetime import datetime
+from datetime import datetime, timezone
 
 class TravelScamExtractor:
     def __init__(self, reddit_repository):
@@ -37,7 +37,7 @@ class TravelScamExtractor:
                 "body": self.__clean_text(post.selftext),
                 "url": f"https://reddit.com{post.permalink}",
                 "type": "post",
-                "posted_at": datetime.utcfromtimestamp(post.created_utc)
+                "posted_at": datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
             }
             self.__add_doc(post_doc)
 
@@ -51,7 +51,7 @@ class TravelScamExtractor:
                         "body": self.__clean_text(comment.body),
                         "url": f"https://reddit.com{comment.permalink}",
                         "type": "comment",
-                        "posted_at": datetime.utcfromtimestamp(comment.created_utc),
+                        "posted_at": datetime.fromtimestamp(comment.created_utc, tz=timezone.utc)
                     }
                     self.__add_doc(comment_doc)
         
