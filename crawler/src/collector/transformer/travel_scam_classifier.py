@@ -24,15 +24,14 @@ class TravelScamClassifier:
     """
     raw data를 리스트로 받아서 비동기 배치 요청을 하고 관련 메타데이터를 db에 저장
     """
-    def submit_classification_batch(self, jsons):
+    def submit_classification_batch(self, batch_docs):
         # 1. list -> jsonl 파일
-        filename = batch_utils.write_jsonl(jsons)
+        filename = batch_utils.write_jsonl(batch_docs)
 
         # 2. jsonl 파일을 openai api에 요청
         batch_metadata = call_openai_api_with_batch(filename)
 
-        # 3. batch_id 등 메타데이터를 MongoDB에 저장
-        self.reddit_repository.save_batch_job(batch_metadata)
+        return batch_metadata
 
     '''
     batch 요청 결과(24시간 후)를 parsed_collection에 반영
@@ -66,7 +65,6 @@ class TravelScamClassifier:
                 # BATCH_SIZE 단위로 저장
                 if len(items) >= self.BATCH_SIZE:
                     self.reddit_repository.flush_classification_results(items)
-                    items.clear()
 
             # 남은 items 처리
             if items:

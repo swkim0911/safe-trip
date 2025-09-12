@@ -16,22 +16,24 @@ class TravelScamTransformer:
     def classify_raw_documents_in_batch(self):
         # MongoDB에서 전체 raw 데이터 가져오기
         raw_jsons = self.reddit_repository.find_raw_documents({})
-        buffer = []
+        batch_docs = []
         for raw_json in raw_jsons:
-            buffer.append({"reddit_id": raw_json.get("reddit_id"), "body": raw_json.get("body")})
+            batch_docs.append({"reddit_id": raw_json.get("reddit_id"), "body": raw_json.get("body")})
 
-            if len(buffer) >= self.BATCH_SIZE:
-                self.travel_scam_classifier.submit_classification_batch(buffer)
-                buffer.clear()
+            if len(batch_docs) >= self.BATCH_SIZE:
+                batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
+                # batch_id 등 메타데이터를 MongoDB에 저장
+                self.reddit_repository.save_batch_job(batch_metadata)
+                batch_docs.clear()
 
-        if buffer:
-            self.travel_scam_classifier.submit_classification_batch(buffer)
-            buffer.clear()
+        if batch_docs:
+            batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
+            self.reddit_repository.save_batch_job(batch_metadata)
+            batch_docs.clear()
 
     ## transforming과정에 parsing
     def parse_classified_documents(self):
-        return
-
+        self.travel_scam_classifier.process_batch_results()
 
 
 
