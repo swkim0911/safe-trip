@@ -5,7 +5,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent  # src/ 상위 디렉�
 LOG_DIR = BASE_DIR / "logs"
 
 def setup_logging(name: str, level=logging.INFO):
-    print(LOG_DIR)
     Path(LOG_DIR).mkdir(exist_ok=True)
     logfile = Path(LOG_DIR) / f"{name}.log"
 
