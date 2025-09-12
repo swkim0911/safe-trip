@@ -1,5 +1,6 @@
 from adapters.openai_client import call_openai_api, call_openai_api_with_batch, get_completed_batch_result
 from utils import prompt_utils, batch_utils
+from pathlib import Path
 import json, os
 import logging
 
@@ -33,6 +34,9 @@ class TravelScamClassifier:
         # 2. jsonl 파일을 openai api에 요청
         batch_metadata = call_openai_api_with_batch(filename)
         self.logger.info("OpenAI API batch 요청 완료 (batch_id=%s)", batch_metadata["batch_id"])
+
+        Path(filename).unlink(missing_ok=True)
+        self.logger.info("jsonl 파일 삭제 (filename=%s)", filename)
 
         return batch_metadata
 
@@ -73,13 +77,6 @@ class TravelScamClassifier:
             if items:
                 self.reddit_repository.flush_classification_results(items)
 
-            # jsonl 파일 삭제
-            filename = batch_job["filename"]
-            try:
-                os.remove(filename)
-                print(f"Deleted temp file: {filename}")
-            except OSError as e:
-                print(f"[WARN] Failed to delete {filename}: {e}")
 
     '''
     안전장치 -> 숫자 이외가 섞여오면 첫 번째 '1' 또는 '0'만 취함
