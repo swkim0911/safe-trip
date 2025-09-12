@@ -14,7 +14,8 @@ import time
 def init_reddit_repository():
     return RedditRepository(
         mongo_client.get_raw_collection(),
-        mongo_client.get_parsed_collection()
+        mongo_client.get_parsed_collection(),
+        mongo_client.get_batch_job_collection()
     )
 
 def init_world_repository():
