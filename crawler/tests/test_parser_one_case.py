@@ -1,4 +1,4 @@
-from collector.transformer import travel_scam_parser
+from collector.transformer.travel_scam_parser import TravelScamParser
 from adapters.reddit_client import get_instance
 import time
 import praw
@@ -13,12 +13,12 @@ def clean_text(text: str) -> str:
     return text.replace("\u200b", "").strip()
 
 
-def crawl_travel_scam_with_url(reddit: praw.Reddit, url: str):
-
+def parse_travel_scam_with_url(reddit: praw.Reddit, url: str):
     submission = reddit.submission(url=url)  # url로 직접 게시글 가져오기
     post_body = clean_text(submission.selftext)
-    result = travel_scam_parser.parse(post_body)
-    print(result)
+    travel_scam_parser = TravelScamParser()
+
+    return travel_scam_parser.parse(post_body)
 
 
 if __name__ == "__main__":
@@ -27,7 +27,9 @@ if __name__ == "__main__":
 
     reddit = get_instance()
 
-    result = crawl_travel_scam_with_url(reddit, url)
+    result = parse_travel_scam_with_url(reddit, url)
+
+    print(result)
 
     end = time.time()
 
