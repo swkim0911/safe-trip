@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent # /crawler
 def get_batch_filename(folder: str = "data/batch_inputs") -> str:
     abs_folder = BASE_DIR / folder
     abs_folder.mkdir(parents=True, exist_ok=True) # 폴더 없으면 생성
-    filename = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
+    filename = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jsonl"
     return str(Path(abs_folder) / filename)
 
 """
