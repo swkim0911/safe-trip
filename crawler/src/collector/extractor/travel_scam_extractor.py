@@ -1,8 +1,9 @@
+from adapters.reddit_client import get_instance
 from datetime import datetime
 
 class TravelScamExtractor:
-    def __init__(self, reddit, reddit_repository):
-        self.reddit = reddit
+    def __init__(self, reddit_repository):
+        self.reddit = get_instance()
         self.reddit_repository = reddit_repository 
         self.BATCH_SIZE = 1000
         self.buffered_docs = []
@@ -25,8 +26,8 @@ class TravelScamExtractor:
         time_filter: hour/day/week/month/year/all 중 하나
         limit: 가져올 최대 게시글 수
     '''
-    def extract(self, time_filter: str, limit: int):
-        subreddit = self.reddit.subreddit("travel") ## todo: redit에 직접 의존할 필요없지 않나.
+    def extract(self, time_filter: str, limit: int | None):
+        subreddit = self.reddit.subreddit("travel")
 
         for post in subreddit.search(" OR ".join(self.keywords), sort="relevance", time_filter=time_filter, limit=limit):
             post_doc = {
