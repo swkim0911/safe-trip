@@ -1,5 +1,6 @@
-from pymongo import UpdateOne
 from datetime import datetime, UTC
+from pymongo import UpdateOne
+import logging
 import os
 
 class RedditRepository:
@@ -7,6 +8,7 @@ class RedditRepository:
         self.raw_collection = raw_collection
         self.parsed_collection = parsed_collection
         self.batch_job_collection = batch_job_collection
+        self.logger = logging.getLogger(__name__)
         
     def find_raw_documents(self, query):
         return self.raw_collection.find(query)
@@ -34,7 +36,7 @@ class RedditRepository:
             )
 
         result = self.raw_collection.bulk_write(ops, ordered=False)
-        print(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
+        logging.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
               f"Modified: {result.modified_count}, "  # 실제 값이 변경된 document 수
               f"Upserted: {len(result.upserted_ids)}")  # upsert로 새로 추가된 document 수
         
@@ -72,7 +74,7 @@ class RedditRepository:
                 )
             )
         result = self.raw_collection.bulk_write(ops, ordered=False)
-        print(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
+        logging.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
               f"Modified: {result.modified_count}")  # 실제 값이 변경된 document 수
 
         items.clear()
@@ -94,8 +96,8 @@ class RedditRepository:
         if operations:
             try:
                 result = self.parsed_collection.bulk_write(operations, ordered=False)
-                print(f"Inserted {len(operations)} docs into parsed_collection")
+                logging.info(f"Inserted {len(operations)} docs into parsed_collection")
             except Exception as e:
-                print(f"[ERROR] Bulk write failed: {e}")
+                logging.info(f"[ERROR] Bulk write failed: {e}")
             finally:
                 operations.clear()
