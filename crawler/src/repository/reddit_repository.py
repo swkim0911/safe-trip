@@ -76,6 +76,7 @@ class RedditRepository:
               f"Modified: {result.modified_count}")  # 실제 값이 변경된 document 수
 
         items.clear()
+
     def save_batch_job(self, batch_metadata):
         doc = {
             "batch_id": batch_metadata["batch_id"],
@@ -83,6 +84,9 @@ class RedditRepository:
             "submitted_at": datetime.now(UTC),
         }
         self.batch_job_collection.insert_one(doc)
+
+    def find_batch_job_documents(self, query):
+        return self.batch_job_collection.find(query)
             
     def flush_parsed_ops(self, operations):
         # operations를 bulk_write 실행 후 비움
