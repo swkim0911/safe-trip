@@ -1,4 +1,4 @@
-from adapters.openai_client import call_openai_api, call_openai_api_with_batch
+from adapters.openai_client import call_openai_api, call_openai_api_with_batch, get_completed_batch_result
 from utils import prompt_utils, batch_utils
 import json, os
 
@@ -8,7 +8,9 @@ class TravelScamClassifier:
         self.reddit_repository = reddit_repository
         self.BATCH_SIZE = 1000
                 
-    # text가 travel scam 관련 글이라면 1, 아니면 0을 반환한다
+    '''
+    text가 travel scam 관련 글이라면 1, 아니면 0을 반환한다
+    '''
     def classify(self, text: str) -> bool:
         system_content = prompt_utils.get_classification_system_content()
         prompt = prompt_utils.generate_classification_prompt(text)
@@ -17,14 +19,7 @@ class TravelScamClassifier:
         if not output_text:  # None, "" 방어
             return False
 
-        # 안전장치 -> 숫자 이외가 섞여오면 첫 번째 '1' 또는 '0'만 취함
-        if "1" in output_text and "0" in output_text:
-            return output_text.index("1") < output_text.index("0")
-        if "1" in output_text:
-            return True
-        if "0" in output_text:
-            return False
-        return False
+        return self.__extract_label_from_output(output_text)
 
     """
     raw data를 리스트로 받아서 비동기 배치 요청을 하고 관련 메타데이터를 db에 저장
@@ -39,40 +34,62 @@ class TravelScamClassifier:
         # 3. batch_id 등 메타데이터를 MongoDB에 저장
         self.reddit_repository.save_batch_job(batch_metadata)
 
-    # 24시간 후, batch요청 결과를 DB에 반영
-    def process_batch_results:
+    '''
+    batch 요청 결과(24시간 후)를 parsed_collection에 반영
+    '''
+    def process_batch_results(self):
         # 1. 몽고에서 batch_id 일어오기
+        batch_jobs = self.reddit_repository.find_batch_job_documents({}) # batch_id,
 
-    #     # 2. batch_id로 부터 content 읽어오기
-    #     content = call_openai_api_for_content(batch_id)
-    #
-    #
-    #     ## 결과 가공
-    #     items = []
-    #
-    #     for line in content.splitlines():
-    #         if not line.strip():
-    #             continue
-    #
-    #         record = json.loads(line)
-    #
-    #         reddit_id = record["custom_id"]
-    #         text = record["response"]["body"]["output"][0]["content"][0]["text"]
-    #
-    #         is_travel_scam = text.strip() == "1"
-    #         items.append({"reddit_id": reddit_id, "is_travel_scam": is_travel_scam})
-    #         if len(items) >= self.BATCH_SIZE:
-    #             self.reddit_repository.flush_classification_results(items)
-    #
-    #     self.reddit_repository.flush_classification_results(items)
-    #
-    #     # jsonl 파일 삭제
-    #     # try:
-    #     #     os.remove(filename)
-    #     #     print(f"Deleted temp file: {filename}")
-    #     # except OSError as e:
-    #     #     print(f"[WARN] Failed to delete {filename}: {e}")
-    #
+        for batch_job in batch_jobs:
+            # 2. batch_id로부터 content(JSONL 결과) 읽어오기
+            batch_id = batch_job["batch_id"]
+            content = get_completed_batch_result(batch_id)
+            if not content:
+                continue  # 혹시 실패했거나 아직 결과가 없으면 스킵
 
+            # 3. 결과 가공
+            items = []
+            for line in content.splitlines():
+                if not line.strip():
+                    continue
+
+                record = json.loads(line)
+
+                reddit_id = record["custom_id"]
+                text = record["response"]["body"]["output"][0]["content"][0]["text"]
+
+                is_travel_scam = self.__extract_label_from_output(text)
+
+                items.append({"reddit_id": reddit_id,"is_travel_scam": is_travel_scam})
+
+                # BATCH_SIZE 단위로 저장
+                if len(items) >= self.BATCH_SIZE:
+                    self.reddit_repository.flush_classification_results(items)
+                    items.clear()
+
+            # 남은 items 처리
+            if items:
+                self.reddit_repository.flush_classification_results(items)
+
+            # jsonl 파일 삭제
+            filename = batch_job["filename"]
+            try:
+                os.remove(filename)
+                print(f"Deleted temp file: {filename}")
+            except OSError as e:
+                print(f"[WARN] Failed to delete {filename}: {e}")
+
+    '''
+    안전장치 -> 숫자 이외가 섞여오면 첫 번째 '1' 또는 '0'만 취함
+    '''
+    def __extract_label_from_output(self, output_text):
+        if "1" in output_text and "0" in output_text:
+            return output_text.index("1") < output_text.index("0")
+        if "1" in output_text:
+            return True
+        if "0" in output_text:
+            return False
+        return False
 
     
