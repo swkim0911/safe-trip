@@ -7,18 +7,9 @@ from repository.reddit_repository import RedditRepository
 from repository.world_repository import WorldRepository
 from adapters import mongo_client
 
-import logging
-import time
+from config.logging_config import setup_logging
 
-def setup_logging():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
-        handlers=[
-            logging.FileHandler("logs/init_collector.log", encoding="utf-8"),
-            logging.StreamHandler()
-        ]
-    )
+import time
 
 def init_reddit_repository():
     return RedditRepository(
@@ -35,8 +26,7 @@ def init_world_repository():
 
 
 if __name__ == "__main__":
-    setup_logging()
-    logger = logging.getLogger("init_collector")
+    logger = setup_logging("init_collector")
 
     start = time.time()
     logger.info("init_collector 시작")
