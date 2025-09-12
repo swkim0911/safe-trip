@@ -25,42 +25,54 @@ class TravelScamClassifier:
         if "0" in output_text:
             return False
         return False
+
     """
-    json data를 리스트로 받아서 배치 요청을 해서 db에 저장
+    raw data를 리스트로 받아서 비동기 배치 요청을 하고 관련 메타데이터를 db에 저장
     """
-    def classify_with_batch(self, jsons):        
+    def submit_classification_batch(self, jsons):
         # 1. list -> jsonl 파일
         filename = batch_utils.write_jsonl(jsons)
-        
+
         # 2. jsonl 파일을 openai api에 요청
-        content = call_openai_api_with_batch(filename)
-        
-        ## 결과 가공        
-        items = []
-        
-        for line in content.splitlines():
-            if not line.strip():
-                continue
+        batch_metadata = call_openai_api_with_batch(filename)
 
-            record = json.loads(line)
+        # 3. batch_id 등 메타데이터를 MongoDB에 저장
+        self.reddit_repository.save_batch_job(batch_metadata)
 
-            reddit_id = record["custom_id"]
-            text = record["response"]["body"]["output"][0]["content"][0]["text"]
+    # 24시간 후, batch요청 결과를 DB에 반영
+    def process_batch_results:
+        # 1. 몽고에서 batch_id 일어오기
 
-            is_travel_scam = text.strip() == "1"
-            items.append({"reddit_id": reddit_id, "is_travel_scam": is_travel_scam})
-            if len(items) >= self.BATCH_SIZE:
-                self.reddit_repository.flush_classification_results(items)
-        
-        self.reddit_repository.flush_classification_results(items)
-        
-        # jsonl 파일 삭제
-        try:
-            os.remove(filename)
-            print(f"Deleted temp file: {filename}")
-        except OSError as e:
-            print(f"[WARN] Failed to delete {filename}: {e}")
-        
+    #     # 2. batch_id로 부터 content 읽어오기
+    #     content = call_openai_api_for_content(batch_id)
+    #
+    #
+    #     ## 결과 가공
+    #     items = []
+    #
+    #     for line in content.splitlines():
+    #         if not line.strip():
+    #             continue
+    #
+    #         record = json.loads(line)
+    #
+    #         reddit_id = record["custom_id"]
+    #         text = record["response"]["body"]["output"][0]["content"][0]["text"]
+    #
+    #         is_travel_scam = text.strip() == "1"
+    #         items.append({"reddit_id": reddit_id, "is_travel_scam": is_travel_scam})
+    #         if len(items) >= self.BATCH_SIZE:
+    #             self.reddit_repository.flush_classification_results(items)
+    #
+    #     self.reddit_repository.flush_classification_results(items)
+    #
+    #     # jsonl 파일 삭제
+    #     # try:
+    #     #     os.remove(filename)
+    #     #     print(f"Deleted temp file: {filename}")
+    #     # except OSError as e:
+    #     #     print(f"[WARN] Failed to delete {filename}: {e}")
+    #
 
 
     
