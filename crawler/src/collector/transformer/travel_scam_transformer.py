@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta, UTC
+from adapters import openai_client
+from utils import batch_utils
 from pymongo import InsertOne
+
 
 class TravelScamTransformer:
     def __init__(self, travel_scam_classifier, travel_scam_parser, reddit_repository, world_repository):
@@ -7,37 +10,50 @@ class TravelScamTransformer:
         self.travel_scam_parser = travel_scam_parser
         self.reddit_repository = reddit_repository
         self.world_repository = world_repository
-        self.BATCH_SIZE = 100
-        
+        self.BATCH_SIZE = 1000
 
-    def __clean_text(self, text: str) -> str:
-        if not text:
-            return ""
-        return text.replace("\u200b", "").strip()
+    ## transforming 과정에 batch classify
+    def classify_raw_documents_in_batch(self):
+        # MongoDB에서 전체 raw 데이터 가져오기
+        raw_jsons = self.reddit_repository.find_raw_documents({})
+        buffer = []
+        for raw_json in raw_jsons:
+            buffer.append({"reddit_id": raw_json.get("reddit_id"), "body": raw_json.get("body")})
+
+            if len(buffer) >= self.BATCH_SIZE:
+                self.travel_scam_classifier.submit_classification_batch(buffer)
+                buffer.clear()
+
+        if buffer:
+            self.travel_scam_classifier.submit_classification_batch(buffer)
+            buffer.clear()
+
+    ## transforming과정에 parsing
+    def parse_classified_documents(self):
+        return
+
+
 
 
     '''
-        MongoDB에서 Reddit raw 데이터를 가져와서
-        travel scam으로 분류/추출한 뒤 정제된 결과를 MongoDB에 저장한다.
+        매일 실행되는 job
+        MongoDB에서 Reddit raw 데이터를 가져와서 travel scam으로 분류 후
+        keyword를 추출하고 정제된 결과를 MongoDB에 저장한다.
 
         Args:
             time_filter (str): "all" 또는 "7d" (최근 7일)
     '''
-    def transform(self, time_filter: str):
+    def transform(self):
         
         operations = []
 
-        # time_filter 조건 설정 ("all, week")
-        query = {}
         existing_ids = set()
-
-        if time_filter == "week":
-            one_week_ago = datetime.utcnow() - timedelta(days=7)
-            query = {"posted_at": {"$gte": one_week_ago}}
-            existing_ids = set(parsed_collection.distinct(
-                "reddit_id",
-                {"posted_at": {"$gte": one_week_ago}}
-            ))
+        one_week_ago = datetime.now(UTC) - timedelta(days=7)
+        query = {"posted_at": {"$gte": one_week_ago}}
+        # existing_ids = set(parsed_collection.distinct(
+        #     "reddit_id",
+        #     {"posted_at": {"$gte": one_week_ago}}
+        # ))
 
         # MongoDB에서 데이터 가져오기
         
@@ -48,7 +64,7 @@ class TravelScamTransformer:
             if raw_json.get("reddit_id") in existing_ids:
                 continue
 
-            body = self.__clean_text(raw_json.get("body", ""))
+            body = raw_json.get("body")
 
             # scam 분류
             is_scam = self.travel_scam_classifier.classify(body)
