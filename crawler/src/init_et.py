@@ -7,7 +7,18 @@ from repository.reddit_repository import RedditRepository
 from repository.world_repository import WorldRepository
 from adapters import mongo_client
 
+import logging
 import time
+
+def setup_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+        handlers=[
+            logging.FileHandler("logs/init_collector.log", encoding="utf-8"),
+            logging.StreamHandler()
+        ]
+    )
 
 def init_reddit_repository():
     return RedditRepository(
@@ -24,19 +35,27 @@ def init_world_repository():
 
 
 if __name__ == "__main__":
+    setup_logging()
+    logger = logging.getLogger("init_collector")
+
     start = time.time()
+    logger.info("init_collector 시작")
+
     reddit_repository = init_reddit_repository()
     world_repository = init_world_repository()
     
     # 1. extract
     travel_scam_extractor = TravelScamExtractor(reddit_repository)
+    logger.info("TravelScamExtractor 시작")
     travel_scam_extractor.extract("all", None)
-    
+    logger.info("TravelScamExtractor 완료")
 
     # 2.1 transform (classify with batch)
     travel_scam_transformer = TravelScamTransformer(TravelScamClassifier(reddit_repository), TravelScamParser(), reddit_repository, world_repository)
+    logger.info("TravelScamTransformer(classify) 시작")
     travel_scam_transformer.classify_raw_documents_in_batch()
+    logger.info("TravelScamTransformer(classify) 완료")
 
     end = time.time()
 
-    print(f"init_collector 실행 시간: {end - start:.2f} 초")
+    logger.info("init_collector 실행 시간: %.2f 초", end - start)
