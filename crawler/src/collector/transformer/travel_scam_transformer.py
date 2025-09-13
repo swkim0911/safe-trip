@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, UTC
 from pymongo import InsertOne
 from utils.token_utils import get_expected_tokens
-import logging
+import logging, math
 
 
 class TravelScamTransformer:
@@ -10,21 +10,21 @@ class TravelScamTransformer:
         self.travel_scam_parser = travel_scam_parser
         self.reddit_repository = reddit_repository
         self.world_repository = world_repository
-        self.TOKEN_LIMIT = 1_999_990 # 원래는 200만이지만 보수적으로 LIMIT 설정
+        self.TOKEN_LIMIT = 1_500_000 # 원래는 200만이지만 보수적으로 LIMIT 설정
         self.logger = logging.getLogger(__name__)
 
     '''
     batch classify
     '''
-
     def classify_raw_documents_in_batch(self):
-        raw_jsons = self.reddit_repository.find_raw_documents({"classification": {"$exists": False}})
+        unclassified_docs = self.reddit_repository.find_raw_documents({"classification": {"$exists": False}})
+
         batch_docs = []
         expected_tokens = 0
 
-        for raw_json in raw_jsons:
-            reddit_id = raw_json["reddit_id"]
-            body = raw_json["body"]
+        for unclassified_doc in unclassified_docs:
+            reddit_id = unclassified_doc["reddit_id"]
+            body = unclassified_doc["body"]
             token_count = get_expected_tokens(body)
 
             # 단일 문서가 토큰 한도를 넘으면 스킵
@@ -53,11 +53,16 @@ class TravelScamTransformer:
             batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
             self.reddit_repository.save_batch_job(batch_metadata)
 
-    ## transforming과정에 parsing
+    '''
+    parsing
+    '''
     def parse_classified_documents(self):
+        # 비동기로 요청한 batch결과를 mongo에 저장
         self.travel_scam_classifier.process_batch_results()
 
         ## todo: keyword 추출 (parsing)
+        # find_travel_scam_document = self.reddit_repository.find_raw_documents({"classification.is_travel_scam": True})
+
 
 
     '''
