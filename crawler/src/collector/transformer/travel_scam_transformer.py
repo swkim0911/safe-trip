@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, UTC
 from pymongo import InsertOne
 from utils.token_utils import get_expected_tokens
-import logging, math
+import logging
 
 
 class TravelScamTransformer:
@@ -10,7 +10,7 @@ class TravelScamTransformer:
         self.travel_scam_parser = travel_scam_parser
         self.reddit_repository = reddit_repository
         self.world_repository = world_repository
-        self.TOKEN_LIMIT = 1_500_000 # 원래는 200만이지만 보수적으로 LIMIT 설정
+        self.TOKEN_LIMIT = 500_000 # 원래는 200만이지만 보수적으로 LIMIT 설정
         self.logger = logging.getLogger(__name__)
 
     '''
@@ -35,7 +35,7 @@ class TravelScamTransformer:
             batch_doc = {"reddit_id": reddit_id, "body": body}
 
             # 이번 문서를 넣으면 초과 → 지금까지 배치 flush
-            if expected_tokens + token_count > self.TOKEN_LIMIT:
+            if expected_tokens + token_count >= self.TOKEN_LIMIT:
                 self.logger.info("Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
                 batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
                 self.reddit_repository.save_batch_job(batch_metadata)
