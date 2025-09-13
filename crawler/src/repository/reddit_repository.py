@@ -83,7 +83,6 @@ class RedditRepository:
         doc = {
             "batch_id": batch_metadata["batch_id"],
             "input_file_id": batch_metadata["input_file_id"],
-            "filename": batch_metadata["filename"],
             "submitted_at": datetime.now(UTC),
         }
         self.batch_job_collection.insert_one(doc)
