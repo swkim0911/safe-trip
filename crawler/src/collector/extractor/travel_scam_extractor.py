@@ -30,20 +30,24 @@ class TravelScamExtractor:
         subreddit = self.reddit.subreddit("travel")
 
         for post in subreddit.search(" OR ".join(self.keywords), sort="relevance", time_filter=time_filter, limit=limit):
-            post_doc = {
-                "reddit_id": f"t3_{post.id}",
-                "source": "reddit",
-                "author": str(post.author) if post.author else None,
-                "body": self.__clean_text(post.selftext),
-                "url": f"https://reddit.com{post.permalink}",
-                "type": "post",
-                "posted_at": datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
-            }
-            self.__add_doc(post_doc)
+            if post.selftext and post.selftext not in ("[deleted]", "[removed]"):
+                post_doc = {
+                    "reddit_id": f"t3_{post.id}",
+                    "source": "reddit",
+                    "author": str(post.author) if post.author else None,
+                    "body": self.__clean_text(post.selftext),
+                    "url": f"https://reddit.com{post.permalink}",
+                    "type": "post",
+                    "posted_at": datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
+                }
+                self.__add_doc(post_doc)
 
             post.comments.replace_more(limit=0)
             for comment in post.comments:
                 if comment.parent_id.startswith("t3_"):
+                    if not comment.body or comment.body in ("[deleted]", "[removed]"):
+                        continue
+
                     comment_doc = {
                         "reddit_id": f"t1_{comment.id}",
                         "source": "reddit",
