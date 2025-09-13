@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, UTC
-from adapters import openai_client
-from utils import batch_utils
 from pymongo import InsertOne
+from utils.token_utils import get_expected_tokens
 import logging
 
 
@@ -11,36 +10,54 @@ class TravelScamTransformer:
         self.travel_scam_parser = travel_scam_parser
         self.reddit_repository = reddit_repository
         self.world_repository = world_repository
-        self.BATCH_SIZE = 1000
+        self.TOKEN_LIMIT = 1_999_990 # 원래는 200만이지만 보수적으로 LIMIT 설정
         self.logger = logging.getLogger(__name__)
 
     '''
     batch classify
     '''
+
     def classify_raw_documents_in_batch(self):
-        # MongoDB에서 전체 raw 데이터 가져오기
-        raw_jsons = self.reddit_repository.find_raw_documents({})
+        raw_jsons = self.reddit_repository.find_raw_documents({"classification": {"$exists": False}})
         batch_docs = []
+        expected_tokens = 0
+
         for raw_json in raw_jsons:
-            batch_docs.append({"reddit_id": raw_json.get("reddit_id"), "body": raw_json.get("body")})
+            reddit_id = raw_json["reddit_id"]
+            body = raw_json["body"]
+            token_count = get_expected_tokens(body)
 
-            if len(batch_docs) >= self.BATCH_SIZE:
-                self.logger.info("Batch %d개 문서 분류 요청", len(batch_docs))
+            # 단일 문서가 토큰 한도를 넘으면 스킵
+            if token_count > self.TOKEN_LIMIT:
+                self.logger.warning("문서 %s 가 토큰 제한 초과, 스킵함",reddit_id)
+                continue
+
+            batch_doc = {"reddit_id": reddit_id, "body": body}
+
+            # 이번 문서를 넣으면 초과 → 지금까지 배치 flush
+            if expected_tokens + token_count > self.TOKEN_LIMIT:
+                self.logger.info("Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
                 batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
-                # batch_id 등 메타데이터를 MongoDB에 저장
                 self.reddit_repository.save_batch_job(batch_metadata)
-                batch_docs.clear()
 
+                # 새 배치 시작
+                batch_docs = [batch_doc]
+                expected_tokens = token_count
+            else:
+                batch_docs.append(batch_doc)
+                expected_tokens += token_count
+
+        # 마지막 배치 처리
         if batch_docs:
-            self.logger.info("마지막 Batch %d개 문서 분류 요청", len(batch_docs))
+            self.logger.info("마지막 Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
             batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
             self.reddit_repository.save_batch_job(batch_metadata)
-            batch_docs.clear()
 
     ## transforming과정에 parsing
     def parse_classified_documents(self):
         self.travel_scam_classifier.process_batch_results()
 
+        ## todo: keyword 추출 (parsing)
 
 
     '''
