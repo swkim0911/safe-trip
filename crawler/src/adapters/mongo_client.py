@@ -18,7 +18,7 @@ def get_raw_collection():
     return safetrip_db["raw_reddit"]
 
 def get_parsed_collection():
-    return safetrip_db["parsed_reddt"]
+    return safetrip_db["parsed_reddit"]
 
 def get_country_collection():
     return world_db["countries"]
