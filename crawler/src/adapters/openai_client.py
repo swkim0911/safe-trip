@@ -1,12 +1,14 @@
-import os, time
 from dotenv import load_dotenv
 from openai import OpenAI
 from functools import lru_cache
+import logging, os
 
 load_dotenv()
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 API_KEY = os.getenv("OPENAI_API_KEY")
+
+logger = logging.getLogger(__name__)
 
 @lru_cache(maxsize=1)
 def get_openai_client() -> OpenAI:
@@ -43,7 +45,7 @@ def call_openai_api_with_batch(filename: str):
     )
     batch_id = response.id
 
-    return {"input_file_id": input_file_id, "batch_id": batch_id, "filename": filename}
+    return {"input_file_id": input_file_id, "batch_id": batch_id}
 
 def get_completed_batch_result(batch_id: str):
     """
@@ -58,13 +60,13 @@ def get_completed_batch_result(batch_id: str):
         file_obj = client.files.content(output_file_id)
 
         # JSONL 콘텐츠 반환
+        logger.info(f"✅ Batch {batch_id} completed. Output file_id={output_file_id}")
         content = file_obj.content.decode("utf-8")
         return content
 
+    elif batch.status in ["failed", "expired", "cancelled"]:
+        logger.error(f"❌ Batch {batch_id} ended with status {batch.status}")
+    else:
+        logger.info(f"⏳ Batch {batch_id} still not ready, status={batch.status}")
+
     return None
-    # elif batch.status in ["failed", "expired", "cancelled"]:
-    #     logging.error(f"❌ Batch {batch_id} ended with status {batch.status}")
-    #     self.reddit_repository.mark_batch_as_failed(batch_id, batch.status)
-    # else:
-    #     logging.info(f"⏳ Batch {batch_id} still not ready, status={batch.status}")
-    #     return None
