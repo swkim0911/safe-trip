@@ -4,7 +4,7 @@ import tiktoken, os
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 ENC = tiktoken.encoding_for_model(MODEL)
 
-def get_expected_tokens(body):
+def estimate_classification_request_tokens(body):
     system_content = get_classification_system_content()
     prompt = generate_classification_prompt(body)
 
@@ -16,3 +16,4 @@ def get_expected_tokens(body):
             len(ENC.encode(prompt)) +
             overhead
     )
+
