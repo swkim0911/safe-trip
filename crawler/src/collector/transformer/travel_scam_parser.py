@@ -1,9 +1,13 @@
-from adapters.openai_client import call_openai_api
-from utils import prompt_utils
+from adapters.openai_client import call_openai_api, call_openai_api_with_batch
+from utils import prompt_utils, batch_utils
 from typing import Any
-import json, re
+from pathlib import Path
+import json, re, logging
 
 class TravelScamParser:
+
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
 
     def __safe_json_loads(self, text: str):
         
@@ -40,3 +44,16 @@ class TravelScamParser:
             raise ValueError(f"JSON 디코딩 실패: {e}\n원본 응답: {output_text}")
 
         return data
+
+    def submit_parsing_batch(self, batch_docs: list[dict[str, str]]):
+        # 1. list -> jsonl 파일
+        filename = batch_utils.write_jsonl(batch_docs)
+
+        # 2. jsonl 파일을 openai api에 요청
+        batch_metadata = call_openai_api_with_batch(filename)
+        self.logger.info("(parsing) OpenAI API batch 요청 완료 (batch_id=%s)", batch_metadata["batch_id"])
+
+        # Path(filename).unlink(missing_ok=True)
+        # self.logger.info("(parsing)jsonl 파일 삭제 (filename=%s)", filename)
+
+        return batch_metadata
