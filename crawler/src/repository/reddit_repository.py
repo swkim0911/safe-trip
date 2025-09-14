@@ -74,7 +74,7 @@ class RedditRepository:
                 )
             )
         result = self.raw_collection.bulk_write(ops, ordered=False)
-        self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
+        self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 document 수
               f"Modified: {result.modified_count}")  # 실제 값이 변경된 document 수
 
         items.clear()
@@ -83,6 +83,7 @@ class RedditRepository:
         doc = {
             "batch_id": batch_metadata["batch_id"],
             "input_file_id": batch_metadata["input_file_id"],
+            "job_type": batch_metadata["job_type"],
             "submitted_at": datetime.now(UTC),
         }
         self.batch_job_collection.insert_one(doc)

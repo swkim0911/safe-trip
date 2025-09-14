@@ -1,8 +1,8 @@
 from adapters.openai_client import call_openai_api, call_openai_api_with_batch, get_completed_batch_result
 from utils import prompt_utils, batch_utils
 from pathlib import Path
-import json, os
 import logging
+import json
 
 class TravelScamClassifier:
     
@@ -55,7 +55,7 @@ class TravelScamClassifier:
                 continue  # 혹시 실패했거나 아직 결과가 없으면 스킵
 
             # 3. 결과 가공
-            items = []
+            classification_results = []
             for line in content.splitlines():
                 if not line.strip():
                     continue
@@ -67,15 +67,15 @@ class TravelScamClassifier:
 
                 is_travel_scam = self.__extract_label_from_output(text)
 
-                items.append({"reddit_id": reddit_id,"is_travel_scam": is_travel_scam})
+                classification_results.append({"reddit_id": reddit_id,"is_travel_scam": is_travel_scam})
 
                 # BATCH_SIZE 단위로 저장
-                if len(items) >= self.BATCH_SIZE:
-                    self.reddit_repository.flush_classification_results(items)
+                if len(classification_results) >= self.BATCH_SIZE:
+                    self.reddit_repository.flush_classification_results(classification_results)
 
-            # 남은 items 처리
-            if items:
-                self.reddit_repository.flush_classification_results(items)
+            # 남은 classification_results 처리
+            if classification_results:
+                self.reddit_repository.flush_classification_results(classification_results)
 
 
     '''
