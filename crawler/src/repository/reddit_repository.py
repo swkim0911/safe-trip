@@ -4,12 +4,16 @@ import logging
 import os
 
 class RedditRepository:
+    MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    CLASSIFICATION_PROMPT_VERSION = os.getenv("CLASSIFICATION_PROMPT_VERSION", "v0")
+    PARSING_PROMPT_VERSION = os.getenv("PARSING_PROMPT_VERSION", "v0")
+
     def __init__(self, raw_collection, parsed_collection, batch_job_collection):
         self.raw_collection = raw_collection
         self.parsed_collection = parsed_collection
         self.batch_job_collection = batch_job_collection
         self.logger = logging.getLogger(__name__)
-        
+
     def find_raw_documents(self, query):
         return self.raw_collection.find(query)
     
@@ -50,9 +54,6 @@ class RedditRepository:
             return
         
         ops = []
-        MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-        PROMPT_VERSION = os.getenv("CLASSIFICATION_PROMPT_VERSION", "v0")
-    
 
         for item in items:
             reddit_id = item["reddit_id"]
@@ -65,8 +66,8 @@ class RedditRepository:
                         "$set": {
                             "classification": {
                                 "is_travel_scam": is_travel_scam,
-                                "model_name": MODEL_NAME,
-                                "classification_prompt_version": PROMPT_VERSION,
+                                "model_name": self.MODEL_NAME,
+                                "classification_prompt_version": self.CLASSIFICATION_PROMPT_VERSION,
                                 "classified_at": datetime.now(UTC)
                             }
                         }
@@ -91,8 +92,26 @@ class RedditRepository:
     def find_batch_job_documents(self, query):
         return self.batch_job_collection.find(query)
 
-    def find_parsed_documents(self, query):
-        return self.parsed_collection.find(query)
+    def find_parsed_documents(self, query, projection=None):
+        return self.parsed_collection.find(query, projection)
+
+    def find_one_raw_document(self, query):
+        return self.raw_collection.find_one(query)
+    # """
+    # dict: {"reddit_id": reddit_id, "parsed_result": json}
+    # parsed_result:
+    # {
+    #     "title": "",
+    #     "action": "",
+    #     "context": "",
+    #     "country": "", nullable
+    #     "state": "", nullable
+    #     "city": "", nullable
+    #     "summary": ""
+    # }
+    # """
+    # def flush_parsing_results(self, items: list[dict]):
+    #     return
 
     def flush_parsed_ops(self, operations):
         # operations를 bulk_write 실행 후 비움
