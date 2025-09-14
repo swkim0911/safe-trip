@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, UTC
 from pymongo import InsertOne
-from utils.token_utils import get_expected_tokens
+from utils.token_utils import estimate_classification_request_tokens, estimate_parsing_request_tokens
 import logging
 
 
@@ -25,18 +25,18 @@ class TravelScamTransformer:
         for unclassified_doc in unclassified_docs:
             reddit_id = unclassified_doc["reddit_id"]
             body = unclassified_doc["body"]
-            token_count = get_expected_tokens(body)
+            token_count = estimate_classification_request_tokens(body)
 
-            # 단일 문서가 토큰 한도를 넘으면 스킵
+            # 단일 문서가 토큰 한도를 넘으면 스킵 (그럴일은 없지만 혹시 모를 경우 무한 루프 에러 발생)
             if token_count > self.TOKEN_LIMIT:
-                self.logger.warning("문서 %s 가 토큰 제한 초과, 스킵함",reddit_id)
+                self.logger.warning("(classification) 문서 %s 가 토큰 제한 초과, 스킵함",reddit_id)
                 continue
 
             batch_doc = {"reddit_id": reddit_id, "body": body}
 
             # 이번 문서를 넣으면 초과 → 지금까지 배치 flush
             if expected_tokens + token_count >= self.TOKEN_LIMIT:
-                self.logger.info("Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
+                self.logger.info("(classification) Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
                 batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
                 self.reddit_repository.save_batch_job(batch_metadata)
 
@@ -49,19 +49,55 @@ class TravelScamTransformer:
 
         # 마지막 배치 처리
         if batch_docs:
-            self.logger.info("마지막 Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
+            self.logger.info("(classification) 마지막 Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
             batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
             self.reddit_repository.save_batch_job(batch_metadata)
 
     '''
-    parsing
+    batch parsing
     '''
-    def parse_classified_documents(self):
+    def parse_classified_documents_in_batch(self):
         # 비동기로 요청한 batch결과를 mongo에 저장
         self.travel_scam_classifier.process_batch_results()
 
-        ## todo: keyword 추출 (parsing)
-        # find_travel_scam_document = self.reddit_repository.find_raw_documents({"classification.is_travel_scam": True})
+        # paring 비동기 요청
+        find_travel_scam_docs = self.reddit_repository.find_raw_documents({"classification.is_travel_scam": True})
+
+        batch_docs = []
+        expected_tokens = 0
+
+        for find_travel_scam_doc in find_travel_scam_docs:
+            reddit_id = find_travel_scam_doc["reddit_id"]
+            body = find_travel_scam_doc["body"]
+            token_count = estimate_parsing_request_tokens(body)
+
+            # 단일 문서가 토큰 한도를 넘으면 스킵 (그럴일은 없지만 혹시 모를 경우 무한 루프 에러 발생)
+            if token_count > self.TOKEN_LIMIT:
+                self.logger.warning("(parsing) 문서 %s 가 토큰 제한 초과, 스킵함", reddit_id)
+                continue
+
+            batch_doc = {"reddit_id": reddit_id, "body": body}
+
+            # 이번 문서를 넣으면 초과 → 지금까지 배치 flush
+            if expected_tokens + token_count >= self.TOKEN_LIMIT:
+                self.logger.info("(parsing) Batch %d개 문서 (%d tokens) 파싱 요청", len(batch_docs), expected_tokens)
+                batch_metadata = self.travel_scam_parser.submit_parsing_batch(batch_docs)
+                self.reddit_repository.save_batch_job(batch_metadata)
+
+                # 새 배치 시작
+                batch_docs = [batch_doc]
+                expected_tokens = token_count
+            else:
+                batch_docs.append(batch_doc)
+                expected_tokens += token_count
+
+            # 마지막 배치 처리
+        if batch_docs:
+            self.logger.info("마지막 Batch %d개 문서 (%d tokens) 파싱 요청", len(batch_docs), expected_tokens)
+            batch_metadata = self.travel_scam_parser.submit_parsing_batch(batch_docs)
+            self.reddit_repository.save_batch_job(batch_metadata)
+
+
 
 
 
