@@ -45,7 +45,7 @@ class TravelScamClassifier:
     '''
     def process_batch_results(self):
         # 1. 몽고에서 batch_id 일어오기
-        batch_jobs = self.reddit_repository.find_batch_job_documents({}) # batch_id,
+        batch_jobs = self.reddit_repository.find_batch_job_documents({"job_type":"classification"}) # batch_id,
 
         for batch_job in batch_jobs:
             # 2. batch_id로부터 content(JSONL 결과) 읽어오기
