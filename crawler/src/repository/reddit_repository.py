@@ -97,21 +97,46 @@ class RedditRepository:
 
     def find_one_raw_document(self, query):
         return self.raw_collection.find_one(query)
-    # """
-    # dict: {"reddit_id": reddit_id, "parsed_result": json}
-    # parsed_result:
-    # {
-    #     "title": "",
-    #     "action": "",
-    #     "context": "",
-    #     "country": "", nullable
-    #     "state": "", nullable
-    #     "city": "", nullable
-    #     "summary": ""
-    # }
-    # """
-    # def flush_parsing_results(self, items: list[dict]):
-    #     return
+
+    """
+    Flush parsing results to MongoDB.
+    @Args:
+        items (list[dict]): [{"reddit_id": str, "parsed_result": dict}, ...]
+    """
+    def flush_parsing_results(self, items: list[dict]):
+        if not items:
+            return
+
+        ops = []
+        now = datetime.now(UTC)
+
+        for item in items:
+            ops.append(
+                UpdateOne(
+                    {"reddit_id": item["reddit_id"]},
+                    {
+                        "$set": {**item, "modified_at": now},
+                        "$setOnInsert": {"created_at": now}
+                    },
+                    upsert=True
+                )
+            )
+
+        try:
+            result = self.parsed_collection.bulk_write(ops, ordered=False)
+            self.logger.info(
+                f"Flushed {len(items)} parsing results to parsed_collection "
+                f"(matched={result.matched_count}, modified={result.modified_count}, upserted={len(result.upserted_ids)})"
+            )
+        except Exception as e:
+            self.logger.error(
+                "Bulk write failed on parsed_collection "
+                f"(items={len(items)}): {e}",
+                exc_info=True
+            )
+            raise
+
+        items.clear()
 
     def flush_parsed_ops(self, operations):
         # operations를 bulk_write 실행 후 비움
