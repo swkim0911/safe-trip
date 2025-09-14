@@ -7,7 +7,7 @@ from utils.prompt_utils import get_classification_system_content, generate_class
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 ENC = tiktoken.encoding_for_model(MODEL)
 
-def get_tokens_of_metadata():
+def estimate_classification_cost():
 
     reddit_repository = RedditRepository(mongo_client.get_raw_collection(), mongo_client.get_parsed_collection(),
                                          mongo_client.get_batch_job_collection())
@@ -34,4 +34,4 @@ def get_tokens_of_metadata():
     print(f"total cost: ${total_cost:.4f}")
 
 if __name__ == "__main__":
-    get_tokens_of_metadata()
+    estimate_classification_cost()
