@@ -10,7 +10,8 @@ class TravelScamTransformer:
         self.travel_scam_parser = travel_scam_parser
         self.reddit_repository = reddit_repository
         self.world_repository = world_repository
-        self.TOKEN_LIMIT = 500_000 # 원래는 200만이지만 보수적으로 LIMIT 설정
+        self.CLASSIFICATION_TOKEN_LIMIT = 500_000 # 원래는 200만이지만 보수적으로 LIMIT 설정
+        self.PARSING_TOKEN_LIMIT = 50_000  # 원래는 200만이지만 보수적으로 LIMIT 설정
         self.logger = logging.getLogger(__name__)
 
     '''
@@ -28,14 +29,14 @@ class TravelScamTransformer:
             token_count = estimate_classification_request_tokens(body)
 
             # 단일 문서가 토큰 한도를 넘으면 스킵 (그럴일은 없지만 혹시 모를 경우 무한 루프 에러 발생)
-            if token_count > self.TOKEN_LIMIT:
+            if token_count > self.CLASSIFICATION_TOKEN_LIMIT:
                 self.logger.warning("(classification) 문서 %s 가 토큰 제한 초과, 스킵함",reddit_id)
                 continue
 
             batch_doc = {"reddit_id": reddit_id, "body": body}
 
             # 이번 문서를 넣으면 초과 → 지금까지 배치 flush
-            if expected_tokens + token_count >= self.TOKEN_LIMIT:
+            if expected_tokens + token_count >= self.CLASSIFICATION_TOKEN_LIMIT:
                 self.logger.info("(classification) Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
                 batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
                 self.reddit_repository.save_batch_job(batch_metadata)
@@ -53,15 +54,19 @@ class TravelScamTransformer:
             batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
             self.reddit_repository.save_batch_job(batch_metadata)
 
+    def process_classification_batch_results(self):
+        # 비동기로 요청한 batch결과를 mongo에 저장
+        self.travel_scam_classifier.process_batch_results()
+
     '''
     batch parsing
     '''
     def parse_classified_documents_in_batch(self):
-        # 비동기로 요청한 batch결과를 mongo에 저장
-        self.travel_scam_classifier.process_batch_results()
 
         # paring 비동기 요청
         find_travel_scam_docs = self.reddit_repository.find_raw_documents({"classification.is_travel_scam": True})
+
+        parsed_ids = {doc["reddit_id"] for doc in self.reddit_repository.find_parsed_documents({}, projection={"reddit_id": 1})}
 
         batch_docs = []
         expected_tokens = 0
@@ -69,17 +74,21 @@ class TravelScamTransformer:
         for find_travel_scam_doc in find_travel_scam_docs:
             reddit_id = find_travel_scam_doc["reddit_id"]
             body = find_travel_scam_doc["body"]
+
+            if reddit_id in parsed_ids:
+                continue
+
             token_count = estimate_parsing_request_tokens(body)
 
             # 단일 문서가 토큰 한도를 넘으면 스킵 (그럴일은 없지만 혹시 모를 경우 무한 루프 에러 발생)
-            if token_count > self.TOKEN_LIMIT:
+            if token_count > self.PARSING_TOKEN_LIMIT:
                 self.logger.warning("(parsing) 문서 %s 가 토큰 제한 초과, 스킵함", reddit_id)
                 continue
 
             batch_doc = {"reddit_id": reddit_id, "body": body}
 
             # 이번 문서를 넣으면 초과 → 지금까지 배치 flush
-            if expected_tokens + token_count >= self.TOKEN_LIMIT:
+            if expected_tokens + token_count >= self.PARSING_TOKEN_LIMIT:
                 self.logger.info("(parsing) Batch %d개 문서 (%d tokens) 파싱 요청", len(batch_docs), expected_tokens)
                 batch_metadata = self.travel_scam_parser.submit_parsing_batch(batch_docs)
                 self.reddit_repository.save_batch_job(batch_metadata)
