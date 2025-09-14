@@ -51,6 +51,7 @@ class TravelScamParser:
 
         # 2. jsonl 파일을 openai api에 요청
         batch_metadata = call_openai_api_with_batch(filename)
+        batch_metadata["job_type"] = "parsing"
         self.logger.info("(parsing) OpenAI API batch 요청 완료 (batch_id=%s)", batch_metadata["batch_id"])
 
         # Path(filename).unlink(missing_ok=True)
