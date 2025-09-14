@@ -90,7 +90,10 @@ class RedditRepository:
 
     def find_batch_job_documents(self, query):
         return self.batch_job_collection.find(query)
-            
+
+    def has_parsed_document(self, reddit_id: str) -> bool:
+        return self.parsed_collection.find_one({"reddit_id": reddit_id}) is not None
+
     def flush_parsed_ops(self, operations):
         # operations를 bulk_write 실행 후 비움
         if operations:
