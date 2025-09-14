@@ -8,6 +8,7 @@ class TravelScamParser:
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.job_type = "parsing"
 
     def __safe_json_loads(self, text: str):
         
@@ -47,14 +48,14 @@ class TravelScamParser:
 
     def submit_parsing_batch(self, batch_docs: list[dict[str, str]]):
         # 1. list -> jsonl 파일
-        filename = batch_utils.write_jsonl(batch_docs)
+        filename = batch_utils.write_jsonl(batch_docs, self.job_type)
 
         # 2. jsonl 파일을 openai api에 요청
         batch_metadata = call_openai_api_with_batch(filename)
-        batch_metadata["job_type"] = "parsing"
+        batch_metadata["job_type"] = self.job_type
         self.logger.info("(parsing) OpenAI API batch 요청 완료 (batch_id=%s)", batch_metadata["batch_id"])
 
-        # Path(filename).unlink(missing_ok=True)
-        # self.logger.info("(parsing)jsonl 파일 삭제 (filename=%s)", filename)
+        Path(filename).unlink(missing_ok=True)
+        self.logger.info("(parsing)jsonl 파일 삭제 (filename=%s)", filename)
 
         return batch_metadata
