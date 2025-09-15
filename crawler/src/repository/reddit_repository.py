@@ -1,5 +1,5 @@
 from datetime import datetime, UTC
-from pymongo import UpdateOne
+from pymongo import UpdateOne, InsertOne
 import logging
 import os
 
@@ -28,6 +28,7 @@ class RedditRepository:
         now = datetime.now(UTC)
 
         for doc in docs:
+
             ops.append(
                 UpdateOne(
                     {"reddit_id": doc["reddit_id"]},
@@ -108,25 +109,14 @@ class RedditRepository:
             return
 
         ops = []
-        now = datetime.now(UTC)
 
         for item in items:
-            ops.append(
-                UpdateOne(
-                    {"reddit_id": item["reddit_id"]},
-                    {
-                        "$set": {**item, "modified_at": now},
-                        "$setOnInsert": {"created_at": now}
-                    },
-                    upsert=True
-                )
-            )
+            ops.append(InsertOne(item))
 
         try:
             result = self.parsed_collection.bulk_write(ops, ordered=False)
             self.logger.info(
                 f"Flushed {len(items)} parsing results to parsed_collection "
-                f"(matched={result.matched_count}, modified={result.modified_count}, upserted={len(result.upserted_ids)})"
             )
         except Exception as e:
             self.logger.error(
