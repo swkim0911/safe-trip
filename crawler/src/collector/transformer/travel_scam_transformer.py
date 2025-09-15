@@ -174,68 +174,81 @@ class TravelScamTransformer:
         Args:
             time_filter (str): "all" 또는 "7d" (최근 7일)
     '''
-    def transform(self):
-        
-        operations = []
+    def daily_transform(self):
 
-        existing_ids = set()
         one_week_ago = datetime.now(UTC) - timedelta(days=7)
-        query = {"posted_at": {"$gte": one_week_ago}}
-        # existing_ids = set(parsed_collection.distinct(
-        #     "reddit_id",
-        #     {"posted_at": {"$gte": one_week_ago}}
-        # ))
+        query = {
+            "posted_at": {"$gte": one_week_ago},
+            "classification": {"$exists": False}
+        } # 최근 1주일 + classification 서브 도큐먼트가 없는 도큐먼트
 
+        classification_results = []
         # MongoDB에서 데이터 가져오기
-        
-        raw_jsons = self.reddit_repository.find_raw_documents_with_limit(query, 500)
-        cnt = 0
-        for raw_json in raw_jsons:
-            # raw_json의 id가 이미 parsed 컬랙션에 있으면 continue (llm api 비용 감면을 위해)
-            if raw_json.get("reddit_id") in existing_ids:
-                continue
-
-            body = raw_json.get("body")
+        raw_docs = self.reddit_repository.find_raw_documents(query)
+        for raw_doc in raw_docs:
+            body = raw_doc.get("body")
 
             # scam 분류
-            is_scam = self.travel_scam_classifier.classify(body)
-            if not is_scam:
-                continue
+            is_travel_scam = self.travel_scam_classifier.classify(body)
 
-            parsed_scams = self.travel_scam_parser.parse(body) or []
+            # db저장
+            classification_results.append({"reddit_id": raw_doc["reddit_id"], "is_travel_scam": is_travel_scam})
+            if len(classification_results) >= self.BATCH_SIZE:
+                self.reddit_repository.flush_classification_results(classification_results)
 
-            for scam_record in parsed_scams:
+        if classification_results:
+            self.reddit_repository.flush_classification_results(classification_results)
 
-                # db look up
-                location_info = self.world_repository.lookup_location(scam_record.get("country"), scam_record.get("state"), scam_record.get("city"))
+        query = {
+            "posted_at": {"$gte": one_week_ago}
+        } # parsed_documents에 있는 최근 7일 모든 reddit_id 조회. projection reddit_id만
+        projection = {
+            "reddit_id": 1,
+            "_id": 0
+        }
+        reddit_ids = {doc["reddit_id"] for doc in self.reddit_repository.find_parsed_documents(query, projection)}
+
+        query = {
+            "posted_at": {"$gte": one_week_ago},
+            "classification.is_travel_scam": True
+        } # 최근 7일에 classification 서브 도큐먼트의 is_travel_scam = true인 도큐먼트
+        find_travel_scam_docs = self.reddit_repository.find_raw_documents(query)
+        parsing_results = []
+
+        for find_travel_scam_doc in find_travel_scam_docs:
+            if find_travel_scam_doc["reddit_id"] in reddit_ids: continue
+            parsed_body_results = self.travel_scam_parser.parse(find_travel_scam_doc["body"])
+            for parsed_body_result in parsed_body_results:
+                location_info = self.world_repository.lookup_location(parsed_body_result.get("country"),
+                                                                      parsed_body_result.get("state"),
+                                                                      parsed_body_result.get("city"))
                 if location_info is None:
                     continue
-
+                # 완전체 저장
                 now = datetime.now(UTC)
 
                 doc = {
-                    "reddit_id": raw_json.get("reddit_id"),  # raw id (unique 아님)
+                    "reddit_id": find_travel_scam_doc["reddit_id"],
                     "source": "reddit",
-                    "url": raw_json.get("url"),
-                    "author": raw_json.get("author"),
-                    "title": scam_record.get("title"),
-                    "action": scam_record.get("action"),
-                    "context": scam_record.get("context"),
+                    "url": find_travel_scam_doc.get("url"),
+                    "author": find_travel_scam_doc.get("author"),
+                    "title": parsed_body_result.get("title"),
+                    "action": parsed_body_result.get("action"),
+                    "context": parsed_body_result.get("context"),
                     "country_id": location_info.get("country_id"),
                     "state_id": location_info.get("state_id"),
                     "city_id": location_info.get("city_id"),
-                    "summary": scam_record.get("summary"),
-                    "posted_at": raw_json.get("posted_at"),
+                    "summary": parsed_body_result.get("summary"),
+                    "posted_at": find_travel_scam_doc.get("posted_at"),
+                    "modified_at": now,
                     "created_at": now,
-                    "modified_at": now
                 }
-                
-                # data insert (단순 insert)
-                operations.append(InsertOne(doc))
+                parsing_results.append(doc)
 
-                # batch 저장
-                if len(operations) >= self.BATCH_SIZE:
-                    self.reddit_repository.flush_parsed_ops(operations)
+                # BATCH_SIZE 단위로 저장
+            if len(parsing_results) >= self.BATCH_SIZE:
+                self.reddit_repository.flush_parsing_results(parsing_results)
 
-        # 남은 operations 처리
-        self.reddit_repository.flush_parsed_ops(operations)
+        # 남은 parsing_results 처리
+        if parsing_results:
+            self.reddit_repository.flush_parsing_results(parsing_results)

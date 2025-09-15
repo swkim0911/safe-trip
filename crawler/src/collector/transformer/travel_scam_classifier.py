@@ -9,6 +9,7 @@ class TravelScamClassifier:
     def __init__(self, reddit_repository):
         self.reddit_repository = reddit_repository
         self.BATCH_SIZE = 1000
+        self.job_type = "classification"
         self.logger = logging.getLogger(__name__)
                 
     '''
@@ -29,11 +30,11 @@ class TravelScamClassifier:
     """
     def submit_classification_batch(self, batch_docs):
         # 1. list -> jsonl 파일
-        filename = batch_utils.write_jsonl(batch_docs)
+        filename = batch_utils.write_jsonl(batch_docs, self.job_type)
 
         # 2. jsonl 파일을 openai api에 요청
         batch_metadata = call_openai_api_with_batch(filename)
-        batch_metadata["job_type"] = "classification"
+        batch_metadata["job_type"] = self.job_type
         self.logger.info("OpenAI API batch 요청 완료 (batch_id=%s)", batch_metadata["batch_id"])
 
         Path(filename).unlink(missing_ok=True)
@@ -46,7 +47,7 @@ class TravelScamClassifier:
     '''
     def process_batch_results(self):
         # 1. 몽고에서 batch_id 일어오기
-        batch_jobs = self.reddit_repository.find_batch_job_documents({"job_type":"classification"}) # batch_id,
+        batch_jobs = self.reddit_repository.find_batch_job_documents({"job_type":self.job_type}) # batch_id,
 
         for batch_job in batch_jobs:
             # 2. batch_id로부터 content(JSONL 결과) 읽어오기
