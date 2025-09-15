@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, UTC
 from pymongo import InsertOne
 from utils.token_utils import estimate_classification_request_tokens, estimate_parsing_request_tokens
-import logging
+from adapters.openai_client import get_completed_batch_result
+import logging, json
 
 
 class TravelScamTransformer:
@@ -10,8 +11,8 @@ class TravelScamTransformer:
         self.travel_scam_parser = travel_scam_parser
         self.reddit_repository = reddit_repository
         self.world_repository = world_repository
-        self.CLASSIFICATION_TOKEN_LIMIT = 500_000 # 원래는 200만이지만 보수적으로 LIMIT 설정
-        self.PARSING_TOKEN_LIMIT = 50_000  # 원래는 200만이지만 보수적으로 LIMIT 설정
+        self.TOKEN_LIMIT = 500_000 # 원래는 200만이지만 보수적으로 LIMIT 설정
+        self.BATCH_SIZE = 1000
         self.logger = logging.getLogger(__name__)
 
     '''
@@ -29,14 +30,14 @@ class TravelScamTransformer:
             token_count = estimate_classification_request_tokens(body)
 
             # 단일 문서가 토큰 한도를 넘으면 스킵 (그럴일은 없지만 혹시 모를 경우 무한 루프 에러 발생)
-            if token_count > self.CLASSIFICATION_TOKEN_LIMIT:
+            if token_count > self.TOKEN_LIMIT:
                 self.logger.warning("(classification) 문서 %s 가 토큰 제한 초과, 스킵함",reddit_id)
                 continue
 
             batch_doc = {"reddit_id": reddit_id, "body": body}
 
             # 이번 문서를 넣으면 초과 → 지금까지 배치 flush
-            if expected_tokens + token_count >= self.CLASSIFICATION_TOKEN_LIMIT:
+            if expected_tokens + token_count > self.TOKEN_LIMIT:
                 self.logger.info("(classification) Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
                 batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
                 self.reddit_repository.save_batch_job(batch_metadata)
@@ -81,14 +82,14 @@ class TravelScamTransformer:
             token_count = estimate_parsing_request_tokens(body)
 
             # 단일 문서가 토큰 한도를 넘으면 스킵 (그럴일은 없지만 혹시 모를 경우 무한 루프 에러 발생)
-            if token_count > self.PARSING_TOKEN_LIMIT:
+            if token_count > self.TOKEN_LIMIT:
                 self.logger.warning("(parsing) 문서 %s 가 토큰 제한 초과, 스킵함", reddit_id)
                 continue
 
             batch_doc = {"reddit_id": reddit_id, "body": body}
 
             # 이번 문서를 넣으면 초과 → 지금까지 배치 flush
-            if expected_tokens + token_count >= self.PARSING_TOKEN_LIMIT:
+            if expected_tokens + token_count > self.TOKEN_LIMIT:
                 self.logger.info("(parsing) Batch %d개 문서 (%d tokens) 파싱 요청", len(batch_docs), expected_tokens)
                 batch_metadata = self.travel_scam_parser.submit_parsing_batch(batch_docs)
                 self.reddit_repository.save_batch_job(batch_metadata)
@@ -106,6 +107,61 @@ class TravelScamTransformer:
             batch_metadata = self.travel_scam_parser.submit_parsing_batch(batch_docs)
             self.reddit_repository.save_batch_job(batch_metadata)
 
+    def process_parsing_batch_results(self):
+        batch_jobs = self.reddit_repository.find_batch_job_documents({"job_type": "parsing"})
+
+        for batch_job in batch_jobs:
+            # 2. batch_id로부터 content(JSONL 결과) 읽어오기
+            batch_id = batch_job["batch_id"]
+            content = get_completed_batch_result(batch_id)
+            if not content:
+                continue  # 혹시 실패했거나 아직 결과가 없으면 스킵
+
+            # 3. 결과 가공
+            parsing_results = []
+            for line in content.splitlines():
+                if not line.strip():
+                    continue
+
+                record = json.loads(line)
+
+                reddit_id = record["custom_id"]
+                text = record["response"]["body"]["output"][0]["content"][0]["text"]
+
+                parsed_body_results = self.travel_scam_parser.safe_json_loads(text)
+                for parsed_body_result in parsed_body_results:
+                    location_info = self.world_repository.lookup_location(parsed_body_result.get("country"),parsed_body_result.get("state"),parsed_body_result.get("city"))
+                    if location_info is None:
+                        continue
+                    # 완전체 저장
+                    now = datetime.now(UTC)
+                    raw_json = self.reddit_repository.find_one_raw_document({"reddit_id": reddit_id})
+                    doc = {
+                        "reddit_id": reddit_id,
+                        "source": "reddit",
+                        "url": raw_json.get("url"),
+                        "author": raw_json.get("author"),
+                        "title": parsed_body_result.get("title"),
+                        "action": parsed_body_result.get("action"),
+                        "context": parsed_body_result.get("context"),
+                        "country_id": location_info.get("country_id"),
+                        "state_id": location_info.get("state_id"),
+                        "city_id": location_info.get("city_id"),
+                        "summary": parsed_body_result.get("summary"),
+                        "posted_at": raw_json.get("posted_at"),
+                        "modified_at": now,
+                        "created_at": now,
+                    }
+                    parsing_results.append(doc)
+
+                # BATCH_SIZE 단위로 저장
+                if len(parsing_results) >= self.BATCH_SIZE:
+                    self.reddit_repository.flush_parsing_results(parsing_results)
+
+
+            # 남은 parsing_results 처리
+            if parsing_results:
+                self.reddit_repository.flush_parsing_results(parsing_results)
 
 
 
