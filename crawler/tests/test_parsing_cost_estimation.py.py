@@ -22,7 +22,7 @@ def estimate_parsing_cost():
         system_content = get_parsing_system_content()
         prompt = generate_parsing_prompt(body)
         input_total_tokens += len(ENC.encode(system_content)) + len(ENC.encode(prompt))
-        output_total_tokens += 800 # Json 배열 형태의 응답의 평균 토큰수
+        output_total_tokens += 200 # Json 배열 형태의 응답의 평균 토큰수
 
 
     input_cost = input_total_tokens / 1_000_000 * 0.15
@@ -31,7 +31,7 @@ def estimate_parsing_cost():
 
     print(f"input tokens: {input_total_tokens}, cost: ${input_cost:.4f}")
     print(f"output tokens: {output_total_tokens}, cost: ${output_cost:.4f}")
-    print(f"total cost: ${total_cost:.4f}")
+    print(f"total tokens: {input_total_tokens + output_total_tokens}, cost: ${total_cost:.4f}")
 
 if __name__ == "__main__":
     estimate_parsing_cost()
