@@ -1,4 +1,3 @@
-
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
@@ -19,7 +18,7 @@ def get_raw_collection():
     return safetrip_db["raw_reddit"]
 
 def get_parsed_collection():
-    return safetrip_db["parsed_reddt"]
+    return safetrip_db["parsed_reddit"]
 
 def get_country_collection():
     return world_db["countries"]
@@ -29,3 +28,6 @@ def get_state_collection():
 
 def get_city_collection():
     return world_db["cities"]
+
+def get_batch_job_collection():
+    return safetrip_db["batch_jobs"]

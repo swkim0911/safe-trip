@@ -6,15 +6,17 @@ from collector.loader.travel_scam_loader import TravelScamLoader
 
 from repository.reddit_repository import RedditRepository
 from repository.world_repository import WorldRepository
-from adapters import mongo_client, openai_client, reddit_client
+from adapters import mongo_client, reddit_client
 
 import time
 
 def init_reddit_repository():
     return RedditRepository(
         mongo_client.get_raw_collection(),
-        mongo_client.get_parsed_collection()
+        mongo_client.get_parsed_collection(),
+        mongo_client.get_batch_job_collection()
     )
+
 
 def init_world_repository():
     return WorldRepository(
@@ -29,18 +31,19 @@ if __name__ == "__main__":
     reddit = reddit_client.get_instance()
     reddit_repository = init_reddit_repository()
     world_repository = init_world_repository()
-    
-    # 1. extract (전체 데이터)
-    travel_scam_extractor = TravelScamExtractor(reddit, reddit_repository)
-    travel_scam_extractor.extract("all", 500)
-    
+
+    # 1. extract (최근 일주일 데이터)
+    travel_scam_extractor = TravelScamExtractor(reddit_repository)
+    travel_scam_extractor.extract("week", None)
 
     # 2. transform
-    travel_scam_transformer = TravelScamTransformer(TravelScamClassifier(), TravelScamParser(), reddit_repository, world_repository)
-    travel_scam_transformer.transform("all")
+    travel_scam_transformer = TravelScamTransformer(
+        TravelScamClassifier(reddit_repository), TravelScamParser(), reddit_repository, world_repository)
+
+    travel_scam_transformer.daily_transform()
     # 3. load -> mysql
     travel_scam_loader = TravelScamLoader(mongo_client.get_parsed_collection())
-    
+    travel_scam_loader.mongo_to_mysql()
     end = time.time()
 
     print(f"실행 시간: {end - start:.2f} 초")

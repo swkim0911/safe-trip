@@ -1,6 +1,3 @@
-[Role]
-You are an AI that analyzes travel-related texts to determine if they are first-hand travel scam experiences at overseas destinations and if they are worth sharing with other travelers.
-
 [Purpose]
 
 Collect real first-hand scam cases that happened abroad.
