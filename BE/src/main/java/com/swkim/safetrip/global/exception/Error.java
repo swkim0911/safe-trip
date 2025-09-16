@@ -16,6 +16,7 @@ public enum Error {
     SCAM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Scam not found"),
     STATE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "State not found"),
     COUNTRY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Country not found"),
+    CITY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "City not found"),
     USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email"),
     S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "Unable to upload image to s3 bucket"),
     DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
