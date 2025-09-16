@@ -23,6 +23,9 @@ public class Country extends BaseEntity {
     @Column(name = "dataset_id", unique = true, nullable = false)
     private Long datasetId;
 
+    @Column(name = "iso2", length = 2, unique = true, nullable = false)
+    private String iso2;
+
     @Column(name = "name", nullable = false)
     private String name;
 
