@@ -27,7 +27,7 @@ public class UserReportDetailResponse {
 
     private String title;
 
-    private String content;
+    private String description;
 
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm")
     private LocalDateTime createdAt;
@@ -44,7 +44,7 @@ public class UserReportDetailResponse {
             String stateName,
             String cityName,
             String title,
-            String content,
+            String description,
             LocalDateTime createdAt
     ) {
         this.nickname = nickname;
@@ -54,7 +54,7 @@ public class UserReportDetailResponse {
         this.stateName = stateName;
         this.cityName =  cityName;
         this.title = title;
-        this.content = content;
+        this.description = description;
         this.createdAt = createdAt;
     }
 }

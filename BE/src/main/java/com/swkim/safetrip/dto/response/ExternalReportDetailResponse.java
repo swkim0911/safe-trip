@@ -23,7 +23,7 @@ public record ExternalReportDetailResponse (
 
         String title,
 
-        String content,
+        String summary,
 
         @JsonFormat(pattern = "yyyy.MM.dd HH:mm")
         LocalDateTime postedAt,
