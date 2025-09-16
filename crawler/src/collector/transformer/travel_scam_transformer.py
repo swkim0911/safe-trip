@@ -1,8 +1,9 @@
+import json
+import logging
 from datetime import datetime, timedelta, UTC
-from pymongo import InsertOne
-from utils.token_utils import estimate_classification_request_tokens, estimate_parsing_request_tokens
+
 from adapters.openai_client import get_completed_batch_result
-import logging, json
+from utils.token_utils import estimate_classification_request_tokens, estimate_parsing_request_tokens
 
 
 class TravelScamTransformer:

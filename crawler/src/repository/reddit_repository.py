@@ -1,7 +1,9 @@
-from datetime import datetime, UTC
-from pymongo import UpdateOne, InsertOne
 import logging
 import os
+from datetime import datetime, UTC
+
+from pymongo import UpdateOne, InsertOne
+
 
 class RedditRepository:
     MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")

@@ -1,5 +1,6 @@
-import mysql.connector
 from datetime import datetime, UTC
+
+import mysql.connector
 
 
 class TravelScamLoader:
