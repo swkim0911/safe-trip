@@ -97,7 +97,7 @@ class UserReportControllerTest {
                 .builder()
                 .nickname("nickname")
                 .title("this is title")
-                .scamName("scam")
+                .scamAction("scam")
                 .countryName("Korea")
                 .stateName("Seoul")
                 .description("hello world")
@@ -184,7 +184,7 @@ class UserReportControllerTest {
 
         return UserReportSaveRequest.builder()
                 .title(title)
-                .scamId(scamId)
+                .scamActionId(scamId)
                 .countryId(countryId)
                 .stateId(stateId)
                 .description(description)

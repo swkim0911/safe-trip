@@ -34,7 +34,7 @@ class UserReportRepositoryTest {
     private UserRepository userRepository;
 
     @Autowired
-    private ScamRepository scamRepository;
+    private ScamActionRepository scamActionRepository;
 
     @Autowired
     private CountryRepository countryRepository;
@@ -47,7 +47,7 @@ class UserReportRepositoryTest {
         userReportRepository.deleteAll();
         stateRepository.deleteAll();
         countryRepository.deleteAll();
-        scamRepository.deleteAll();
+        scamActionRepository.deleteAll();
         userRepository.deleteAll();
 
         em.flush();
@@ -75,7 +75,7 @@ class UserReportRepositoryTest {
         assertAll(
                 () -> assertThat(dto.getNickname()).isEqualTo("nickname"),
                 () -> assertThat(dto.getTitle()).isEqualTo("title"),
-                () -> assertThat(dto.getScamName()).isEqualTo("Pickpocket"),
+                () -> assertThat(dto.getScamAction()).isEqualTo("Pickpocket"),
                 () -> assertThat(dto.getCountryName()).isEqualTo("France"),
                 () -> assertThat(dto.getStateName()).isEqualTo("Paris"),
                 () -> assertThat(dto.getDescription()).isEqualTo("description")
@@ -102,7 +102,7 @@ class UserReportRepositoryTest {
         State state = State.builder()
                 .datasetId(2L)
                 .name("Paris")
-                .koreanName("파리")
+                .nameKo("파리")
                 .lat(48.856614)
                 .lng(121.3522972)
                 .build();
@@ -115,7 +115,7 @@ class UserReportRepositoryTest {
         Country country = Country.builder()
                 .datasetId(1L)
                 .name("France")
-                .koreanName("프랑스")
+                .nameKo("프랑스")
                 .lat(63.34234)
                 .lng(119.13842)
                 .build();
@@ -127,7 +127,7 @@ class UserReportRepositoryTest {
         ScamAction scamAction = ScamAction.builder()
                 .name("Pickpocket")
                 .build();
-        return scamRepository.save(scamAction);
+        return scamActionRepository.save(scamAction);
     }
 
     private User saveUser() {

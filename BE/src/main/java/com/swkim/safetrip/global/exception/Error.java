@@ -16,11 +16,13 @@ public enum Error {
     SCAM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Scam not found"),
     STATE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "State not found"),
     COUNTRY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Country not found"),
+    CITY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "City not found"),
     USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email"),
     S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "Unable to upload image to s3 bucket"),
     DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
     DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "This nickname is already in use"),
     STATE_COUNTRY_MISMATCH_ERROR(HttpStatus.BAD_REQUEST.value(), "State and Country is mismatch"),
+    CITY_STATE_MISMATCH_ERROR(HttpStatus.BAD_REQUEST.value(), "City and State is mismatch"),
     INVALID_SORT_KEY_ERROR(HttpStatus.BAD_REQUEST.value(), "Sort Key is invalid"),
 
     REFRESH_TOKEN_MISSING_ERROR(HttpStatus.BAD_REQUEST.value(), "Refresh token is empty"),

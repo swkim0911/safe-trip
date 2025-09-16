@@ -15,18 +15,22 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     @Query("""
     select new com.swkim.safetrip.dto.response.UserReportDetailResponse(
         u.nickname,
-        ur.title,
-        scamAction.name,
-        c.name,
+        sa.name,
+        sc.name,
+        co.name,
         st.name,
-        ur.description,
+        ci.name,
+        ur.title,
+        ur.content,
         ur.createdAt
     )
     from UserReport ur
     join ur.user u
-    join ur.scamAction scamAction
-    join ur.country c
+    join ur.scamAction sa
+    join ur.scamContext sc
+    join ur.country co
     join ur.state st
+    join ur.city ci
     where ur.id = :id
     """)
     Optional<UserReportDetailResponse> findReportDetailById(@Param("id") Long id);

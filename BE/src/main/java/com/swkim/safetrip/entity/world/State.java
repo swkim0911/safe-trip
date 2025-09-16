@@ -29,7 +29,7 @@ public class State extends BaseEntity {
     private String name;
 
     @Column(name = "name_ko")
-    private String koreanName;
+    private String nameKo;
 
     @Column(name = "lat")
     private Double lat; //consider: state에는 lat, lng 정보가 없을 수도 있는데, 그럴 때는 어떻게 할지 정하기(ex: 안도라) -> 아마 그냥 null저장하고, summary 조회할 때는 생략
@@ -38,10 +38,10 @@ public class State extends BaseEntity {
     private Double lng;
 
     @Builder
-    public State(Long datasetId, String name, String koreanName, Double lat, Double lng) {
+    public State(Long datasetId, String name, String nameKo, Double lat, Double lng) {
         this.datasetId = datasetId;
         this.name = name;
-        this.koreanName = koreanName;
+        this.nameKo = nameKo;
         this.lat = lat;
         this.lng = lng;
     }

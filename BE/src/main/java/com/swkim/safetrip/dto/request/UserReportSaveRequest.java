@@ -9,14 +9,20 @@ public record UserReportSaveRequest(
         @NotBlank(message = "Title must not be blank.")
         String title,
 
-        @NotNull(message = "Scam Category must not be null.")
-        Long scamId,
+        @NotNull(message = "Scam action must not be null.")
+        Long scamActionId,
+
+        @NotNull(message = "Scam context must not be null.")
+        Long scamContextId,
 
         @NotNull(message = "Country must not be null.")
         Long countryId,
 
         @NotNull(message = "State must not be null.")
         Long stateId,
+
+        @NotNull(message = "City must not be null")
+        Long cityId,
 
         @NotBlank(message = "Description must not be blank")
         String description

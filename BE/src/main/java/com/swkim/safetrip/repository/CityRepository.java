@@ -1,0 +1,16 @@
+package com.swkim.safetrip.repository;
+
+import com.swkim.safetrip.entity.world.City;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface CityRepository extends JpaRepository<City, Long> {
+
+    @Query("SELECT c FROM City c JOIN FETCH c.state s WHERE c.id = :id")
+    Optional<City> findByIdWithState(@Param("id") Long id);
+}

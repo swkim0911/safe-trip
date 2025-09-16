@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "external_report",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"externalId", "source"})
-)
+@Table(name = "external_report")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ExternalReport extends BaseReport {
 
@@ -22,11 +19,14 @@ public class ExternalReport extends BaseReport {
     @Column(nullable = false)
     private String externalId;
 
+    @Column(nullable = false)
+    private String author;
+
     @Column(length = 500, nullable = false)
     private String sourceUrl;
 
     @Column(updatable = false)
-    private LocalDateTime originalCreatedAt;
+    private LocalDateTime postedAt;
 
     @Column(updatable = false)
     private LocalDateTime collectedAt;

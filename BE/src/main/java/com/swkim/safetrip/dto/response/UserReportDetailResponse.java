@@ -15,13 +15,17 @@ public class UserReportDetailResponse {
 
     private String nickname;
 
-    private String title;
+    private String scamAction;
 
-    private String scamName;
+    private String scamContext;
 
     private String countryName;
 
     private String stateName;
+
+    private String cityName;
+
+    private String title;
 
     private String description;
 
@@ -34,18 +38,22 @@ public class UserReportDetailResponse {
     @Builder
     public UserReportDetailResponse(
             String nickname,
-            String title,
-            String scamName,
+            String scamAction,
+            String scamContext,
             String countryName,
             String stateName,
+            String cityName,
+            String title,
             String description,
             LocalDateTime createdAt
     ) {
         this.nickname = nickname;
-        this.title = title;
-        this.scamName = scamName;
+        this.scamAction = scamAction;
+        this.scamContext = scamContext;
         this.countryName = countryName;
         this.stateName = stateName;
+        this.cityName =  cityName;
+        this.title = title;
         this.description = description;
         this.createdAt = createdAt;
     }

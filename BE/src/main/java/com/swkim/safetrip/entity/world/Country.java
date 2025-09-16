@@ -23,11 +23,14 @@ public class Country extends BaseEntity {
     @Column(name = "dataset_id", unique = true, nullable = false)
     private Long datasetId;
 
+    @Column(name = "iso2", length = 2, unique = true, nullable = false)
+    private String iso2;
+
     @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "name_ko")
-    private String koreanName;
+    private String nameKo;
 
     @Column(name = "lat")
     private Double lat;
@@ -39,10 +42,10 @@ public class Country extends BaseEntity {
     private List<State> states = new ArrayList<>();
 
     @Builder
-    public Country(Long datasetId, String name, String koreanName, Double lat, Double lng) {
+    public Country(Long datasetId, String name, String nameKo, Double lat, Double lng) {
         this.datasetId = datasetId;
         this.name = name;
-        this.koreanName = koreanName;
+        this.nameKo = nameKo;
         this.lat = lat;
         this.lng = lng;
     }

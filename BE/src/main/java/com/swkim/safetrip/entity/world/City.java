@@ -32,7 +32,7 @@ public class City extends BaseEntity {
     private String name;
 
     @Column(name = "name_ko")
-    private String koreanName;
+    private String nameKo;
 
     @Column(name = "lat")
     private Double lat;

@@ -1,6 +1,7 @@
 package com.swkim.safetrip.entity;
 
 import com.swkim.safetrip.entity.enums.Source;
+import com.swkim.safetrip.entity.world.City;
 import com.swkim.safetrip.entity.world.Country;
 import com.swkim.safetrip.entity.world.State;
 import jakarta.persistence.*;
@@ -36,9 +37,14 @@ public abstract class BaseReport extends BaseEntity {
     @JoinColumn(name = "state_id")
     private State state;
 
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id")
+    private City city;
+
     @Column(name = "title", nullable = false)
     protected String title;
 
-    @Column(name = "description", nullable = false, length = 1000)
-    protected String description;
+    @Column(name = "content", nullable = false, length = 1000)
+    protected String content;
 }
