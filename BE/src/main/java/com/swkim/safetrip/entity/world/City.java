@@ -29,7 +29,7 @@ public class City extends BaseEntity {
     private State state;
 
     @Column(name = "name", nullable = false)
-    private String name;
+    private String nameKo;
 
     @Column(name = "name_ko")
     private String koreanName;
