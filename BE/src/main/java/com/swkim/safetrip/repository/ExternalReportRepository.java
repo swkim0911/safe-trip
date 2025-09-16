@@ -1,9 +1,11 @@
 package com.swkim.safetrip.repository;
 
 import com.swkim.safetrip.dto.response.ExternalReportDetailResponse;
+import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.ExternalReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -13,18 +15,22 @@ public interface ExternalReportRepository extends JpaRepository<ExternalReport, 
     select new com.swkim.safetrip.dto.response.ExternalReportDetailResponse(
         er.source,
         er.sourceUrl,
-        er.title,
-        s.name,
-        c.name,
+        sa.name,
+        sc.name,
+        co.name,
         st.name,
-        er.description,
-        er.originalCreatedAt,
+        ci.name,
+        er.title,
+        er.content,
+        er.postedAt,
         er.collectedAt
     )
     from ExternalReport er
-    join er.scamAction s
-    join er.country c
+    join er.scamAction sa
+    join er.scamContext sc
+    join er.country co
     join er.state st
+    join er.city ci
     where er.id = :id
     """)
     Optional<ExternalReportDetailResponse> findReportDetailById(Long id);

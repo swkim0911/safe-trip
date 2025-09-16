@@ -97,10 +97,10 @@ class UserReportControllerTest {
                 .builder()
                 .nickname("nickname")
                 .title("this is title")
-                .scamName("scam")
+                .scamType("scam")
                 .countryName("Korea")
                 .stateName("Seoul")
-                .description("hello world")
+                .content("hello world")
                 .createdAt(LocalDateTime.now())
                 .build();
 

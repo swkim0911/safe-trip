@@ -15,15 +15,19 @@ public class UserReportDetailResponse {
 
     private String nickname;
 
-    private String title;
+    private String scamType;
 
-    private String scamName;
+    private String scamContext;
 
     private String countryName;
 
     private String stateName;
 
-    private String description;
+    private String cityName;
+
+    private String title;
+
+    private String content;
 
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm")
     private LocalDateTime createdAt;
@@ -34,19 +38,23 @@ public class UserReportDetailResponse {
     @Builder
     public UserReportDetailResponse(
             String nickname,
-            String title,
-            String scamName,
+            String scamType,
+            String scamContext,
             String countryName,
             String stateName,
-            String description,
+            String cityName,
+            String title,
+            String content,
             LocalDateTime createdAt
     ) {
         this.nickname = nickname;
-        this.title = title;
-        this.scamName = scamName;
+        this.scamType = scamType;
+        this.scamContext = scamContext;
         this.countryName = countryName;
         this.stateName = stateName;
-        this.description = description;
+        this.cityName =  cityName;
+        this.title = title;
+        this.content = content;
         this.createdAt = createdAt;
     }
 }

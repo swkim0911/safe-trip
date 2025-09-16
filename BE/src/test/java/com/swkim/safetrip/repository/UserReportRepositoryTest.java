@@ -75,10 +75,10 @@ class UserReportRepositoryTest {
         assertAll(
                 () -> assertThat(dto.getNickname()).isEqualTo("nickname"),
                 () -> assertThat(dto.getTitle()).isEqualTo("title"),
-                () -> assertThat(dto.getScamName()).isEqualTo("Pickpocket"),
+                () -> assertThat(dto.getScamType()).isEqualTo("Pickpocket"),
                 () -> assertThat(dto.getCountryName()).isEqualTo("France"),
                 () -> assertThat(dto.getStateName()).isEqualTo("Paris"),
-                () -> assertThat(dto.getDescription()).isEqualTo("description")
+                () -> assertThat(dto.getContent()).isEqualTo("description")
         );
     }
 
