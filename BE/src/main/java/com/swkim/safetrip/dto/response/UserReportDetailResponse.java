@@ -15,7 +15,7 @@ public class UserReportDetailResponse {
 
     private String nickname;
 
-    private String scamType;
+    private String scamAction;
 
     private String scamContext;
 
@@ -38,7 +38,7 @@ public class UserReportDetailResponse {
     @Builder
     public UserReportDetailResponse(
             String nickname,
-            String scamType,
+            String scamAction,
             String scamContext,
             String countryName,
             String stateName,
@@ -48,7 +48,7 @@ public class UserReportDetailResponse {
             LocalDateTime createdAt
     ) {
         this.nickname = nickname;
-        this.scamType = scamType;
+        this.scamAction = scamAction;
         this.scamContext = scamContext;
         this.countryName = countryName;
         this.stateName = stateName;

@@ -11,7 +11,7 @@ public record ExternalReportDetailResponse (
 
         String sourceUrl,
 
-        String scamType,
+        String scamAction,
 
         String scamContext,
 
