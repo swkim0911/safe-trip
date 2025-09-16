@@ -34,7 +34,7 @@ class UserReportRepositoryTest {
     private UserRepository userRepository;
 
     @Autowired
-    private ScamRepository scamRepository;
+    private ScamActionRepository scamActionRepository;
 
     @Autowired
     private CountryRepository countryRepository;
@@ -47,7 +47,7 @@ class UserReportRepositoryTest {
         userReportRepository.deleteAll();
         stateRepository.deleteAll();
         countryRepository.deleteAll();
-        scamRepository.deleteAll();
+        scamActionRepository.deleteAll();
         userRepository.deleteAll();
 
         em.flush();
@@ -127,7 +127,7 @@ class UserReportRepositoryTest {
         ScamAction scamAction = ScamAction.builder()
                 .name("Pickpocket")
                 .build();
-        return scamRepository.save(scamAction);
+        return scamActionRepository.save(scamAction);
     }
 
     private User saveUser() {
