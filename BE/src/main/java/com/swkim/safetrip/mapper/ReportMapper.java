@@ -9,8 +9,8 @@ public class ReportMapper {
     public static UserReport toReport(UserReportSaveRequest userReportSaveRequest) {
         return UserReport.builder()
                 .source(Source.SAFETRIP)
-                .title(userReportSaveRequest.getTitle())
-                .description(userReportSaveRequest.getDescription())
+                .title(userReportSaveRequest.title())
+                .description(userReportSaveRequest.description())
                 .build();
     }
 }

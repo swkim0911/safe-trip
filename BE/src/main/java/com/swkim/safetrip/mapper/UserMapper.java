@@ -12,9 +12,9 @@ public class UserMapper {
     public static User toUser(UserSignUpRequest signUpRequest) {
 
         return User.builder()
-                .email(signUpRequest.getEmail())
-                .password(signUpRequest.getPassword())
-                .nickname(signUpRequest.getNickname())
+                .email(signUpRequest.email())
+                .password(signUpRequest.password())
+                .nickname(signUpRequest.nickname())
                 .role(Role.USER)
                 .build();
     }
