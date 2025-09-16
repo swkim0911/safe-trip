@@ -29,10 +29,10 @@ public class City extends BaseEntity {
     private State state;
 
     @Column(name = "name", nullable = false)
-    private String nameKo;
+    private String name;
 
     @Column(name = "name_ko")
-    private String koreanName;
+    private String nameKo;
 
     @Column(name = "lat")
     private Double lat;
