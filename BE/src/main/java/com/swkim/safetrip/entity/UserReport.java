@@ -30,7 +30,7 @@ public class UserReport extends BaseReport{
     public UserReport(Source source, String title, String description) {
         this.source = source;
         this.title = title;
-        this.description = description;
+        this.content = description;
     }
 
     // 양방향 연관관계 편의 메서드

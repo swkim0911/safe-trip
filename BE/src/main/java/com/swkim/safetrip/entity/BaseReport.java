@@ -39,6 +39,6 @@ public abstract class BaseReport extends BaseEntity {
     @Column(name = "title", nullable = false)
     protected String title;
 
-    @Column(name = "description", nullable = false, length = 1000)
-    protected String description;
+    @Column(name = "content", nullable = false, length = 1000)
+    protected String content;
 }
