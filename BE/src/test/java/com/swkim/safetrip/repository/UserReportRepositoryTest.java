@@ -78,7 +78,7 @@ class UserReportRepositoryTest {
                 () -> assertThat(dto.getScamAction()).isEqualTo("Pickpocket"),
                 () -> assertThat(dto.getCountryName()).isEqualTo("France"),
                 () -> assertThat(dto.getStateName()).isEqualTo("Paris"),
-                () -> assertThat(dto.getContent()).isEqualTo("description")
+                () -> assertThat(dto.getDescription()).isEqualTo("description")
         );
     }
 
@@ -102,7 +102,7 @@ class UserReportRepositoryTest {
         State state = State.builder()
                 .datasetId(2L)
                 .name("Paris")
-                .koreanName("파리")
+                .nameKo("파리")
                 .lat(48.856614)
                 .lng(121.3522972)
                 .build();
@@ -115,7 +115,7 @@ class UserReportRepositoryTest {
         Country country = Country.builder()
                 .datasetId(1L)
                 .name("France")
-                .koreanName("프랑스")
+                .nameKo("프랑스")
                 .lat(63.34234)
                 .lng(119.13842)
                 .build();
