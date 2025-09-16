@@ -22,6 +22,7 @@ public enum Error {
     DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
     DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "This nickname is already in use"),
     STATE_COUNTRY_MISMATCH_ERROR(HttpStatus.BAD_REQUEST.value(), "State and Country is mismatch"),
+    CITY_STATE_MISMATCH_ERROR(HttpStatus.BAD_REQUEST.value(), "City and State is mismatch"),
     INVALID_SORT_KEY_ERROR(HttpStatus.BAD_REQUEST.value(), "Sort Key is invalid"),
 
     REFRESH_TOKEN_MISSING_ERROR(HttpStatus.BAD_REQUEST.value(), "Refresh token is empty"),
