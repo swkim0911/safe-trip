@@ -19,7 +19,7 @@ public class ExternalReport extends BaseReport {
     @Column(nullable = false)
     private String externalId;
 
-    @Column(nullable = false)
+    @Column(name = "author")
     private String author;
 
     @Column(length = 500, nullable = false)
