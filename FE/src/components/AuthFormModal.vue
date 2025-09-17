@@ -23,14 +23,20 @@
 
                 <div class="mb-3">
                   <label for="password" class="form-label fw-bold">Password</label>
-                  <input
-                    type="password"
-                    id="password"
-                    class="form-control"
-                    v-model="loginForm.password"
-                    placeholder="Enter your password"
-                    required
-                  />
+                  <div class="input-group">
+                    <input
+                      :type="showLoginPassword ? 'text' : 'password'"
+                      type="password"
+                      id="password"
+                      class="form-control"
+                      v-model="loginForm.password"
+                      placeholder="Enter your password"
+                      required
+                    />
+                    <button type="button" class="btn btn-outline-secondary" @click="toggleLoginPasswordVisibility">
+                      <i :class="showLoginPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                    </button>
+                  </div>
                 </div>
                 <p v-if="loginFormMessage" class="text-center text-danger fw-bold">
                       {{ loginFormMessage }}
@@ -78,15 +84,15 @@
                   <label for="password" class="form-label fw-bold">Password</label>
                   <div class="input-group">
                     <input
-                      :type="showPassword ? 'text' : 'password'"
+                      :type="showSignupPassword ? 'text' : 'password'"
                       id="password"
                       class="form-control"
                       v-model="signupForm.password"
                       placeholder="Enter your password"
                       required
                     />
-                    <button type="button" class="btn btn-outline-secondary" @click="togglePasswordVisibility">
-                      <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                    <button type="button" class="btn btn-outline-secondary" @click="toggleSignupPasswordVisibility">
+                      <i :class="showSignupPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
                     </button>
                   </div>
                   <div v-if="signupForm.password">
@@ -161,7 +167,8 @@ const mode = ref('login')
 const signupSuccessMessage = ref('');
 const signupFailureMessage = ref('');
 const loginFormMessage = ref('');
-const showPassword = ref(false);
+const showLoginPassword = ref(false);
+const showSignupPassword = ref(false);
 
 const loginForm = reactive({
   email: '',
@@ -210,8 +217,12 @@ const isSignupFormValid = () => {
 const emailValidationErrorMessage = ref('');
 const nicknameValidationErrorMessage = ref('');
 
-const togglePasswordVisibility = () => {
-  showPassword.value = !showPassword.value;
+const toggleLoginPasswordVisibility = () => {
+  showLoginPassword.value = !showLoginPassword.value;
+}
+
+const toggleSignupPasswordVisibility = () => {
+  showSignupPassword.value = !showSignupPassword.value;
 }
 
 const isValidLength = computed(() => signupForm.password.length >= 8 && signupForm.password.length <= 20);
