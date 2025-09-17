@@ -128,8 +128,6 @@ class RedditRepository:
             )
             raise
 
-        items.clear()
-
     def flush_parsed_ops(self, operations):
         # operations를 bulk_write 실행 후 비움
         if operations:
