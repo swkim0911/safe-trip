@@ -32,7 +32,7 @@ def init_object():
     travel_scam_transformer = TravelScamTransformer(TravelScamClassifier(reddit_repository), TravelScamParser(),
                           reddit_repository, world_repository)
 
-    travel_scam_loader = TravelScamLoader(travel_scam_transformer)
+    travel_scam_loader = TravelScamLoader(reddit_repository)
 
     return travel_scam_transformer, travel_scam_loader
 
