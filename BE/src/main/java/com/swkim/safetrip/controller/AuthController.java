@@ -14,21 +14,19 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.swkim.safetrip.global.utils.CookieUtils.makeExpiredRefreshTokenCookie;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/auth")
 public class AuthController {
 
     private final AuthService authService;
 
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 인증을 시도하고, 성공 시 JWT 토큰을 반환한다.")
-    @PostMapping("/auth/login")
+    @PostMapping("/login")
     public ApiResult<AccessTokenResponse> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         AuthTokensResponseDto authTokensResponseDto = authService.login(loginRequest);
         httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.refreshTokenCookie().toString());
@@ -42,7 +40,7 @@ public class AuthController {
             @ApiResponse(responseCode = "204", description = "액세스 토큰, 리프레시 토큰이 없다면 처음 접근이므로 비로그인 상태 유지"),
             @ApiResponse(responseCode = "400", description = "리프레시 토큰이 요청에 포함되지 않음")
     })
-    @PostMapping("/auth/refresh")
+    @PostMapping("/refresh")
     public ResponseEntity<?> refreshTokens(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse httpServletResponse) {
         if (refreshToken == null || refreshToken.isBlank()) {
             return ResponseEntity.noContent().build();
@@ -55,7 +53,7 @@ public class AuthController {
     }
 
     @Operation(summary = "로그아웃", description = "리프레시 토큰을 무효화하여 로그아웃을 처리합니다.")
-    @PostMapping("/auth/logout")
+    @PostMapping("/logout")
     public ApiResult<Void> logout(@CookieValue(value = "refreshToken") String refreshToken, HttpServletResponse response) {
         authService.logout(refreshToken);
         response.addCookie(makeExpiredRefreshTokenCookie());
