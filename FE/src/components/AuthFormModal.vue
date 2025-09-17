@@ -321,7 +321,7 @@ const validateNickname = async () => {
     });
     nicknameValidationErrorMessage.value = '';
     const result = response.data.result;
-    isNicknameAvailable.value = result.available;
+    isNicknameAvailable.value = result.isAvailable;
 
   } catch (error) {
     console.error(error);
