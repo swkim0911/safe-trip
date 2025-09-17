@@ -422,7 +422,7 @@ const submitLoginForm = async () => {
     const accessToken = signupResponse.result.accessToken;
     authStore.setAccessToken(accessToken);
 
-    const { data: userInfoResponse } = await apiClient.get('/me');
+    const { data: userInfoResponse } = await apiClient.get('/users/me');
     authStore.setUser(userInfoResponse.result);
 
     hide();
