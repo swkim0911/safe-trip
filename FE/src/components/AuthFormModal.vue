@@ -289,7 +289,7 @@ const validateEmail = async () => {
     });
     emailValidationErrorMessage.value = '';
     const result = response.data.result;
-    isEmailAvailable.value = result.available;
+    isEmailAvailable.value = result.isAvailable;
 
   } catch (error) {
     console.error(error);
