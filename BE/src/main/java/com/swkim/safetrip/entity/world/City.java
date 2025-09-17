@@ -31,9 +31,6 @@ public class City extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "name_ko")
-    private String nameKo;
-
     @Column(name = "lat")
     private Double lat;
 
