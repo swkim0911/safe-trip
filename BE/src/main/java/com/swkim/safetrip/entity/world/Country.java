@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "country")
+@Table(name = "countries")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Country extends BaseEntity {
