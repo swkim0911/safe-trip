@@ -1,14 +1,14 @@
+import time
+
+from adapters import mongo_client, reddit_client
 from collector.extractor.travel_scam_extractor import TravelScamExtractor
-from collector.transformer.travel_scam_transformer import TravelScamTransformer
+from collector.loader.travel_scam_loader import TravelScamLoader
 from collector.transformer.travel_scam_classifier import TravelScamClassifier
 from collector.transformer.travel_scam_parser import TravelScamParser
-from collector.loader.travel_scam_loader import TravelScamLoader
-
+from collector.transformer.travel_scam_transformer import TravelScamTransformer
 from repository.reddit_repository import RedditRepository
 from repository.world_repository import WorldRepository
-from adapters import mongo_client, reddit_client
 
-import time
 
 def init_reddit_repository():
     return RedditRepository(

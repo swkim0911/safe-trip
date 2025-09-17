@@ -1,7 +1,9 @@
+import logging
+import os
+from functools import lru_cache
+
 from dotenv import load_dotenv
 from openai import OpenAI
-from functools import lru_cache
-import logging, os
 
 load_dotenv()
 

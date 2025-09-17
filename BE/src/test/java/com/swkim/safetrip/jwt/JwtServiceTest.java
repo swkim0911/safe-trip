@@ -35,7 +35,7 @@ class JwtServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    private final String secretKey = "1FD5151F374A7B3C9877AD728F769";
+    private final String secretKey = "a123fsdni";
 
     @BeforeEach
     void setUp() {

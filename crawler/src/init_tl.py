@@ -1,15 +1,13 @@
-from collector.transformer.travel_scam_transformer import TravelScamTransformer
+import time
+
+from adapters import mongo_client
+from collector.loader.travel_scam_loader import TravelScamLoader
 from collector.transformer.travel_scam_classifier import TravelScamClassifier
 from collector.transformer.travel_scam_parser import TravelScamParser
-from collector.loader.travel_scam_loader import TravelScamLoader
-
+from collector.transformer.travel_scam_transformer import TravelScamTransformer
+from config.logging_config import setup_logging
 from repository.reddit_repository import RedditRepository
 from repository.world_repository import WorldRepository
-from adapters import mongo_client
-
-from config.logging_config import setup_logging
-
-import time
 
 
 def init_reddit_repository():
@@ -34,7 +32,7 @@ def init_object():
     travel_scam_transformer = TravelScamTransformer(TravelScamClassifier(reddit_repository), TravelScamParser(),
                           reddit_repository, world_repository)
 
-    travel_scam_loader = TravelScamLoader(travel_scam_transformer)
+    travel_scam_loader = TravelScamLoader(reddit_repository)
 
     return travel_scam_transformer, travel_scam_loader
 

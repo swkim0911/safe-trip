@@ -1,8 +1,10 @@
+import json
+import logging
+from pathlib import Path
+
 from adapters.openai_client import call_openai_api, call_openai_api_with_batch, get_completed_batch_result
 from utils import prompt_utils, batch_utils
-from pathlib import Path
-import logging
-import json
+
 
 class TravelScamClassifier:
     

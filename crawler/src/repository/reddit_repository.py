@@ -1,7 +1,9 @@
-from datetime import datetime, UTC
-from pymongo import UpdateOne, InsertOne
 import logging
 import os
+from datetime import datetime, UTC
+
+from pymongo import UpdateOne, InsertOne
+
 
 class RedditRepository:
     MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
@@ -33,7 +35,7 @@ class RedditRepository:
                 UpdateOne(
                     {"reddit_id": doc["reddit_id"]},
                     {
-                        "$set": {**doc, "modified_at": now},
+                        "$set": {**doc, "updated_at": now},
                         "$setOnInsert": {"created_at": now}
                     },
                     upsert=True

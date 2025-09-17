@@ -1,8 +1,9 @@
+import json
+import logging
 from datetime import datetime, timedelta, UTC
-from pymongo import InsertOne
-from utils.token_utils import estimate_classification_request_tokens, estimate_parsing_request_tokens
+
 from adapters.openai_client import get_completed_batch_result
-import logging, json
+from utils.token_utils import estimate_classification_request_tokens, estimate_parsing_request_tokens
 
 
 class TravelScamTransformer:
@@ -149,7 +150,7 @@ class TravelScamTransformer:
                         "city_id": location_info.get("city_id"),
                         "summary": parsed_body_result.get("summary"),
                         "posted_at": raw_json.get("posted_at"),
-                        "modified_at": now,
+                        "updated_at": now,
                         "created_at": now,
                     }
                     parsing_results.append(doc)
@@ -240,7 +241,7 @@ class TravelScamTransformer:
                     "city_id": location_info.get("city_id"),
                     "summary": parsed_body_result.get("summary"),
                     "posted_at": find_travel_scam_doc.get("posted_at"),
-                    "modified_at": now,
+                    "updated_at": now,
                     "created_at": now,
                 }
                 parsing_results.append(doc)

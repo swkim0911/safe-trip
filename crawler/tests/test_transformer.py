@@ -146,7 +146,7 @@ def transform(time_filter: str):
                 "summary": scam_record.get("summary"),
                 "posted_at": raw_json.get("posted_at"),
                 "created_at": now,
-                "modified_at": now
+                "updated_at": now
             }
             cnt += 1
             print(doc)

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "city")
+@Table(name = "cities")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class City extends BaseEntity {
@@ -30,9 +30,6 @@ public class City extends BaseEntity {
 
     @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "name_ko")
-    private String nameKo;
 
     @Column(name = "lat")
     private Double lat;

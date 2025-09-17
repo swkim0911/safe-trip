@@ -52,7 +52,7 @@ def process_raw_json(raw_json, travel_scam_classifier, travel_scam_parser, world
             "summary": scam_record.get("summary"),
             "posted_at": raw_json.get("posted_at"),
             "created_at": now,
-            "modified_at": now
+            "updated_at": now
         }
         results.append(doc)
     return results

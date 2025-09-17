@@ -1,5 +1,7 @@
-from adapters.reddit_client import get_instance
 from datetime import datetime, timezone
+
+from adapters.reddit_client import get_instance
+
 
 class TravelScamExtractor:
     def __init__(self, reddit_repository):

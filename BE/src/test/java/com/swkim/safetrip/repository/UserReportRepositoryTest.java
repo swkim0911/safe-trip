@@ -102,7 +102,6 @@ class UserReportRepositoryTest {
         State state = State.builder()
                 .datasetId(2L)
                 .name("Paris")
-                .nameKo("파리")
                 .lat(48.856614)
                 .lng(121.3522972)
                 .build();

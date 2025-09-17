@@ -1,6 +1,7 @@
-from dotenv import load_dotenv
-import praw
 import os
+
+import praw
+from dotenv import load_dotenv
 
 load_dotenv()  # .env 파일 불러오기
 
