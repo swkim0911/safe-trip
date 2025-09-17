@@ -150,7 +150,7 @@ class TravelScamTransformer:
                         "city_id": location_info.get("city_id"),
                         "summary": parsed_body_result.get("summary"),
                         "posted_at": raw_json.get("posted_at"),
-                        "modified_at": now,
+                        "updated_at": now,
                         "created_at": now,
                     }
                     parsing_results.append(doc)
@@ -241,7 +241,7 @@ class TravelScamTransformer:
                     "city_id": location_info.get("city_id"),
                     "summary": parsed_body_result.get("summary"),
                     "posted_at": find_travel_scam_doc.get("posted_at"),
-                    "modified_at": now,
+                    "updated_at": now,
                     "created_at": now,
                 }
                 parsing_results.append(doc)

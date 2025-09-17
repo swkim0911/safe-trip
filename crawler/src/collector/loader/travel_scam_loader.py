@@ -53,7 +53,7 @@ class TravelScamLoader:
             cursor.execute(
                 """
                 INSERT INTO external_report 
-                (scam_action_id, scam_context_id, country_id, state_id, external_id, source, source_url, author, title, summary, posted_at, collected_at, created_at, modified_at)
+                (scam_action_id, scam_context_id, country_id, state_id, external_id, source, source_url, author, title, summary, posted_at, collected_at, created_at, updated_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (

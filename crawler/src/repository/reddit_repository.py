@@ -35,7 +35,7 @@ class RedditRepository:
                 UpdateOne(
                     {"reddit_id": doc["reddit_id"]},
                     {
-                        "$set": {**doc, "modified_at": now},
+                        "$set": {**doc, "updated_at": now},
                         "$setOnInsert": {"created_at": now}
                     },
                     upsert=True
