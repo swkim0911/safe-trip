@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,18 +39,19 @@ public class AuthController {
     @Operation(summary = "액세스 토큰 재발급", description = "리프레시 토큰을 기반으로 새로운 액세스 토큰을 발급합니다. (RTR)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "액세스 토큰이 성공적으로 재발급됨"),
+            @ApiResponse(responseCode = "204", description = "액세스 토큰, 리프레시 토큰이 없다면 처음 접근이므로 비로그인 상태 유지"),
             @ApiResponse(responseCode = "400", description = "리프레시 토큰이 요청에 포함되지 않음")
     })
     @PostMapping("/auth/refresh")
-    public ApiResult<AccessTokenResponse> refreshTokens(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<?> refreshTokens(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse httpServletResponse) {
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new RefreshTokenMissingException();
+            return ResponseEntity.noContent().build();
         }
 
         AuthTokensResponseDto authTokensResponseDto = authService.reIssueAccessToken(refreshToken);
         httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.refreshTokenCookie().toString());
 
-        return ApiResult.of(HttpStatus.OK.value(), "Access Token is reissued under RTR", authTokensResponseDto.accessTokenResponse());
+        return ResponseEntity.ok(ApiResult.of(HttpStatus.OK.value(), "Access Token is reissued under RTR", authTokensResponseDto.accessTokenResponse()));
     }
 
     @Operation(summary = "로그아웃", description = "리프레시 토큰을 무효화하여 로그아웃을 처리합니다.")
