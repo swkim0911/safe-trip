@@ -29,7 +29,7 @@ public class State extends BaseEntity {
     private String name;
 
     @Column(name = "lat")
-    private Double lat; //consider: state에는 lat, lng 정보가 없을 수도 있는데, 그럴 때는 어떻게 할지 정하기(ex: 안도라) -> 아마 그냥 null저장하고, summary 조회할 때는 생략
+    private Double lat;
 
     @Column(name = "lng")
     private Double lng;
