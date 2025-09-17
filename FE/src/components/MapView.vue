@@ -134,11 +134,14 @@ const logout = async () => {
 }
 
 const restoreSession = async () => {
-  
   if (!authStore.accessToken) {
     try {
-      const { data } = await apiClient.post('/auth/refresh', {}, { withCredentials: true });
-      authStore.setAccessToken(data.result.accessToken);
+      const response = await apiClient.post('/auth/refresh', {}, { withCredentials: true });
+
+      // 서버가 204 No Content를 반환한 경우 비로그인 상태 유지
+      if (response.status === 204) return;
+
+      authStore.setAccessToken(response.result.accessToken);
 
       // accessToken 얻었으니 사용자 정보 요청
       const { data: meResponse } = await apiClient.get('/me');
