@@ -27,7 +27,5 @@ public record ExternalReportDetailResponse (
 
         String summary,
 
-        LocalDateTime postedAt,
-
-        LocalDateTime collectedAt
+        LocalDateTime postedAt
 ){}
