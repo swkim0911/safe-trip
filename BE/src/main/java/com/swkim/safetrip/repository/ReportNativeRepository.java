@@ -26,19 +26,20 @@ public class ReportNativeRepository {
     public Slice<LocationScamSummaryItem> findCountrySummarySlice(Pageable pageable) {
         String orderBy = getOrderBy(pageable);
 
-        String sql = """
+        String sql = String.format("""
             SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
             FROM (
                 SELECT country_id FROM user_report
                 UNION ALL
                 SELECT country_id FROM external_report
             ) r
-            JOIN country c ON r.country_id = c.id
+            JOIN countries c ON r.country_id = c.id
             WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
             GROUP BY c.id, c.name, c.lat, c.lng
-            ORDER BY """ + orderBy + """
+            ORDER BY %s
             LIMIT :limit OFFSET :offset
-            """;
+            """, orderBy);
+
 
         Query query = em.createNativeQuery(sql);
 
@@ -62,19 +63,19 @@ public class ReportNativeRepository {
     public Slice<LocationScamSummaryItem> findStateSummarySliceByCountryId(Long countryId, Pageable pageable){
         String orderBy = getOrderBy(pageable);
 
-        String sql = """
+        String sql = String.format("""
             SELECT s.id, s.name, s.lat, s.lng, COUNT(*) AS scam_cnt
             FROM (
                 SELECT state_id FROM user_report WHERE countryId = :countryId
                 UNION ALL
                 SELECT state_id FROM external_report WHERE countryId = :countryId
             ) r
-            JOIN state s ON r.state_id = s.id
+            JOIN states s ON r.state_id = s.id
             WHERE s.lat IS NOT NULL AND s.lng IS NOT NULL
             GROUP BY s.id, s.name, s.lat, s.lng
-            ORDER BY """ + orderBy + """
+            ORDER BY %s
             LIMIT :limit OFFSET :offset
-            """;
+            """, orderBy);
 
         Query query = em.createNativeQuery(sql);
         query.setParameter("countryId", countryId);
@@ -99,17 +100,17 @@ public class ReportNativeRepository {
     public Slice<ReportSummaryItem> findReportSummarySliceByCountryIdAndStateId(Long countryId, Long stateId, Pageable pageable){
         String orderBy = getOrderBy(pageable);
 
-        String sql = """
-            SELECT r.report_id, r.source, r.title, s.name as scam_name
-            FROM (
-                SELECT report_id, source, title, scam_id FROM user_report WHERE countryId = :countryId AND stateId = :stateId
-                UNION ALL
-                SELECT report_id, source, title, scam_id FROM external_report WHERE countryId = :countryId AND stateId = :stateId
-            ) r
-            JOIN scamAction s on r.scam_id = s.id
-            ORDER BY """ + orderBy + """
-            LIMIT :limit OFFSET :offset
-            """;
+        String sql = String.format("""
+                SELECT r.report_id, r.source, r.title, s.name as scam_name
+                FROM (
+                    SELECT report_id, source, title, scam_id FROM user_report WHERE countryId = :countryId AND stateId = :stateId
+                    UNION ALL
+                    SELECT report_id, source, title, scam_id FROM external_report WHERE countryId = :countryId AND stateId = :stateId
+                ) r
+                JOIN scamAction s on r.scam_id = s.id
+                ORDER BY %s
+                LIMIT :limit OFFSET :offset
+                """, orderBy);
 
         Query query = em.createNativeQuery(sql);
         query.setParameter("countryId", countryId);
@@ -169,7 +170,6 @@ public class ReportNativeRepository {
                 "scamCnt", "scam_cnt",
                 "createdAt", "created_at"
         );
-
         String orderBy = sort.stream()
                 .map(order -> {
                     String column = SORT_MAPPING.get(order.getProperty());
@@ -183,6 +183,7 @@ public class ReportNativeRepository {
         if (orderBy.isBlank()) {
             orderBy = "created_at DESC"; // 기본값
         }
+        System.out.println("orderBy = " + orderBy);
         return orderBy;
     }
 }
