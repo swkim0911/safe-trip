@@ -11,6 +11,8 @@ public record ReportSummaryItem(
 
         String title,
 
-        String scamName
+        String scamAction,
+
+        String scamContext
 
 ){}
