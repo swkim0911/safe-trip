@@ -15,6 +15,7 @@ public interface ExternalReportRepository extends JpaRepository<ExternalReport, 
     select new com.swkim.safetrip.dto.response.ExternalReportDetailResponse(
         er.source,
         er.sourceUrl,
+        er.author,
         sa.name,
         sc.name,
         co.name,
