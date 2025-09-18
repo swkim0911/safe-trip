@@ -96,34 +96,11 @@
             <h6 class="fw-bold mb-0 text-center"> Scam of {{ selectedCity.name }}</h6>
           </div>
           <ul class="list-group">
-            <!-- <li
-              class="list-group-item position-relative pt-3"
-              v-for="report in sidebarReports"
-              :key="report.reportId"
-              @click="openReportDetailModal(report.reportId)"
-            >
-              <span class="badge bg-primary position-absolute top-0 end-0 translate-middle-y me-2">
-                {{ report.source === 'safetrip' ? 'safetrip' : 'AI Bot' }}
-              </span>
-
-              <div class="fw-bold mb-2 mt-2">
-                {{ report.title }}
-              </div>
-
-              <div class="mb-2">
-                <span class="badge text-bg-danger me-1">{{ report.scamAction }}</span>
-                <span class="badge text-bg-warning">{{ report.scamContext }}</span>
-              </div>
-
-              <div class="text-end">
-                <small class="text-muted">{{ formatDate(report.posted_at) }}</small>
-              </div>
-            </li> -->
             <li
               class="list-group-item position-relative"
               v-for="report in sidebarReports"
               :key="report.reportId"
-              @click="openReportDetailModal(report.reportId)"
+              @click="openReportDetailModal(report.source, report.reportId)"
             >
               <span class="badge bg-primary position-absolute top-0 end-0 translate-middle-y me-2">
                 {{ report.source === 'safetrip' ? 'safetrip' : 'AI Bot' }}
@@ -192,13 +169,20 @@ const selectedCity = reactive({
 });
 
 const selectedReport = reactive({
+  source: '',
+  sourceUrl: '',
+  author: '',
+  nickname: '',
+  scamAction: '',
+  scamContext: '',
+  countryName: '',
+  stateName: '',
+  cityName: '',
   title: '',
-  scam: '',
-  address: '',
-  description: '',
-  advice: '',
-  createdAt: ''
-})
+  content: '',
+  postedAt: '',
+  collectedAt: ''
+});
 
 const size = 12;
 
@@ -224,27 +208,78 @@ const formatDate = (date) => {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
-const openReportDetailModal = (reportId) => {
-  loadReportDetialInfo(reportId);
+const openReportDetailModal = (source, reportId) => {
+  if (source === "safetrip") {
+    loadUserReportDetailInfo(reportId);
+  } else {
+    loadExternalReportDetailInfo(reportId);
+  }
   show();
 }
 
-const loadReportDetialInfo = async (reportId) => {
+function mapUserReportDetail(result) {
+  Object.assign(selectedReport, {
+    source: result.source,
+    sourceUrl: '',
+    author: '',
+    nickname: result.nickname,
+    scamAction: result.scamAction,
+    scamContext: result.scamContext,
+    countryName: result.countryName,
+    stateName: result.stateName,
+    cityName: result.cityName,
+    title: result.title,
+    content: result.description,
+    postedAt: res.createdAt,
+    collectedAt: ''
+  })
+}
+
+function mapExternalReportDetail(result) {
+  Object.assign(selectedReport, {
+    source: result.source,
+    sourceUrl: result.sourceUrl,
+    author: result.author,
+    nickname: '',
+    scamAction: result.scamAction,
+    scamContext: result.scamContext,
+    countryName: result.countryName,
+    stateName: result.stateName,
+    cityName: result.cityName,
+    title: result.title,
+    summary: result.summary,
+    postedAt: result.postedAt,
+    collectedAt: result.collectedAt
+  })
+}
+
+const loadUserReportDetailInfo = async (reportId) => {
   try {
-    const response = await apiClient.get(`/reports/${reportId}`);
+    const response = await apiClient.get(`/user-reports/${reportId}`);
 
     const result = response.data.result;
-    selectedReport.title = result.title;
-    selectedReport.scam = result.scam;
-    selectedReport.address = result.address;
-    selectedReport.description = result.description;
-    selectedReport.advice = result.advice;
-    selectedReport.createdAt = result.createdAt;
+    mapUserReportDetail(result);
 
   } catch (e) {
     console.error('API 요청 실패:', e);
   }
 }
+
+const loadExternalReportDetailInfo = async (reportId) => {
+  try {
+    const response = await apiClient.get(`/external-reports/${reportId}`);
+
+    const result = response.data.result;
+    console.log(result);
+    mapExternalReportDetail(result);
+
+
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  }
+}
+
+
 
 const loadSidebarCountrySummary = async (mode = 'click') => {
 
