@@ -23,7 +23,7 @@ public interface ExternalReportRepository extends JpaRepository<ExternalReport, 
         ci.name,
         er.title,
         er.content,
-        er.postedAt,
+        er.postedAt
     )
     from ExternalReport er
     join er.scamAction sa
