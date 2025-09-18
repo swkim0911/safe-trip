@@ -230,7 +230,7 @@ function mapUserReportDetail(result) {
     cityName: result.cityName,
     title: result.title,
     content: result.description,
-    postedAt: res.createdAt,
+    postedAt: formatDate(esult.createdAt),
     collectedAt: ''
   })
 }
@@ -248,8 +248,8 @@ function mapExternalReportDetail(result) {
     cityName: result.cityName,
     title: result.title,
     summary: result.summary,
-    postedAt: result.postedAt,
-    collectedAt: result.collectedAt
+    postedAt: formatDate(result.postedAt),
+    collectedAt: formatDate(result.collectedAt)
   })
 }
 
