@@ -12,13 +12,13 @@
       
       </div>
       <div class="sidebar-body" @scroll="onSidebarScroll" ref="sidebarRef">
-        <template v-if="viewState === 'country'">
+        <template v-if="viewType === 'country'">
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="country in sidebarCountries"
               :key="country.id"
-              @click="loadSidebarCitySummary(country.id, country.name)"
+              @click="loadSidebarStateSummary(country.id, country.name)"
             >
               <div class="ms-2 me-auto">
                 <div class="fw-bold">{{ country.name }}</div>
@@ -30,7 +30,7 @@
           </ul>
         </template>
 
-        <template v-else-if="viewState === 'city'">
+        <template v-else-if="viewType === 'state'">
           <div class="d-flex align-items-center justify-content-center position-relative mb-2">
             <button
               class="btn position-absolute start-0"
@@ -39,14 +39,40 @@
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
 
-            <h6 class="fw-bold mb-0 text-center"> City of {{ selectedCountry.name }}</h6>
+            <h6 class="fw-bold mb-0 text-center"> State of {{ selectedCountry.name }}</h6>
+          </div>
+          <ul class="list-group">
+            <li
+              class="list-group-item d-flex justify-content-between align-items-start"
+              v-for="state in sidebarStates"
+              :key="state.id"
+              @click="loadSidebarCitySummary(selectedState.id, selectedState.name)"
+            >
+              <div class="ms-2 me-auto">
+                <div class="fw-bold">{{ state.name }}</div>
+              </div>
+              <span class="badge text-bg-primary rounded-pill">{{ state.scamCnt }}</span>
+            </li>
+          </ul>
+        </template>
+
+        <template v-else-if="viewType === 'city'">
+          <div class="d-flex align-items-center justify-content-center position-relative mb-2">
+            <button
+              class="btn position-absolute start-0"
+              @click="backToList('state')"
+            >
+              <font-awesome-icon :icon="['fas', 'chevron-left']" />
+            </button>
+
+            <h6 class="fw-bold mb-0 text-center"> City of {{ selectedState.name }}</h6>
           </div>
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="city in sidebarCities"
               :key="city.id"
-              @click="loadSidebarReportSummary(selectedCountry.id, city.id, city.name)"
+              @click="loadSidebarReportSummary(selectedState.id, city.id, city.name)"
             >
               <div class="ms-2 me-auto">{{ city.name }}</div>
               <span class="badge text-bg-primary rounded-pill">{{ city.scamCnt }}</span>
@@ -54,7 +80,7 @@
           </ul>
         </template>
 
-        <template v-else-if="viewState === 'report'">
+        <template v-else-if="viewType === 'report'">
           <div class="d-flex align-items-center justify-content-center position-relative mb-2">
             <button
               class="btn position-absolute start-0"
@@ -101,13 +127,19 @@ const { show } = useBootstrapModal('#reportDetailModal');
 const isOpen = ref(false);
 const searchText = ref('');
 
-const viewState = ref('country') // 'country' 또는 'city' 또는 'report'
+const viewType = ref('country') // 'country' 또는 'state' 또는 'city' 또는 'report'
 
 const sidebarCountries = ref([]);
+const sidebarStates = ref([]);
 const sidebarCities = ref([]);
 const sidebarReports = ref([]);
 
 const selectedCountry = reactive({
+  id: null,
+  name: ''
+});
+
+const selectedState = reactive({
   id: null,
   name: ''
 });
@@ -132,6 +164,10 @@ const countryPage = ref(0);
 const isLastCountryPage = ref(false);
 const isLoadingCountry = ref(false);
 
+const statePage = ref(0);
+const isLastStatePage = ref(false);
+const isLoadingState = ref(false);
+
 const cityPage = ref(0);
 const isLastCityPage = ref(false);
 const isLoadingCity = ref(false);
@@ -141,7 +177,6 @@ const isLastReportPage = ref(false);
 const isLoadingReport = ref(false);
 
 const sidebarRef = ref(null);
-const serverURL = import.meta.env.VITE_API_URL;
 
 const openReportDetailModal = (reportId) => {
   loadReportDetialInfo(reportId);
@@ -178,7 +213,6 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
         sort: "scamCnt,DESC"
       }
     });
-    console.log(response);
     const content = response.data.result.content;
     const last = response.data.result.last;
 
@@ -192,6 +226,40 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
   }
 }
 
+const loadSidebarStateSummary = async (countryId, countryName, mode = 'click') => {
+  if (mode === 'scroll' && (isLoadingState.value || isLastStatePage.value)) return;
+
+  isLoadingState.value = true;
+
+  selectedCountry.id = countryId;
+  selectedCountry.name = countryName;
+
+  try {
+    const response = await apiClient.get('/reports/sidebar-summary/states', {
+      params: {
+        countryId: countryId,
+        page: statePage.value,
+        size: size,
+        sort: "scamCnt,DESC"
+      }
+    });
+    console.log(response);
+    const content = response.data.result.content;
+    const last = response.data.result.last;
+
+    sidebarStates.value.push(...content);
+    isLastStatePage.value = last;
+    statePage.value += 1;
+
+    viewType.value = 'state';
+  } catch (e) {
+    console.error('API 요청 실패:', e);
+  } finally {
+    isLoadingState.value = false;
+  }
+}
+
+// todo: stateId, stateName
 const loadSidebarCitySummary = async (countryId, countryName, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
 
@@ -205,9 +273,11 @@ const loadSidebarCitySummary = async (countryId, countryName, mode = 'click') =>
       params: {
         countryId: countryId,
         page: cityPage.value,
-        size: size
+        size: size,
+        sort: "scamCnt,DESC"
       }
     });
+    console.log(response);
     const content = response.data.result.content;
     const last = response.data.result.last;
 
@@ -215,7 +285,7 @@ const loadSidebarCitySummary = async (countryId, countryName, mode = 'click') =>
     isLastCityPage.value = last;
     cityPage.value += 1;
 
-    viewState.value = 'city';
+    viewType.value = 'city';
   } catch (e) {
     console.error('API 요청 실패:', e);
   } finally {
@@ -247,7 +317,7 @@ const loadSidebarReportSummary = async (countryId, cityId, cityName, mode = 'cli
     isLastReportPage.value = last;
     reportPage.value += 1;
 
-    viewState.value = 'report';
+    viewType.value = 'report';
   } catch (e) {
     console.error('API 요청 실패:', e);
   } finally {
@@ -257,7 +327,7 @@ const loadSidebarReportSummary = async (countryId, cityId, cityName, mode = 'cli
 
 
 const backToList = (type) => {
-  viewState.value = type;
+  viewType.value = type;
 }
 
 const toggleSidebar = () => {
@@ -273,11 +343,11 @@ const onSidebarScroll = () => {
 
   if (!scrollBottom) return;
   
-  if (viewState.value === 'country') {
+  if (viewType.value === 'country') {
     loadSidebarCountrySummary('scroll');
-  } else if (viewState.value === 'city') {
+  } else if (viewType.value === 'city') {
     loadSidebarCitySummary(selectedCountry.id, selectedCountry.name, 'scroll');
-  } else if (viewState.value === 'report') {
+  } else if (viewType.value === 'report') {
     loadSidebarReportSummary(selectedCountry.id, selectedCity.id, selectedCity.name, 'scroll');
   }
 };
