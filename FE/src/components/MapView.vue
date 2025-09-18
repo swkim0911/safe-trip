@@ -153,7 +153,7 @@ const restoreSession = async () => {
 }
 
 onMounted(() => {
-  loadMapSummary(),
+  // loadMapSummary(),
   restoreSession()
 })
 </script>
