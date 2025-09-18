@@ -183,7 +183,6 @@ public class ReportNativeRepository {
         if (orderBy.isBlank()) {
             orderBy = "created_at DESC"; // 기본값
         }
-        System.out.println("orderBy = " + orderBy);
         return orderBy;
     }
 }
