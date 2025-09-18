@@ -13,6 +13,8 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -134,24 +136,23 @@ public class ReportNativeRepository {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
-    public Slice<ReportSummaryItem> findReportSummarySliceByCountryIdAndStateId(Long countryId, Long stateId, Pageable pageable){
+    public Slice<ReportSummaryItem> findReportSummarySliceByCityId(Long cityId, Pageable pageable){
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
-                SELECT r.report_id, r.source, r.title, s.name as scam_name
+                SELECT r.id, r.source, r.title, sa.name as scam_action_name, sc.name as scam_context_name, r.created_at
                 FROM (
-                    SELECT report_id, source, title, scam_id FROM user_report WHERE countryId = :countryId AND stateId = :stateId
+                    SELECT id, source, title, scam_action_id, scam_context_id, created_at FROM user_report WHERE city_id = :cityId
                     UNION ALL
-                    SELECT report_id, source, title, scam_id FROM external_report WHERE countryId = :countryId AND stateId = :stateId
+                    SELECT id, source, title, scam_action_id, scam_context_id, posted_at as created_at FROM external_report WHERE city_id = :cityId
                 ) r
-                JOIN scamAction s on r.scam_id = s.id
+                JOIN scam_action sa on r.scam_action_id = sa.id
+                JOIN scam_context sc on r.scam_context_id = sc.id
                 ORDER BY %s
                 LIMIT :limit OFFSET :offset
                 """, orderBy);
-
         Query query = em.createNativeQuery(sql);
-        query.setParameter("countryId", countryId);
-        query.setParameter("stateId", stateId);
+        query.setParameter("cityId", cityId);
 
         int pageSize = pageable.getPageSize();
         int offset = (int) pageable.getOffset();
@@ -176,7 +177,9 @@ public class ReportNativeRepository {
                         ((Number) row[0]).longValue(),
                         toSource(row[1]), // DB 문자열 → Enum 변환
                         (String)row[2],
-                        (String)row[3]
+                        (String)row[3],
+                        (String)row[4],
+                        ((Timestamp) row[5]).toLocalDateTime()
                 ))
                 .toList();
     }
@@ -218,7 +221,7 @@ public class ReportNativeRepository {
                 .collect(Collectors.joining(", "));
 
         if (orderBy.isBlank()) {
-            orderBy = "created_at DESC"; // 기본값
+            orderBy = "r.created_at DESC"; // 기본값
         }
         return orderBy;
     }
