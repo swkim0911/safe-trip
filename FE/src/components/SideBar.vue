@@ -267,7 +267,6 @@ const loadExternalReportDetailInfo = async (reportId) => {
     const response = await apiClient.get(`/external-reports/${reportId}`);
 
     const result = response.data.result;
-    console.log(result);
     mapExternalReportDetail(result);
 
 
@@ -373,7 +372,6 @@ const loadSidebarCitySummary = async (stateId, stateName, mode = 'click') => {
         sort: "scamCnt,DESC"
       }
     });
-    console.log(response);
     const content = response.data.result.content;
     const last = response.data.result.last;
 
@@ -413,7 +411,6 @@ const loadSidebarReportSummary = async (cityId, cityName, mode = 'click') => {
     });
     const content = response.data.result.content;
     const last = response.data.result.last;
-    console.log(content); // localtime 적용하기
     sidebarReports.value.push(...content);
     isLastReportPage.value = last;
     reportPage.value += 1;
