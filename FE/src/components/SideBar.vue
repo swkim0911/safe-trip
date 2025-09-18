@@ -96,24 +96,49 @@
             <h6 class="fw-bold mb-0 text-center"> Scam of {{ selectedCity.name }}</h6>
           </div>
           <ul class="list-group">
+            <!-- <li
+              class="list-group-item position-relative pt-3"
+              v-for="report in sidebarReports"
+              :key="report.reportId"
+              @click="openReportDetailModal(report.reportId)"
+            >
+              <span class="badge bg-primary position-absolute top-0 end-0 translate-middle-y me-2">
+                {{ report.source === 'safetrip' ? 'safetrip' : 'AI Bot' }}
+              </span>
+
+              <div class="fw-bold mb-2 mt-2">
+                {{ report.title }}
+              </div>
+
+              <div class="mb-2">
+                <span class="badge text-bg-danger me-1">{{ report.scamAction }}</span>
+                <span class="badge text-bg-warning">{{ report.scamContext }}</span>
+              </div>
+
+              <div class="text-end">
+                <small class="text-muted">{{ formatDate(report.posted_at) }}</small>
+              </div>
+            </li> -->
             <li
               class="list-group-item position-relative"
               v-for="report in sidebarReports"
               :key="report.reportId"
               @click="openReportDetailModal(report.reportId)"
             >
-              <!-- 포스트잇처럼 오른쪽 상단에 붙는 source 뱃지 -->
               <span class="badge bg-primary position-absolute top-0 end-0 translate-middle-y me-2">
                 {{ report.source === 'safetrip' ? 'safetrip' : 'AI Bot' }}
               </span>
 
-              <!-- 본문 -->
-              <div class="fw-bold mb-1 mt-1">
+              <div class="fw-bold mb-1 mt-3">
                 {{ report.title }}
               </div>
 
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="badge text-bg-danger">{{ report.scamAction }}</span>
+              <div class="mb-1">
+                <span class="badge text-bg-danger me-1">{{ report.scamAction }}</span>
+                <span class="badge text-bg-warning">{{ report.scamContext }}</span>
+              </div>
+
+              <div class="text-end">
                 <small class="text-muted">{{ formatDate(report.posted_at) }}</small>
               </div>
             </li>
