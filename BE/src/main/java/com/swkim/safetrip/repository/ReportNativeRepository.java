@@ -66,9 +66,9 @@ public class ReportNativeRepository {
         String sql = String.format("""
             SELECT s.id, s.name, s.lat, s.lng, COUNT(*) AS scam_cnt
             FROM (
-                SELECT state_id FROM user_report WHERE countryId = :countryId
+                SELECT state_id FROM user_report WHERE country_id = :countryId
                 UNION ALL
-                SELECT state_id FROM external_report WHERE countryId = :countryId
+                SELECT state_id FROM external_report WHERE country_id = :countryId
             ) r
             JOIN states s ON r.state_id = s.id
             WHERE s.lat IS NOT NULL AND s.lng IS NOT NULL
