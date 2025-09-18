@@ -97,6 +97,43 @@ public class ReportNativeRepository {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
+    public Slice<LocationScamSummaryItem> findCitySummarySliceByStateId(Long stateId, Pageable pageable) {
+        String orderBy = getOrderBy(pageable);
+
+        String sql = String.format("""
+            SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
+            FROM (
+                SELECT city_id FROM user_report WHERE state_id = :stateId
+                UNION ALL
+                SELECT city_id FROM external_report WHERE state_id = :stateId
+            ) r
+            JOIN cities c ON r.city_id = c.id
+            WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
+            GROUP BY c.id, c.name, c.lat, c.lng
+            ORDER BY %s
+            LIMIT :limit OFFSET :offset
+            """, orderBy);
+
+        Query query = em.createNativeQuery(sql);
+        query.setParameter("stateId", stateId);
+
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+        query.setParameter("limit", pageSize + 1);
+        query.setParameter("offset", offset);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        // DTO 매핑
+        List<LocationScamSummaryItem> items = getLocationScamSummaryItems(results);
+
+        boolean hasNext = items.size() > pageSize;
+        List<LocationScamSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
+
+        return new SliceImpl<>(content, pageable, hasNext);
+    }
+
     public Slice<ReportSummaryItem> findReportSummarySliceByCountryIdAndStateId(Long countryId, Long stateId, Pageable pageable){
         String orderBy = getOrderBy(pageable);
 
