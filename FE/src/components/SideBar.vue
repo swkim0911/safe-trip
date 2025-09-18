@@ -6,7 +6,7 @@
         <input
         type="text"
         v-model="searchText"
-        placeholder="국가, 도시 검색"
+        placeholder="Country or State or City"
         class="form-control form-control-lg mb-3"
         />
       
@@ -174,10 +174,11 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
     const response = await apiClient.get('/reports/sidebar-summary/counties', {
       params: {
         page: countryPage.value,
-        size: size
+        size: size,
+        sort: "scamCnt,DESC"
       }
     });
-
+    console.log(response);
     const content = response.data.result.content;
     const last = response.data.result.last;
 
@@ -185,7 +186,7 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
     isLastCountryPage.value = last;
     countryPage.value += 1;
   } catch (e) {
-    console.error('API 요청 실패:', e);
+    console.error('Failed to load sidebar info because of server error. Please try again later.', e);
   } finally {
     isLoadingCountry.value = false;
   }
