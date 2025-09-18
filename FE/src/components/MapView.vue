@@ -17,8 +17,10 @@
           :fill-opacity="0.5"
           :weight="1"
         >
-          <l-tooltip :options="{ permanent: false, direction: 'auto'}">
-            {{ marker.scamCnt }}
+          <l-tooltip :options="{ direction: 'top', offset: [0, -5] }">
+            <div class="tooltip-card">
+              <strong>{{ marker.scamCnt }}</strong> reports
+            </div>
           </l-tooltip>
         </l-circle-marker>
         <l-control-zoom position="bottomright"></l-control-zoom>
