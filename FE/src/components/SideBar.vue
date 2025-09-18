@@ -108,7 +108,7 @@
               </span>
 
               <!-- 본문 -->
-              <div class="fw-bold mb-1 mt-2">
+              <div class="fw-bold mb-1 mt-1">
                 {{ report.title }}
               </div>
 
