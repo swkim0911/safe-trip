@@ -12,8 +12,8 @@
           v-for="marker in markers"
           :key="marker.id"
           :lat-lng="[marker.lat, marker.lng]"
-          :radius="getRadius(marker.scamCnt, zoom)"
-          color="#ff9500"
+          :radius="getRadius(marker.scamCnt)"
+          :color="getColor(marker.scamCnt)"
           :fill-opacity="0.5"
           :weight="1"
         >
@@ -89,6 +89,10 @@ const center = ref({ "lat": 42.8333, "lng": 12.8333 });
 
 const markers = ref([]);
 
+// maxCnt / minCnt를 computed로 미리 구해두기
+const maxCnt = computed(() => Math.max(...markers.value.map(m => m.scamCnt)))
+const minCnt = computed(() => Math.min(...markers.value.map(m => m.scamCnt)))
+
 watch(zoom, (newZoom, oldZoom) => {
   const prevGroup = oldZoom >= 7 ? 'city' : 'country';
   const currGroup = newZoom >= 7 ? 'city' : 'country';
@@ -98,12 +102,26 @@ watch(zoom, (newZoom, oldZoom) => {
   }
 })
 
+const getRadius = (scamCnt) => {
+  const minSize = 3
+  const maxSize = 40
 
-const getRadius = (scamCnt, zoom) => {
-  if (zoom <= 4) return Math.sqrt(scamCnt) * 3
-  if (zoom <= 6) return Math.sqrt(scamCnt) * 4
-  if (zoom <= 8) return Math.sqrt(scamCnt) * 5
-  return scamCnt * 6
+  if (!maxCnt.value || maxCnt.value === minCnt.value) return minSize
+
+  const normalized = (Math.sqrt(scamCnt) - Math.sqrt(minCnt.value)) / (Math.sqrt(maxCnt.value) - Math.sqrt(minCnt.value))
+
+  const zoomFactor = 1 + (zoom.value - 4) * 0.2
+
+  return minSize + normalized * (maxSize - minSize) * zoomFactor
+}
+
+const getColor = (scamCnt) => {
+  if (!maxCnt.value) return "hsl(120, 90%, 50%)"
+
+  const ratio = Math.sqrt(scamCnt / maxCnt.value) // √ 스케일 적용
+  const hue = (1 - ratio) * 120
+
+  return `hsl(${hue}, ${60 + ratio*40}%, ${60 - ratio*20}%)`
 }
 
 const loadMapSummary = async () => {
