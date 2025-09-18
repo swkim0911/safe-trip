@@ -100,10 +100,10 @@ watch(zoom, (newZoom, oldZoom) => {
 
 
 const getRadius = (scamCnt, zoom) => {
-  if (zoom <= 4) return Math.sqrt(scamCnt) * 15
-  if (zoom <= 6) return Math.sqrt(scamCnt) * 20
-  if (zoom <= 8) return Math.sqrt(scamCnt) * 25
-  return scamCnt * 30
+  if (zoom <= 4) return Math.sqrt(scamCnt) * 3
+  if (zoom <= 6) return Math.sqrt(scamCnt) * 4
+  if (zoom <= 8) return Math.sqrt(scamCnt) * 5
+  return scamCnt * 6
 }
 
 const loadMapSummary = async () => {
@@ -113,8 +113,7 @@ const loadMapSummary = async () => {
         zoom: zoom.value
       }
     });
-
-    markers.value = response.data.result.locationSummaryItems;
+    markers.value = response.data.result.items;
 
   } catch (e) {
     console.error('Failed to load map summary information:', e);
@@ -153,7 +152,7 @@ const restoreSession = async () => {
 }
 
 onMounted(() => {
-  // loadMapSummary(),
+  loadMapSummary(),
   restoreSession()
 })
 </script>
