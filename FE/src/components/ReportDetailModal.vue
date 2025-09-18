@@ -12,6 +12,20 @@
     <h5 class="fw-bold mb-0">{{ report.title }}</h5>
 
     <div class="text-end small ms-3">
+      <div class="d-flex justify-content-end mb-1">
+        <span
+          v-if="report.source === 'safetrip'"
+          class="badge rounded-pill bg-success text-white fs-6 px-2 py-1"
+        >
+          ✅ User Report
+        </span>
+        <span
+          v-else
+          class="badge rounded-pill bg-light text-dark border fs-6 px-2 py-1"
+        >
+          🤖 Collected by AI Bot
+        </span>
+      </div>
       <div>
         <span v-if="report.source === 'safetrip'" class="fw-bold">
           by {{ report.nickname }}

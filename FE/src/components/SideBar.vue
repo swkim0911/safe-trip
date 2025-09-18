@@ -103,7 +103,7 @@
               @click="openReportDetailModal(report.source, report.reportId)"
             >
               <span class="badge bg-primary position-absolute top-0 end-0 translate-middle-y me-2">
-                {{ report.source === 'safetrip' ? 'safetrip' : 'AI Bot' }}
+                {{ report.source === 'safetrip' ? 'safetrip' : '🤖 AI Bot' }}
               </span>
 
               <div class="fw-bold mb-1 mt-3">
