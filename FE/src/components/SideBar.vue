@@ -46,7 +46,7 @@
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="state in sidebarStates"
               :key="state.id"
-              @click="loadSidebarCitySummary(selectedCountry.id, state.id, state.name)"
+              @click="loadSidebarCitySummary(state.id, state.name)"
             >
               <div class="ms-2 me-auto">
                 <div class="fw-bold">{{ state.name }}</div>
@@ -74,7 +74,11 @@
               :key="city.id"
               @click="loadSidebarReportSummary(selectedState.id, city.id, city.name)"
             >
-              <div class="ms-2 me-auto">{{ city.name }}</div>
+              <div class="ms-2 me-auto">
+                <div class="fw-bold">
+                  {{ city.name }}
+                </div>
+              </div>
               <span class="badge text-bg-primary rounded-pill">{{ city.scamCnt }}</span>
             </li>
           </ul>
@@ -240,6 +244,7 @@ const loadSidebarStateSummary = async (countryId, countryName, mode = 'click') =
   selectedCountry.id = countryId;
   selectedCountry.name = countryName;
 
+  // 새로운 Country 클릭이면 초기화
   if (mode === 'click') {
     statePage.value = 0;
     isLastStatePage.value = false;
@@ -271,19 +276,24 @@ const loadSidebarStateSummary = async (countryId, countryName, mode = 'click') =
 };
 
 
-// todo: stateId, stateName
-const loadSidebarCitySummary = async (countryId, countryName, mode = 'click') => {
+const loadSidebarCitySummary = async (stateId, stateName, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
 
   isLoadingCity.value = true;
 
-  selectedCountry.id = countryId;
-  selectedCountry.name = countryName;
+  selectedState.id = stateId;
+  selectedState.name = stateName;
+
+  if (mode === 'click') {
+    cityPage.value = 0;
+    isLastCityPage.value = false;
+    sidebarCities.value = []; 
+  }
 
   try {
     const response = await apiClient.get('/reports/sidebar-summary/cities', {
       params: {
-        countryId: countryId,
+        stateId: stateId,
         page: cityPage.value,
         size: size,
         sort: "scamCnt,DESC"
@@ -299,7 +309,7 @@ const loadSidebarCitySummary = async (countryId, countryName, mode = 'click') =>
 
     viewType.value = 'city';
   } catch (e) {
-    console.error('API 요청 실패:', e);
+    console.error('Failed to load sidebar info because of server error. Please try again later.', e);
   } finally {
     isLoadingCity.value = false;
   }
@@ -360,7 +370,7 @@ const onSidebarScroll = () => {
   } else if (viewType.value === 'state') {
     loadSidebarStateSummary(selectedCountry.id, selectedCountry.name, 'scroll');
   } else if (viewType.value === 'city') {
-    loadSidebarCitySummary(selectedCountry.id, selectedCountry.name, 'scroll');
+    loadSidebarCitySummary(selectedState.id, selectedState.name, 'scroll');
   } else if (viewType.value === 'report') {
     loadSidebarReportSummary(selectedCountry.id, selectedCity.id, selectedCity.name, 'scroll');
   }
