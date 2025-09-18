@@ -181,7 +181,6 @@ const selectedReport = reactive({
   title: '',
   content: '',
   postedAt: '',
-  collectedAt: ''
 });
 
 const size = 12;
@@ -230,8 +229,7 @@ function mapUserReportDetail(result) {
     cityName: result.cityName,
     title: result.title,
     content: result.description,
-    postedAt: formatDate(esult.createdAt),
-    collectedAt: ''
+    postedAt: formatDate(result.createdAt),
   })
 }
 
@@ -249,7 +247,6 @@ function mapExternalReportDetail(result) {
     title: result.title,
     summary: result.summary,
     postedAt: formatDate(result.postedAt),
-    collectedAt: formatDate(result.collectedAt)
   })
 }
 
