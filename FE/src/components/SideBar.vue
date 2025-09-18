@@ -406,6 +406,8 @@ onMounted(() => {
 
 <style scoped lang="scss">
 
+$sidebar-width: 560px;
+
 /* 사이드바 컨테이너 */
 .sidebar-container {
   position: fixed;
@@ -419,8 +421,8 @@ onMounted(() => {
   position: fixed;
   display: flex;
   top: 0;
-  left: -560px; /* 기본적으로 숨김 */
-  width: 560px;
+  left: -$sidebar-width; /* 기본적으로 숨김 */
+  width: $sidebar-width;
   height: 100vh;
   background-color: #e0e0e0bd;
   transition: left 0.3s ease;
@@ -448,7 +450,7 @@ onMounted(() => {
 
 /* 사이드바가 열렸을 때 토글 버튼 위치 조정 */
 .sidebar.open + .toggle-btn {
-  left: 560px;
+  left: $sidebar-width;
 }
 
 .list-group-item {
