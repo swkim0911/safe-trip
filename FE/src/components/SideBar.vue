@@ -46,7 +46,7 @@
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="state in sidebarStates"
               :key="state.id"
-              @click="loadSidebarCitySummary(selectedState.id, selectedState.name)"
+              @click="loadSidebarCitySummary(selectedCountry.id, state.id, state.name)"
             >
               <div class="ms-2 me-auto">
                 <div class="fw-bold">{{ state.name }}</div>
@@ -205,6 +205,13 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
   if (mode === 'scroll' && (isLoadingCountry.value || isLastCountryPage.value)) return;
 
   isLoadingCountry.value = true;
+
+  if (mode === 'click') {
+    countryPage.value = 0;
+    isLastCountryPage.value = false;
+    sidebarCountries.value = []; 
+  }
+
   try {
     const response = await apiClient.get('/reports/sidebar-summary/counties', {
       params: {
@@ -230,34 +237,39 @@ const loadSidebarStateSummary = async (countryId, countryName, mode = 'click') =
   if (mode === 'scroll' && (isLoadingState.value || isLastStatePage.value)) return;
 
   isLoadingState.value = true;
-
   selectedCountry.id = countryId;
   selectedCountry.name = countryName;
+
+  if (mode === 'click') {
+    statePage.value = 0;
+    isLastStatePage.value = false;
+    sidebarStates.value = []; 
+  }
 
   try {
     const response = await apiClient.get('/reports/sidebar-summary/states', {
       params: {
-        countryId: countryId,
+        countryId,
         page: statePage.value,
-        size: size,
+        size,
         sort: "scamCnt,DESC"
       }
     });
-    console.log(response);
+
     const content = response.data.result.content;
     const last = response.data.result.last;
 
     sidebarStates.value.push(...content);
     isLastStatePage.value = last;
     statePage.value += 1;
-
     viewType.value = 'state';
   } catch (e) {
-    console.error('API 요청 실패:', e);
+    console.error('Failed to load sidebar info because of server error. Please try again later.', e);
   } finally {
     isLoadingState.value = false;
   }
-}
+};
+
 
 // todo: stateId, stateName
 const loadSidebarCitySummary = async (countryId, countryName, mode = 'click') => {
@@ -345,6 +357,8 @@ const onSidebarScroll = () => {
   
   if (viewType.value === 'country') {
     loadSidebarCountrySummary('scroll');
+  } else if (viewType.value === 'state') {
+    loadSidebarStateSummary(selectedCountry.id, selectedCountry.name, 'scroll');
   } else if (viewType.value === 'city') {
     loadSidebarCitySummary(selectedCountry.id, selectedCountry.name, 'scroll');
   } else if (viewType.value === 'report') {
