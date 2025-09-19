@@ -15,6 +15,7 @@ public interface ExternalReportRepository extends JpaRepository<ExternalReport, 
     select new com.swkim.safetrip.dto.response.ExternalReportDetailResponse(
         er.source,
         er.sourceUrl,
+        er.author,
         sa.name,
         sc.name,
         co.name,
@@ -22,8 +23,7 @@ public interface ExternalReportRepository extends JpaRepository<ExternalReport, 
         ci.name,
         er.title,
         er.content,
-        er.postedAt,
-        er.collectedAt
+        er.postedAt
     )
     from ExternalReport er
     join er.scamAction sa

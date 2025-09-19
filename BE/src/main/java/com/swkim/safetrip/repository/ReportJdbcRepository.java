@@ -21,7 +21,7 @@ public class ReportJdbcRepository {
             UNION ALL
             SELECT country_id FROM external_report
         ) r
-        JOIN country c ON r.country_id = c.id
+        JOIN countries c ON r.country_id = c.id
         GROUP BY c.id, c.name, c.lat, c.lng
     """;
 
@@ -32,7 +32,7 @@ public class ReportJdbcRepository {
             UNION ALL
             SELECT state_id FROM external_report
         ) r
-        JOIN state s ON r.state_id = s.id
+        JOIN states s ON r.state_id = s.id
         Where s.lat IS NOT NULL AND s.lng IS NOT NULL
         GROUP BY s.id, s.name, s.lat, s.lng
     """;

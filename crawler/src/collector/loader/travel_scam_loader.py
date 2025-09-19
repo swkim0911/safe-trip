@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime, UTC
+from datetime import datetime, UTC, timedelta, timezone
 
 import mysql.connector
 from dotenv import load_dotenv
@@ -11,7 +11,8 @@ class TravelScamLoader:
         self.reddit_repository = reddit_repository
         self.logger = logging.getLogger(__name__)
 
-    def mongo_to_mysql(self):
+
+    def mongo_to_mysql(self, run_type=None):
         load_dotenv()
 
         host = os.getenv("MYSQL_HOST")
@@ -30,8 +31,18 @@ class TravelScamLoader:
         )
 
         cursor = mysql_conn.cursor()
+        query = {}
+        if run_type == "daily":
+            today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) # 오늘의 자정 시간 ex) 2025-09-11 00:00:00+00:00
+            tomorrow = today + timedelta(days=1) # 내일 자정 시간 ex) 2025-09-12 00:00:00+00:00
+            query = {
+                "created_at": {
+                    "$gte": today,
+                    "$lt": tomorrow
+                }
+            } # created_at >= {오늘 자정} 그리고 created_at < {내일 자정}
 
-        parsed_docs = self.reddit_repository.find_parsed_documents({})
+        parsed_docs = self.reddit_repository.find_parsed_documents(query)
 
         for doc in parsed_docs:
             country_id = doc.get("country_id")

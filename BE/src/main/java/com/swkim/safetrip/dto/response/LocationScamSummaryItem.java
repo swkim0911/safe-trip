@@ -6,7 +6,7 @@ import lombok.Builder;
 public record LocationScamSummaryItem (
 
     Long id,
-    String name, // country or state name
+    String name, // country or state or city name
     Double lat,
     Double lng,
     Long scamCnt

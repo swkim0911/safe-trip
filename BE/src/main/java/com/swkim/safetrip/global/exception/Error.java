@@ -25,7 +25,7 @@ public enum Error {
     CITY_STATE_MISMATCH_ERROR(HttpStatus.BAD_REQUEST.value(), "City and State is mismatch"),
     INVALID_SORT_KEY_ERROR(HttpStatus.BAD_REQUEST.value(), "Sort Key is invalid"),
 
-    REFRESH_TOKEN_MISSING_ERROR(HttpStatus.BAD_REQUEST.value(), "Refresh token is empty"),
+    REFRESH_TOKEN_MISSING_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is empty"),
     REFRESH_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is expired"),
     INVALID_REFRESH_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is invalid"),
     REFRESH_TOKEN_REUSE_DETECTED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token reuse detected"),

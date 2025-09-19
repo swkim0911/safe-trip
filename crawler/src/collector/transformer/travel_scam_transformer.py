@@ -171,9 +171,6 @@ class TravelScamTransformer:
         매일 실행되는 job
         MongoDB에서 Reddit raw 데이터를 가져와서 travel scam으로 분류 후
         keyword를 추출하고 정제된 결과를 MongoDB에 저장한다.
-
-        Args:
-            time_filter (str): "all" 또는 "7d" (최근 7일)
     '''
     def daily_transform(self):
 
@@ -212,7 +209,7 @@ class TravelScamTransformer:
         query = {
             "posted_at": {"$gte": one_week_ago},
             "classification.is_travel_scam": True
-        } # 최근 7일에 classification 서브 도큐먼트의 is_travel_scam = true인 도큐먼트
+        } # 최근 7일에 classification 서브 도큐먼트의 is_travel_scam = true인 도큐먼트 + updated_at != created_at (이 조건은 이전에 삽입된 데이터는 제외)
         find_travel_scam_docs = self.reddit_repository.find_raw_documents(query)
         parsing_results = []
 
@@ -249,7 +246,9 @@ class TravelScamTransformer:
                 # BATCH_SIZE 단위로 저장
             if len(parsing_results) >= self.BATCH_SIZE:
                 self.reddit_repository.flush_parsing_results(parsing_results)
+                parsing_results.clear()
 
         # 남은 parsing_results 처리
         if parsing_results:
             self.reddit_repository.flush_parsing_results(parsing_results)
+            parsing_results.clear()

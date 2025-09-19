@@ -1,6 +1,7 @@
 package com.swkim.safetrip.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.swkim.safetrip.entity.enums.Source;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class UserReportDetailResponse {
+
+    private Source source;
 
     private String nickname;
 
@@ -37,6 +40,7 @@ public class UserReportDetailResponse {
 
     @Builder
     public UserReportDetailResponse(
+            Source source,
             String nickname,
             String scamAction,
             String scamContext,
@@ -47,6 +51,7 @@ public class UserReportDetailResponse {
             String description,
             LocalDateTime createdAt
     ) {
+        this.source = source;
         this.nickname = nickname;
         this.scamAction = scamAction;
         this.scamContext = scamContext;

@@ -127,16 +127,3 @@ class RedditRepository:
                 exc_info=True
             )
             raise
-
-        items.clear()
-
-    def flush_parsed_ops(self, operations):
-        # operations를 bulk_write 실행 후 비움
-        if operations:
-            try:
-                result = self.parsed_collection.bulk_write(operations, ordered=False)
-                self.logger.info(f"Inserted {len(operations)} docs into parsed_collection")
-            except Exception as e:
-                self.logger.error(f"[ERROR] Bulk write failed: {e}")
-            finally:
-                operations.clear()

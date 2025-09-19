@@ -7,7 +7,7 @@ import org.springframework.http.HttpMethod;
 @AllArgsConstructor
 public enum ProtectedEndpoint {
     USER_REPORTS("/user-reports", HttpMethod.POST),
-    ME("/me", HttpMethod.GET);
+    ME("/users/me", HttpMethod.GET);
 
     @Getter
     private final String path;

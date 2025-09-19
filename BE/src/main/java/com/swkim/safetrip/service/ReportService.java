@@ -45,8 +45,13 @@ public class ReportService {
         return reportNativeRepository.findStateSummarySliceByCountryId(countryId, pageable);
     }
 
-    @Transactional
-    public Slice<ReportSummaryItem> getReportSummaryPages(Long countryId, Long stateId, Pageable pageable) {
-        return reportNativeRepository.findReportSummarySliceByCountryIdAndStateId(countryId, stateId, pageable);
+    @Transactional(readOnly = true)
+    public Slice<LocationScamSummaryItem> getCitySummaryPages(Long stateId, Pageable pageable) {
+        return reportNativeRepository.findCitySummarySliceByStateId(stateId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Slice<ReportSummaryItem> getReportSummaryPages(Long city, Pageable pageable) {
+        return reportNativeRepository.findReportSummarySliceByCityId(city, pageable);
     }
 }

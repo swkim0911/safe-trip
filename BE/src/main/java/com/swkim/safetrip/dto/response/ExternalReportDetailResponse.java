@@ -11,6 +11,8 @@ public record ExternalReportDetailResponse (
 
         String sourceUrl,
 
+        String author,
+
         String scamAction,
 
         String scamContext,
@@ -25,9 +27,5 @@ public record ExternalReportDetailResponse (
 
         String summary,
 
-        @JsonFormat(pattern = "yyyy.MM.dd HH:mm")
-        LocalDateTime postedAt,
-
-        @JsonFormat(pattern = "yyyy.MM.dd HH:mm")
-        LocalDateTime collectedAt
+        LocalDateTime postedAt
 ){}

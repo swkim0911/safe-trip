@@ -3,6 +3,8 @@ package com.swkim.safetrip.dto.response;
 import com.swkim.safetrip.entity.enums.Source;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
+
 @Builder
 public record ReportSummaryItem(
         Long reportId,
@@ -11,6 +13,10 @@ public record ReportSummaryItem(
 
         String title,
 
-        String scamName
+        String scamAction,
+
+        String scamContext,
+
+        LocalDateTime posted_at
 
 ){}
