@@ -151,23 +151,31 @@ const logout = async () => {
     console.error('Logout failed', error);
   }
 }
+let refreshPromise = null;
 
 const restoreSession = async () => {
   if (!authStore.accessToken) {
-    try {
-      const response = await apiClient.post('/auth/refresh', {}, { withCredentials: true });
-      // 서버가 204 No Content를 반환한 경우 비로그인 상태 유지
-      if (response.status === 204) return;
-      authStore.setAccessToken(response.data.result.accessToken);
-      // accessToken 얻었으니 사용자 정보 요청
-      const { data: meResponse } = await apiClient.get('/users/me');
-
-      authStore.setUser(meResponse.result);
-    } catch {
-      // refreshToken 없거나 만료된 상태 -> 아무것도 하지 않음.
+    if (!refreshPromise) {
+      refreshPromise = apiClient.post('/auth/refresh', {}, { withCredentials: true })
+        .then(response => {
+          if (response.status !== 204) {
+            authStore.setAccessToken(response.data.result.accessToken);
+            return apiClient.get('/users/me');
+          }
+        })
+        .then(meResponse => {
+          if (meResponse) authStore.setUser(meResponse.data.result);
+        })
+        .catch(err => {
+          console.error("restoreSession failed:", err);
+        })
+        .finally(() => {
+          refreshPromise = null; // 끝나면 초기화
+        });
     }
+    return refreshPromise; // 다른 호출은 같은 Promise 반환
   }
-}
+};
 
 onMounted(() => {
   loadMapSummary(),
