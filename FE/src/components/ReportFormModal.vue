@@ -365,9 +365,13 @@ const resetForm = () => {
   }
 
   Object.keys(errors).forEach((key) => (errors[key] = ''));
+};
+
+const closeForm = () => {
+  resetForm();
   submitMessage.value = '';
   submitStatus.value = '';
-};
+}
 
 const setupModalEventListener = () => {
   const modal = document.getElementById('reportFormModal');
@@ -379,7 +383,7 @@ const setupModalEventListener = () => {
       }
     });
 
-    modal.addEventListener('hidden.bs.modal', resetForm);
+    modal.addEventListener('hidden.bs.modal', closeForm);
   }
 }
 
@@ -401,6 +405,7 @@ const submitForm = async () => {
   try {
     await submitReportForm();
     submitMessage.value = 'Your report has been successfully submitted.';
+    console.log(submitMessage.value);
     submitStatus.value = 'success';
     resetForm();
   } catch (error) {
