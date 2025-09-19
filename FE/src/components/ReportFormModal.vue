@@ -44,20 +44,16 @@
                 </label>
                 <select
                   id="report-action"
-                  v-model="form.scamAction"
-                  :class="['form-select', { 'is-invalid': errors.scamAction }]"
+                  v-model="form.scamActionId"
+                  :class="['form-select', { 'is-invalid': errors.scamActionId }]"
                 >
-                  <option disabled value="">Select an action</option>
-                  <option>Pickpocketing</option>
-                  <option>Theft</option>
-                  <option>Overcharging</option>
-                  <option>Aggressive Solicitation</option>
-                  <option>Fraud</option>
-                  <option>System Tampering</option>
-                  <option>Other Action</option>
+                  <option disabled value="">Select a Action</option>
+                  <option v-for="a in scamActions" :key="a.id" :value="a.id">
+                    {{ a.name }}
+                  </option>
                 </select>
-                <div v-if="errors.scamAction" class="text-danger small mt-1">
-                  {{ errors.scamAction }}
+                <div v-if="errors.scamActionId" class="text-danger small mt-1">
+                  {{ errors.scamActionId }}
                 </div>
               </div>
 
@@ -68,20 +64,16 @@
                 </label>
                 <select
                   id="report-context"
-                  v-model="form.scamContext"
-                  :class="['form-select', { 'is-invalid': errors.scamContext }]"
+                  v-model="form.scamContextId"
+                  :class="['form-select', { 'is-invalid': errors.scamContextId }]"
                 >
                   <option disabled value="">Select a context</option>
-                  <option>Street/Public Area</option>
-                  <option>Restaurant/Bar / Cafe</option>
-                  <option>Transportation</option>
-                  <option>Lodging</option>
-                  <option>Tourist Attraction / Ticketed Venue</option>
-                  <option>Financial Service</option>
-                  <option>Other Context</option>
+                  <option v-for="c in scamContexts" :key="c.id" :value="c.id">
+                    {{ c.name }}
+                  </option>
                 </select>
-                <div v-if="errors.scamContext" class="text-danger small mt-1">
-                  {{ errors.scamContext }}
+                <div v-if="errors.scamContextId" class="text-danger small mt-1">
+                  {{ errors.scamContextId }}
                 </div>
               </div>
             </div>
@@ -94,9 +86,9 @@
               <div class="row g-2">
                 <div class="col-md-4">
                   <select
-                    v-model="form.country"
+                    v-model="form.countryId"
                     class="form-select"
-                    :class="{ 'is-invalid': errors.country }"
+                    :class="{ 'is-invalid': errors.countryId }"
                     @change="loadStates"
                   >
                     <option disabled value="">Select a country</option>
@@ -104,17 +96,17 @@
                       {{ c.name }}
                     </option>
                   </select>
-                  <div v-if="errors.country" class="text-danger small mt-1">
-                    {{ errors.country }}
+                  <div v-if="errors.countryId" class="text-danger small mt-1">
+                    {{ errors.countryId }}
                   </div>
                 </div>
 
                 <div class="col-md-4">
                   <select
-                    v-model="form.state"
+                    v-model="form.stateId"
                     class="form-select"
-                    :disabled="!form.country"
-                    :class="{ 'is-invalid': errors.state }"
+                    :disabled="!form.countryId"
+                    :class="{ 'is-invalid': errors.stateId }"
                     @change="loadCities"
                   >
                     <option disabled value="">Select a state</option>
@@ -122,17 +114,17 @@
                       {{ s.name }}
                     </option>
                   </select>
-                  <div v-if="errors.state" class="text-danger small mt-1">
-                    {{ errors.state }}
+                  <div v-if="errors.stateId" class="text-danger small mt-1">
+                    {{ errors.stateId }}
                   </div>
                 </div>
 
                 <div class="col-md-4">
                   <select
-                    v-model="form.city"
+                    v-model="form.cityId"
                     class="form-select"
-                    :disabled="!form.state"
-                    :class="{ 'is-invalid': errors.city }"
+                    :disabled="!form.stateId"
+                    :class="{ 'is-invalid': errors.cityId }"
                   >
                     <option disabled value="">Select a city</option>
                     <option v-for="c in cities" :key="c.id" :value="c.id">
@@ -140,7 +132,7 @@
                     </option>
                   </select>
                   <div v-if="errors.city" class="text-danger small mt-1">
-                    {{ errors.city }}
+                    {{ errors.cityId }}
                   </div>
                 </div>
               </div>
@@ -218,30 +210,50 @@ const { hide } = useBootstrapModal(modalRef);
 
 const fileInput = ref(null);
 
+const scamActions = ref([
+  { id: 1, name: "Pickpocketing" },
+  { id: 2, name: "Theft" },
+  { id: 3, name: "Overcharging" },
+  { id: 4, name: "Aggressive Solicitation" },
+  { id: 5, name: "Fraud" },
+  { id: 6, name: "System Tampering" },
+  { id: 7, name: "Other Action" },
+]);
+
+const scamContexts = ref([
+  { id: 1, name: "Street / Public Area" },
+  { id: 2, name: "Restaurant/Bar / Cafe" },
+  { id: 3, name: "Transportation" },
+  { id: 4, name: "Lodging" },
+  { id: 5, name: "Tourist Attraction / Ticketed Venue" },
+  { id: 6, name: "Financial Service" },
+  { id: 7, name: "Other Context" },
+]);
+
 const countries = ref([])
 const states = ref([])
 const cities = ref([])
 
 const form = reactive({
   title: '',
-  scamAction: '',
-  scamContext: '',
+  scamActionId: '',
+  scamContextId: '',
   description: '',
   imageFile: null,
-  country: '',   
-  state: '',     
-  city: '',      
+  countryId: '',   
+  stateId: '',     
+  cityId: '',      
 });
 
 const errors = reactive({
   title: '',
-  scamAction: '',
-  scamContext: '',
+  scamActionId: '',
+  scamContextId: '',
   description: '',
   imageFile: '',
-  country: '',
-  state: '',
-  city: '',
+  countryId: '',
+  stateId: '',
+  cityId: '',
 });
 
 const submitMessage = ref('');
@@ -255,22 +267,22 @@ const loadCountries = async () => {
 
 
 const loadStates = async () => {
-  if (!form.country) return;
-  form.state = '';
-  form.city = '';
+  if (!form.countryId) return;
+  form.stateId = '';
+  form.cityId = '';
   states.value = [];
   cities.value = [];
 
-  const response = await apiClient.get(`/countries/${form.country}/states`);
+  const response = await apiClient.get(`/countries/${form.countryId}/states`);
   states.value = response.data.result.states;
 };
 
 const loadCities = async () => {
-  if (!form.country || !form.state) return
-  form.city = '';
+  if (!form.countryId || !form.stateId) return
+  form.cityId = '';
   cities.value = [];
 
-  const response = await apiClient.get(`/countries/states/${form.state}/cities`);
+  const response = await apiClient.get(`/countries/states/${form.stateId}/cities`);
   cities.value = response.data.result.cities;
 }
 
@@ -304,28 +316,28 @@ const checkForm = () => {
     isValid = false;
   } else errors.title = '';
 
-  if (!form.scamAction) {
-    errors.scamAction = 'Please select a scam action.';
+  if (!form.scamActionId) {
+    errors.scamActionId = 'Please select a scam action.';
     isValid = false;
-  } else errors.scamAction = '';
+  } else errors.scamActionId = '';
 
-  if (!form.scamContext) {
-    errors.scamContext = 'Please select a scam context.';
+  if (!form.scamContextId) {
+    errors.scamContextId = 'Please select a scam context.';
     isValid = false;
-  } else errors.scamContext = '';
+  } else errors.scamContextId = '';
 
-  if (!form.country) {
-    errors.country = 'Please select a country.';
+  if (!form.countryId) {
+    errors.countryId = 'Please select a country.';
     isValid = false;
-  } else errors.country = '';
+  } else errors.countryId = '';
 
-  if (!form.state) {
-    errors.state = 'Please select a state.';
+  if (!form.stateId) {
+    errors.stateId = 'Please select a state.';
     isValid = false;
-  } else errors.state = '';
+  } else errors.stateId = '';
 
-  if (!form.city) {
-    errors.city = 'Please select a city.';
+  if (!form.cityId) {
+    errors.cityId = 'Please select a city.';
     isValid = false;
   } 
 
@@ -340,11 +352,11 @@ const checkForm = () => {
 
 const resetForm = () => {
   form.title = '';
-  form.scamAction = '';
-  form.scamContext = '';
-  form.country = '';  
-  form.state = '';    
-  form.city = '';    
+  form.scamActionId = '';
+  form.scamContextId = '';
+  form.countryId = '';  
+  form.stateId = '';    
+  form.cityId = '';    
   form.description = '';
   form.imageFile = null;
 
