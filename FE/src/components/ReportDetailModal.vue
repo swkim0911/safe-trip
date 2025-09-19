@@ -14,7 +14,7 @@
     <div class="text-end small ms-3">
       <div class="d-flex justify-content-end mb-1">
         <span
-          v-if="report.source === 'safetrip'"
+          v-if="report.source === 'SAFETRIP'"
           class="badge rounded-pill bg-success text-white fs-6 px-2 py-1"
         >
           ✅ User Report
@@ -27,7 +27,7 @@
         </span>
       </div>
       <div>
-        <span v-if="report.source === 'safetrip'" class="fw-bold">
+        <span v-if="report.source === 'SAFETRIP'" class="fw-bold">
           by {{ report.nickname }}
         </span>
         <span v-else>
@@ -50,8 +50,14 @@
   </div>
 
   <div class="mb-3">
-    <span class="fw-bold">Summary</span>
-    <p class="text-body mt-1">{{ report.summary }}</p>
+    <span v-if="report.source === 'SAFETRIP'">
+      <span class="fw-bold">Description</span>
+    </span>
+    <span v-else>
+     <span class="fw-bold">Summary</span>
+    </span>
+    <p class="text-body mt-1">{{ report.content }}</p>
+  
   </div>
 
   <div class="mb-3">
@@ -98,7 +104,7 @@ const setupModalEventListener = () => {
 }
 
 onMounted(() => {
-  setupModalEventListener();
+  setupModalEventListener()
 })
 
 </script>

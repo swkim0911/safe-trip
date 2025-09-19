@@ -103,7 +103,7 @@
               @click="openReportDetailModal(report.source, report.reportId)"
             >
               <span class="badge bg-primary position-absolute top-0 end-0 translate-middle-y me-2">
-                {{ report.source === 'safetrip' ? 'safetrip' : '🤖 AI Bot' }}
+                {{ report.source === 'SAFETRIP' ? 'SAFETRIP' : '🤖 AI Bot' }}
               </span>
 
               <div class="fw-bold mb-1 mt-3">
@@ -208,7 +208,7 @@ const formatDate = (date) => {
 }
 
 const openReportDetailModal = (source, reportId) => {
-  if (source === "safetrip") {
+  if (source === "SAFETRIP") {
     loadUserReportDetailInfo(reportId);
   } else {
     loadExternalReportDetailInfo(reportId);
@@ -245,7 +245,7 @@ function mapExternalReportDetail(result) {
     stateName: result.stateName,
     cityName: result.cityName,
     title: result.title,
-    summary: result.summary,
+    content: result.summary,
     postedAt: formatDate(result.postedAt),
   })
 }
@@ -268,7 +268,6 @@ const loadExternalReportDetailInfo = async (reportId) => {
 
     const result = response.data.result;
     mapExternalReportDetail(result);
-
 
   } catch (e) {
     console.error('API 요청 실패:', e);
@@ -294,7 +293,8 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
       params: {
         page: countryPage.value,
         size: size,
-        sort: "scamCnt,DESC"
+        sort: "countryName,ASC"
+        // sort: "scamCnt,DESC"
       }
     });
     const content = response.data.result.content;

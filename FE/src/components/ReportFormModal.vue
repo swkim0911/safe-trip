@@ -405,7 +405,6 @@ const submitForm = async () => {
   try {
     await submitReportForm();
     submitMessage.value = 'Your report has been successfully submitted.';
-    console.log(submitMessage.value);
     submitStatus.value = 'success';
     resetForm();
   } catch (error) {
