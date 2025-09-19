@@ -228,9 +228,9 @@ const form = reactive({
   scamContext: '',
   description: '',
   imageFile: null,
-  country: '',   // "" 로 둠
-  state: '',     // "" 로 둠
-  city: '',      // "" 로 둠
+  country: '',   
+  state: '',     
+  city: '',      
 });
 
 const errors = reactive({
@@ -407,7 +407,7 @@ const submitReportForm = async () => {
     formData.append('images', form.imageFile);
   }
 
-  return apiClient.post('/reports', formData, {
+  return apiClient.post('/user-reports', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
