@@ -37,11 +37,22 @@ public class ReportJdbcRepository {
         GROUP BY s.id, s.name, s.lat, s.lng
     """;
 
+    private static final String findCitySummariesSQL = """
+        SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
+        FROM (
+            SELECT city_id FROM user_report
+            UNION ALL
+            SELECT city_id FROM external_report
+        ) r
+        JOIN cities c ON r.city_id = c.id
+        Where c.lat IS NOT NULL AND c.lng IS NOT NULL
+        GROUP BY c.id, c.name, c.lat, c.lng
+    """;
+
     public List<LocationScamSummaryItem> findCountrySummaries() {
         return jdbc.query(findCountrySummariesSQL, Map.of(), (rs, i) -> new LocationScamSummaryItem(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-
+                rs.getLong("id"),
+                rs.getString("name"),
                 rs.getDouble("lat"),
                 rs.getDouble("lng"),
                 rs.getLong("scam_cnt")
@@ -50,6 +61,16 @@ public class ReportJdbcRepository {
 
     public List<LocationScamSummaryItem> findStateSummaries() {
         return jdbc.query(findStateSummariesSQL, Map.of(), (rs, i) -> new LocationScamSummaryItem(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getDouble("lat"),
+                rs.getDouble("lng"),
+                rs.getLong("scam_cnt")
+        ));
+    }
+
+    public List<LocationScamSummaryItem> findCitySummaries() {
+        return jdbc.query(findCitySummariesSQL, Map.of(), (rs, i) -> new LocationScamSummaryItem(
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getDouble("lat"),

@@ -13,8 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.swkim.safetrip.dto.response.LocationScamSummaryResponse.LocationType.COUNTRY;
-import static com.swkim.safetrip.dto.response.LocationScamSummaryResponse.LocationType.STATE;
+import static com.swkim.safetrip.dto.response.LocationScamSummaryResponse.LocationType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +32,12 @@ public class ReportService {
     public LocationScamSummaryResponse getStateSummaries(){
         List<LocationScamSummaryItem> stateSummariesItems = reportJdbcRepository.findStateSummaries();
         return new LocationScamSummaryResponse(STATE, stateSummariesItems);
+    }
+
+    @Transactional(readOnly = true)
+    public LocationScamSummaryResponse getCitySummaries(){
+        List<LocationScamSummaryItem> stateSummariesItems = reportJdbcRepository.findCitySummaries();
+        return new LocationScamSummaryResponse(CITY, stateSummariesItems);
     }
 
     @Transactional(readOnly = true)

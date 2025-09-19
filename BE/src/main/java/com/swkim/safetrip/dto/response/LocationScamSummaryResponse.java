@@ -6,13 +6,14 @@ import java.util.List;
 
 @Builder
 public record LocationScamSummaryResponse(
-        LocationType locationType,// country or state
+        LocationType locationType,// country or state or city
         List<LocationScamSummaryItem> items
 ) {
 
     public enum LocationType {
         COUNTRY,
-        STATE
+        STATE,
+        CITY
     }
 }
 
