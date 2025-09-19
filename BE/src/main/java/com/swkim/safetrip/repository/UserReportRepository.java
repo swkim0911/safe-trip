@@ -1,5 +1,6 @@
 package com.swkim.safetrip.repository;
 
+import com.swkim.safetrip.dto.response.ExternalReportDetailResponse;
 import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.UserReport;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,7 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
 
     @Query("""
     select new com.swkim.safetrip.dto.response.UserReportDetailResponse(
+        ur.source,
         u.nickname,
         sa.name,
         sc.name,
