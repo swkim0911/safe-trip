@@ -5,10 +5,8 @@ Keep only texts with useful, experience-based information for other travelers.
 
 [Evaluation Criteria]
 
-1. Travel scam experience
-
   The text must clearly describe a real scam personally experienced by the author abroad, written in first-person perspective (e.g., "I", "we", "my experience").
-  Examples: pickpocketing/theft, aggressive sales/solicitation, taxi/transport, lodging, restaurant/bar/cafe, financial/exchange, others.
+  Examples: pickpocketing, theft, aggressive sales, Overcharging, fraud, system tampering
   Exclude: General advice or safety tips without a personal incident, Poor service complaints or vague, generic grievances, News articles, rumors, or second-hand reports, Jokes, satire, or humorous exaggerations, Advertisements or promotional content, Experiences that happened to others (not first-hand)
 
 2. Value for sharing
