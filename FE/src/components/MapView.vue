@@ -122,11 +122,17 @@ const getRadius = (scamCnt) => {
 
   if (!maxCnt.value || maxCnt.value === minCnt.value) return minSize
 
-  const normalized = (Math.sqrt(scamCnt) - Math.sqrt(minCnt.value)) / (Math.sqrt(maxCnt.value) - Math.sqrt(minCnt.value))
+  const normalized = (Math.sqrt(scamCnt) - Math.sqrt(minCnt.value)) /
+                     (Math.sqrt(maxCnt.value) - Math.sqrt(minCnt.value))
 
   const zoomFactor = 1 + (zoom.value - 4) * 0.2
+  let radius = minSize + normalized * (maxSize - minSize) * zoomFactor
 
-  return minSize + normalized * (maxSize - minSize) * zoomFactor
+  if (zoom.value >= 9 && scamCnt <= 1) {
+    radius = Math.max(radius, 10)
+  }
+
+  return radius
 }
 
 const getColor = (scamCnt) => {
