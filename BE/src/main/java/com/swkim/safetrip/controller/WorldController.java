@@ -1,5 +1,6 @@
 package com.swkim.safetrip.controller;
 
+import com.swkim.safetrip.dto.response.world.CitiesResponse;
 import com.swkim.safetrip.dto.response.world.CountriesResponse;
 import com.swkim.safetrip.dto.response.world.StatesResponse;
 import com.swkim.safetrip.global.response.ApiResult;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,5 +32,12 @@ public class WorldController {
         StatesResponse allStates = stateService.getStates(countryId);
         return ApiResult.of(HttpStatus.OK.value(), "All states retrieved successfully", allStates);
     }
+
+    @GetMapping("/countries/states/{stateId}/cities")
+    public ApiResult<CitiesResponse> getCities(@PathVariable Long stateId) {
+        CitiesResponse allCities = cityService.getCities(stateId);
+        return ApiResult.of(HttpStatus.OK.value(), "All cities retrieved successfully", allCities);
+    }
+
 
 }
