@@ -29,7 +29,6 @@
                 id="report-title"
                 v-model="form.title"
                 maxlength="100"
-                placeholder="Enter a title"
               />
               <div v-if="errors.title" class="text-danger small mt-1">
                 {{ errors.title }}
@@ -86,6 +85,66 @@
                 </div>
               </div>
             </div>
+            <!-- Location -->
+            <div class="mb-3">
+              <label class="col-form-label fw-bold">
+                <font-awesome-icon :icon="['fas', 'map-location-dot']" class="modal-icon" />
+                Where did it happened
+              </label>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <select
+                    v-model="form.country"
+                    class="form-select"
+                    :class="{ 'is-invalid': errors.country }"
+                    @change="loadStates"
+                  >
+                    <option disabled value="">Select a country</option>
+                    <option v-for="c in countries" :key="c.id" :value="c.id">
+                      {{ c.name }}
+                    </option>
+                  </select>
+                  <div v-if="errors.country" class="text-danger small mt-1">
+                    {{ errors.country }}
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <select
+                    v-model="form.state"
+                    class="form-select"
+                    :disabled="!form.country"
+                    :class="{ 'is-invalid': errors.state }"
+                    @change="loadCities"
+                  >
+                    <option disabled value="">Select a state</option>
+                    <option v-for="s in states" :key="s.id" :value="s.id">
+                      {{ s.name }}
+                    </option>
+                  </select>
+                  <div v-if="errors.state" class="text-danger small mt-1">
+                    {{ errors.state }}
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <select
+                    v-model="form.city"
+                    class="form-select"
+                    :disabled="!form.state"
+                    :class="{ 'is-invalid': errors.city }"
+                  >
+                    <option disabled value="">Select a city</option>
+                    <option v-for="c in cities" :key="c.id" :value="c.id">
+                      {{ c.name }}
+                    </option>
+                  </select>
+                  <div v-if="errors.city" class="text-danger small mt-1">
+                    {{ errors.city }}
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <!-- Image Upload -->
             <div class="mb-3">
@@ -118,7 +177,7 @@
                 :class="['form-control', { 'is-invalid': errors.description }]"
                 maxlength="500"
                 rows="4"
-                placeholder="Describe the scam in detail"
+                placeholder="Please describe the scam in detail"
               ></textarea>
               <div v-if="errors.description" class="text-danger small mt-1">
                 {{ errors.description }}
@@ -159,12 +218,19 @@ const { hide } = useBootstrapModal(modalRef);
 
 const fileInput = ref(null);
 
+const countries = ref([])
+const states = ref([])
+const cities = ref([])
+
 const form = reactive({
   title: '',
   scamAction: '',
   scamContext: '',
   description: '',
   imageFile: null,
+  country: '',   // "" 로 둠
+  state: '',     // "" 로 둠
+  city: '',      // "" 로 둠
 });
 
 const errors = reactive({
@@ -173,11 +239,41 @@ const errors = reactive({
   scamContext: '',
   description: '',
   imageFile: '',
+  country: '',
+  state: '',
+  city: '',
 });
 
 const submitMessage = ref('');
 const submitStatus = ref('');
 const isSubmitting = ref(false);
+
+const loadCountries = async () => {
+  const response = await apiClient.get('/countries');
+  countries.value = response.data.result.countries;
+}
+
+
+const loadStates = async () => {
+  if (!form.country) return;
+  form.state = '';
+  form.city = '';
+  states.value = [];
+  cities.value = [];
+
+  const response = await apiClient.get(`/countries/${form.country}/states`);
+  states.value = response.data.result.states;
+};
+
+const loadCities = async () => {
+  if (!form.country || !form.state) return
+  form.city = '';
+  cities.value = [];
+
+  const response = await apiClient.get(`/countries/states/${form.state}/cities`);
+  cities.value = response.data.result.cities;
+}
+
 
 const handleFileChange = (event) => {
   const file = event.target.files[0];
@@ -218,6 +314,21 @@ const checkForm = () => {
     isValid = false;
   } else errors.scamContext = '';
 
+  if (!form.country) {
+    errors.country = 'Please select a country.';
+    isValid = false;
+  } else errors.country = '';
+
+  if (!form.state) {
+    errors.state = 'Please select a state.';
+    isValid = false;
+  } else errors.state = '';
+
+  if (!form.city) {
+    errors.city = 'Please select a city.';
+    isValid = false;
+  } 
+
   if (!form.description.trim()) {
     errors.description = 'Please provide a description.';
     isValid = false;
@@ -231,6 +342,9 @@ const resetForm = () => {
   form.title = '';
   form.scamAction = '';
   form.scamContext = '';
+  form.country = '';  
+  form.state = '';    
+  form.city = '';    
   form.description = '';
   form.imageFile = null;
 
@@ -298,7 +412,10 @@ const submitReportForm = async () => {
   });
 };
 
-onMounted(setupModalEventListener);
+onMounted(() => {
+  setupModalEventListener(); 
+  loadCountries(); 
+});
 </script>
 
 <style scoped lang="scss">
