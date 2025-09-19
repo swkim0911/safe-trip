@@ -156,14 +156,12 @@ const restoreSession = async () => {
   if (!authStore.accessToken) {
     try {
       const response = await apiClient.post('/auth/refresh', {}, { withCredentials: true });
-
       // 서버가 204 No Content를 반환한 경우 비로그인 상태 유지
       if (response.status === 204) return;
-
-      authStore.setAccessToken(response.result.accessToken);
-
+      authStore.setAccessToken(response.data.result.accessToken);
       // accessToken 얻었으니 사용자 정보 요청
-      const { data: meResponse } = await apiClient.get('/me');
+      const { data: meResponse } = await apiClient.get('/users/me');
+
       authStore.setUser(meResponse.result);
     } catch {
       // refreshToken 없거나 만료된 상태 -> 아무것도 하지 않음.
