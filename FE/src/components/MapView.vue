@@ -95,9 +95,21 @@ const markers = ref([]);
 const maxCnt = computed(() => Math.max(...markers.value.map(m => m.scamCnt)))
 const minCnt = computed(() => Math.min(...markers.value.map(m => m.scamCnt)))
 
+function getGroupByZoom(zoom) {
+  if (zoom >= 9) {
+    return 'city';
+  }else if (zoom >= 6) {
+    return 'state';
+  } else {
+    return 'country';
+  }
+}
+
 watch(zoom, (newZoom, oldZoom) => {
-  const prevGroup = oldZoom >= 7 ? 'city' : 'country';
-  const currGroup = newZoom >= 7 ? 'city' : 'country';
+  const prevGroup = getGroupByZoom(oldZoom);
+  const currGroup = getGroupByZoom(newZoom);
+
+  console.log(zoom.value);
 
   if (prevGroup !== currGroup) {
     loadMapSummary();
@@ -105,16 +117,22 @@ watch(zoom, (newZoom, oldZoom) => {
 })
 
 const getRadius = (scamCnt) => {
-  const minSize = 3
+  const minSize = 4
   const maxSize = 40
 
   if (!maxCnt.value || maxCnt.value === minCnt.value) return minSize
 
-  const normalized = (Math.sqrt(scamCnt) - Math.sqrt(minCnt.value)) / (Math.sqrt(maxCnt.value) - Math.sqrt(minCnt.value))
+  const normalized = (Math.sqrt(scamCnt) - Math.sqrt(minCnt.value)) /
+                     (Math.sqrt(maxCnt.value) - Math.sqrt(minCnt.value))
 
   const zoomFactor = 1 + (zoom.value - 4) * 0.2
+  let radius = minSize + normalized * (maxSize - minSize) * zoomFactor
 
-  return minSize + normalized * (maxSize - minSize) * zoomFactor
+  if (zoom.value >= 9 && scamCnt <= 1) {
+    radius = Math.max(radius, 10)
+  }
+
+  return radius
 }
 
 const getColor = (scamCnt) => {
