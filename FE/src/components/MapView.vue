@@ -95,9 +95,21 @@ const markers = ref([]);
 const maxCnt = computed(() => Math.max(...markers.value.map(m => m.scamCnt)))
 const minCnt = computed(() => Math.min(...markers.value.map(m => m.scamCnt)))
 
+function getGroupByZoom(zoom) {
+  if (zoom >= 9) {
+    return 'city';
+  }else if (zoom >= 6) {
+    return 'state';
+  } else {
+    return 'country';
+  }
+}
+
 watch(zoom, (newZoom, oldZoom) => {
-  const prevGroup = oldZoom >= 7 ? 'city' : 'country';
-  const currGroup = newZoom >= 7 ? 'city' : 'country';
+  const prevGroup = getGroupByZoom(oldZoom);
+  const currGroup = getGroupByZoom(newZoom);
+
+  console.log(zoom.value);
 
   if (prevGroup !== currGroup) {
     loadMapSummary();
@@ -105,7 +117,7 @@ watch(zoom, (newZoom, oldZoom) => {
 })
 
 const getRadius = (scamCnt) => {
-  const minSize = 3
+  const minSize = 4
   const maxSize = 40
 
   if (!maxCnt.value || maxCnt.value === minCnt.value) return minSize
