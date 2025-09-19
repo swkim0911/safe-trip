@@ -293,8 +293,8 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
       params: {
         page: countryPage.value,
         size: size,
-        sort: "countryName,ASC"
-        // sort: "scamCnt,DESC"
+        // sort: "countryName,ASC"
+        sort: "scamCnt,DESC"
       }
     });
     const content = response.data.result.content;

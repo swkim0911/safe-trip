@@ -15,9 +15,9 @@
       <div class="d-flex justify-content-end mb-1">
         <span
           v-if="report.source === 'SAFETRIP'"
-          class="badge rounded-pill bg-success text-white fs-6 px-2 py-1"
+          class="badge rounded-pill border border-primary text-primary fs-6 px-2 py-1"
         >
-          ✅ User Report
+          👤 User Report
         </span>
         <span
           v-else
@@ -27,7 +27,7 @@
         </span>
       </div>
       <div>
-        <span v-if="report.source === 'SAFETRIP'" class="fw-bold">
+        <span v-if="report.source === 'SAFETRIP'" class="text-muted">
           by {{ report.nickname }}
         </span>
         <span v-else>
