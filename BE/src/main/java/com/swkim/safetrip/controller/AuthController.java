@@ -42,8 +42,17 @@ public class AuthController {
     })
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshTokens(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse httpServletResponse) {
-        if (refreshToken == null || refreshToken.isBlank()) {
+        if (refreshToken == null) {
             return ResponseEntity.noContent().build();
+        }
+
+        if (refreshToken.isBlank()) {
+            // 쿠키는 있는데 값이 비어 있음 → 클라이언트 잘못 → 400
+            return ResponseEntity.badRequest().body(ApiResult.of(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Refresh token is empty",
+                    null
+            ));
         }
 
         AuthTokensResponseDto authTokensResponseDto = authService.reIssueAccessToken(refreshToken);
