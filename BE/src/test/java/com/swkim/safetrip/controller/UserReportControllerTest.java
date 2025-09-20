@@ -177,16 +177,15 @@ class UserReportControllerTest {
 
     private UserReportSaveRequest getMockUserReportSaveRequest() {
         String title = "this is title";
-        Long scamId = 1L;
-        Long countryId = 3L;
-        Long stateId = 2L;
         String description = "this is description";
 
         return UserReportSaveRequest.builder()
                 .title(title)
-                .scamActionId(scamId)
-                .countryId(countryId)
-                .stateId(stateId)
+                .scamActionId(1L)
+                .scamContextId(1L)
+                .countryId(12L)
+                .stateId(23L)
+                .cityId(34L)
                 .description(description)
                 .build();
 
