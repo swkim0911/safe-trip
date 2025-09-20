@@ -106,19 +106,18 @@ class AuthControllerTest {
                 .cookie(new Cookie("refreshToken", ""))); // 빈 문자열 전달
         // when
         resultActions
-                .andExpect(status().isBadRequest()) // 예외 매핑에 따라 조정
+                .andExpect(status().isUnauthorized()) // 예외 매핑에 따라 조정
                 .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()));
     }
 
     @Test
-    void 액세스_토큰_재발급_요청시_쿠키의_이름이_refreshToken이_아니면_400_예외가_발생한다() throws Exception {
+    void 액세스_토큰_재발급_요청시_쿠키의_이름이_refreshToken이_아니면_204_예외가_발생한다() throws Exception {
         // give & when
         ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
                 .cookie(new Cookie("wrongName", "im.refresh.token")));
         // when
         resultActions
-                .andExpect(status().isBadRequest()) // 예외 매핑에 따라 조정
-                .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()));
+                .andExpect(status().isNoContent()); // 예외 매핑에 따라 조정
     }
 
     @Test
