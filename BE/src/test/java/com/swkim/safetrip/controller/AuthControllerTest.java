@@ -90,16 +90,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void 액세스_토큰_재발급_요청시_리프레시_토큰이_없다면_400_예외가_발생한다() throws Exception {
+    void 액세스_토큰_재발급_요청시_리프레시_토큰이_없다면_204를_반환한다() throws Exception {
         // give & when
         ResultActions resultActions = mockMvc.perform(post("/auth/refresh"));
 
         // then
         resultActions
-                .andExpect(status().isBadRequest()) // 예외에 따라 상태코드 조정
-                .andExpect(result -> assertInstanceOf(RefreshTokenMissingException.class, result.getResolvedException()))
-                .andExpect(jsonPath("$.code").value(400))
-                .andExpect(jsonPath("$.message").value("Refresh token is empty"));
+                .andExpect(status().isNoContent()); // 예외에 따라 상태코드 조정
     }
 
     @Test
