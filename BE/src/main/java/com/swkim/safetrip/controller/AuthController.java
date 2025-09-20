@@ -42,9 +42,8 @@ public class AuthController {
     })
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshTokens(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse httpServletResponse) {
-        if (refreshToken == null || refreshToken.isBlank()) {
-            return ResponseEntity.noContent().build();
-        }
+        if (refreshToken == null)  return ResponseEntity.noContent().build();
+        if (refreshToken.isBlank()) throw new RefreshTokenMissingException();
 
         AuthTokensResponseDto authTokensResponseDto = authService.reIssueAccessToken(refreshToken);
         httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.refreshTokenCookie().toString());
