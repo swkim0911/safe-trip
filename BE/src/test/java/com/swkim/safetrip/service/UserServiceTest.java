@@ -45,15 +45,15 @@ class UserServiceTest {
                 "nickname"
         );
 
-        given(userRepository.existsByEmail(signUpRequest.getEmail())).willReturn(false);
-        given(userRepository.existsByNickname(signUpRequest.getNickname())).willReturn(false);
+        given(userRepository.existsByEmail(signUpRequest.email())).willReturn(false);
+        given(userRepository.existsByNickname(signUpRequest.nickname())).willReturn(false);
 
         String encodedPassword = "encodedPassword";
         given(passwordEncoder.encode(anyString())).willReturn(encodedPassword);
 
         User savedUser = User.builder()
-                .email(signUpRequest.getEmail())
-                .nickname(signUpRequest.getNickname())
+                .email(signUpRequest.email())
+                .nickname(signUpRequest.nickname())
                 .password(encodedPassword)
                 .build();
         ReflectionTestUtils.setField(savedUser, "id", 1L);
@@ -76,7 +76,7 @@ class UserServiceTest {
                 "nickname"
         );
 
-        given(userRepository.existsByEmail(signUpRequest.getEmail())).willReturn(true);
+        given(userRepository.existsByEmail(signUpRequest.email())).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> userService.signup(signUpRequest)).isInstanceOf(DuplicateUserEmailException.class);
@@ -94,7 +94,7 @@ class UserServiceTest {
                 "duplicatedNickname"
         );
 
-        given(userRepository.existsByNickname(signUpRequest.getNickname())).willReturn(true);
+        given(userRepository.existsByNickname(signUpRequest.nickname())).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> userService.signup(signUpRequest)).isInstanceOf(DuplicateUserNicknameException.class);
@@ -115,7 +115,7 @@ class UserServiceTest {
         // then
         assertThat(response.isValidFormat()).isFalse();
         assertThat(response.isAvailable()).isFalse();
-        assertThat(response.getReason()).isEqualTo("Invalid email format");
+        assertThat(response.reason()).isEqualTo("Invalid email format");
     }
 
     @Test
@@ -130,7 +130,7 @@ class UserServiceTest {
 
         // then
         assertThat(response.isAvailable()).isFalse();
-        assertThat(response.getReason()).isEqualTo("Email already in use");
+        assertThat(response.reason()).isEqualTo("Email already in use");
     }
 
     @Test
@@ -146,7 +146,7 @@ class UserServiceTest {
         // then
         assertThat(response.isValidFormat()).isTrue();
         assertThat(response.isAvailable()).isTrue();
-        assertThat(response.getReason()).isNull();
+        assertThat(response.reason()).isNull();
     }
 
     @Test
@@ -162,7 +162,7 @@ class UserServiceTest {
         // then
         assertThat(response.isValidFormat()).isTrue();
         assertThat(response.isAvailable()).isTrue();
-        assertThat(response.getReason()).isNull();
+        assertThat(response.reason()).isNull();
     }
 
     @Test
@@ -177,6 +177,6 @@ class UserServiceTest {
 
         // then
         assertThat(response.isAvailable()).isFalse();
-        assertThat(response.getReason()).isEqualTo("Nickname already in use");
+        assertThat(response.reason()).isEqualTo("Nickname already in use");
     }
 }
