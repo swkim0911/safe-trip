@@ -74,11 +74,11 @@ class AuthServiceTest {
         AuthTokensResponseDto authTokensResponseDto = authService.login(loginRequest);
 
         // then
-        AccessTokenResponse accessTokenResponse = authTokensResponseDto.getAccessTokenResponse();
-        ResponseCookie refreshTokenCookie = authTokensResponseDto.getRefreshTokenCookie();
+        AccessTokenResponse accessTokenResponse = authTokensResponseDto.accessTokenResponse();
+        ResponseCookie refreshTokenCookie = authTokensResponseDto.refreshTokenCookie();
 
         verify(tokenService).saveRefreshToken(eq(email), eq(refreshToken), anyLong());
-        assertThat(accessTokenResponse.getAccessToken()).isEqualTo(accessToken);
+        assertThat(accessTokenResponse.accessToken()).isEqualTo(accessToken);
         assertThat(refreshTokenCookie.getValue()).isEqualTo(refreshToken);
     }
 
