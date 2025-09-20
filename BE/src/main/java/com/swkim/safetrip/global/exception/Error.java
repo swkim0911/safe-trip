@@ -1,0 +1,41 @@
+package com.swkim.safetrip.global.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+@AllArgsConstructor
+public enum Error {
+
+    METHOD_ARGUMENT_NOT_VALID_ERROR(HttpStatus.BAD_REQUEST.value(), "Invalid request"),
+
+    UN_AUTHENTICATION_ERROR(HttpStatus.UNAUTHORIZED.value(), "로그인이 필요합니다."),
+    COORDINATES_NOT_VALID_ERROR(HttpStatus.BAD_REQUEST.value(), "잘못된 위치 정보 입력입니다."),
+    REPORT_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Report not found"),
+    SCAM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Scam not found"),
+    STATE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "State not found"),
+    COUNTRY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Country not found"),
+    CITY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "City not found"),
+    USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email"),
+    S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "Unable to upload image to s3 bucket"),
+    DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
+    DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "This nickname is already in use"),
+    STATE_COUNTRY_MISMATCH_ERROR(HttpStatus.BAD_REQUEST.value(), "State and Country is mismatch"),
+    CITY_STATE_MISMATCH_ERROR(HttpStatus.BAD_REQUEST.value(), "City and State is mismatch"),
+    INVALID_SORT_KEY_ERROR(HttpStatus.BAD_REQUEST.value(), "Sort Key is invalid"),
+
+    REFRESH_TOKEN_MISSING_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is empty"),
+    REFRESH_TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is expired"),
+    INVALID_REFRESH_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token is invalid"),
+    REFRESH_TOKEN_REUSE_DETECTED_ERROR(HttpStatus.UNAUTHORIZED.value(), "Refresh token reuse detected"),
+    ACCESS_TOKEN_MISSING_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is missing"),
+    ACCESS_TOKEN_EXPIRED_ERROR(40101, "Access token is expired"),
+    EMAIL_CLAIM_MISSING_ERROR(HttpStatus.UNAUTHORIZED.value(), "Email claim is missing"),
+    INVALID_ACCESS_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid"),
+
+    TOKEN_HASHING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed token hashing");
+
+    private final int statusCode;
+    private final String message;
+}
