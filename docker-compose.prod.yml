@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./BE
+    container_name: safetrip-backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./BE/.env.prod
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - redis
+
+  crawler:
+    build: ./crawler
+    container_name: safetrip-crawler
+    env_file:
+      - ./crawler/.env.prod
+
+  redis:
+    image: redis:7.2
+    container_name: safetrip-redis
+    ports:
+      - "6379:6379"
