@@ -5,12 +5,12 @@ from pymongo import MongoClient
 
 load_dotenv()
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/")
 
 SAFETRIP_DB = os.getenv("SAFETRIP_DB", "safe_trip")
 WORLD_DB = os.getenv("WORLD_DB", "world")
 
-client = MongoClient(MONGO_URI)
+client = MongoClient(MONGO_URL)
 safetrip_db = client[SAFETRIP_DB]
 world_db = client[WORLD_DB]
 

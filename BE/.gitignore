@@ -38,9 +38,9 @@ out/
 
 ### yaml file ###
 application-dev.yml
-application-prod.yml
-application-jwt.yml
 application-test.yml
 
 ### .sql ###
 import.sql
+.env
+.env.prod
