@@ -48,7 +48,7 @@ public class ImageService {
         Image image = Image.builder()
                 .originalName(originalFilename)
                 .build();
-        String fileName = image.getStoredName();
+        String fileName = "images/" + image.getStoredName();
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(file.getContentType());
