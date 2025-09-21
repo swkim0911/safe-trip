@@ -221,4 +221,5 @@ pip-selfcheck.json
 # custom
 data/batch_inputs/
 logs/
+.env.prod
 # End of https://www.toptal.com/developers/gitignore/api/macos,python,venv
