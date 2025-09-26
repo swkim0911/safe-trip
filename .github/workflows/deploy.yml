@@ -23,6 +23,7 @@ jobs:
       # 3. 테스트 실행 (테스트 실패 → 이후 단계 전부 중단)
       - name: Run Tests
         run: ./gradlew test --no-daemon
+        working-directory: ./BE
 
        # 4. DockerHub 로그인
       - name: Login to DockerHub
