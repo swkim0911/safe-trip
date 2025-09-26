@@ -31,7 +31,7 @@ jobs:
         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/safetrip-crawler:latest
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.8.0
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
