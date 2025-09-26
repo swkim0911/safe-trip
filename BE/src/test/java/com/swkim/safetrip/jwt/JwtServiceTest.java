@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Date;
@@ -25,7 +26,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
-
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class JwtServiceTest {
 

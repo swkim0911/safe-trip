@@ -1,0 +1,53 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop   # 매 테스트마다 테이블 새로 생성
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+    show-sql: true
+
+  sql:
+    init:
+      mode: never  # schema.sql/data.sql 자동 실행 방지 (원하면 always로 변경)
+
+  # WebMvc 설정 (없는 URL 예외 잡으려면 필요)
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+cloud:
+  aws:
+    credentials:
+      access-key:
+      secret-key:
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    s3:
+      bucket-name:
+
+jwt:
+  secretKey: asdfc123fsjdcm
+
+  access:
+    expiration: 3600000
+    header: Authorization
+
+  refresh:
+    expiration: 1209600000
+    name: refreshToken
