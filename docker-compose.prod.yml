@@ -1,20 +1,19 @@
 version: "3.8"
-
 services:
   backend:
-    build: ./BE
+    image: swkim0911/safetrip-backend:latest
     container_name: safetrip-backend
     ports:
       - "8080:8080"
     env_file:
-      - ./BE/.env.prod
+      - ./BE/src/main/resources/.env.prod
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       - redis
 
   crawler:
-    build: ./crawler
+    image: swkim0911/safetrip-crawler:latest
     container_name: safetrip-crawler
     env_file:
       - ./crawler/.env.prod
