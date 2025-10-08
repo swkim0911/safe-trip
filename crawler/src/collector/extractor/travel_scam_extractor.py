@@ -1,15 +1,20 @@
 from datetime import datetime, timezone
 
-from adapters.reddit_client import get_instance
-
 
 class TravelScamExtractor:
-    def __init__(self, reddit_repository):
-        self.reddit = get_instance()
+    """Reddit에서 여행 사기 관련 데이터를 추출하는 클래스"""
+    
+    def __init__(self, reddit_client, reddit_repository, config):
+        """
+        Args:
+            reddit_client: Reddit API 클라이언트
+            reddit_repository: Reddit 데이터 저장소
+            config: ETL 설정 객체
+        """
+        self.reddit = reddit_client
         self.reddit_repository = reddit_repository 
-        self.BATCH_SIZE = 1000
+        self.config = config
         self.raw_docs = []
-        self.keywords = ["travel scam"]
 
     def __clean_text(self, text: str) -> str:
         if not text:
@@ -18,20 +23,20 @@ class TravelScamExtractor:
 
     def __add_doc(self, doc: dict):
         self.raw_docs.append(doc)
-        if len(self.raw_docs) >= self.BATCH_SIZE:
+        if len(self.raw_docs) >= self.config.BATCH_SIZE:
             self.reddit_repository.flush_raw_docs(self.raw_docs)
     
     '''
     reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
 
     @Args:
-        time_filter: hour/day/week/month/year/all 중 하나
+        time_filter: week/all 중 하나
         limit: 가져올 최대 게시글 수
     '''
     def extract(self, time_filter: str, limit: int | None):
         subreddit = self.reddit.subreddit("travel")
 
-        for post in subreddit.search(" OR ".join(self.keywords), sort="relevance", time_filter=time_filter, limit=limit):
+        for post in subreddit.search(" OR ".join(self.config.REDDIT_KEYWORDS), sort="relevance", time_filter=time_filter, limit=limit):
             if post.selftext and post.selftext not in ("[deleted]", "[removed]"):
                 post_doc = {
                     "reddit_id": f"t3_{post.id}",
@@ -46,7 +51,7 @@ class TravelScamExtractor:
 
             post.comments.replace_more(limit=0)
             for comment in post.comments:
-                if comment.parent_id.startswith("t3_"):
+                if comment.parent_id.startswith("t3_"): # depth = 1 댓글만 추출
                     if not comment.body or comment.body in ("[deleted]", "[removed]"):
                         continue
 
