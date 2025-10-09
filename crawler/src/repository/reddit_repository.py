@@ -1,19 +1,24 @@
 import logging
-import os
 from datetime import datetime, UTC
 
 from pymongo import UpdateOne, InsertOne
 
 
 class RedditRepository:
-    MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    CLASSIFICATION_PROMPT_VERSION = os.getenv("CLASSIFICATION_PROMPT_VERSION", "v0")
-    PARSING_PROMPT_VERSION = os.getenv("PARSING_PROMPT_VERSION", "v0")
-
-    def __init__(self, raw_collection, parsed_collection, batch_job_collection):
+    """Reddit 데이터에 대한 MongoDB 접근을 담당하는 Repository 클래스"""
+    
+    def __init__(self, raw_collection, parsed_collection, batch_job_collection, config):
+        """
+        Args:
+            raw_collection: MongoDB raw 데이터 컬렉션
+            parsed_collection: MongoDB parsed 데이터 컬렉션
+            batch_job_collection: MongoDB batch job 컬렉션
+            config: ETL 설정 객체
+        """
         self.raw_collection = raw_collection
         self.parsed_collection = parsed_collection
         self.batch_job_collection = batch_job_collection
+        self.config = config
         self.logger = logging.getLogger(__name__)
 
     def find_raw_documents(self, query):
@@ -69,8 +74,8 @@ class RedditRepository:
                         "$set": {
                             "classification": {
                                 "is_travel_scam": is_travel_scam,
-                                "model_name": self.MODEL_NAME,
-                                "classification_prompt_version": self.CLASSIFICATION_PROMPT_VERSION,
+                                "model_name": self.config.MODEL_NAME,
+                                "classification_prompt_version": self.config.CLASSIFICATION_PROMPT_VERSION,
                                 "classified_at": datetime.now(UTC)
                             }
                         }
@@ -103,7 +108,8 @@ class RedditRepository:
 
     """
     Flush parsing results to MongoDB.
-    @Args:
+    
+    Args:
         items (list[dict]): [{"reddit_id": str, "parsed_result": dict}, ...]
     """
     def flush_parsing_results(self, items: list[dict]):
