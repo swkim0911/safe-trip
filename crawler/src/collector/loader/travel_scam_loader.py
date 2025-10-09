@@ -18,7 +18,7 @@ class TravelScamLoader:
         self.config = config
         self.logger = logging.getLogger(__name__)
 
-    def mongo_to_mysql(self, run_type=None):
+    def mongo_to_mysql(self, load_scope=None):
         load_dotenv()
 
         host = self.config.MYSQL_HOST
@@ -38,7 +38,7 @@ class TravelScamLoader:
 
         cursor = mysql_conn.cursor()
         query = {}
-        if run_type == "daily":
+        if load_scope == "daily":
             today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) # 오늘의 자정 시간 ex) 2025-09-11 00:00:00+00:00
             tomorrow = today + timedelta(days=1) # 내일 자정 시간 ex) 2025-09-12 00:00:00+00:00
             query = {
