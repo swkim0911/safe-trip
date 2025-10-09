@@ -1,5 +1,4 @@
 import logging
-import os
 from datetime import datetime, UTC, timedelta, timezone
 
 import mysql.connector
@@ -7,19 +6,26 @@ from dotenv import load_dotenv
 
 
 class TravelScamLoader:
-    def __init__(self, reddit_repository):
+    """MongoDB에서 MySQL로 데이터를 적재하는 클래스"""
+    
+    def __init__(self, reddit_repository, config):
+        """
+        Args:
+            reddit_repository: Reddit 데이터 저장소
+            config: ETL 설정 객체
+        """
         self.reddit_repository = reddit_repository
+        self.config = config
         self.logger = logging.getLogger(__name__)
-
 
     def mongo_to_mysql(self, run_type=None):
         load_dotenv()
 
-        host = os.getenv("MYSQL_HOST")
-        port = int(os.getenv("MYSQL_PORT"))
-        user = os.getenv("MYSQL_USER")
-        password = os.getenv("MYSQL_PASSWORD")
-        database = os.getenv("MYSQL_DATABASE")
+        host = self.config.MYSQL_HOST
+        port = self.config.MYSQL_PORT
+        user = self.config.MYSQL_USER
+        password = self.config.MYSQL_PASSWORD
+        database = self.config.MYSQL_DATABASE
 
         mysql_conn = mysql.connector.connect(
             host=host,
