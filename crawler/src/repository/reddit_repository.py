@@ -46,13 +46,13 @@ class RedditRepository:
                     upsert=True
                 )
             )
-
-        result = self.raw_collection.bulk_write(ops, ordered=False)
-        self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
-              f"Modified: {result.modified_count}, "  # 실제 값이 변경된 document 수
-              f"Upserted: {len(result.upserted_ids)}")  # upsert로 새로 추가된 document 수
-        
-        docs.clear()
+        try:
+            result = self.raw_collection.bulk_write(ops, ordered=False)
+            self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
+                f"Modified: {result.modified_count}, "  # 실제 값이 변경된 document 수
+                f"Upserted: {len(result.upserted_ids)}")  # upsert로 새로 추가된 document 수
+        finally:
+            docs.clear()
 
     """
         items: [{"reddit_id": "xxx", "is_travel_scam": True}, ...]
@@ -82,11 +82,13 @@ class RedditRepository:
                     }
                 )
             )
-        result = self.raw_collection.bulk_write(ops, ordered=False)
-        self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 document 수
-              f"Modified: {result.modified_count}")  # 실제 값이 변경된 document 수
-
-        items.clear()
+        
+        try:
+            result = self.raw_collection.bulk_write(ops, ordered=False)
+            self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 document 수
+                f"Modified: {result.modified_count}")  # 실제 값이 변경된 document 수
+        finally:
+            items.clear()
 
     def save_batch_job(self, batch_metadata):
         doc = {
@@ -133,3 +135,5 @@ class RedditRepository:
                 exc_info=True
             )
             raise
+        finally:
+            items.clear()
