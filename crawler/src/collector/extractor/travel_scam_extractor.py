@@ -4,13 +4,13 @@ from datetime import datetime, timezone
 class TravelScamExtractor:
     """Reddit에서 여행 사기 관련 데이터를 추출하는 클래스"""
     
+    """
+    Args:
+        reddit_client: Reddit API 클라이언트
+        reddit_repository: Reddit 데이터 저장소
+        config: ETL 설정 객체
+    """
     def __init__(self, reddit_client, reddit_repository, config):
-        """
-        Args:
-            reddit_client: Reddit API 클라이언트
-            reddit_repository: Reddit 데이터 저장소
-            config: ETL 설정 객체
-        """
         self.reddit = reddit_client
         self.reddit_repository = reddit_repository 
         self.config = config
@@ -29,7 +29,7 @@ class TravelScamExtractor:
     '''
     reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
 
-    @Args:
+    Args:
         time_filter: week/all 중 하나
         limit: 가져올 최대 게시글 수
     '''
