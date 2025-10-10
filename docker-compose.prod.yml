@@ -6,7 +6,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - ./BE/src/main/resources/.env.prod
+      - ./.env.backend
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
@@ -16,7 +16,7 @@ services:
     image: swkim0911/safetrip-crawler:latest
     container_name: safetrip-crawler
     env_file:
-      - ./crawler/.env.prod
+      - ./.env.crawler
 
   redis:
     image: redis:7.2
