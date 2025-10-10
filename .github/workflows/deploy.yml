@@ -47,7 +47,17 @@ jobs:
       - name: Push crawler image
         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/safetrip-crawler:latest
 
-      # 8. EC2에 배포
+      # 8. EC2로 docker-compose 파일 업로드
+      - name: Copy compose file to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "./docker-compose.prod.yml"
+          target: "/home/ubuntu/safe-trip/"
+
+      # 9. EC2에 배포
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
         with:
@@ -56,6 +66,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/safe-trip
+            # Secrets 내용으로 .env.prod 파일 복원
+            echo "${{ secrets.ENV_BACKEND_FILE }}" > .env.backend
+            echo "${{ secrets.ENV_CRAWLER_FILE }}" > .env.crawler
+            
+            # 최신 이미지 pull & compose 실행
             docker-compose -f docker-compose.prod.yml pull backend
             docker-compose -f docker-compose.prod.yml pull crawler
             docker-compose -f docker-compose.prod.yml up -d backend 
