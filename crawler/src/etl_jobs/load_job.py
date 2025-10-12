@@ -26,7 +26,7 @@ def main():
         
         # 의존성 주입
         config = ETLConfig.create_default()
-        factory = DependencyFactory(config)
+        factory = DependencyFactory()
         loader = factory.create_loader()
         
         # MongoDB → MySQL 데이터 적재

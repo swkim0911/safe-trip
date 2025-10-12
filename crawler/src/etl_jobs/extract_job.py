@@ -29,7 +29,7 @@ def main():
         
         # 의존성 주입
         config = ETLConfig.create_default()
-        factory = DependencyFactory(config)
+        factory = DependencyFactory()
         extractor = factory.create_extractor()
         
         # 데이터 추출
