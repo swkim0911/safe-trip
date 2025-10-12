@@ -108,10 +108,10 @@ class ETLController:
 
 
 def main():
-    """메인 함수"""
+    
     # 명령줄 인자 파싱
-    extract_args = sys.argv[1:] if len(sys.argv) > 1 else ["all"]
-    load_args = sys.argv[2:] if len(sys.argv) > 2 else ["all"]
+    extract_args = [sys.argv[1]] if len(sys.argv) > 1 else None
+    load_args = [sys.argv[2]] if len(sys.argv) > 2 else None
   
     # ETL 파이프라인 실행
     controller = ETLController()
