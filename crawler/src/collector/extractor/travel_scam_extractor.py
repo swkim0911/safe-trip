@@ -11,7 +11,7 @@ class TravelScamExtractor:
         config: ETL 설정 객체
     """
     def __init__(self, reddit_client, reddit_repository, config):
-        self.reddit = reddit_client
+        self.reddit_client = reddit_client
         self.reddit_repository = reddit_repository 
         self.config = config
         self.raw_docs = []
@@ -34,7 +34,7 @@ class TravelScamExtractor:
         limit: 가져올 최대 게시글 수
     '''
     def extract(self, time_filter: str, limit: int | None):
-        subreddit = self.reddit.subreddit("travel")
+        subreddit = self.reddit_client.subreddit("travel")
 
         for post in subreddit.search(" OR ".join(self.config.REDDIT_KEYWORDS), sort="relevance", time_filter=time_filter, limit=limit):
             if post.selftext and post.selftext not in ("[deleted]", "[removed]"):
