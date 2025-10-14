@@ -20,7 +20,7 @@ class WorldRepository:
         doc = self.state_collection.find_one(
             query,
             {"_id": 1, "country_id": 1},
-            collation={"locale": "en", "strength": 1},
+            collation={"locale": "en", "strength": 1}, # 대소문자, 악센트, 기호 무시 (A == a == Á == ä)
         )
         
         if not doc:
