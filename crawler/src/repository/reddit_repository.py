@@ -27,20 +27,20 @@ class RedditRepository:
     def find_raw_documents_with_limit(self, query, limit):
         return self.raw_collection.find(query).limit(limit)
     
-    def flush_raw_docs(self, docs: list[dict]):
-        if not docs:
+    def flush_raw_records(self, records: list[dict]):
+        if not records:
             return
 
         ops = []
         now = datetime.now(UTC)
 
-        for doc in docs:
+        for record in records:
 
             ops.append(
                 UpdateOne(
-                    {"reddit_id": doc["reddit_id"]},
+                    {"reddit_id": record["reddit_id"]},
                     {
-                        "$set": {**doc, "updated_at": now},
+                        "$set": {**record, "updated_at": now},
                         "$setOnInsert": {"created_at": now}
                     },
                     upsert=True
@@ -48,11 +48,11 @@ class RedditRepository:
             )
         try:
             result = self.raw_collection.bulk_write(ops, ordered=False)
-            self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 docuement 수
+            self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 document 수
                 f"Modified: {result.modified_count}, "  # 실제 값이 변경된 document 수
                 f"Upserted: {len(result.upserted_ids)}")  # upsert로 새로 추가된 document 수
         finally:
-            docs.clear()
+            records.clear()
 
     """
         items: [{"reddit_id": "xxx", "is_travel_scam": True}, ...]

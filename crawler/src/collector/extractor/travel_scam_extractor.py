@@ -14,17 +14,17 @@ class TravelScamExtractor:
         self.reddit_client = reddit_client
         self.reddit_repository = reddit_repository 
         self.etl_config = etl_config
-        self._raw_docs = []
+        self._raw_records = []
 
     def _clean_text(self, text: str) -> str:
         if not text:
             return ""
         return text.replace("\u200b", "").strip()
 
-    def _buffer_doc(self, doc: dict):
-        self._raw_docs.append(doc)
-        if len(self._raw_docs) >= self.etl_config.BATCH_SIZE:
-            self.reddit_repository.flush_raw_docs(self._raw_docs)
+    def _buffer_record(self, record: dict):
+        self._raw_records.append(record)
+        if len(self._raw_records) >= self.etl_config.BATCH_SIZE:
+            self.reddit_repository.flush_raw_records(self._raw_records)
     
     '''
     reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
@@ -38,7 +38,7 @@ class TravelScamExtractor:
 
         for post in subreddit.search(" OR ".join(self.etl_config.REDDIT_KEYWORDS), sort="relevance", time_filter=time_filter, limit=limit):
             if post.selftext and post.selftext not in ("[deleted]", "[removed]"):
-                post_doc = {
+                post_record = {
                     "reddit_id": f"t3_{post.id}",
                     "source": "reddit",
                     "author": str(post.author) if post.author else None,
@@ -47,7 +47,7 @@ class TravelScamExtractor:
                     "type": "post",
                     "posted_at": datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
                 }
-                self._buffer_doc(post_doc)
+                self._buffer_record(post_record)
 
             post.comments.replace_more(limit=0)
             for comment in post.comments:
@@ -55,7 +55,7 @@ class TravelScamExtractor:
                     if not comment.body or comment.body in ("[deleted]", "[removed]"):
                         continue
 
-                    comment_doc = {
+                    comment_record = {
                         "reddit_id": f"t1_{comment.id}",
                         "source": "reddit",
                         "author": str(comment.author) if comment.author else None,
@@ -64,7 +64,7 @@ class TravelScamExtractor:
                         "type": "comment",
                         "posted_at": datetime.fromtimestamp(comment.created_utc, tz=timezone.utc)
                     }
-                    self._buffer_doc(comment_doc)
+                    self._buffer_record(comment_record)
         
         # 마지막 flush
-        self.reddit_repository.flush_raw_docs(self._raw_docs)
+        self.reddit_repository.flush_raw_records(self._raw_records)
