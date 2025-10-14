@@ -8,12 +8,12 @@ class TravelScamExtractor:
     Args:
         reddit_client: Reddit API 클라이언트
         reddit_repository: Reddit 데이터 저장소
-        config: ETL 설정 객체
+        etl_config: ETL 설정 객체
     """
-    def __init__(self, reddit_client, reddit_repository, config):
+    def __init__(self, reddit_client, reddit_repository, etl_config):
         self.reddit_client = reddit_client
         self.reddit_repository = reddit_repository 
-        self.config = config
+        self.etl_config = etl_config
         self._raw_docs = []
 
     def _clean_text(self, text: str) -> str:
@@ -23,7 +23,7 @@ class TravelScamExtractor:
 
     def _buffer_doc(self, doc: dict):
         self._raw_docs.append(doc)
-        if len(self._raw_docs) >= self.config.BATCH_SIZE:
+        if len(self._raw_docs) >= self.etl_config.BATCH_SIZE:
             self.reddit_repository.flush_raw_docs(self._raw_docs)
     
     '''
@@ -36,7 +36,7 @@ class TravelScamExtractor:
     def extract(self, time_filter: str, limit: int | None):
         subreddit = self.reddit_client.subreddit("travel")
 
-        for post in subreddit.search(" OR ".join(self.config.REDDIT_KEYWORDS), sort="relevance", time_filter=time_filter, limit=limit):
+        for post in subreddit.search(" OR ".join(self.etl_config.REDDIT_KEYWORDS), sort="relevance", time_filter=time_filter, limit=limit):
             if post.selftext and post.selftext not in ("[deleted]", "[removed]"):
                 post_doc = {
                     "reddit_id": f"t3_{post.id}",
