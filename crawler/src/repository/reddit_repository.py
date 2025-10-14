@@ -45,10 +45,17 @@ class RedditRepository:
             )
         try:
             result = self.raw_collection.bulk_write(ops, ordered=False)
-            self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 document 수
-                f"Modified: {result.modified_count}, "  # 실제 값이 변경된 document 수
-                f"Upserted: {len(result.upserted_ids)}")  # upsert로 새로 추가된 document 수
-        finally:
+        except Exception as e:
+            self.logger.error(
+                f"[flush_raw_records] Bulk write failed (records={len(records)}): {e}",
+                exc_info=True
+            )
+            # 실패 시 clear하지 않음 → 재시도 가능
+        else:
+            self.logger.info(
+                f"[flush_raw_records] Matched={result.matched_count}, "
+                f"Modified={result.modified_count}, Upserted={len(result.upserted_ids)}"
+            )
             records.clear()
 
     """
@@ -79,12 +86,19 @@ class RedditRepository:
                     }
                 )
             )
-        
+
         try:
             result = self.raw_collection.bulk_write(ops, ordered=False)
-            self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 document 수
-                f"Modified: {result.modified_count}")  # 실제 값이 변경된 document 수
-        finally:
+        except Exception as e:
+            self.logger.error(
+                f"[flush_classification_results] Bulk write failed (records={len(records)}): {e}",
+                exc_info=True
+            )
+        else:
+            self.logger.info(
+                f"[flush_classification_results] Matched={result.matched_count}, "
+                f"Modified={result.modified_count}"
+            )
             records.clear()
 
     def save_batch_job(self, batch_metadata):
@@ -121,16 +135,15 @@ class RedditRepository:
             ops.append(InsertOne(record))
 
         try:
-            result = self.parsed_collection.bulk_write(ops, ordered=False)
-            self.logger.info(
-                f"Flushed {len(records)} parsing results to parsed_collection "
-            )
+            self.parsed_collection.bulk_write(ops, ordered=False)
         except Exception as e:
             self.logger.error(
                 "Bulk write failed on parsed_collection "
                 f"(records={len(records)}): {e}",
                 exc_info=True
             )
-            raise
-        finally:
+        else:
+            self.logger.info(
+                f"Flushed {len(records)} parsing results to parsed_collection "
+            )
             records.clear()
