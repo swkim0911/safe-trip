@@ -14,17 +14,17 @@ class TravelScamExtractor:
         self.reddit_client = reddit_client
         self.reddit_repository = reddit_repository 
         self.config = config
-        self.raw_docs = []
+        self._raw_docs = []
 
-    def __clean_text(self, text: str) -> str:
+    def _clean_text(self, text: str) -> str:
         if not text:
             return ""
         return text.replace("\u200b", "").strip()
 
-    def __add_doc(self, doc: dict):
-        self.raw_docs.append(doc)
-        if len(self.raw_docs) >= self.config.BATCH_SIZE:
-            self.reddit_repository.flush_raw_docs(self.raw_docs)
+    def _buffer_doc(self, doc: dict):
+        self._raw_docs.append(doc)
+        if len(self._raw_docs) >= self.config.BATCH_SIZE:
+            self.reddit_repository.flush_raw_docs(self._raw_docs)
     
     '''
     reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
@@ -42,12 +42,12 @@ class TravelScamExtractor:
                     "reddit_id": f"t3_{post.id}",
                     "source": "reddit",
                     "author": str(post.author) if post.author else None,
-                    "body": self.__clean_text(post.selftext),
+                    "body": self._clean_text(post.selftext),
                     "url": f"https://reddit.com{post.permalink}",
                     "type": "post",
                     "posted_at": datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
                 }
-                self.__add_doc(post_doc)
+                self._buffer_doc(post_doc)
 
             post.comments.replace_more(limit=0)
             for comment in post.comments:
@@ -59,12 +59,12 @@ class TravelScamExtractor:
                         "reddit_id": f"t1_{comment.id}",
                         "source": "reddit",
                         "author": str(comment.author) if comment.author else None,
-                        "body": self.__clean_text(comment.body),
+                        "body": self._clean_text(comment.body),
                         "url": f"https://reddit.com{comment.permalink}",
                         "type": "comment",
                         "posted_at": datetime.fromtimestamp(comment.created_utc, tz=timezone.utc)
                     }
-                    self.__add_doc(comment_doc)
+                    self._buffer_doc(comment_doc)
         
         # 마지막 flush
-        self.reddit_repository.flush_raw_docs(self.raw_docs)
+        self.reddit_repository.flush_raw_docs(self._raw_docs)
