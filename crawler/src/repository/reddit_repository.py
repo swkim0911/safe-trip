@@ -52,17 +52,17 @@ class RedditRepository:
             records.clear()
 
     """
-        items: [{"reddit_id": "xxx", "is_travel_scam": True}, ...]
+        records: [{"reddit_id": "xxx", "is_travel_scam": True}, ...]
     """
-    def flush_classification_results(self, items: list[dict]):
-        if not items:
+    def flush_classification_results(self, records: list[dict]):
+        if not records:
             return
         
         ops = []
 
-        for item in items:
-            reddit_id = item["reddit_id"]
-            is_travel_scam = item["is_travel_scam"]
+        for record in records:
+            reddit_id = record["reddit_id"]
+            is_travel_scam = record["is_travel_scam"]
 
             ops.append(
                 UpdateOne(
@@ -85,7 +85,7 @@ class RedditRepository:
             self.logger.info(f"Matched: {result.matched_count}, "  # 조건에 걸린 document 수
                 f"Modified: {result.modified_count}")  # 실제 값이 변경된 document 수
         finally:
-            items.clear()
+            records.clear()
 
     def save_batch_job(self, batch_metadata):
         doc = {
@@ -109,28 +109,28 @@ class RedditRepository:
     Flush parsing results to MongoDB.
     
     Args:
-        items (list[dict]): [{"reddit_id": str, "parsed_result": dict}, ...]
+        records (list[dict]): [{"reddit_id": str, "parsed_result": dict}, ...]
     """
-    def flush_parsing_results(self, items: list[dict]):
-        if not items:
+    def flush_parsing_results(self, records: list[dict]):
+        if not records:
             return
 
         ops = []
 
-        for item in items:
-            ops.append(InsertOne(item))
+        for record in records:
+            ops.append(InsertOne(record))
 
         try:
             result = self.parsed_collection.bulk_write(ops, ordered=False)
             self.logger.info(
-                f"Flushed {len(items)} parsing results to parsed_collection "
+                f"Flushed {len(records)} parsing results to parsed_collection "
             )
         except Exception as e:
             self.logger.error(
                 "Bulk write failed on parsed_collection "
-                f"(items={len(items)}): {e}",
+                f"(records={len(records)}): {e}",
                 exc_info=True
             )
             raise
         finally:
-            items.clear()
+            records.clear()
