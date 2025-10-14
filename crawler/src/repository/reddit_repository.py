@@ -24,9 +24,6 @@ class RedditRepository:
     def find_raw_documents(self, query):
         return self.raw_collection.find(query)
     
-    def find_raw_documents_with_limit(self, query, limit):
-        return self.raw_collection.find(query).limit(limit)
-    
     def flush_raw_records(self, records: list[dict]):
         if not records:
             return
