@@ -1,9 +1,8 @@
 import logging
 import sys
 
-
 class LevelBasedStreamHandler(logging.StreamHandler):
-    """로그 레벨에 따라 stdout/stderr으로 나누어 출력"""
+    """커스텀 핸들러: 로그 레벨에 따라 stdout/stderr으로 나누어 출력"""
 
     def emit(self, record):
         if record.levelno >= logging.WARNING:
