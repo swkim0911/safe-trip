@@ -9,8 +9,14 @@ from utils import prompt_utils, batch_utils
 
 
 class TravelScamParser:
+    """여행 사기 관련 데이터를 파싱하는 클래스"""
 
-    def __init__(self):
+    def __init__(self, config):
+        """
+        Args:
+            config: ETL 설정 객체
+        """
+        self.config = config
         self.logger = logging.getLogger(__name__)
         self.job_type = "parsing"
 
@@ -48,7 +54,9 @@ class TravelScamParser:
             self.logger.error(f"safe_json_loads 실패: {e}\n원본: {text[:200]}...", exc_info=True)
             raise
 
-    # 분류된 데이터에서 필요한 데이터를 추출해서 json array를 반환한다
+    '''
+    분류된 데이터에서 필요한 데이터를 추출(parsing)해서 json array로 반환
+    '''
     def parse(self, text: str) -> list[dict[str, Any]]:
         system_content = prompt_utils.get_parsing_system_content()
         prompt = prompt_utils.generate_parsing_prompt(text)

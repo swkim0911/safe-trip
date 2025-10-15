@@ -1,65 +1,70 @@
 from datetime import datetime, timezone
 
-from adapters.reddit_client import get_instance
-
 
 class TravelScamExtractor:
-    def __init__(self, reddit_repository):
-        self.reddit = get_instance()
+    """Reddit에서 여행 사기 관련 데이터를 추출하는 클래스"""
+    
+    """
+    Args:
+        reddit_client: Reddit API 클라이언트
+        reddit_repository: Reddit 데이터 저장소
+        etl_config: ETL 설정 객체
+    """
+    def __init__(self, reddit_client, reddit_repository, etl_config):
+        self.reddit_client = reddit_client
         self.reddit_repository = reddit_repository 
-        self.BATCH_SIZE = 1000
-        self.raw_docs = []
-        self.keywords = ["travel scam"]
+        self.etl_config = etl_config
+        self._raw_records = []
 
-    def __clean_text(self, text: str) -> str:
+    def _clean_text(self, text: str) -> str:
         if not text:
             return ""
         return text.replace("\u200b", "").strip()
 
-    def __add_doc(self, doc: dict):
-        self.raw_docs.append(doc)
-        if len(self.raw_docs) >= self.BATCH_SIZE:
-            self.reddit_repository.flush_raw_docs(self.raw_docs)
+    def _buffer_record(self, record: dict):
+        self._raw_records.append(record)
+        if len(self._raw_records) >= self.etl_config.BATCH_SIZE:
+            self.reddit_repository.flush_raw_records(self._raw_records)
     
     '''
     reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
 
-    @Args:
-        time_filter: hour/day/week/month/year/all 중 하나
+    Args:
+        time_filter: week/all 중 하나
         limit: 가져올 최대 게시글 수
     '''
     def extract(self, time_filter: str, limit: int | None):
-        subreddit = self.reddit.subreddit("travel")
+        subreddit = self.reddit_client.subreddit("travel")
 
-        for post in subreddit.search(" OR ".join(self.keywords), sort="relevance", time_filter=time_filter, limit=limit):
+        for post in subreddit.search(" OR ".join(self.etl_config.REDDIT_KEYWORDS), sort="relevance", time_filter=time_filter, limit=limit):
             if post.selftext and post.selftext not in ("[deleted]", "[removed]"):
-                post_doc = {
+                post_record = {
                     "reddit_id": f"t3_{post.id}",
                     "source": "reddit",
                     "author": str(post.author) if post.author else None,
-                    "body": self.__clean_text(post.selftext),
+                    "body": self._clean_text(post.selftext),
                     "url": f"https://reddit.com{post.permalink}",
                     "type": "post",
                     "posted_at": datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
                 }
-                self.__add_doc(post_doc)
+                self._buffer_record(post_record)
 
             post.comments.replace_more(limit=0)
             for comment in post.comments:
-                if comment.parent_id.startswith("t3_"):
+                if comment.parent_id.startswith("t3_"): # depth = 1 댓글만 추출
                     if not comment.body or comment.body in ("[deleted]", "[removed]"):
                         continue
 
-                    comment_doc = {
+                    comment_record = {
                         "reddit_id": f"t1_{comment.id}",
                         "source": "reddit",
                         "author": str(comment.author) if comment.author else None,
-                        "body": self.__clean_text(comment.body),
+                        "body": self._clean_text(comment.body),
                         "url": f"https://reddit.com{comment.permalink}",
                         "type": "comment",
                         "posted_at": datetime.fromtimestamp(comment.created_utc, tz=timezone.utc)
                     }
-                    self.__add_doc(comment_doc)
+                    self._buffer_record(comment_record)
         
         # 마지막 flush
-        self.reddit_repository.flush_raw_docs(self.raw_docs)
+        self.reddit_repository.flush_raw_records(self._raw_records)

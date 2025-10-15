@@ -7,15 +7,21 @@ from utils import prompt_utils, batch_utils
 
 
 class TravelScamClassifier:
+    """여행 사기 여부를 분류하는 클래스"""
     
-    def __init__(self, reddit_repository):
+    """
+    Args:
+        reddit_repository: Reddit 데이터 저장소
+        config: ETL 설정 객체
+    """
+    def __init__(self, reddit_repository, config):
         self.reddit_repository = reddit_repository
-        self.BATCH_SIZE = 1000
+        self.config = config
         self.job_type = "classification"
         self.logger = logging.getLogger(__name__)
                 
     '''
-    text가 travel scam 관련 글이라면 1, 아니면 0을 반환한다
+    text가 travel scam 관련 글이라면 True, 아니면 False를 반환한다
     '''
     def classify(self, text: str) -> bool:
         system_content = prompt_utils.get_classification_system_content()
@@ -74,7 +80,7 @@ class TravelScamClassifier:
                 classification_results.append({"reddit_id": reddit_id,"is_travel_scam": is_travel_scam})
 
                 # BATCH_SIZE 단위로 저장
-                if len(classification_results) >= self.BATCH_SIZE:
+                if len(classification_results) >= self.config.BATCH_SIZE:
                     self.reddit_repository.flush_classification_results(classification_results)
 
             # 남은 classification_results 처리
@@ -83,7 +89,8 @@ class TravelScamClassifier:
 
 
     '''
-    안전장치 -> 숫자 이외가 섞여오면 첫 번째 '1' 또는 '0'만 취함
+    output_text의 결과를 bool 타입으로 치환한다
+    숫자 이외가 섞여오면 첫 번째 '1' 또는 '0'만 취함 (안전장치)
     '''
     def __extract_label_from_output(self, output_text):
         if "1" in output_text and "0" in output_text:
