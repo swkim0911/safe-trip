@@ -26,7 +26,7 @@ class DependencyFactory:
         if self._initialized:
             return
 
-        self.config = ETLConfig.create_default()
+        self.etl_config = ETLConfig.create_default()
         self._reddit_repository = None
         self._world_repository = None
         self._reddit_client = None
@@ -38,7 +38,7 @@ class DependencyFactory:
                 raw_collection=mongo_client.get_raw_collection(),
                 parsed_collection=mongo_client.get_parsed_collection(),
                 batch_job_collection=mongo_client.get_batch_job_collection(),
-                config=self.config
+                etl_config=self.etl_config
             )
         return self._reddit_repository
 
@@ -60,17 +60,17 @@ class DependencyFactory:
         return TravelScamExtractor(
             reddit_client=self.get_reddit_client(),
             reddit_repository=self.get_reddit_repository(),
-            config=self.config
+            etl_config=self.etl_config
         )
 
     def create_classifier(self) -> TravelScamClassifier:
         return TravelScamClassifier(
             reddit_repository=self.get_reddit_repository(),
-            config=self.config
+            etl_config=self.etl_config
         )
 
     def create_parser(self) -> TravelScamParser:
-        return TravelScamParser(config=self.config)
+        return TravelScamParser(config=self.etl_config)
 
     def create_transformer(self) -> TravelScamTransformer:
         return TravelScamTransformer(
@@ -78,11 +78,11 @@ class DependencyFactory:
             travel_scam_parser=self.create_parser(),
             reddit_repository=self.get_reddit_repository(),
             world_repository=self.get_world_repository(),
-            config=self.config
+            etl_config=self.etl_config
         )
 
     def create_loader(self) -> TravelScamLoader:
         return TravelScamLoader(
             reddit_repository=self.get_reddit_repository(),
-            config=self.config
+            etl_config=self.etl_config
         )
