@@ -19,7 +19,7 @@ def main():
         
         # 의존성 주입
         config = ETLConfig.create_default()
-        factory = DependencyFactory(config)
+        factory = DependencyFactory()
         transformer = factory.create_transformer()
         
         # 1. 분류 배치 요청
