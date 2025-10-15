@@ -108,10 +108,14 @@ class ETLController:
 
 
 def main():
-    
-    # 명령줄 인자 파싱
-    extract_args = [sys.argv[1]] if len(sys.argv) > 1 else None
-    load_args = [sys.argv[2]] if len(sys.argv) > 2 else None
+ 
+    # 명령줄 인자 파싱 (python3 init_etl_pipeline.py <time_filter> [limit] <load_scope>)
+    if len(sys.argv) == 4:
+        extract_args = [sys.argv[1], sys.argv[2]]
+        load_args = [sys.argv[3]]
+    else:  # (python3 init_etl_pipeline.py <time_filter> <load_scope>)
+        extract_args = [sys.argv[1]] if len(sys.argv) > 1 else None
+        load_args = [sys.argv[2]] if len(sys.argv) > 2 else None
   
     # ETL 파이프라인 실행
     controller = ETLController()
