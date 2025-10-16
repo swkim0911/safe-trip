@@ -11,15 +11,25 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       - redis
+    networks:
+      - safetrip-network
 
   crawler:
     image: swkim0911/safetrip-crawler:latest
     container_name: safetrip-crawler
     env_file:
       - ./.env.crawler
+    networks:
+      - safetrip-network
 
   redis:
     image: redis:7.2
     container_name: safetrip-redis
     ports:
       - "6379:6379"
+    networks:
+      - safetrip-network
+
+networks:
+  safetrip-network:
+    driver: bridge
