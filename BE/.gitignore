@@ -42,4 +42,4 @@ application-dev.yml
 ### .sql ###
 import.sql
 .env
-.env.prod
+.env.backend
