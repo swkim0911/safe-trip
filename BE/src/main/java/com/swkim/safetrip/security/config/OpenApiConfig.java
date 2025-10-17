@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
                 description = "여행지 사기 정보 공유 플랫폼 SafeTrip의 REST API 문서입니다.",
                 contact = @Contact(
                         name = "SafeTrip Team",
-                        email = "kimsungwon364l@gmail.com",
+                        email = "kimsungwon364@gmail.com",
                         url = "https://github.com/swkim0911/safe-trip"
                 )
         )
@@ -27,5 +27,5 @@ import org.springframework.context.annotation.Configuration;
         description = "JWT 토큰을 입력하세요. (Bearer 접두사 제외)"
 )
 @Configuration
-public class OpenApiSecurityConfig {
+public class OpenApiConfig {
 }
