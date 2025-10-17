@@ -1,4 +1,4 @@
-package com.swkim.safetrip.security.config;
+package com.swkim.safetrip.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
