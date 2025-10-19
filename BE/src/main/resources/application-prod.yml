@@ -37,3 +37,4 @@ cloud:
       auto: false
     s3:
       bucket-name: ${AWS_BUCKET_NAME}
+      base-path: ${AWS_BASE_PATH}
