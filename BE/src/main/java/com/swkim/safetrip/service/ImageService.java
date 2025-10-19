@@ -23,6 +23,9 @@ public class ImageService {
     @Value("${cloud.aws.s3.bucket-name}")
     private String bucketName;
 
+    @Value("${cloud.aws.s3.base-path}")
+    private String basePath;
+
     private final AmazonS3Client amazonS3Client;
     private final ImageRepository imageRepository;
 
@@ -48,7 +51,7 @@ public class ImageService {
         Image image = Image.builder()
                 .originalName(originalFilename)
                 .build();
-        String fileName = "images/" + image.getStoredName();
+        String fileName = basePath + image.getStoredName();
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(file.getContentType());
