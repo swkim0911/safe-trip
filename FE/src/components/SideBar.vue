@@ -181,6 +181,7 @@ const selectedReport = reactive({
   title: '',
   content: '',
   postedAt: '',
+  imageUrls: [],
 });
 
 const size = 12;
@@ -230,6 +231,7 @@ function mapUserReportDetail(result) {
     title: result.title,
     content: result.description,
     postedAt: formatDate(result.createdAt),
+    imageUrls: result.urls || [],
   })
 }
 
