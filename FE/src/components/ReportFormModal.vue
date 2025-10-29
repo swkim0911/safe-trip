@@ -222,7 +222,7 @@ const scamActions = ref([
 
 const scamContexts = ref([
   { id: 1, name: "Street / Public Area" },
-  { id: 2, name: "Restaurant/Bar / Cafe" },
+  { id: 2, name: "Restaurant /Bar / Cafe" },
   { id: 3, name: "Transportation" },
   { id: 4, name: "Lodging" },
   { id: 5, name: "Tourist Attraction / Ticketed Venue" },
