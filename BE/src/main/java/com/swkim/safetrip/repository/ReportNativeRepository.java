@@ -223,6 +223,12 @@ public class ReportNativeRepository {
         if (orderBy.isBlank()) {
             orderBy = "r.created_at DESC"; // 기본값
         }
+        
+        // 정렬 안정성을 위해 고유 ID 추가 (페이징 중복 방지)
+        if (!orderBy.contains("id")) {
+            orderBy += ", id ASC";
+        }
+        
         return orderBy;
     }
 }
