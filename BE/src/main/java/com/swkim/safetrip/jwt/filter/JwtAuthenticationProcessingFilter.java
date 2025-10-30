@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,6 +31,9 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
+
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
 
     private final JwtProvider jwtProvider;
     private final UserService userService;
@@ -72,7 +76,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         String method = request.getMethod().toUpperCase();
 
         return Arrays.stream(ProtectedEndpoint.values())
-                .anyMatch(ep -> ep.getPath().equals(requestURI) && ep.getMethod().equals(method));
+                .anyMatch(ep -> (contextPath + ep.getPath()).equals(requestURI) && ep.getMethod().equals(method));
     }
 
 
