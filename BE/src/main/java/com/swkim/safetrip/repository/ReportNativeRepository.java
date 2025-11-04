@@ -136,6 +136,41 @@ public class ReportNativeRepository {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
+    public Slice<ReportSummaryItem> findReportSummarySliceByCountryId(Long countryId, Pageable pageable){
+        String orderBy = getOrderBy(pageable);
+
+        String sql = String.format("""
+                SELECT r.id, r.source, r.title, sa.name as scam_action_name, sc.name as scam_context_name, r.created_at
+                FROM (
+                    SELECT id, source, title, scam_action_id, scam_context_id, created_at FROM user_report WHERE country_id = :countryId
+                    UNION ALL
+                    SELECT id, source, title, scam_action_id, scam_context_id, posted_at as created_at FROM external_report WHERE country_id = :countryId
+                ) r
+                JOIN scam_action sa on r.scam_action_id = sa.id
+                JOIN scam_context sc on r.scam_context_id = sc.id
+                ORDER BY %s
+                LIMIT :limit OFFSET :offset
+                """, orderBy);
+        Query query = em.createNativeQuery(sql);
+        query.setParameter("countryId", countryId);
+
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+        query.setParameter("limit", pageSize + 1);
+        query.setParameter("offset", offset);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        // DTO 매핑
+        List<ReportSummaryItem> items = getReportSummaryItems(results);
+
+        boolean hasNext = items.size() > pageSize;
+        List<ReportSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
+
+        return new SliceImpl<>(content, pageable, hasNext);
+    }
+
     public Slice<ReportSummaryItem> findReportSummarySliceByCityId(Long cityId, Pageable pageable){
         String orderBy = getOrderBy(pageable);
 
