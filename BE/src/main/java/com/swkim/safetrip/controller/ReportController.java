@@ -22,6 +22,7 @@ public class ReportController {
 
     private final ReportService reportService;
 
+<<<<<<< HEAD
     @Operation(
         summary = "국가별 리포트 통계 조회", 
         description = "각 국가별 리포트 개수 및 통계 정보를 조회합니다. " +
@@ -29,6 +30,11 @@ public class ReportController {
     )
     @GetMapping(value = "/statistics/countries")
     public ApiResult<Slice<LocationScamSummaryItem>> getCountryStatistics(Pageable pageable){
+=======
+    @Operation(summary = "국가별 스캠 요약 정보 조회", description = "사이드바에 표현될 국가별 스캠 요약 정보를 조회합니다")
+    @GetMapping(value = "/sidebar-summary/countries")
+    public ApiResult<Slice<LocationScamSummaryItem>> getCountrySummariesForSideBar(Pageable pageable){
+>>>>>>> fc5fc3a ([#124] refactor: url 오타 수정)
         Slice<LocationScamSummaryItem> countrySummaryPages = reportService.getCountrySummaryPages(pageable);
         return ApiResult.of(HttpStatus.OK.value(), "Report statistics by country", countrySummaryPages);
     }
