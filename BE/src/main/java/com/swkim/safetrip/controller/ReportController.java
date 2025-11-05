@@ -63,9 +63,12 @@ public class ReportController {
         return ApiResult.of(HttpStatus.OK.value(), "Report summaries", summaries);
     }
 
-    @Operation(summary = "지도에 표시될 스캠 정보 조회", description = "zoom 정도에 따라 도시에 표시될 스캠 요약 정보를 조회합니다")
-    @GetMapping(value = "/map-summary")
-    public ApiResult<LocationScamSummaryResponse> getLocationSummariesForMap(@RequestParam Integer zoom){
+    @Operation(
+        summary = "리포트 개요 조회",
+        description = "지도 zoom 레벨에 따라 적절한 집계 단위(국가/주/도시)의 리포트 개요 정보를 반환합니다."
+    )
+    @GetMapping("/overview")
+    public ApiResult<LocationScamSummaryResponse> getReportOverview(@RequestParam Integer zoom){
         LocationScamSummaryResponse summaries;
 
         if (zoom < 6) {
@@ -75,6 +78,6 @@ public class ReportController {
         } else {
             summaries = reportService.getCitySummaries();
         }
-        return ApiResult.of(HttpStatus.OK.value(), "scam summaries for map view", summaries);
+        return ApiResult.of(HttpStatus.OK.value(), "Report overview", summaries);
     }
 }
