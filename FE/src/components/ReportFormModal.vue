@@ -282,7 +282,7 @@ const loadCities = async () => {
   form.cityId = '';
   cities.value = [];
 
-  const response = await apiClient.get(`/countries/states/${form.stateId}/cities`);
+  const response = await apiClient.get(`/states/${form.stateId}/cities`);
   cities.value = response.data.result.cities;
 }
 
