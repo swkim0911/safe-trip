@@ -404,7 +404,7 @@ const loadSidebarReportSummary = async (cityId, cityName, mode = 'click') => {
   }
 
   try {
-    const response = await apiClient.get('/reports/sidebar-summary', {
+    const response = await apiClient.get('/reports/summary', {
       params: {
         cityId: cityId,
         page: reportPage.value,

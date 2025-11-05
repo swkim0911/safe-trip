@@ -25,7 +25,7 @@ public class ReportController {
     @Operation(
         summary = "국가별 리포트 통계 조회", 
         description = "각 국가별 리포트 개수 및 통계 정보를 조회합니다. " +
-                     "향후 스캠 유형별 분포, 위험도 점수, 트렌드 등의 통계 정보가 추가될 예정입니다."
+                     "향후 스캠 유형별 분포, 위험도 점수, 트렌드 등의 통계 정보가 추가될 수 있습니다."
     )
     @GetMapping(value = "/statistics/countries")
     public ApiResult<Slice<LocationScamSummaryItem>> getCountryStatistics(Pageable pageable){
@@ -34,7 +34,7 @@ public class ReportController {
     }
 
     @Operation(
-        summary = "주/도별 리포트 통계 조회", 
+        summary = "주별 리포트 통계 조회", 
         description = "특정 국가 내 제1 행정구역(주별 리포트 개수 및 통계 정보를 조회합니다."
     )
     @GetMapping(value = "/statistics/states")
@@ -53,11 +53,14 @@ public class ReportController {
         return ApiResult.of(HttpStatus.OK.value(), "Report statistics by city", citySummaryPage);
     }
 
-    @Operation(summary = "스캠 리포트 요약 정보 조회", description = "사이드바에 표현될 스캠 리포트들의 요약 정보를 조회합니다")
-    @GetMapping(value = "/sidebar-summary")
-    public ApiResult<Slice<ReportSummaryItem>> getReportSummariesForSidebar(@RequestParam Long cityId, Pageable pageable) {
-        Slice<ReportSummaryItem> reportSummaryPages = reportService.getReportSummaryPages(cityId, pageable);
-        return ApiResult.of(HttpStatus.OK.value(), "Report summaries for sidebar", reportSummaryPages);
+    @Operation(
+        summary = "스캠 리포트 요약 정보 조회", 
+        description = "도시 ID를 기준으로 해당 도시의 스캠 리포트 요약 정보를 조회합니다."
+    )
+    @GetMapping("/summary")
+    public ApiResult<Slice<ReportSummaryItem>> getReportSummaries(@RequestParam(required = false) Long cityId,Pageable pageable) {
+        Slice<ReportSummaryItem> summaries = reportService.getSummaries(cityId, pageable);
+        return ApiResult.of(HttpStatus.OK.value(), "Report summaries", summaries);
     }
 
     @Operation(summary = "지도에 표시될 스캠 정보 조회", description = "zoom 정도에 따라 도시에 표시될 스캠 요약 정보를 조회합니다")
