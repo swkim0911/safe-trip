@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +23,6 @@ public class ReportController {
 
     private final ReportService reportService;
 
-<<<<<<< HEAD
     @Operation(
         summary = "국가별 리포트 통계 조회", 
         description = "각 국가별 리포트 개수 및 통계 정보를 조회합니다. " +
@@ -30,11 +30,6 @@ public class ReportController {
     )
     @GetMapping(value = "/statistics/countries")
     public ApiResult<Slice<LocationScamSummaryItem>> getCountryStatistics(Pageable pageable){
-=======
-    @Operation(summary = "국가별 스캠 요약 정보 조회", description = "사이드바에 표현될 국가별 스캠 요약 정보를 조회합니다")
-    @GetMapping(value = "/sidebar-summary/countries")
-    public ApiResult<Slice<LocationScamSummaryItem>> getCountrySummariesForSideBar(Pageable pageable){
->>>>>>> fc5fc3a ([#124] refactor: url 오타 수정)
         Slice<LocationScamSummaryItem> countrySummaryPages = reportService.getCountrySummaryPages(pageable);
         return ApiResult.of(HttpStatus.OK.value(), "Report statistics by country", countrySummaryPages);
     }
@@ -59,12 +54,19 @@ public class ReportController {
         return ApiResult.of(HttpStatus.OK.value(), "Report statistics by city", citySummaryPage);
     }
 
+    @Operation(summary = "특정 국가의 모든 스캠 리포트 조회", description = "선택한 국가에서 발생한 모든 스캠 리포트 요약 정보를 조회합니다")
+    @GetMapping(value = "/countries/{countryId}/reports")
+    public ApiResult<Slice<ReportSummaryItem>> getReportSummariesByCountry(@PathVariable Long countryId, Pageable pageable) {
+        Slice<ReportSummaryItem> reportSummaryPages = reportService.getReportSummaryPagesByCountry(countryId, pageable);
+        return ApiResult.of(HttpStatus.OK.value(), "All report summaries in country", reportSummaryPages);
+    }
+
     @Operation(
         summary = "스캠 리포트 요약 정보 조회", 
         description = "도시 ID를 기준으로 해당 도시의 스캠 리포트 요약 정보를 조회합니다."
     )
     @GetMapping("/summary")
-    public ApiResult<Slice<ReportSummaryItem>> getReportSummaries(@RequestParam(required = false) Long cityId,Pageable pageable) {
+    public ApiResult<Slice<ReportSummaryItem>> getReportSummaries(@RequestParam(required = false) Long cityId, Pageable pageable) {
         Slice<ReportSummaryItem> summaries = reportService.getSummaries(cityId, pageable);
         return ApiResult.of(HttpStatus.OK.value(), "Report summaries", summaries);
     }
