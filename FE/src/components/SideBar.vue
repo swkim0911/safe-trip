@@ -291,7 +291,7 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
   }
 
   try {
-    const response = await apiClient.get('/reports/sidebar-summary/counties', {
+    const response = await apiClient.get('/reports/statistics/countries', {
       params: {
         page: countryPage.value,
         size: size,
@@ -327,7 +327,7 @@ const loadSidebarStateSummary = async (countryId, countryName, mode = 'click') =
   }
 
   try {
-    const response = await apiClient.get('/reports/sidebar-summary/states', {
+    const response = await apiClient.get('/reports/statistics/states', {
       params: {
         countryId,
         page: statePage.value,
@@ -366,7 +366,7 @@ const loadSidebarCitySummary = async (stateId, stateName, mode = 'click') => {
   }
 
   try {
-    const response = await apiClient.get('/reports/sidebar-summary/cities', {
+    const response = await apiClient.get('/reports/statistics/cities', {
       params: {
         stateId: stateId,
         page: cityPage.value,
@@ -404,7 +404,7 @@ const loadSidebarReportSummary = async (cityId, cityName, mode = 'click') => {
   }
 
   try {
-    const response = await apiClient.get('/reports/sidebar-summary', {
+    const response = await apiClient.get('/reports/summary', {
       params: {
         cityId: cityId,
         page: reportPage.value,

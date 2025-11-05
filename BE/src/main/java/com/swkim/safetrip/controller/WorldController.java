@@ -33,7 +33,7 @@ public class WorldController {
         return ApiResult.of(HttpStatus.OK.value(), "All states retrieved successfully", allStates);
     }
 
-    @GetMapping("/countries/states/{stateId}/cities")
+    @GetMapping("/states/{stateId}/cities")
     public ApiResult<CitiesResponse> getCities(@PathVariable Long stateId) {
         CitiesResponse allCities = cityService.getCities(stateId);
         return ApiResult.of(HttpStatus.OK.value(), "All cities retrieved successfully", allCities);

@@ -56,7 +56,8 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
-    public Slice<ReportSummaryItem> getReportSummaryPages(Long city, Pageable pageable) {
-        return reportNativeRepository.findReportSummarySliceByCityId(city, pageable);
+    public Slice<ReportSummaryItem> getSummaries(Long cityId, Pageable pageable) {
+        return reportNativeRepository.findReportSummarySliceByCityId(cityId, pageable);
     }
+
 }
