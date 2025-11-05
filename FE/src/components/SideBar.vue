@@ -291,11 +291,8 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
   }
 
   try {
-<<<<<<< HEAD
+
     const response = await apiClient.get('/reports/statistics/countries', {
-=======
-    const response = await apiClient.get('/reports/sidebar-summary/countries', {
->>>>>>> fc5fc3a ([#124] refactor: url 오타 수정)
       params: {
         page: countryPage.value,
         size: size,
