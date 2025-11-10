@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user-reports")
+@RequestMapping("/v1/user-reports")
 @RequiredArgsConstructor
 public class UserReportController {
 

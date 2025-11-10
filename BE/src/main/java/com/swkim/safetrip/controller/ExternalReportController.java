@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/external-reports")
+@RequestMapping("/v1/external-reports")
 @RequiredArgsConstructor
 public class ExternalReportController {
 
