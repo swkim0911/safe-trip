@@ -83,7 +83,7 @@ class JwtAuthenticationProcessingFilterTest {
     @Test
     void 글_등록_요청에_액세스_토큰이_없다면_entryPoint가_호출된다() throws ServletException, IOException {
         // given
-        given(request.getRequestURI()).willReturn("/user-reports");
+        given(request.getRequestURI()).willReturn("/v1/user-reports");
         given(request.getMethod()).willReturn("POST");
         given(jwtProvider.extractAccessToken(request)).willReturn(Optional.empty());
 
@@ -108,7 +108,7 @@ class JwtAuthenticationProcessingFilterTest {
 
         DecodedJWT decodedJWT = mock(DecodedJWT.class);
 
-        given(request.getRequestURI()).willReturn("/user-reports");
+        given(request.getRequestURI()).willReturn("/v1/user-reports");
         given(request.getMethod()).willReturn("POST");
 
         given(jwtProvider.extractAccessToken(request)).willReturn(Optional.of(accessToken));
@@ -144,7 +144,7 @@ class JwtAuthenticationProcessingFilterTest {
 
         DecodedJWT decodedJWT = mock(DecodedJWT.class);
 
-        given(request.getRequestURI()).willReturn("/user-reports");
+        given(request.getRequestURI()).willReturn("/v1/user-reports");
         given(request.getMethod()).willReturn("POST");
 
         given(jwtProvider.extractAccessToken(request)).willReturn(Optional.of(accessTokenWithoutEmailClaim));
@@ -172,7 +172,7 @@ class JwtAuthenticationProcessingFilterTest {
 
         DecodedJWT decodedJWT = mock(DecodedJWT.class);
 
-        given(request.getRequestURI()).willReturn("/user-reports");
+        given(request.getRequestURI()).willReturn("/v1/user-reports");
         given(request.getMethod()).willReturn("POST");
 
         given(jwtProvider.extractAccessToken(request)).willReturn(Optional.of(accessToken));
