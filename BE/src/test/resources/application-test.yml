@@ -35,14 +35,15 @@ logging:
 cloud:
   aws:
     credentials:
-      access-key:
-      secret-key:
+      access-key: test-access-key
+      secret-key: test-secret-key
     region:
       static: ap-northeast-2
     stack:
       auto: false
     s3:
-      bucket-name:
+      bucket-name: test-bucket
+      base-path: test-path
 
 jwt:
   secretKey: asdfc123fsjdcm
