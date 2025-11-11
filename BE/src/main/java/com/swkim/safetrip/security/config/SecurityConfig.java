@@ -28,9 +28,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
-
     private final UserService userService;
     private final JwtProvider jwtProvider;
     private final ObjectMapper objectMapper;
@@ -48,19 +45,24 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
-                    // 공개 엔드포인트
-                    auth.requestMatchers("/error").permitAll()
-                            .requestMatchers(HttpMethod.GET, contextPath + "/reports/**").permitAll()
-                            .requestMatchers(contextPath + "/users", contextPath + "/auth/login", contextPath + "/auth/refresh").permitAll();
-
                     // 보호 엔드포인트
                     Arrays.stream(ProtectedEndpoint.values())
                             .forEach(ep -> auth
-                                    .requestMatchers(HttpMethod.valueOf(ep.getMethod()), contextPath + ep.getPath())
+                                    .requestMatchers(HttpMethod.valueOf(ep.getMethod()), ep.getPath())
                                     .authenticated()
                             );
-                    // 나머지 기본 정책
-                    auth.anyRequest().permitAll();
+
+                    // 공개 엔드포인트
+                    auth.requestMatchers("/error").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/v1/reports/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/v1/external-reports/**").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/v1/auth/login", "/v1/auth/refresh", "/v1/auth/logout").permitAll()
+                            .requestMatchers("/v1/users").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/v1/user-reports/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/v1/countries").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/v1/states").permitAll()
+                            .anyRequest().permitAll();  // 나머지 요청은 모두 허용
+
                 }).exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint()));
 
