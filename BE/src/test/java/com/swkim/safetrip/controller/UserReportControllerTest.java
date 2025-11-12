@@ -61,7 +61,7 @@ class UserReportControllerTest {
     private JwtProvider jwtProvider;
 
     @Test
-    @DisplayName("[Post] /user-reports 요청시 저장된 report의 id를 반환한다")
+    @DisplayName("scam 보고서 등록 요청 성공시 저장된 report의 id를 반환한다")
     @SuppressWarnings("unchecked")
     void scam_보고서_등록_성공시_id를_반환해야한다() throws Exception {
 
@@ -76,7 +76,7 @@ class UserReportControllerTest {
         given(userReportService.saveUserReport(any(String.class), any(UserReportSaveRequest.class), anyList())).willReturn(1L);
 
         // when
-        ResultActions resultActions = mockMvc.perform(multipart("/user-reports")
+        ResultActions resultActions = mockMvc.perform(multipart("/v1/user-reports")
                 .file(images)
                 .file(request)
                 .header("Authorization", "Bearer valid.token.here"));
@@ -90,7 +90,7 @@ class UserReportControllerTest {
     }
 
     @Test
-    @DisplayName("[GET] /user-reports/{reportId} 요청시 저장된 user report 정보를 보인다.")
+    @DisplayName("사용자 report 요청시 저장된 user report 정보를 보인다.")
     void 보고서_id_조회시_보고서_정보를_보인다() throws Exception {
 
         // given
@@ -108,7 +108,7 @@ class UserReportControllerTest {
 
         given(userReportService.getUserReport(reportId)).willReturn(response);
         // when
-        ResultActions resultActions = mockMvc.perform(get("/user-reports/" + "{reportId}", reportId));
+        ResultActions resultActions = mockMvc.perform(get("/v1/user-reports/" + "{reportId}", reportId));
 
         // then
         resultActions
@@ -124,7 +124,7 @@ class UserReportControllerTest {
         MockMultipartFile request = getMockMultipartFile(userReportSaveRequest);
 
         // when
-        ResultActions resultActions = mockMvc.perform(multipart("/user-reports")
+        ResultActions resultActions = mockMvc.perform(multipart("/v1/user-reports")
                 .file(request));
 
         // then
@@ -147,7 +147,7 @@ class UserReportControllerTest {
         doThrow(new InvalidAccessTokenException()).when(jwtProvider).verifyAccessToken(invalidAccessToken);
 
         // when
-        ResultActions resultActions = mockMvc.perform(multipart("/user-reports")
+        ResultActions resultActions = mockMvc.perform(multipart("/v1/user-reports")
                 .file(request));
         // then
         resultActions
@@ -168,7 +168,7 @@ class UserReportControllerTest {
         doThrow(new AccessTokenExpiredException()).when(jwtProvider).verifyAccessToken(expiredAccessToken);
 
         // when
-        ResultActions resultActions = mockMvc.perform(multipart("/user-reports")
+        ResultActions resultActions = mockMvc.perform(multipart("/v1/user-reports")
                 .file(request));
         // then
         resultActions

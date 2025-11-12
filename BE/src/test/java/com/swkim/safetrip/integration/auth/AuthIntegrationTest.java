@@ -59,7 +59,7 @@ public class AuthIntegrationTest {
 
         // when then
        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/auth/login")
+                        .post("/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
@@ -75,7 +75,7 @@ public class AuthIntegrationTest {
 
         // when then
         mockMvc.perform(MockMvcRequestBuilders
-                        .post("/auth/login")
+                        .post("/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())

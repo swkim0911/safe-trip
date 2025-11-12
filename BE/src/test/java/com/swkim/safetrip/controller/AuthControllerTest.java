@@ -80,7 +80,7 @@ class AuthControllerTest {
         when(authService.login(any(UserLoginRequest.class))).thenReturn(authTokensResponseDto);
 
         // then
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
@@ -94,7 +94,7 @@ class AuthControllerTest {
     @Test
     void 액세스_토큰_재발급_요청시_리프레시_토큰이_없다면_204를_반환한다() throws Exception {
         // give & when
-        ResultActions resultActions = mockMvc.perform(post("/auth/refresh"));
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/refresh"));
 
         // then
         resultActions
@@ -104,7 +104,7 @@ class AuthControllerTest {
     @Test
     void 액세스_토큰_재발급_요청시_쿠키에_리프레시_토큰이_없다면_400_예외가_발생한다() throws Exception {
         // give & when
-        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/refresh")
                 .cookie(new Cookie("refreshToken", ""))); // 빈 문자열 전달
         // when
         resultActions
@@ -115,7 +115,7 @@ class AuthControllerTest {
     @Test
     void 액세스_토큰_재발급_요청시_쿠키의_이름이_refreshToken이_아니면_204_예외가_발생한다() throws Exception {
         // give & when
-        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/refresh")
                 .cookie(new Cookie("wrongName", "im.refresh.token")));
         // when
         resultActions
@@ -131,7 +131,7 @@ class AuthControllerTest {
                 .willThrow(new RefreshTokenExpiredException());
 
         // when
-        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/refresh")
                 .cookie(new Cookie("refreshToken", expiredRefreshToken)));
 
         // then
@@ -151,7 +151,7 @@ class AuthControllerTest {
                 .willThrow(new InvalidRefreshTokenException());
 
         // when
-        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/refresh")
                 .cookie(new Cookie("refreshToken", inValidRefreshToken)));
         // then
         resultActions
@@ -171,7 +171,7 @@ class AuthControllerTest {
                 .willThrow(new InvalidRefreshTokenException());
 
         // when
-        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/refresh")
                 .cookie(new Cookie("refreshToken", refreshToken)));
         // then
         resultActions
@@ -200,7 +200,7 @@ class AuthControllerTest {
         given(authService.reIssueAccessToken(validRefreshToken)).willReturn(tokensResponseDto);
 
         // when
-        ResultActions resultActions = mockMvc.perform(post("/auth/refresh")
+        ResultActions resultActions = mockMvc.perform(post("/v1/auth/refresh")
                 .cookie(new Cookie("refreshToken", validRefreshToken)));
         // then
         resultActions

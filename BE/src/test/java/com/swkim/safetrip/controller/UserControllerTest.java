@@ -52,7 +52,7 @@ public class UserControllerTest {
         given(userService.signup(any(UserSignUpRequest.class))).willReturn(1L);
 
         //when
-        ResultActions resultActions = mockMvc.perform(post("/users")
+        ResultActions resultActions = mockMvc.perform(post("/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signUpRequest)));
 
@@ -73,7 +73,7 @@ public class UserControllerTest {
                 .build();
 
         //when
-        ResultActions resultActions = mockMvc.perform(post("/users")
+        ResultActions resultActions = mockMvc.perform(post("/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signUpRequest)));
 
@@ -94,7 +94,7 @@ public class UserControllerTest {
                 .build();
 
         //when
-        ResultActions resultActions = mockMvc.perform(post("/users")
+        ResultActions resultActions = mockMvc.perform(post("/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signUpRequest)));
 

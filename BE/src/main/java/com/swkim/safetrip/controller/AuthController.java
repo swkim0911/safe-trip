@@ -20,7 +20,7 @@ import static com.swkim.safetrip.global.utils.CookieUtils.makeExpiredRefreshToke
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth")
+@RequestMapping("/v1/auth")
 public class AuthController {
 
     private final AuthService authService;
