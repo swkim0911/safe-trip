@@ -12,7 +12,7 @@ public class WebProdConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://makesafetrip.vercel.app")
+                .allowedOrigins("https://www.safetrip.world", "https://safetrip.world")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("Content-Type", "Authorization")
                 .allowCredentials(true)
