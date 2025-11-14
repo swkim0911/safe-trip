@@ -1,6 +1,6 @@
 package com.swkim.safetrip.repository;
 
-import com.swkim.safetrip.dto.response.LocationScamStatisticsItem;
+import com.swkim.safetrip.dto.response.RegionScamStatisticsItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -49,8 +49,8 @@ public class ReportJdbcRepository {
         GROUP BY c.id, c.name, c.lat, c.lng
     """;
 
-    public List<LocationScamStatisticsItem> findCountryStatistics() {
-        return jdbc.query(findCountryStatisticsSQL, Map.of(), (rs, i) -> new LocationScamStatisticsItem(
+    public List<RegionScamStatisticsItem> findCountryStatistics() {
+        return jdbc.query(findCountryStatisticsSQL, Map.of(), (rs, i) -> new RegionScamStatisticsItem(
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getDouble("lat"),
@@ -59,8 +59,8 @@ public class ReportJdbcRepository {
                 ));
     }
 
-    public List<LocationScamStatisticsItem> findStateStatistics() {
-        return jdbc.query(findStateStatisticsSQL, Map.of(), (rs, i) -> new LocationScamStatisticsItem(
+    public List<RegionScamStatisticsItem> findStateStatistics() {
+        return jdbc.query(findStateStatisticsSQL, Map.of(), (rs, i) -> new RegionScamStatisticsItem(
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getDouble("lat"),
@@ -69,8 +69,8 @@ public class ReportJdbcRepository {
         ));
     }
 
-    public List<LocationScamStatisticsItem> findCityStatistics() {
-        return jdbc.query(findCityStatisticsSQL, Map.of(), (rs, i) -> new LocationScamStatisticsItem(
+    public List<RegionScamStatisticsItem> findCityStatistics() {
+        return jdbc.query(findCityStatisticsSQL, Map.of(), (rs, i) -> new RegionScamStatisticsItem(
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getDouble("lat"),

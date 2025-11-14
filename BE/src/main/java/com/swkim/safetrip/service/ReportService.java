@@ -1,7 +1,7 @@
 package com.swkim.safetrip.service;
 
-import com.swkim.safetrip.dto.response.LocationScamStatisticsItem;
-import com.swkim.safetrip.dto.response.LocationScamStatisticsResponse;
+import com.swkim.safetrip.dto.response.RegionScamStatisticsItem;
+import com.swkim.safetrip.dto.response.RegionScamStatisticsResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.repository.ReportJdbcRepository;
 import com.swkim.safetrip.repository.ReportNativeRepository;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.swkim.safetrip.dto.response.LocationScamStatisticsResponse.LocationType.*;
+import static com.swkim.safetrip.dto.response.RegionScamStatisticsResponse.RegionType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -23,21 +23,21 @@ public class ReportService {
     private final ReportNativeRepository reportNativeRepository;
 
     @Transactional(readOnly = true)
-    public LocationScamStatisticsResponse getCountryStatistics(){
-        List<LocationScamStatisticsItem> countryStatisticsItems = reportJdbcRepository.findCountryStatistics();
-        return new LocationScamStatisticsResponse(COUNTRY, countryStatisticsItems);
+    public RegionScamStatisticsResponse getCountryStatistics(){
+        List<RegionScamStatisticsItem> countryStatisticsItems = reportJdbcRepository.findCountryStatistics();
+        return new RegionScamStatisticsResponse(COUNTRY, countryStatisticsItems);
     }
 
     @Transactional(readOnly = true)
-    public LocationScamStatisticsResponse getStateStatistics(){
-        List<LocationScamStatisticsItem> stateStatisticsItems = reportJdbcRepository.findStateStatistics();
-        return new LocationScamStatisticsResponse(STATE, stateStatisticsItems);
+    public RegionScamStatisticsResponse getStateStatistics(){
+        List<RegionScamStatisticsItem> stateStatisticsItems = reportJdbcRepository.findStateStatistics();
+        return new RegionScamStatisticsResponse(STATE, stateStatisticsItems);
     }
 
     @Transactional(readOnly = true)
-    public LocationScamStatisticsResponse getCityStatistics(){
-        List<LocationScamStatisticsItem> cityStatisticsItems = reportJdbcRepository.findCityStatistics();
-        return new LocationScamStatisticsResponse(CITY, cityStatisticsItems);
+    public RegionScamStatisticsResponse getCityStatistics(){
+        List<RegionScamStatisticsItem> cityStatisticsItems = reportJdbcRepository.findCityStatistics();
+        return new RegionScamStatisticsResponse(CITY, cityStatisticsItems);
     }
 
 }

@@ -1,6 +1,6 @@
 package com.swkim.safetrip.repository;
 
-import com.swkim.safetrip.dto.response.LocationScamStatisticsItem;
+import com.swkim.safetrip.dto.response.RegionScamStatisticsItem;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.enums.Source;
 import com.swkim.safetrip.global.exception.custom.InvalidSortKeyException;
@@ -25,7 +25,7 @@ public class ReportNativeRepository {
 
     private final EntityManager em;
 
-    public Slice<LocationScamStatisticsItem> findCountryStatisticsSlice(Pageable pageable) {
+    public Slice<RegionScamStatisticsItem> findCountryStatisticsSlice(Pageable pageable) {
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
@@ -54,15 +54,15 @@ public class ReportNativeRepository {
         List<Object[]> results = query.getResultList();
 
         // DTO 매핑
-        List<LocationScamStatisticsItem> items = getLocationScamStatisticsItems(results);
+        List<RegionScamStatisticsItem> items = getRegionScamStatisticsItems(results);
 
         boolean hasNext = items.size() > pageSize;
-        List<LocationScamStatisticsItem> content = hasNext ? items.subList(0, pageSize) : items;
+        List<RegionScamStatisticsItem> content = hasNext ? items.subList(0, pageSize) : items;
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
-    public Slice<LocationScamStatisticsItem> findStateStatisticsSliceByCountryId(Long countryId, Pageable pageable){
+    public Slice<RegionScamStatisticsItem> findStateStatisticsSliceByCountryId(Long countryId, Pageable pageable){
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
@@ -91,15 +91,15 @@ public class ReportNativeRepository {
         List<Object[]> results = query.getResultList();
 
         // DTO 매핑
-        List<LocationScamStatisticsItem> items = getLocationScamStatisticsItems(results);
+        List<RegionScamStatisticsItem> items = getRegionScamStatisticsItems(results);
 
         boolean hasNext = items.size() > pageSize;
-        List<LocationScamStatisticsItem> content = hasNext ? items.subList(0, pageSize) : items;
+        List<RegionScamStatisticsItem> content = hasNext ? items.subList(0, pageSize) : items;
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
-    public Slice<LocationScamStatisticsItem> findCityStatisticsSliceByStateId(Long stateId, Pageable pageable) {
+    public Slice<RegionScamStatisticsItem> findCityStatisticsSliceByStateId(Long stateId, Pageable pageable) {
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
@@ -128,10 +128,10 @@ public class ReportNativeRepository {
         List<Object[]> results = query.getResultList();
 
         // DTO 매핑
-        List<LocationScamStatisticsItem> items = getLocationScamStatisticsItems(results);
+        List<RegionScamStatisticsItem> items = getRegionScamStatisticsItems(results);
 
         boolean hasNext = items.size() > pageSize;
-        List<LocationScamStatisticsItem> content = hasNext ? items.subList(0, pageSize) : items;
+        List<RegionScamStatisticsItem> content = hasNext ? items.subList(0, pageSize) : items;
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
@@ -254,9 +254,9 @@ public class ReportNativeRepository {
                 .toList();
     }
 
-    private List<LocationScamStatisticsItem> getLocationScamStatisticsItems(List<Object[]> results) {
+    private List<RegionScamStatisticsItem> getRegionScamStatisticsItems(List<Object[]> results) {
         return results.stream()
-                .map(row -> new LocationScamStatisticsItem(
+                .map(row -> new RegionScamStatisticsItem(
                         ((Number) row[0]).longValue(),
                         (String) row[1],
                         ((Number) row[2]).doubleValue(),
