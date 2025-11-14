@@ -1,6 +1,7 @@
 package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.dto.response.world.CitiesResponse;
 import com.swkim.safetrip.dto.response.world.CountriesResponse;
 import com.swkim.safetrip.dto.response.world.StatesResponse;
@@ -85,5 +86,34 @@ public class WorldController {
         return ApiResult.of(HttpStatus.OK.value(), "Report statistics by city", cityStatistics);
     }
 
+    @Operation(
+            summary = "특정 국가의 모든 스캠 리포트 조회",
+            description = "선택한 국가에서 발생한 모든 스캠 리포트 요약 정보를 조회합니다."
+    )
+    @GetMapping("/countries/{countryId}/reports")
+    public ApiResult<Slice<ReportSummaryItem>> getReportsByCountry(@PathVariable Long countryId, Pageable pageable) {
+        Slice<ReportSummaryItem> reports = countryService.getReportsByCountry(countryId, pageable);
+        return ApiResult.of(HttpStatus.OK.value(), "All report summaries in country", reports);
+    }
+
+    @Operation(
+            summary = "특정 주(State)의 모든 스캠 리포트 조회",
+            description = "선택한 주(State)에서 발생한 모든 스캠 리포트 요약 정보를 조회합니다."
+    )
+    @GetMapping("/states/{stateId}/reports")
+    public ApiResult<Slice<ReportSummaryItem>> getReportsByState(@PathVariable Long stateId, Pageable pageable) {
+        Slice<ReportSummaryItem> reports = stateService.getReportsByState(stateId, pageable);
+        return ApiResult.of(HttpStatus.OK.value(), "All report summaries in state", reports);
+    }
+
+    @Operation(
+            summary = "특정 도시(City)의 모든 스캠 리포트 조회",
+            description = "선택한 도시(City)에서 발생한 모든 스캠 리포트 요약 정보를 조회합니다."
+    )
+    @GetMapping("/cities/{cityId}/reports")
+    public ApiResult<Slice<ReportSummaryItem>> getReportsByCity(@PathVariable Long cityId, Pageable pageable) {
+        Slice<ReportSummaryItem> reports = cityService.getReportsByCity(cityId, pageable);
+        return ApiResult.of(HttpStatus.OK.value(), "All report summaries in city", reports);
+    }
 
 }

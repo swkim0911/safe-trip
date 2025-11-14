@@ -23,23 +23,6 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    @Operation(summary = "특정 국가의 모든 스캠 리포트 조회", description = "선택한 국가에서 발생한 모든 스캠 리포트 요약 정보를 조회합니다")
-    @GetMapping(value = "/countries/{countryId}/reports")
-    public ApiResult<Slice<ReportSummaryItem>> getReportSummariesByCountry(@PathVariable Long countryId, Pageable pageable) {
-        Slice<ReportSummaryItem> reportSummaryPages = reportService.getReportSummaryPagesByCountry(countryId, pageable);
-        return ApiResult.of(HttpStatus.OK.value(), "All report summaries in country", reportSummaryPages);
-    }
-
-    @Operation(
-        summary = "스캠 리포트 요약 정보 조회", 
-        description = "도시 ID를 기준으로 해당 도시의 스캠 리포트 요약 정보를 조회합니다."
-    )
-    @GetMapping("/summary")
-    public ApiResult<Slice<ReportSummaryItem>> getReportSummaries(@RequestParam(required = false) Long cityId, Pageable pageable) {
-        Slice<ReportSummaryItem> summaries = reportService.getSummaries(cityId, pageable);
-        return ApiResult.of(HttpStatus.OK.value(), "Report summaries", summaries);
-    }
-
     @Operation(
         summary = "리포트 개요 조회",
         description = "지도 zoom 레벨에 따라 적절한 집계 단위(국가/주/도시)의 리포트 개요 정보를 반환합니다."

@@ -1,6 +1,7 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.dto.response.world.CitiesResponse;
 import com.swkim.safetrip.dto.response.world.CitiesResponse.CityDto;
 import com.swkim.safetrip.dto.response.world.StatesResponse;
@@ -38,5 +39,10 @@ public class CityService {
     @Transactional(readOnly = true)
     public Slice<LocationScamSummaryItem> getCityStatistics(Long stateId, Pageable pageable) {
         return reportNativeRepository.findCityStatisticsSliceByStateId(stateId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Slice<ReportSummaryItem> getReportsByCity(Long cityId, Pageable pageable) {
+        return reportNativeRepository.findReportSummarySliceByCityId(cityId, pageable);
     }
 }

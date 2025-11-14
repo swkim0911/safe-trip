@@ -1,6 +1,7 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.dto.response.world.CountriesResponse;
 import com.swkim.safetrip.entity.world.Country;
 import com.swkim.safetrip.global.exception.custom.CountryNotFoundException;
@@ -38,6 +39,11 @@ public class CountryService {
     @Transactional(readOnly = true)
     public Slice<LocationScamSummaryItem> getCountryStatistics(Pageable pageable) {
         return reportNativeRepository.findCountryStatisticsSlice(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Slice<ReportSummaryItem> getReportsByCountry(Long countryId, Pageable pageable) {
+        return reportNativeRepository.findReportSummarySliceByCountryId(countryId, pageable);
     }
 
 }
