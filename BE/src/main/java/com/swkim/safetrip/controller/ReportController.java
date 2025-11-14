@@ -24,17 +24,6 @@ public class ReportController {
     private final ReportService reportService;
 
     @Operation(
-        summary = "국가별 리포트 통계 조회", 
-        description = "각 국가별 리포트 개수 및 통계 정보를 조회합니다. " +
-                     "향후 스캠 유형별 분포, 위험도 점수, 트렌드 등의 통계 정보가 추가될 수 있습니다."
-    )
-    @GetMapping(value = "/statistics/countries")
-    public ApiResult<Slice<LocationScamSummaryItem>> getCountryStatistics(Pageable pageable){
-        Slice<LocationScamSummaryItem> countrySummaryPages = reportService.getCountrySummaryPages(pageable);
-        return ApiResult.of(HttpStatus.OK.value(), "Report statistics by country", countrySummaryPages);
-    }
-
-    @Operation(
         summary = "주별 리포트 통계 조회", 
         description = "특정 국가 내 제1 행정구역(주별 리포트 개수 및 통계 정보를 조회합니다."
     )

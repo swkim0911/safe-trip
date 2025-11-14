@@ -25,7 +25,7 @@ public class ReportNativeRepository {
 
     private final EntityManager em;
 
-    public Slice<LocationScamSummaryItem> findCountrySummarySlice(Pageable pageable) {
+    public Slice<LocationScamSummaryItem> findCountryStatisticsSlice(Pageable pageable) {
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""

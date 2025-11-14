@@ -41,11 +41,6 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
-    public Slice<LocationScamSummaryItem> getCountrySummaryPages(Pageable pageable) {
-        return reportNativeRepository.findCountrySummarySlice(pageable);
-    }
-
-    @Transactional(readOnly = true)
     public Slice<LocationScamSummaryItem> getStateSummaryPages(Long countryId, Pageable pageable) {
         return reportNativeRepository.findStateSummarySliceByCountryId(countryId, pageable);
     }
