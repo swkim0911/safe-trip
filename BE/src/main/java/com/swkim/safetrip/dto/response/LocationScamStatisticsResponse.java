@@ -5,9 +5,9 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record LocationScamSummaryResponse(
+public record LocationScamStatisticsResponse(
         LocationType locationType,// country or state or city
-        List<LocationScamSummaryItem> items
+        List<LocationScamStatisticsItem> items
 ) {
 
     public enum LocationType {
@@ -16,5 +16,4 @@ public record LocationScamSummaryResponse(
         CITY
     }
 }
-
 

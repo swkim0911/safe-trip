@@ -1,6 +1,6 @@
 package com.swkim.safetrip.repository;
 
-import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.dto.response.LocationScamStatisticsItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -14,7 +14,7 @@ public class ReportJdbcRepository {
 
     private final NamedParameterJdbcTemplate jdbc;
 
-    private static final String findCountrySummariesSQL = """
+    private static final String findCountryStatisticsSQL = """
         SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
         FROM (
             SELECT country_id FROM user_report
@@ -25,7 +25,7 @@ public class ReportJdbcRepository {
         GROUP BY c.id, c.name, c.lat, c.lng
     """;
 
-    private static final String findStateSummariesSQL = """
+    private static final String findStateStatisticsSQL = """
         SELECT s.id, s.name, s.lat, s.lng, COUNT(*) AS scam_cnt
         FROM (
             SELECT state_id FROM user_report
@@ -37,7 +37,7 @@ public class ReportJdbcRepository {
         GROUP BY s.id, s.name, s.lat, s.lng
     """;
 
-    private static final String findCitySummariesSQL = """
+    private static final String findCityStatisticsSQL = """
         SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
         FROM (
             SELECT city_id FROM user_report
@@ -49,8 +49,8 @@ public class ReportJdbcRepository {
         GROUP BY c.id, c.name, c.lat, c.lng
     """;
 
-    public List<LocationScamSummaryItem> findCountrySummaries() {
-        return jdbc.query(findCountrySummariesSQL, Map.of(), (rs, i) -> new LocationScamSummaryItem(
+    public List<LocationScamStatisticsItem> findCountryStatistics() {
+        return jdbc.query(findCountryStatisticsSQL, Map.of(), (rs, i) -> new LocationScamStatisticsItem(
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getDouble("lat"),
@@ -59,8 +59,8 @@ public class ReportJdbcRepository {
                 ));
     }
 
-    public List<LocationScamSummaryItem> findStateSummaries() {
-        return jdbc.query(findStateSummariesSQL, Map.of(), (rs, i) -> new LocationScamSummaryItem(
+    public List<LocationScamStatisticsItem> findStateStatistics() {
+        return jdbc.query(findStateStatisticsSQL, Map.of(), (rs, i) -> new LocationScamStatisticsItem(
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getDouble("lat"),
@@ -69,8 +69,8 @@ public class ReportJdbcRepository {
         ));
     }
 
-    public List<LocationScamSummaryItem> findCitySummaries() {
-        return jdbc.query(findCitySummariesSQL, Map.of(), (rs, i) -> new LocationScamSummaryItem(
+    public List<LocationScamStatisticsItem> findCityStatistics() {
+        return jdbc.query(findCityStatisticsSQL, Map.of(), (rs, i) -> new LocationScamStatisticsItem(
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getDouble("lat"),

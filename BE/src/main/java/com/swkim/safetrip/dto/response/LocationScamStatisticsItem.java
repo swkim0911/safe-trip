@@ -3,7 +3,7 @@ package com.swkim.safetrip.dto.response;
 import lombok.Builder;
 
 @Builder
-public record LocationScamSummaryItem (
+public record LocationScamStatisticsItem (
 
     Long id,
     String name, // country or state or city name
@@ -11,3 +11,4 @@ public record LocationScamSummaryItem (
     Double lng,
     Long scamCnt
 ){}
+

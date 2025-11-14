@@ -1,7 +1,7 @@
 package com.swkim.safetrip.controller;
 
-import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
-import com.swkim.safetrip.dto.response.LocationScamSummaryResponse;
+import com.swkim.safetrip.dto.response.LocationScamStatisticsItem;
+import com.swkim.safetrip.dto.response.LocationScamStatisticsResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.dto.response.world.CitiesResponse;
 import com.swkim.safetrip.dto.response.world.CountriesResponse;
@@ -64,8 +64,8 @@ public class WorldController {
                      "향후 스캠 유형별 분포, 위험도 점수, 트렌드 등의 통계 정보가 추가될 수 있습니다."
     )
     @GetMapping(value = "/countries/statistics")
-    public ApiResult<Slice<LocationScamSummaryItem>> getCountryStatistics(Pageable pageable){
-        Slice<LocationScamSummaryItem> countryStatistics = countryService.getCountryStatistics(pageable);
+    public ApiResult<Slice<LocationScamStatisticsItem>> getCountryStatistics(Pageable pageable){
+        Slice<LocationScamStatisticsItem> countryStatistics = countryService.getCountryStatistics(pageable);
         return ApiResult.of(HttpStatus.OK.value(), "Report statistics by country", countryStatistics);
     }
 
@@ -74,8 +74,8 @@ public class WorldController {
             description = "특정 국가 내 제1 행정구역(주별 리포트 개수 및 통계 정보를 조회합니다."
     )
     @GetMapping(value = "/states/statistics")
-    public ApiResult<Slice<LocationScamSummaryItem>> getStateStatistics(@RequestParam Long countryId, Pageable pageable){
-        Slice<LocationScamSummaryItem> stateStatistics = stateService.getStateStatistics(countryId, pageable);
+    public ApiResult<Slice<LocationScamStatisticsItem>> getStateStatistics(@RequestParam Long countryId, Pageable pageable){
+        Slice<LocationScamStatisticsItem> stateStatistics = stateService.getStateStatistics(countryId, pageable);
         return ApiResult.of(HttpStatus.OK.value(), "Report statistics by state", stateStatistics);
     }
 
@@ -84,8 +84,8 @@ public class WorldController {
             description = "특정 주/도 내 도시별 리포트 개수 및 통계 정보를 조회합니다."
     )
     @GetMapping(value = "/cities/statistics")
-    public ApiResult<Slice<LocationScamSummaryItem>> getCityStatistics(@RequestParam Long stateId, Pageable pageable){
-        Slice<LocationScamSummaryItem> cityStatistics = cityService.getCityStatistics(stateId, pageable);
+    public ApiResult<Slice<LocationScamStatisticsItem>> getCityStatistics(@RequestParam Long stateId, Pageable pageable){
+        Slice<LocationScamStatisticsItem> cityStatistics = cityService.getCityStatistics(stateId, pageable);
         return ApiResult.of(HttpStatus.OK.value(), "Report statistics by city", cityStatistics);
     }
 
@@ -125,15 +125,15 @@ public class WorldController {
                          "zoom < 6: 국가별 통계, 6 <= zoom < 9: 주별 통계, zoom >= 9: 도시별 통계"
     )
     @GetMapping("/map/overview")
-    public ApiResult<LocationScamSummaryResponse> getMapOverview(@RequestParam Integer zoom){
-        LocationScamSummaryResponse summaries;
+    public ApiResult<LocationScamStatisticsResponse> getMapOverview(@RequestParam Integer zoom){
+        LocationScamStatisticsResponse summaries;
 
         if (zoom < 6) {
-            summaries = reportService.getCountrySummaries();
+            summaries = reportService.getCountryStatistics();
         } else if (zoom < 9) {
-            summaries = reportService.getStateSummaries();
+            summaries = reportService.getStateStatistics();
         } else {
-            summaries = reportService.getCitySummaries();
+            summaries = reportService.getCityStatistics();
         }
         return ApiResult.of(HttpStatus.OK.value(), "Map overview by zoom level", summaries);
     }
