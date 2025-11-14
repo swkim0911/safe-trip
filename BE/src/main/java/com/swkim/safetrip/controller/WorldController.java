@@ -1,6 +1,7 @@
 package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.dto.response.LocationScamSummaryResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.dto.response.world.CitiesResponse;
 import com.swkim.safetrip.dto.response.world.CountriesResponse;
@@ -8,6 +9,7 @@ import com.swkim.safetrip.dto.response.world.StatesResponse;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.service.CityService;
 import com.swkim.safetrip.service.CountryService;
+import com.swkim.safetrip.service.ReportService;
 import com.swkim.safetrip.service.StateService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class WorldController {
     private final CountryService countryService;
     private final StateService stateService;
     private final CityService cityService;
+    private final ReportService reportService;
 
     @Operation(
             summary = "전체 국가 목록 조회",
@@ -114,6 +117,25 @@ public class WorldController {
     public ApiResult<Slice<ReportSummaryItem>> getReportsByCity(@PathVariable Long cityId, Pageable pageable) {
         Slice<ReportSummaryItem> reports = cityService.getReportsByCity(cityId, pageable);
         return ApiResult.of(HttpStatus.OK.value(), "All report summaries in city", reports);
+    }
+
+    @Operation(
+            summary = "지도 통계 개요 조회",
+            description = "지도 zoom 레벨에 따라 적절한 집계 단위(국가/주/도시)의 통계 개요 정보를 반환합니다. " +
+                         "zoom < 6: 국가별 통계, 6 <= zoom < 9: 주별 통계, zoom >= 9: 도시별 통계"
+    )
+    @GetMapping("/map/overview")
+    public ApiResult<LocationScamSummaryResponse> getMapOverview(@RequestParam Integer zoom){
+        LocationScamSummaryResponse summaries;
+
+        if (zoom < 6) {
+            summaries = reportService.getCountrySummaries();
+        } else if (zoom < 9) {
+            summaries = reportService.getStateSummaries();
+        } else {
+            summaries = reportService.getCitySummaries();
+        }
+        return ApiResult.of(HttpStatus.OK.value(), "Map overview by zoom level", summaries);
     }
 
 }
