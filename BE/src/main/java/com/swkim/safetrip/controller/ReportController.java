@@ -23,16 +23,6 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    @Operation(
-        summary = "도시별 리포트 통계 조회", 
-        description = "특정 주/도 내 도시별 리포트 개수 및 통계 정보를 조회합니다."
-    )
-    @GetMapping(value = "/statistics/cities")
-    public ApiResult<Slice<LocationScamSummaryItem>> getCityStatistics(@RequestParam Long stateId, Pageable pageable){
-        Slice<LocationScamSummaryItem> citySummaryPage = reportService.getCitySummaryPages(stateId, pageable);
-        return ApiResult.of(HttpStatus.OK.value(), "Report statistics by city", citySummaryPage);
-    }
-
     @Operation(summary = "특정 국가의 모든 스캠 리포트 조회", description = "선택한 국가에서 발생한 모든 스캠 리포트 요약 정보를 조회합니다")
     @GetMapping(value = "/countries/{countryId}/reports")
     public ApiResult<Slice<ReportSummaryItem>> getReportSummariesByCountry(@PathVariable Long countryId, Pageable pageable) {

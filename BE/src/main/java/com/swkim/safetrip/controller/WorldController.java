@@ -75,5 +75,15 @@ public class WorldController {
         return ApiResult.of(HttpStatus.OK.value(), "Report statistics by state", stateStatistics);
     }
 
+    @Operation(
+            summary = "도시별 리포트 통계 조회",
+            description = "특정 주/도 내 도시별 리포트 개수 및 통계 정보를 조회합니다."
+    )
+    @GetMapping(value = "/cities/statistics")
+    public ApiResult<Slice<LocationScamSummaryItem>> getCityStatistics(@RequestParam Long stateId, Pageable pageable){
+        Slice<LocationScamSummaryItem> cityStatistics = cityService.getCityStatistics(stateId, pageable);
+        return ApiResult.of(HttpStatus.OK.value(), "Report statistics by city", cityStatistics);
+    }
+
 
 }

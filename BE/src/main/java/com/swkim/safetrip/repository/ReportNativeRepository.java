@@ -99,7 +99,7 @@ public class ReportNativeRepository {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
-    public Slice<LocationScamSummaryItem> findCitySummarySliceByStateId(Long stateId, Pageable pageable) {
+    public Slice<LocationScamSummaryItem> findCityStatisticsSliceByStateId(Long stateId, Pageable pageable) {
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
