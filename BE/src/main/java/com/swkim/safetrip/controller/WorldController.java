@@ -13,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1")
@@ -66,6 +63,16 @@ public class WorldController {
     public ApiResult<Slice<LocationScamSummaryItem>> getCountryStatistics(Pageable pageable){
         Slice<LocationScamSummaryItem> countryStatistics = countryService.getCountryStatistics(pageable);
         return ApiResult.of(HttpStatus.OK.value(), "Report statistics by country", countryStatistics);
+    }
+
+    @Operation(
+            summary = "주별 리포트 통계 조회",
+            description = "특정 국가 내 제1 행정구역(주별 리포트 개수 및 통계 정보를 조회합니다."
+    )
+    @GetMapping(value = "/states/statistics")
+    public ApiResult<Slice<LocationScamSummaryItem>> getStateStatistics(@RequestParam Long countryId, Pageable pageable){
+        Slice<LocationScamSummaryItem> stateStatistics = stateService.getStateStatistics(countryId, pageable);
+        return ApiResult.of(HttpStatus.OK.value(), "Report statistics by state", stateStatistics);
     }
 
 

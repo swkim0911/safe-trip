@@ -24,16 +24,6 @@ public class ReportController {
     private final ReportService reportService;
 
     @Operation(
-        summary = "주별 리포트 통계 조회", 
-        description = "특정 국가 내 제1 행정구역(주별 리포트 개수 및 통계 정보를 조회합니다."
-    )
-    @GetMapping(value = "/statistics/states")
-    public ApiResult<Slice<LocationScamSummaryItem>> getStateStatistics(@RequestParam Long countryId, Pageable pageable){
-        Slice<LocationScamSummaryItem> stateSummaryPage = reportService.getStateSummaryPages(countryId, pageable);
-        return ApiResult.of(HttpStatus.OK.value(), "Report statistics by state", stateSummaryPage);
-    }
-
-    @Operation(
         summary = "도시별 리포트 통계 조회", 
         description = "특정 주/도 내 도시별 리포트 개수 및 통계 정보를 조회합니다."
     )

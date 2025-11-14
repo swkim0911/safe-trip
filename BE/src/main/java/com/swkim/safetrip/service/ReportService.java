@@ -40,10 +40,6 @@ public class ReportService {
         return new LocationScamSummaryResponse(CITY, stateSummariesItems);
     }
 
-    @Transactional(readOnly = true)
-    public Slice<LocationScamSummaryItem> getStateSummaryPages(Long countryId, Pageable pageable) {
-        return reportNativeRepository.findStateSummarySliceByCountryId(countryId, pageable);
-    }
 
     @Transactional(readOnly = true)
     public Slice<LocationScamSummaryItem> getCitySummaryPages(Long stateId, Pageable pageable) {
