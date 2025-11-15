@@ -120,7 +120,7 @@ public class WorldController {
     }
 
     @Operation(
-            summary = "지도 통계 개요 조회",
+            summary = "지도 통계 요약 조회",
             description = "지도 zoom 레벨에 따라 적절한 집계 단위(국가/주/도시)의 통계 개요 정보를 반환합니다. " +
                          "zoom < 6: 국가별 통계, 6 <= zoom < 9: 주별 통계, zoom >= 9: 도시별 통계"
     )
