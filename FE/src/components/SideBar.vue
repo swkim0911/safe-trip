@@ -34,7 +34,7 @@
           <div class="d-flex align-items-center justify-content-center position-relative mb-3">
             <button
               class="btn position-absolute start-0"
-              @click="backToList('country')"
+              @click="goToParentView('country')"
             >
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
@@ -81,7 +81,7 @@
           <div class="d-flex align-items-center justify-content-center position-relative mb-3">
             <button
               class="btn position-absolute start-0"
-              @click="backToList('state')"
+              @click="goToParentView('state')"
             >
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
@@ -125,7 +125,7 @@
           <div class="d-flex align-items-center justify-content-center position-relative mb-2">
             <button
               class="btn position-absolute start-0"
-              @click="backToPreviousView"
+              @click="backFromReport"
             >
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
@@ -615,11 +615,11 @@ const loadSidebarReportSummary = async (cityId, cityName, mode = 'click') => {
 }
 
 
-const backToList = (type) => {
+const goToParentView = (type) => {
   viewType.value = type;
 }
 
-const backToPreviousView = () => {
+const backFromReport = () => {
   if (selectedCity.id) {
     // 도시에서 온 경우
     viewType.value = 'city';
