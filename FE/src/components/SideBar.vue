@@ -2,12 +2,16 @@
   <div class="sidebar-container">
     <div :class="['sidebar', {'open': isOpen}]">
       <!-- 검색창 -->
-      <div class="sidebar-header form-group">
+      <div class="sidebar-header form-group position-relative">
+        <font-awesome-icon 
+          :icon="['fas', 'search']" 
+          class="search-icon"
+        />
         <input
         type="text"
         v-model="searchText"
         placeholder="Search by country, state, or city"
-        class="form-control form-control-lg mb-3"
+        class="form-control form-control-lg mb-3 ps-5"
         />
       </div>
 
@@ -49,6 +53,7 @@
               style="border-radius: 8px;"
             >
               <span class="d-flex align-items-center">
+                <font-awesome-icon :icon="['fas', 'file-alt']" class="me-2" />
                 See all reports
               </span>
               <span class="badge bg-light text-dark">
@@ -96,6 +101,7 @@
               style="border-radius: 8px;"
             >
               <span class="d-flex align-items-center">
+                <font-awesome-icon :icon="['fas', 'file-alt']" class="me-2" />
                 See all reports in {{ selectedState.name }}
               </span>
               <span class="badge bg-light text-dark">
@@ -147,8 +153,9 @@
                 {{ report.source === 'SAFETRIP' ? 'SAFETRIP' : '🤖 AI Bot' }}
               </span>
 
-              <div class="fw-bold mb-1 mt-3">
-                {{ report.title }}
+              <div class="fw-bold mb-1 mt-3 d-flex align-items-start">
+                <font-awesome-icon :icon="['fas', 'shield-alt']" class="me-2 text-danger mt-1" />
+                <span>{{ report.title }}</span>
               </div>
 
               <div class="mb-1">
@@ -167,8 +174,14 @@
 
     <!-- 토글 버튼 (사이드바 열기) -->
     <button @click="toggleSidebar" class="toggle-btn">
-      <span v-if="!isOpen">▶</span>
-      <span v-else>◀</span>
+      <font-awesome-icon 
+        v-if="!isOpen" 
+        :icon="['fas', 'chevron-right']" 
+      />
+      <font-awesome-icon 
+        v-else 
+        :icon="['fas', 'chevron-left']" 
+      />
     </button>
   </div>
   <ReportDetailModal :report="selectedReport"/>
@@ -700,6 +713,15 @@ $sidebar-width: 560px;
   align-items: center;
   font-size: 18px;
   margin-bottom: 20px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  z-index: 10;
 }
 
 .sidebar-body {
