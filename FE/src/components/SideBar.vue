@@ -6,7 +6,7 @@
         <input
         type="text"
         v-model="searchText"
-        placeholder="Country or State or City"
+        placeholder="Search by country, state, or city"
         class="form-control form-control-lg mb-3"
         />
       </div>
@@ -49,7 +49,7 @@
               style="border-radius: 8px;"
             >
               <span class="d-flex align-items-center">
-                View All Scam Reports
+                See all reports
               </span>
               <span class="badge bg-light text-dark">
                 {{ selectedCountry.scamCnt }} reports
@@ -59,7 +59,7 @@
 
           <!-- 하단: State 목록 -->
           <div>
-            <h6 class="fw-bold mb-2">States</h6>
+            <h6 class="fw-bold mb-2">Browse States</h6>
             <ul class="list-group">
               <li
                 class="list-group-item d-flex justify-content-between align-items-start"
@@ -85,7 +85,7 @@
             >
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
-            <h6 class="fw-bold mb-0 text-center">City of {{ selectedState.name }}</h6>
+            <h6 class="fw-bold mb-0 text-center">Cities in {{ selectedState.name }}</h6>
           </div>
 
           <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
@@ -96,7 +96,7 @@
               style="border-radius: 8px;"
             >
               <span class="d-flex align-items-center">
-                View All Reports in {{ selectedState.name }}
+                See all reports in {{ selectedState.name }}
               </span>
               <span class="badge bg-light text-dark">
                 {{ selectedState.scamCnt || 0 }} reports
@@ -131,9 +131,9 @@
             </button>
 
             <h6 class="fw-bold mb-0 text-center">
-              <span v-if="selectedCity.id">Scam of {{ selectedCity.name }}</span>
-              <span v-else-if="selectedState.id">Scam of {{ selectedState.name }}</span>
-              <span v-else>Scam of {{ selectedCountry.name }}</span>
+              <span v-if="selectedCity.id">Reports from {{ selectedCity.name }}</span>
+              <span v-else-if="selectedState.id">Reports from {{ selectedState.name }}</span>
+              <span v-else>Reports from {{ selectedCountry.name }}</span>
             </h6>
           </div>
           <ul class="list-group">
