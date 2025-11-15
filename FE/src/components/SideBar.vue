@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-container">
-    <!-- 사이드바 -->
     <div :class="['sidebar', {'open': isOpen}]">
+      <!-- 검색창 -->
       <div class="sidebar-header form-group">
         <input
         type="text"
@@ -9,8 +9,8 @@
         placeholder="Country or State or City"
         class="form-control form-control-lg mb-3"
         />
-      
       </div>
+
       <div class="sidebar-body" @scroll="onSidebarScroll" ref="sidebarRef">
         <template v-if="viewType === 'country'">
           <ul class="list-group">
@@ -18,7 +18,7 @@
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="country in sidebarCountries"
               :key="country.id"
-              @click="loadSidebarStateSummary(country.id, country.name)"
+              @click="loadCountryDetail(country.id, country.name, country.scamCnt)"
             >
               <div class="ms-2 me-auto">
                 <div class="fw-bold">{{ country.name }}</div>
@@ -31,42 +31,79 @@
         </template>
 
         <template v-else-if="viewType === 'state'">
-          <div class="d-flex align-items-center justify-content-center position-relative mb-2">
+          <div class="d-flex align-items-center justify-content-center position-relative mb-3">
             <button
               class="btn position-absolute start-0"
               @click="backToList('country')"
             >
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
-
-            <h6 class="fw-bold mb-0 text-center"> State of {{ selectedCountry.name }}</h6>
+            <h6 class="fw-bold mb-0 text-center">{{ selectedCountry.name }}</h6>
           </div>
-          <ul class="list-group">
-            <li
-              class="list-group-item d-flex justify-content-between align-items-start"
-              v-for="state in sidebarStates"
-              :key="state.id"
-              @click="loadSidebarCitySummary(state.id, state.name)"
+
+          <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
+          <div class="mb-3">
+            <button 
+              class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3"
+              @click="loadCountryAllReports(selectedCountry.id, selectedCountry.name)"
+              style="border-radius: 8px;"
             >
-              <div class="ms-2 me-auto">
-                <div class="fw-bold">{{ state.name }}</div>
-              </div>
-              <span class="badge text-bg-primary rounded-pill">{{ state.scamCnt }}</span>
-            </li>
-          </ul>
+              <span class="d-flex align-items-center">
+                View All Scam Reports
+              </span>
+              <span class="badge bg-light text-dark">
+                {{ selectedCountry.scamCnt }} reports
+              </span>
+            </button>
+          </div>
+
+          <!-- 하단: State 목록 -->
+          <div>
+            <h6 class="fw-bold mb-2">States</h6>
+            <ul class="list-group">
+              <li
+                class="list-group-item d-flex justify-content-between align-items-start"
+                v-for="state in sidebarStates"
+                :key="state.id"
+                @click="loadSidebarCityStatistics(state.id, state.name)"
+              >
+                <div class="ms-2 me-auto">
+                  <div class="fw-bold">{{ state.name }}</div>
+                </div>
+                <span class="badge text-bg-primary rounded-pill">{{ state.scamCnt }}</span>
+              </li>
+            </ul>
+          </div>
         </template>
 
+
         <template v-else-if="viewType === 'city'">
-          <div class="d-flex align-items-center justify-content-center position-relative mb-2">
+          <div class="d-flex align-items-center justify-content-center position-relative mb-3">
             <button
               class="btn position-absolute start-0"
               @click="backToList('state')"
             >
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
-
-            <h6 class="fw-bold mb-0 text-center"> City of {{ selectedState.name }}</h6>
+            <h6 class="fw-bold mb-0 text-center">City of {{ selectedState.name }}</h6>
           </div>
+
+          <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
+          <div class="mb-3">
+            <button 
+              class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3"
+              @click="loadStateAllReports(selectedState.id, selectedState.name)"
+              style="border-radius: 8px;"
+            >
+              <span class="d-flex align-items-center">
+                View All Reports in {{ selectedState.name }}
+              </span>
+              <span class="badge bg-light text-dark">
+                {{ selectedState.scamCnt || 0 }} reports
+              </span>
+            </button>
+          </div>
+
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
@@ -88,12 +125,16 @@
           <div class="d-flex align-items-center justify-content-center position-relative mb-2">
             <button
               class="btn position-absolute start-0"
-              @click="backToList('city')"
+              @click="backToPreviousView"
             >
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
 
-            <h6 class="fw-bold mb-0 text-center"> Scam of {{ selectedCity.name }}</h6>
+            <h6 class="fw-bold mb-0 text-center">
+              <span v-if="selectedCity.id">Scam of {{ selectedCity.name }}</span>
+              <span v-else-if="selectedState.id">Scam of {{ selectedState.name }}</span>
+              <span v-else>Scam of {{ selectedCountry.name }}</span>
+            </h6>
           </div>
           <ul class="list-group">
             <li
@@ -155,12 +196,14 @@ const sidebarReports = ref([]);
 
 const selectedCountry = reactive({
   id: null,
-  name: ''
+  name: '',
+  scamCnt: 0
 });
 
 const selectedState = reactive({
   id: null,
-  name: ''
+  name: '',
+  scamCnt: 0
 });
 
 const selectedCity = reactive({
@@ -252,6 +295,10 @@ function mapExternalReportDetail(result) {
   })
 }
 
+/**
+ * 사용자 리포트 상세 정보를 조회합니다.
+ * @param {number} reportId - 조회할 리포트 ID
+ */
 const loadUserReportDetailInfo = async (reportId) => {
   try {
     const response = await apiClient.get(`/user-reports/${reportId}`);
@@ -264,6 +311,10 @@ const loadUserReportDetailInfo = async (reportId) => {
   }
 }
 
+/**
+ * 외부 리포트 상세 정보를 조회합니다.
+ * @param {number} reportId - 조회할 리포트 ID
+ */
 const loadExternalReportDetailInfo = async (reportId) => {
   try {
     const response = await apiClient.get(`/external-reports/${reportId}`);
@@ -278,7 +329,12 @@ const loadExternalReportDetailInfo = async (reportId) => {
 
 
 
-const loadSidebarCountrySummary = async (mode = 'click') => {
+/**
+ * 국가별 스캠 통계 목록을 조회합니다 (페이지네이션 지원).
+ * 스캠 리포트 개수 기준으로 내림차순 정렬하여 반환합니다.
+ * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ */
+const loadSidebarCountryStatistics = async (mode = 'click') => {
 
   if (mode === 'scroll' && (isLoadingCountry.value || isLastCountryPage.value)) return;
 
@@ -292,7 +348,7 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
 
   try {
 
-    const response = await apiClient.get('/reports/statistics/countries', {
+    const response = await apiClient.get('/countries/statistics', {
       params: {
         page: countryPage.value,
         size: size,
@@ -313,7 +369,124 @@ const loadSidebarCountrySummary = async (mode = 'click') => {
   }
 }
 
-const loadSidebarStateSummary = async (countryId, countryName, mode = 'click') => {
+const loadCountryDetail = async (countryId, countryName, scamCnt) => {
+  selectedCountry.id = countryId;
+  selectedCountry.name = countryName;
+  selectedCountry.scamCnt = scamCnt;
+  
+  // 국가의 state 목록 로드
+  await loadSidebarStateStatistics(countryId, countryName, 'click');
+  // viewType을 'state'로 설정
+  viewType.value = 'state';
+};
+
+
+const loadCountryAllReports = async (countryId, countryName) => {
+  selectedCountry.id = countryId;
+  selectedCountry.name = countryName;
+  selectedState.id = null;
+  selectedState.name = '';
+  selectedCity.id = null;
+  selectedCity.name = '';
+  
+  // 국가의 모든 리포트 로드
+  await loadSidebarReportSummaryByCountry(countryId, 'click');
+};
+
+const loadStateAllReports = async (stateId, stateName) => {
+  selectedState.id = stateId;
+  selectedState.name = stateName;
+  selectedCity.id = null;
+  selectedCity.name = '';
+  
+  // State의 모든 리포트 로드
+  await loadSidebarReportSummaryByState(stateId, 'click');
+};
+
+/**
+ * 특정 주(State)의 모든 스캠 리포트 목록을 조회합니다 (페이지네이션 지원).
+ * @param {number} stateId - 조회할 주(State) ID
+ * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ */
+const loadSidebarReportSummaryByState = async (stateId, mode = 'click') => {
+  if (mode === 'scroll' && (isLoadingReport.value || isLastReportPage.value)) return;
+
+  isLoadingReport.value = true;
+
+  if (mode === 'click') {
+    reportPage.value = 0;
+    isLastReportPage.value = false;
+    sidebarReports.value = [];
+  }
+
+  try {
+    const response = await apiClient.get(`/states/${stateId}/reports`, {
+      params: {
+        page: reportPage.value,
+        size: size
+      }
+    });
+    
+    const content = response.data.result.content;
+    const last = response.data.result.last;
+    sidebarReports.value.push(...content);
+    isLastReportPage.value = last;
+    reportPage.value += 1;
+
+    viewType.value = 'report';
+  } catch (e) {
+    console.error('Failed to load state reports:', e);
+  } finally {
+    isLoadingReport.value = false;
+  }
+};
+
+/**
+ * 특정 국가의 모든 스캠 리포트 목록을 조회합니다 (페이지네이션 지원).
+ * @param {number} countryId - 조회할 국가 ID
+ * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ */
+const loadSidebarReportSummaryByCountry = async (countryId, mode = 'click') => {
+  if (mode === 'scroll' && (isLoadingReport.value || isLastReportPage.value)) return;
+
+  isLoadingReport.value = true;
+
+  if (mode === 'click') {
+    reportPage.value = 0;
+    isLastReportPage.value = false;
+    sidebarReports.value = [];
+  }
+
+  try {
+    const response = await apiClient.get(`/countries/${countryId}/reports`, {
+      params: {
+        page: reportPage.value,
+        size: size
+      }
+    });
+    
+    const content = response.data.result.content;
+    const last = response.data.result.last;
+    sidebarReports.value.push(...content);
+    isLastReportPage.value = last;
+    reportPage.value += 1;
+
+    viewType.value = 'report';
+  } catch (e) {
+    console.error('Failed to load country reports:', e);
+  } finally {
+    isLoadingReport.value = false;
+  }
+};
+
+/**
+ * 특정 국가의 주(State)별 스캠 통계 목록을 조회합니다 (페이지네이션 지원).
+ * 스캠 리포트 개수 기준으로 내림차순 정렬하여 반환합니다.
+ * @param {number} countryId - 조회할 국가 ID
+ * @param {string} countryName - 국가 이름
+ * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ */
+const loadSidebarStateStatistics = async (countryId, countryName, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingState.value || isLastStatePage.value)) return;
 
   isLoadingState.value = true;
@@ -328,7 +501,7 @@ const loadSidebarStateSummary = async (countryId, countryName, mode = 'click') =
   }
 
   try {
-    const response = await apiClient.get('/reports/statistics/states', {
+    const response = await apiClient.get('/states/statistics', {
       params: {
         countryId,
         page: statePage.value,
@@ -343,7 +516,7 @@ const loadSidebarStateSummary = async (countryId, countryName, mode = 'click') =
     sidebarStates.value.push(...content);
     isLastStatePage.value = last;
     statePage.value += 1;
-    viewType.value = 'state';
+    // viewType은 호출한 곳에서 설정 (state 유지)
   } catch (e) {
     console.error("Failed to load states sidebar info because of server error. Please try again later.", e);
   } finally {
@@ -352,13 +525,23 @@ const loadSidebarStateSummary = async (countryId, countryName, mode = 'click') =
 };
 
 
-const loadSidebarCitySummary = async (stateId, stateName, mode = 'click') => {
+/**
+ * 특정 주(State)의 도시(City)별 스캠 통계 목록을 조회합니다 (페이지네이션 지원).
+ * 스캠 리포트 개수 기준으로 내림차순 정렬하여 반환합니다.
+ * @param {number} stateId - 조회할 주(State) ID
+ * @param {string} stateName - 주(State) 이름
+ * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ */
+const loadSidebarCityStatistics = async (stateId, stateName, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
 
   isLoadingCity.value = true;
 
   selectedState.id = stateId;
   selectedState.name = stateName;
+  // State의 scamCnt는 sidebarStates에서 찾아서 설정
+  const state = sidebarStates.value.find(s => s.id === stateId);
+  selectedState.scamCnt = state?.scamCnt || 0;
 
   if (mode === 'click') {
     cityPage.value = 0;
@@ -367,7 +550,7 @@ const loadSidebarCitySummary = async (stateId, stateName, mode = 'click') => {
   }
 
   try {
-    const response = await apiClient.get('/reports/statistics/cities', {
+    const response = await apiClient.get('/cities/statistics', {
       params: {
         stateId: stateId,
         page: cityPage.value,
@@ -390,6 +573,12 @@ const loadSidebarCitySummary = async (stateId, stateName, mode = 'click') => {
   }
 }
 
+/**
+ * 특정 도시(City)의 스캠 리포트 목록을 조회합니다 (페이지네이션 지원).
+ * @param {number} cityId - 조회할 도시(City) ID
+ * @param {string} cityName - 도시(City) 이름
+ * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ */
 const loadSidebarReportSummary = async (cityId, cityName, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingReport.value || isLastReportPage.value)) return;
 
@@ -405,9 +594,8 @@ const loadSidebarReportSummary = async (cityId, cityName, mode = 'click') => {
   }
 
   try {
-    const response = await apiClient.get('/reports/summary', {
+    const response = await apiClient.get(`/cities/${cityId}/reports`, {
       params: {
-        cityId: cityId,
         page: reportPage.value,
         size: size
       }
@@ -431,6 +619,19 @@ const backToList = (type) => {
   viewType.value = type;
 }
 
+const backToPreviousView = () => {
+  if (selectedCity.id) {
+    // 도시에서 온 경우
+    viewType.value = 'city';
+  } else if (selectedState.id) {
+    // State에서 온 경우 - state로 돌아감
+    viewType.value = 'state';
+  } else if (selectedCountry.id) {
+    // 국가에서 온 경우
+    viewType.value = 'country';
+  }
+}
+
 const toggleSidebar = () => {
   isOpen.value = !isOpen.value;
 };
@@ -445,18 +646,24 @@ const onSidebarScroll = () => {
   if (!scrollBottom) return;
   
   if (viewType.value === 'country') {
-    loadSidebarCountrySummary('scroll');
+    loadSidebarCountryStatistics('scroll');
   } else if (viewType.value === 'state') {
-    loadSidebarStateSummary(selectedCountry.id, selectedCountry.name, 'scroll');
+    loadSidebarStateStatistics(selectedCountry.id, selectedCountry.name, 'scroll');
   } else if (viewType.value === 'city') {
-    loadSidebarCitySummary(selectedState.id, selectedState.name, 'scroll');
+    loadSidebarCityStatistics(selectedState.id, selectedState.name, 'scroll');
   } else if (viewType.value === 'report') {
-    loadSidebarReportSummary(selectedCity.id, selectedCity.name, 'scroll');
+    if (selectedCity.id) {
+      loadSidebarReportSummary(selectedCity.id, selectedCity.name, 'scroll');
+    } else if (selectedState.id) {
+      loadSidebarReportSummaryByState(selectedState.id, 'scroll');
+    } else {
+      loadSidebarReportSummaryByCountry(selectedCountry.id, 'scroll');
+    }
   }
 };
 
 onMounted(() => {
-  loadSidebarCountrySummary();
+  loadSidebarCountryStatistics();
 })
 
 </script>
