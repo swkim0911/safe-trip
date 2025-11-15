@@ -146,7 +146,7 @@ const getColor = (scamCnt) => {
 
 const loadMapSummary = async () => {
   try {
-    const response = await apiClient.get('/reports/overview', {
+    const response = await apiClient.get('/map/overview', {
       params: {
         zoom: zoom.value
       }
