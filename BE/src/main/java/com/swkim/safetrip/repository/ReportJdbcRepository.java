@@ -55,7 +55,8 @@ public class ReportJdbcRepository {
                 rs.getString("name"),
                 rs.getDouble("lat"),
                 rs.getDouble("lng"),
-                rs.getLong("scam_cnt")
+                rs.getLong("scam_cnt"),
+                null
                 ));
     }
 
@@ -65,7 +66,8 @@ public class ReportJdbcRepository {
                 rs.getString("name"),
                 rs.getDouble("lat"),
                 rs.getDouble("lng"),
-                rs.getLong("scam_cnt")
+                rs.getLong("scam_cnt"),
+                null
         ));
     }
 
@@ -75,7 +77,8 @@ public class ReportJdbcRepository {
                 rs.getString("name"),
                 rs.getDouble("lat"),
                 rs.getDouble("lng"),
-                rs.getLong("scam_cnt")
+                rs.getLong("scam_cnt"),
+                null
         ));
     }
 

@@ -29,7 +29,7 @@ public class ReportNativeRepository {
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
-            SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
+            SELECT c.id, c.name, c.lat, c.lng, c.iso2, COUNT(*) AS scam_cnt
             FROM (
                 SELECT country_id FROM user_report
                 UNION ALL
@@ -37,7 +37,7 @@ public class ReportNativeRepository {
             ) r
             JOIN countries c ON r.country_id = c.id
             WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
-            GROUP BY c.id, c.name, c.lat, c.lng
+            GROUP BY c.id, c.name, c.lat, c.lng, c.iso2
             ORDER BY %s
             LIMIT :limit OFFSET :offset
             """, orderBy);
@@ -256,13 +256,28 @@ public class ReportNativeRepository {
 
     private List<RegionScamStatisticsItem> getRegionScamStatisticsItems(List<Object[]> results) {
         return results.stream()
-                .map(row -> new RegionScamStatisticsItem(
-                        ((Number) row[0]).longValue(),
-                        (String) row[1],
-                        ((Number) row[2]).doubleValue(),
-                        ((Number) row[3]).doubleValue(),
-                        ((Number) row[4]).longValue()
-                ))
+                .map(row -> {
+                    // 국가 통계(row 길이 6)일 경우 iso2 포함, 그 외(null)
+                    if (row.length == 6) {
+                        return new RegionScamStatisticsItem(
+                                ((Number) row[0]).longValue(),
+                                (String) row[1],
+                                ((Number) row[2]).doubleValue(),
+                                ((Number) row[3]).doubleValue(),
+                                ((Number) row[5]).longValue(),
+                                (String) row[4]
+                        );
+                    } else {
+                        return new RegionScamStatisticsItem(
+                                ((Number) row[0]).longValue(),
+                                (String) row[1],
+                                ((Number) row[2]).doubleValue(),
+                                ((Number) row[3]).doubleValue(),
+                                ((Number) row[4]).longValue(),
+                                null
+                        );
+                    }
+                })
                 .toList();
     }
 
