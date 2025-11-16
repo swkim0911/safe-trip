@@ -24,7 +24,10 @@
               :key="country.id"
               @click="showStatesByCountry(country.id, country.name, country.scamCnt)"
             >
-              <div class="ms-2 me-auto">
+              <div class="ms-2 me-auto d-flex align-items-center">
+                <span v-if="country.iso2" class="me-2" style="font-size: 1.2em;">
+                  {{ getCountryFlag(country.iso2) }}
+                </span>
                 <div class="fw-bold">{{ country.name }}</div>
               </div>
               <span class="badge text-bg-primary rounded-pill">
@@ -262,6 +265,28 @@ const sidebarRef = ref(null);
 
 const formatDate = (date) => {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
+}
+
+/**
+ * ISO2 코드를 플래그 이모티콘으로 변환합니다.
+ * @param {string} iso2 - ISO2 국가 코드 (예: "US", "KR", "JP")
+ * @returns {string} 플래그 이모티콘 (예: "🇺🇸", "🇰🇷", "🇯🇵")
+ */
+const getCountryFlag = (iso2) => {
+  if (!iso2 || typeof iso2 !== 'string' || iso2.length !== 2) {
+    return '';
+  }
+  
+  const upperIso2 = iso2.toUpperCase();
+  const codePoints = upperIso2
+    .split('')
+    .map(char => 0x1F1E6 + (char.charCodeAt(0) - 0x41));
+  
+  try {
+    return String.fromCodePoint(...codePoints);
+  } catch {
+    return '';
+  }
 }
 
 const openReportDetailModal = (source, reportId) => {
