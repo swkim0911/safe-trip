@@ -51,7 +51,7 @@
           <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
           <div class="mb-3">
             <button 
-              class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3"
+              class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3 report-cta"
               @click="showReportsByCountry(selectedCountry.id, selectedCountry.name)"
               style="border-radius: 8px;"
             >
@@ -67,7 +67,6 @@
 
           <!-- 하단: State 목록 -->
           <div>
-            <h6 class="fw-bold mb-2">Browse States</h6>
             <ul class="list-group">
               <li
                 class="list-group-item d-flex justify-content-between align-items-start"
@@ -99,7 +98,7 @@
           <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
           <div class="mb-3">
             <button 
-              class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3"
+              class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3 report-cta"
               @click="showReportsByState(selectedState.id, selectedState.name)"
               style="border-radius: 8px;"
             >
@@ -762,27 +761,75 @@ $sidebar-width: 560px;
 }
 
 .list-group-item {
-  background-color: #f8f9fa; /* 배경색 */
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffffff, #f2f6ff);
   color: black;
-  border-radius: 8px; /* 모서리를 둥글게 */
-  padding: 12px; /* 내부 여백 */
-  margin-bottom: 12px; /* 아래 여백 */
-  margin-top: 12px;
-  border: 1px solid #ddd; /* 테두리 */
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  border-radius: 12px; /* 모서리를 둥글게 */
+  padding: 14px; /* 내부 여백 */
+  margin-bottom: 14px; /* 아래 여백 */
+  margin-top: 14px;
+  border: 1px solid rgba(13, 110, 253, 0.15);
+  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.08); /* 그림자 효과 */
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -30% auto auto -30%;
+    width: 110px;
+    height: 110px;
+    background: radial-gradient(circle, rgba(13, 110, 253, 0.15), transparent 70%);
+    z-index: -1;
+  }
 
   &:hover {
-    background-color: #eef3ff;
-    transform: translateY(-2px);
-    box-shadow: 3px 6px 12px rgba(0, 0, 0, 0.12);
+    background: linear-gradient(135deg, #eef3ff, #ffffff);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 26px rgba(13, 110, 253, 0.15);
   }
 
   &:active {
-    background-color: #dce6ff;
+    background: linear-gradient(135deg, #e0e9ff, #f7f9ff);
     transform: translateY(0);
-    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+  }
+}
+
+.report-cta {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #0d6efd, #6591ff);
+  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.2);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 20% -20% auto auto;
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.45), transparent 70%);
+    opacity: 0.6;
+    transition: opacity 0.25s ease;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 26px rgba(13, 110, 253, 0.3);
+    background: linear-gradient(135deg, #2b7bff, #0c5ad6);
+  }
+
+  &:hover::before {
+    opacity: 0.9;
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 14px rgba(13, 110, 253, 0.35);
   }
 }
 
