@@ -1,6 +1,6 @@
 package com.swkim.safetrip.repository;
 
-import com.swkim.safetrip.dto.response.LocationScamSummaryItem;
+import com.swkim.safetrip.dto.response.RegionScamStatisticsItem;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.entity.enums.Source;
 import com.swkim.safetrip.global.exception.custom.InvalidSortKeyException;
@@ -25,11 +25,11 @@ public class ReportNativeRepository {
 
     private final EntityManager em;
 
-    public Slice<LocationScamSummaryItem> findCountrySummarySlice(Pageable pageable) {
+    public Slice<RegionScamStatisticsItem> findCountryStatisticsSlice(Pageable pageable) {
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
-            SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
+            SELECT c.id, c.name, c.lat, c.lng, c.iso2, COUNT(*) AS scam_cnt
             FROM (
                 SELECT country_id FROM user_report
                 UNION ALL
@@ -37,7 +37,7 @@ public class ReportNativeRepository {
             ) r
             JOIN countries c ON r.country_id = c.id
             WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
-            GROUP BY c.id, c.name, c.lat, c.lng
+            GROUP BY c.id, c.name, c.lat, c.lng, c.iso2
             ORDER BY %s
             LIMIT :limit OFFSET :offset
             """, orderBy);
@@ -54,15 +54,15 @@ public class ReportNativeRepository {
         List<Object[]> results = query.getResultList();
 
         // DTO 매핑
-        List<LocationScamSummaryItem> items = getLocationScamSummaryItems(results);
+        List<RegionScamStatisticsItem> items = getRegionScamStatisticsItems(results);
 
         boolean hasNext = items.size() > pageSize;
-        List<LocationScamSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
+        List<RegionScamStatisticsItem> content = hasNext ? items.subList(0, pageSize) : items;
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
-    public Slice<LocationScamSummaryItem> findStateSummarySliceByCountryId(Long countryId, Pageable pageable){
+    public Slice<RegionScamStatisticsItem> findStateStatisticsSliceByCountryId(Long countryId, Pageable pageable){
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
@@ -91,15 +91,15 @@ public class ReportNativeRepository {
         List<Object[]> results = query.getResultList();
 
         // DTO 매핑
-        List<LocationScamSummaryItem> items = getLocationScamSummaryItems(results);
+        List<RegionScamStatisticsItem> items = getRegionScamStatisticsItems(results);
 
         boolean hasNext = items.size() > pageSize;
-        List<LocationScamSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
+        List<RegionScamStatisticsItem> content = hasNext ? items.subList(0, pageSize) : items;
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
-    public Slice<LocationScamSummaryItem> findCitySummarySliceByStateId(Long stateId, Pageable pageable) {
+    public Slice<RegionScamStatisticsItem> findCityStatisticsSliceByStateId(Long stateId, Pageable pageable) {
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
@@ -128,10 +128,80 @@ public class ReportNativeRepository {
         List<Object[]> results = query.getResultList();
 
         // DTO 매핑
-        List<LocationScamSummaryItem> items = getLocationScamSummaryItems(results);
+        List<RegionScamStatisticsItem> items = getRegionScamStatisticsItems(results);
 
         boolean hasNext = items.size() > pageSize;
-        List<LocationScamSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
+        List<RegionScamStatisticsItem> content = hasNext ? items.subList(0, pageSize) : items;
+
+        return new SliceImpl<>(content, pageable, hasNext);
+    }
+
+    public Slice<ReportSummaryItem> findReportSummarySliceByCountryId(Long countryId, Pageable pageable){
+        String orderBy = getOrderBy(pageable);
+
+        String sql = String.format("""
+                SELECT r.id, r.source, r.title, sa.name as scam_action_name, sc.name as scam_context_name, r.created_at
+                FROM (
+                    SELECT id, source, title, scam_action_id, scam_context_id, created_at FROM user_report WHERE country_id = :countryId
+                    UNION ALL
+                    SELECT id, source, title, scam_action_id, scam_context_id, posted_at as created_at FROM external_report WHERE country_id = :countryId
+                ) r
+                JOIN scam_action sa on r.scam_action_id = sa.id
+                JOIN scam_context sc on r.scam_context_id = sc.id
+                ORDER BY %s
+                LIMIT :limit OFFSET :offset
+                """, orderBy);
+        Query query = em.createNativeQuery(sql);
+        query.setParameter("countryId", countryId);
+
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+        query.setParameter("limit", pageSize + 1);
+        query.setParameter("offset", offset);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        // DTO 매핑
+        List<ReportSummaryItem> items = getReportSummaryItems(results);
+
+        boolean hasNext = items.size() > pageSize;
+        List<ReportSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
+
+        return new SliceImpl<>(content, pageable, hasNext);
+    }
+
+    public Slice<ReportSummaryItem> findReportSummarySliceByStateId(Long stateId, Pageable pageable){
+        String orderBy = getOrderBy(pageable);
+
+        String sql = String.format("""
+                SELECT r.id, r.source, r.title, sa.name as scam_action_name, sc.name as scam_context_name, r.created_at
+                FROM (
+                    SELECT id, source, title, scam_action_id, scam_context_id, created_at FROM user_report WHERE state_id = :stateId
+                    UNION ALL
+                    SELECT id, source, title, scam_action_id, scam_context_id, posted_at as created_at FROM external_report WHERE state_id = :stateId
+                ) r
+                JOIN scam_action sa on r.scam_action_id = sa.id
+                JOIN scam_context sc on r.scam_context_id = sc.id
+                ORDER BY %s
+                LIMIT :limit OFFSET :offset
+                """, orderBy);
+        Query query = em.createNativeQuery(sql);
+        query.setParameter("stateId", stateId);
+
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+        query.setParameter("limit", pageSize + 1);
+        query.setParameter("offset", offset);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        // DTO 매핑
+        List<ReportSummaryItem> items = getReportSummaryItems(results);
+
+        boolean hasNext = items.size() > pageSize;
+        List<ReportSummaryItem> content = hasNext ? items.subList(0, pageSize) : items;
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
@@ -184,15 +254,30 @@ public class ReportNativeRepository {
                 .toList();
     }
 
-    private List<LocationScamSummaryItem> getLocationScamSummaryItems(List<Object[]> results) {
+    private List<RegionScamStatisticsItem> getRegionScamStatisticsItems(List<Object[]> results) {
         return results.stream()
-                .map(row -> new LocationScamSummaryItem(
-                        ((Number) row[0]).longValue(),
-                        (String) row[1],
-                        ((Number) row[2]).doubleValue(),
-                        ((Number) row[3]).doubleValue(),
-                        ((Number) row[4]).longValue()
-                ))
+                .map(row -> {
+                    // 국가 통계(row 길이 6)일 경우 iso2 포함, 그 외(null)
+                    if (row.length == 6) {
+                        return new RegionScamStatisticsItem(
+                                ((Number) row[0]).longValue(),
+                                (String) row[1],
+                                ((Number) row[2]).doubleValue(),
+                                ((Number) row[3]).doubleValue(),
+                                ((Number) row[5]).longValue(),
+                                (String) row[4]
+                        );
+                    } else {
+                        return new RegionScamStatisticsItem(
+                                ((Number) row[0]).longValue(),
+                                (String) row[1],
+                                ((Number) row[2]).doubleValue(),
+                                ((Number) row[3]).doubleValue(),
+                                ((Number) row[4]).longValue(),
+                                null
+                        );
+                    }
+                })
                 .toList();
     }
 

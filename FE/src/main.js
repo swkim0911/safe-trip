@@ -12,10 +12,10 @@ import { createPinia } from 'pinia';
 const pinia = createPinia();
 
 // 사용할 아이콘
-import { faUserLarge, faBullhorn, faPen, faCamera, faChevronLeft, faArrowRightFromBracket, faMessage, faTriangleExclamation, faMapLocationDot } from '@fortawesome/free-solid-svg-icons'
+import { faUserLarge, faBullhorn, faPen, faCamera, faChevronLeft, faChevronRight, faArrowRightFromBracket, faMessage, faTriangleExclamation, faMapLocationDot, faSearch, faGlobe, faFileAlt, faMapMarkerAlt, faLocationDot, faShieldAlt } from '@fortawesome/free-solid-svg-icons'
 import {} from '@fortawesome/free-regular-svg-icons'
 
-library.add(faUserLarge, faBullhorn, faPen, faMessage, faCamera, faChevronLeft, faArrowRightFromBracket, faTriangleExclamation, faMapLocationDot)
+library.add(faUserLarge, faBullhorn, faPen, faMessage, faCamera, faChevronLeft, faChevronRight, faArrowRightFromBracket, faTriangleExclamation, faMapLocationDot, faSearch, faGlobe, faFileAlt, faMapMarkerAlt, faLocationDot, faShieldAlt)
 
 createApp(App)
   .component('font-awesome-icon', FontAwesomeIcon)

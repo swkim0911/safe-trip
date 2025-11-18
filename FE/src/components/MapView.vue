@@ -146,7 +146,7 @@ const getColor = (scamCnt) => {
 
 const loadMapSummary = async () => {
   try {
-    const response = await apiClient.get('/reports/overview', {
+    const response = await apiClient.get('/map/overview', {
       params: {
         zoom: zoom.value
       }
@@ -174,30 +174,28 @@ let refreshPromise = null;
 const restoreSession = async () => {
   if (!authStore.accessToken) {
     if (!refreshPromise) {
-      refreshPromise = apiClient.post('/auth/refresh', {}, { withCredentials: true })
-        .then(response => {
+      refreshPromise = (async () => {
+        try {
+          const response = await apiClient.post('/auth/refresh', {}, { withCredentials: true });
           if (response.status !== 204) {
             authStore.setAccessToken(response.data.result.accessToken);
-            return apiClient.get('/users/me');
+            const meResponse = await apiClient.get('/users/me');
+            if (meResponse) authStore.setUser(meResponse.data.result);
           }
-        })
-        .then(meResponse => {
-          if (meResponse) authStore.setUser(meResponse.data.result);
-        })
-        .catch(err => {
+        } catch (err) {
           console.error("restoreSession failed:", err);
-        })
-        .finally(() => {
+        } finally {
           refreshPromise = null; // 끝나면 초기화
-        });
+        }
+      })();
     }
     return refreshPromise; // 다른 호출은 같은 Promise 반환
   }
 };
 
 onMounted(() => {
-  loadMapSummary(),
-  restoreSession()
+  loadMapSummary();
+  restoreSession();
 })
 </script>
 
