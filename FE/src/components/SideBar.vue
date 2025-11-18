@@ -770,6 +770,20 @@ $sidebar-width: 560px;
   margin-top: 12px;
   border: 1px solid #ddd; /* 테두리 */
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background-color: #eef3ff;
+    transform: translateY(-2px);
+    box-shadow: 3px 6px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  &:active {
+    background-color: #dce6ff;
+    transform: translateY(0);
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.15);
+  }
 }
 
 /* 토글 버튼 (사이드바 여닫기 버튼) */
