@@ -8,10 +8,10 @@
           class="search-icon"
         />
         <input
-        type="text"
-        v-model="searchText"
-        placeholder="Search by country, state, or city"
-        class="form-control form-control-lg mb-3 ps-5"
+          type="text"
+          v-model="searchText"
+          placeholder="Search by country, state, or city"
+          class="form-control form-control-lg mb-3 search-input"
         />
       </div>
 
@@ -741,11 +741,31 @@ $sidebar-width: 560px;
 
 .search-icon {
   position: absolute;
-  left: 15px;
-  top: 50%;
+  left: 24px;
+  top: 39%;
   transform: translateY(-50%);
-  color: #6c757d;
+  color: #0d6efd;
   z-index: 10;
+  font-size: 1rem;
+}
+
+.search-input {
+  background: linear-gradient(135deg, #ffffff, #f2f6ff);
+  border-radius: 50px;
+  border: 1px solid rgba(13, 110, 253, 0.25);
+  padding-left: 50px;
+  font-size: 1rem;
+  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.08);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &::placeholder {
+    color: #8aa0c2;
+  }
+
+  &:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 12px 26px rgba(13, 110, 253, 0.15);
+  }
 }
 
 .sidebar-body {
