@@ -3,8 +3,7 @@
 import sys
 import time
 
-from config.dependency_factory import DependencyFactory
-from config.etl_config import ETLConfig
+from config.dependencies import container
 from config.logging_config import setup_logging
 
 
@@ -18,9 +17,7 @@ def main():
         logger.info("Parsing Job 시작")
         
         # 의존성 주입
-        config = ETLConfig.create_default()
-        factory = DependencyFactory(config)
-        transformer = factory.create_transformer()
+        transformer = container.transformer
         
         # 1. 파싱 배치 요청
         logger.info("분류된 문서 파싱 시작")

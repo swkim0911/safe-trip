@@ -3,8 +3,7 @@
 import sys
 import time
 
-from config.dependency_factory import DependencyFactory
-from config.etl_config import ETLConfig
+from config.dependencies import container
 from config.logging_config import setup_logging
 
 
@@ -28,9 +27,7 @@ def main():
         logger.info("Extract Job 시작 (time_filter=%s, limit=%s)", time_filter, limit)
         
         # 의존성 주입
-        config = ETLConfig.create_default()
-        factory = DependencyFactory()
-        extractor = factory.create_extractor()
+        extractor = container.extractor
         
         # 데이터 추출
         logger.info("Reddit에서 Raw 데이터 수집 시작")

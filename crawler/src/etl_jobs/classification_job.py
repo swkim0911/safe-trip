@@ -3,8 +3,7 @@
 import sys
 import time
 
-from config.dependency_factory import DependencyFactory
-from config.etl_config import ETLConfig
+from config.dependencies import container
 from config.logging_config import setup_logging
 
 
@@ -18,9 +17,7 @@ def main():
         logger.info("Classification Job 시작")
         
         # 의존성 주입
-        config = ETLConfig.create_default()
-        factory = DependencyFactory()
-        transformer = factory.create_transformer()
+        transformer = container.transformer
         
         # 1. 분류 배치 요청
         logger.info("Raw 데이터 배치 분류 작업 시작")

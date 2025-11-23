@@ -3,8 +3,7 @@
 import sys
 import time
 
-from config.dependency_factory import DependencyFactory
-from config.etl_config import ETLConfig
+from config.dependencies import container
 from config.logging_config import setup_logging
 
 
@@ -25,9 +24,7 @@ def main():
         logger.info("Load Job 시작")
         
         # 의존성 주입
-        config = ETLConfig.create_default()
-        factory = DependencyFactory()
-        loader = factory.create_loader()
+        loader = container.loader
         
         # MongoDB → MySQL 데이터 적재
         logger.info("파싱된 데이터 → MySQL 적재 시작")
