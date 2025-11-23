@@ -14,9 +14,9 @@ class TravelScamClassifier:
         reddit_repository: Reddit 데이터 저장소
         config: ETL 설정 객체
     """
-    def __init__(self, reddit_repository, config):
+    def __init__(self, reddit_repository, etl_config):
         self.reddit_repository = reddit_repository
-        self.config = config
+        self.etl_config = etl_config
         self.job_type = "classification"
         self.logger = logging.getLogger(__name__)
                 
@@ -80,7 +80,7 @@ class TravelScamClassifier:
                 classification_results.append({"reddit_id": reddit_id,"is_travel_scam": is_travel_scam})
 
                 # BATCH_SIZE 단위로 저장
-                if len(classification_results) >= self.config.BATCH_SIZE:
+                if len(classification_results) >= self.etl_config.BATCH_SIZE:
                     self.reddit_repository.flush_classification_results(classification_results)
 
             # 남은 classification_results 처리
