@@ -48,7 +48,7 @@ class TravelScamExtractor:
                 }
                 self._add_raw_record_to_buffer(post_record)
 
-            post.comments.replace_more(limit=0)
+            post.comments.replace_more(limit=0) # 댓글 트리 안의 "MoreComments" 객체를 실제 댓글로 치환
             for comment in post.comments:
                 if comment.parent_id.startswith("t3_"): # depth = 1 댓글만 추출
                     if not comment.body or comment.body in ("[deleted]", "[removed]"):
