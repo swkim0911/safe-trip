@@ -2,9 +2,8 @@ from datetime import datetime, timezone
 
 
 class TravelScamExtractor:
-    """Reddit에서 여행 사기 관련 데이터를 추출하는 클래스"""
-    
-    """
+    """Reddit에서 여행 사기 관련 데이터를 추출하는 클래스
+
     Args:
         reddit_client: Reddit API 클라이언트
         reddit_repository: Reddit 데이터 저장소
@@ -26,14 +25,14 @@ class TravelScamExtractor:
         if len(self._raw_records) >= self.etl_config.BATCH_SIZE:
             self.reddit_repository.flush_raw_records(self._raw_records)
     
-    '''
-    reddit에 있는 travel scam raw data -> mongoDB에 json 형태로 저장
-
-    Args:
-        time_filter: week/all 중 하나
-        limit: 가져올 최대 게시글 수
-    '''
     def extract(self, time_filter: str, limit: int | None):
+        '''
+        Reddit에 있는 travel scam raw data -> MongoDB에 json 형태로 저장
+
+        Args:
+            time_filter: week/all 중 하나
+            limit: 가져올 최대 게시글 수
+        '''
         subreddit = self.reddit_client.subreddit("travel")
 
         for post in subreddit.search(" OR ".join(self.etl_config.REDDIT_KEYWORDS), sort="relevance", time_filter=time_filter, limit=limit):
