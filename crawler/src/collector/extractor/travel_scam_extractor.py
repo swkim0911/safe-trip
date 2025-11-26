@@ -20,7 +20,7 @@ class TravelScamExtractor:
             return ""
         return text.replace("\u200b", "").strip()
 
-    def _buffer_record(self, record: dict):
+    def _add_raw_record_to_buffer(self, record: dict):
         self._raw_records.append(record)
         if len(self._raw_records) >= self.etl_config.BATCH_SIZE:
             self.reddit_repository.flush_raw_records(self._raw_records)
@@ -46,7 +46,7 @@ class TravelScamExtractor:
                     "type": "post",
                     "posted_at": datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
                 }
-                self._buffer_record(post_record)
+                self._add_raw_record_to_buffer(post_record)
 
             post.comments.replace_more(limit=0)
             for comment in post.comments:
@@ -63,7 +63,7 @@ class TravelScamExtractor:
                         "type": "comment",
                         "posted_at": datetime.fromtimestamp(comment.created_utc, tz=timezone.utc)
                     }
-                    self._buffer_record(comment_record)
+                    self._add_raw_record_to_buffer(comment_record)
         
         # 마지막 flush
         self.reddit_repository.flush_raw_records(self._raw_records)
