@@ -1,14 +1,11 @@
-"""Parsing Job - 분류된 데이터를 파싱하고 결과를 저장하는 Job"""
-
-import sys
-import time
+import time, sys
 
 from config.dependencies import container
 from config.logging_config import setup_logging
 
-
+"""Parsing Job - 분류된 데이터를 파싱하고 결과를 저장하는 Job"""
 def main():
-    """Parsing Job 메인 함수"""
+
     # 로깅 설정
     logger = setup_logging("parsing_job")
     

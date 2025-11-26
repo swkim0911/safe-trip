@@ -1,12 +1,10 @@
-"""Load Job - MongoDB에서 MySQL로 데이터를 적재하는 Job"""
-
-import time
+import time, sys
 
 from config.dependencies import container
 from config.logging_config import setup_logging
 from etl_jobs.job_argparsers import build_load_parser
 
-
+"""Load Job - MongoDB에서 MySQL로 데이터를 적재하는 Job"""
 def main():
     """Load Job 메인 함수"""
     parser = build_load_parser()
@@ -29,7 +27,7 @@ def main():
 
     except Exception as e:
         logger.error("Load Job 실패: %s", e, exc_info=True)
-        raise SystemExit(1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

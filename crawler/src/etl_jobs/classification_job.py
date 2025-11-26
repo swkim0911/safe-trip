@@ -1,14 +1,10 @@
-"""Classification Job - Raw 데이터를 분류하고 결과를 저장하는 Job"""
-
-import sys
-import time
+import time, sys
 
 from config.dependencies import container
 from config.logging_config import setup_logging
 
-
+"""Classification Job - Raw 데이터를 분류하고 결과를 저장하는 Job"""
 def main():
-    """Classification Job 메인 함수"""
     # 로깅 설정
     logger = setup_logging("classification_job")
     
@@ -23,7 +19,7 @@ def main():
         logger.info("Raw 데이터 배치 분류 작업 시작")
         transformer.classify_raw_documents_in_batch()
         logger.info("Raw 데이터 배치 분류 작업 완료")
-        # todo: 배치 결과  스케줄러로 확인
+        # todo: 배치 결과 스케줄러로 확인
         # 2. 배치 결과 저장
         logger.info("분류된 데이터 DB 저장 시작")
         transformer.process_classification_batch_results()

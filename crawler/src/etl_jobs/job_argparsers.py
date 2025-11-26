@@ -1,6 +1,5 @@
 import argparse
 
-
 def build_extract_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="extract_job", # 파서 이름
