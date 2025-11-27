@@ -5,11 +5,12 @@ Keep only texts with useful, experience-based information for other travelers.
 
 [Evaluation Criteria]
 
+1. Personal first-hand experience
   The text must clearly describe a real scam personally experienced by the author abroad, written in first-person perspective (e.g., "I", "we", "my experience").
   Examples: pickpocketing, theft, aggressive sales, Overcharging, fraud, system tampering
   Exclude: General advice or safety tips without a personal incident, Poor service complaints or vague, generic grievances, News articles, rumors, or second-hand reports, Jokes, satire, or humorous exaggerations, Advertisements or promotional content, Experiences that happened to others (not first-hand)
 
-[Value for sharing]
+2. Value for sharing
 
   Must mention a country, or a subnational region (such as a city, state, or province) where the corresponding country can reasonably be inferred.
   The text must provide enough context to be useful for other travelers. Specifically, it should mention:
