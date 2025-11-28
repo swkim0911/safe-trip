@@ -107,11 +107,50 @@ class RedditRepository:
             "input_file_id": batch_metadata["input_file_id"],
             "job_type": batch_metadata["job_type"],
             "submitted_at": datetime.now(UTC),
+            "processed": False,  # 처리 여부
+            "processed_at": None,  # 처리 완료 시각
+            "status": "submitted"  # submitted, completed, failed, expired, cancelled
         }
         self.batch_job_collection.insert_one(doc)
 
     def find_batch_job_documents(self, query):
         return self.batch_job_collection.find(query)
+    
+    def find_unprocessed_batches(self, job_type: str):
+        """미처리 배치 조회"""
+        query = {
+            "job_type": job_type,
+            "processed": False
+        }
+        return self.batch_job_collection.find(query)
+    
+    def mark_batch_as_processed(self, batch_id: str):
+        """배치를 처리 완료로 표시"""
+        self.batch_job_collection.update_one(
+            {"batch_id": batch_id},
+            {
+                "$set": {
+                    "processed": True,
+                    "processed_at": datetime.now(UTC),
+                    "status": "completed"
+                }
+            }
+        )
+        self.logger.info(f"Batch {batch_id} marked as processed")
+    
+    def mark_batch_as_failed(self, batch_id: str, status: str):
+        """실패/만료 배치 표시"""
+        self.batch_job_collection.update_one(
+            {"batch_id": batch_id},
+            {
+                "$set": {
+                    "processed": True,
+                    "processed_at": datetime.now(UTC),
+                    "status": status
+                }
+            }
+        )
+        self.logger.warning(f"Batch {batch_id} marked as {status}")
 
     def find_parsed_documents(self, query, projection=None):
         return self.parsed_collection.find(query, projection)
