@@ -53,22 +53,29 @@ def get_completed_batch_result(batch_id: str):
     """
         주어진 batch_id로 OpenAI Batch API 결과(JSONL)를 가져온다.
         완료되지 않았으면 None 반환.
+        
+        Returns:
+            tuple: (content: str | None, status: str)
+            - content: 배치 결과 JSONL 문자열 (완료된 경우만)
+            - status: 배치 상태 (completed, failed, expired, cancelled, in_progress, etc.)
     """
     client = get_openai_client()
 
     batch = client.batches.retrieve(batch_id)
-    if batch.status == "completed":
+    status = batch.status
+    
+    if status == "completed":
         output_file_id = batch.output_file_id
         file_obj = client.files.content(output_file_id)
 
         # JSONL 콘텐츠 반환
         logger.info(f"✅ Batch {batch_id} completed. Output file_id={output_file_id}")
         content = file_obj.content.decode("utf-8")
-        return content
+        return content, status
 
-    elif batch.status in ["failed", "expired", "cancelled"]:
-        logger.error(f"❌ Batch {batch_id} ended with status {batch.status}")
+    elif status in ["failed", "expired", "cancelled"]:
+        logger.error(f"❌ Batch {batch_id} ended with status {status}")
     else:
-        logger.info(f"⏳ Batch {batch_id} still not ready, status={batch.status}")
+        logger.info(f"⏳ Batch {batch_id} still not ready, status={status}")
 
-    return None
+    return None, status
