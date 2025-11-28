@@ -21,8 +21,11 @@ class RedditRepository:
         self.etl_config = etl_config
         self.logger = logging.getLogger(__name__)
 
-    def find_raw_documents(self, query):
-        return self.raw_collection.find(query)
+    def find_raw_documents(self, query, limit: int | None = None):
+        cursor = self.raw_collection.find(query)
+        if limit is not None:
+            cursor = cursor.limit(limit)
+        return cursor
     
     def flush_raw_records(self, records: list[dict]):
         if not records:
