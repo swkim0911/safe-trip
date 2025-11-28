@@ -51,41 +51,63 @@ class TravelScamClassifier:
         return batch_metadata
 
     '''
-    batch 요청 결과(24시간 후)를 parsed_collection에 반영
+    batch 요청 결과를 확인하고 완료된 배치를 처리
+    
+    Returns:
+        int: 처리된 배치 수
     '''
     def process_batch_results(self):
-        # 1. 몽고에서 batch_id 일어오기
-        batch_jobs = self.reddit_repository.find_batch_job_documents({"job_type":self.job_type}) # batch_id,
+        # 1. 미처리 배치만 조회
+        batch_jobs = self.reddit_repository.find_unprocessed_batches(self.job_type)
+        
+        processed_count = 0
 
         for batch_job in batch_jobs:
-            # 2. batch_id로부터 content(JSONL 결과) 읽어오기
             batch_id = batch_job["batch_id"]
-            content = get_completed_batch_result(batch_id)
-            if not content:
-                continue  # 혹시 실패했거나 아직 결과가 없으면 스킵
+            
+            # 2. batch_id로부터 결과 및 상태 확인
+            content, status = get_completed_batch_result(batch_id)
+            
+            # 3. 배치 상태별 처리
+            if status == "completed" and content:
+                # 결과 가공 및 저장
+                classification_results = []
+                for line in content.splitlines():
+                    if not line.strip():
+                        continue
 
-            # 3. 결과 가공
-            classification_results = []
-            for line in content.splitlines():
-                if not line.strip():
-                    continue
+                    record = json.loads(line)
 
-                record = json.loads(line)
+                    reddit_id = record["custom_id"]
+                    text = record["response"]["body"]["output"][0]["content"][0]["text"]
 
-                reddit_id = record["custom_id"]
-                text = record["response"]["body"]["output"][0]["content"][0]["text"]
+                    is_travel_scam = self.__extract_label_from_output(text)
 
-                is_travel_scam = self.__extract_label_from_output(text)
+                    classification_results.append({"reddit_id": reddit_id,"is_travel_scam": is_travel_scam})
 
-                classification_results.append({"reddit_id": reddit_id,"is_travel_scam": is_travel_scam})
+                    # BATCH_SIZE 단위로 저장
+                    if len(classification_results) >= self.etl_config.BATCH_SIZE:
+                        self.reddit_repository.flush_classification_results(classification_results)
 
-                # BATCH_SIZE 단위로 저장
-                if len(classification_results) >= self.etl_config.BATCH_SIZE:
+                # 남은 classification_results 처리
+                if classification_results:
                     self.reddit_repository.flush_classification_results(classification_results)
-
-            # 남은 classification_results 처리
-            if classification_results:
-                self.reddit_repository.flush_classification_results(classification_results)
+                
+                # 처리 완료 표시
+                self.reddit_repository.mark_batch_as_processed(batch_id)
+                processed_count += 1
+                self.logger.info(f"✅ Batch {batch_id} 처리 완료")
+                
+            elif status in ["failed", "expired", "cancelled"]:
+                # 실패한 배치는 실패로 표시하고 건너뜀
+                self.reddit_repository.mark_batch_as_failed(batch_id, status)
+                self.logger.warning(f"⚠️ Batch {batch_id} {status} 상태로 건너뜀")
+                
+            else:
+                # 아직 진행 중인 배치(in_process)는 로그만 남김
+                self.logger.debug(f"⏳ Batch {batch_id} 아직 {status} 상태")
+        
+        return processed_count
 
 
     '''
