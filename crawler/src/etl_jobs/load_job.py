@@ -2,12 +2,12 @@ import time, sys
 
 from config.dependencies import container
 from config.logging_config import setup_logging
-from etl_jobs.job_argparsers import build_load_parser
+from etl_jobs.job_argparsers import create_load_job_parser
 
 """Load Job - MongoDB에서 MySQL로 데이터를 적재하는 Job"""
 def main():
     """Load Job 메인 함수"""
-    parser = build_load_parser()
+    parser = create_load_job_parser()
     args = parser.parse_args()  # {load_scope="all"}이 담긴 객체로 변환
 
     logger = setup_logging("load_job")

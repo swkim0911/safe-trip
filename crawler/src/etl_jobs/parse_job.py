@@ -2,22 +2,26 @@ import time, sys
 
 from config.dependencies import container
 from config.logging_config import setup_logging
+from etl_jobs.job_argparsers import create_parse_job_parser
 
-"""Parsing Job - 분류된 데이터를 파싱하고 결과를 저장하는 Job"""
+"""Parse Job - 분류된 데이터를 파싱하고 결과를 저장하는 Job"""
 def main():
-
+    parser = create_parse_job_parser()
+    args = parser.parse_args()
+    
     # 로깅 설정
-    logger = setup_logging("parsing_job")
+    logger = setup_logging("parse_job")
     
     try:
         start = time.time()
-        logger.info("Parsing Job 시작")
+        logger.info("Parse Job 시작 (limit=%s)", args.limit)
         
         # 의존성 주입
         transformer = container.transformer
         
         # 1. 파싱 배치 요청
         logger.info("분류된 문서 파싱 시작")
+        # TODO: transformer.parse_classified_documents_in_batch에 limit 파라미터 추가 필요
         transformer.parse_classified_documents_in_batch()
         logger.info("분류된 문서 파싱 완료")
         # todo: 배치 결과  스케줄러로 확인
@@ -27,10 +31,10 @@ def main():
         logger.info("파싱된 데이터 DB 저장 완료")
         
         end = time.time()
-        logger.info("Parsing Job 완료 (실행 시간: %.2f 초)", end - start)
+        logger.info("Parse Job 완료 (실행 시간: %.2f 초)", end - start)
         
     except Exception as e:
-        logger.error("Parsing Job 실패: %s", e, exc_info=True)
+        logger.error("Parse Job 실패: %s", e, exc_info=True)
         sys.exit(1)
 
 
