@@ -27,9 +27,15 @@ class TravelScamTransformer:
 
     '''
     raw 도큐먼트를 batch 작업으로 분류(classification)한다.
+    
+    Args:
+        limit: 처리할 최대 문서 수 (None이면 전체)
     '''
-    def classify_raw_documents_in_batch(self):
-        unclassified_docs = self.reddit_repository.find_raw_documents({"classification": {"$exists": False}})
+    def classify_raw_documents_in_batch(self, limit: int | None = None):
+        unclassified_docs = self.reddit_repository.find_raw_documents(
+            {"classification": {"$exists": False}}, 
+            limit=limit
+        )
 
         batch_docs = []
         expected_tokens = 0
@@ -67,17 +73,38 @@ class TravelScamTransformer:
 
     '''
     비동기로 요청한 classification batch 결과를 mongo에 저장
+    
+    Returns:
+        int: 처리된 배치 수
     '''
     def process_classification_batch_results(self):
-        self.travel_scam_classifier.process_batch_results()
+        return self.travel_scam_classifier.process_batch_results()
+    
+    def get_unprocessed_batch_count(self, job_type: str) -> int:
+        """
+        미처리 배치 수 반환
+        
+        Args:
+            job_type: 배치 작업 타입 (classification 또는 parsing)
+            
+        Returns:
+            int: 미처리 배치 수
+        """
+        unprocessed_batches = list(self.reddit_repository.find_unprocessed_batches(job_type))
+        return len(unprocessed_batches)
 
     '''
     classified된 도큐먼트를 batch 작업으로 파싱(parsing)한다.
+    
+    Args:
+        limit: 처리할 최대 문서 수 (테스트용, None이면 전체)
     '''
-    def parse_classified_documents_in_batch(self):
+    def parse_classified_documents_in_batch(self, limit: int | None = None):
 
-        # paring 비동기 요청
-        find_travel_scam_docs = self.reddit_repository.find_raw_documents({"classification.is_travel_scam": True})
+        find_travel_scam_docs = self.reddit_repository.find_raw_documents(
+            {"classification.is_travel_scam": True},
+            limit=limit
+        )
 
         parsed_ids = {doc["reddit_id"] for doc in self.reddit_repository.find_parsed_documents({}, projection={"reddit_id": 1})}
 
@@ -121,62 +148,83 @@ class TravelScamTransformer:
 
     '''
     비동기로 요청한 parsing batch 결과를 mongo에 저장
+    
+    Returns:
+        int: 처리된 배치 수
     '''
     def process_parsing_batch_results(self):
-        batch_jobs = self.reddit_repository.find_batch_job_documents({"job_type": "parsing"})
+        batch_jobs = self.reddit_repository.find_unprocessed_batches("parsing")
+        
+        processed_count = 0
 
         for batch_job in batch_jobs:
-            # 2. batch_id로부터 content(JSONL 결과) 읽어오기
             batch_id = batch_job["batch_id"]
-            content = get_completed_batch_result(batch_id)
-            if not content:
-                continue  # 혹시 실패했거나 아직 결과가 없으면 스킵
-
-            # 3. 결과 가공
-            parsing_results = []
-            for line in content.splitlines():
-                if not line.strip():
-                    continue
-
-                record = json.loads(line)
-
-                reddit_id = record["custom_id"]
-                text = record["response"]["body"]["output"][0]["content"][0]["text"]
-
-                parsed_body_results = self.travel_scam_parser.safe_json_loads(text)
-                for parsed_body_result in parsed_body_results:
-                    location_info = self.world_repository.lookup_location(parsed_body_result.get("country"),parsed_body_result.get("state"),parsed_body_result.get("city"))
-                    if location_info is None:
+            
+            # 2. batch_id로부터 결과 및 상태 확인
+            content, status = get_completed_batch_result(batch_id)
+            
+            # 3. 배치 상태별 처리
+            if status == "completed" and content:
+                # 결과 가공 및 저장
+                parsing_results = []
+                for line in content.splitlines():
+                    if not line.strip():
                         continue
-                    # 완전체 저장
-                    now = datetime.now(UTC)
-                    raw_json = self.reddit_repository.find_one_raw_document({"reddit_id": reddit_id})
-                    doc = {
-                        "reddit_id": reddit_id,
-                        "source": "reddit",
-                        "url": raw_json.get("url"),
-                        "author": raw_json.get("author"),
-                        "title": parsed_body_result.get("title"),
-                        "action": parsed_body_result.get("action"),
-                        "context": parsed_body_result.get("context"),
-                        "country_id": location_info.get("country_id"),
-                        "state_id": location_info.get("state_id"),
-                        "city_id": location_info.get("city_id"),
-                        "summary": parsed_body_result.get("summary"),
-                        "posted_at": raw_json.get("posted_at"),
-                        "updated_at": now,
-                        "created_at": now,
-                    }
-                    parsing_results.append(doc)
 
-                # BATCH_SIZE 단위로 저장
-                if len(parsing_results) >= self.etl_config.BATCH_SIZE:
+                    record = json.loads(line)
+
+                    reddit_id = record["custom_id"]
+                    text = record["response"]["body"]["output"][0]["content"][0]["text"]
+
+                    parsed_body_results = self.travel_scam_parser.safe_json_loads(text)
+                    for parsed_body_result in parsed_body_results:
+                        location_info = self.world_repository.lookup_location(parsed_body_result.get("country"),parsed_body_result.get("state"),parsed_body_result.get("city"))
+                        if location_info is None:
+                            continue
+                        # 완전체 저장
+                        now = datetime.now(UTC)
+                        raw_json = self.reddit_repository.find_one_raw_document({"reddit_id": reddit_id})
+                        doc = {
+                            "reddit_id": reddit_id,
+                            "source": "reddit",
+                            "url": raw_json.get("url"),
+                            "author": raw_json.get("author"),
+                            "title": parsed_body_result.get("title"),
+                            "action": parsed_body_result.get("action"),
+                            "context": parsed_body_result.get("context"),
+                            "country_id": location_info.get("country_id"),
+                            "state_id": location_info.get("state_id"),
+                            "city_id": location_info.get("city_id"),
+                            "summary": parsed_body_result.get("summary"),
+                            "posted_at": raw_json.get("posted_at"),
+                            "updated_at": now,
+                            "created_at": now,
+                        }
+                        parsing_results.append(doc)
+
+                    # BATCH_SIZE 단위로 저장
+                    if len(parsing_results) >= self.etl_config.BATCH_SIZE:
+                        self.reddit_repository.flush_parsing_results(parsing_results)
+
+                # 남은 parsing_results 처리
+                if parsing_results:
                     self.reddit_repository.flush_parsing_results(parsing_results)
-
-
-            # 남은 parsing_results 처리
-            if parsing_results:
-                self.reddit_repository.flush_parsing_results(parsing_results)
+                
+                # 처리 완료 표시
+                self.reddit_repository.mark_batch_as_processed(batch_id)
+                processed_count += 1
+                self.logger.info(f"✅ Batch {batch_id} 처리 완료")
+                
+            elif status in ["failed", "expired", "cancelled"]:
+                # 실패한 배치는 실패로 표시하고 건너뜀
+                self.reddit_repository.mark_batch_as_failed(batch_id, status)
+                self.logger.warning(f"⚠️ Batch {batch_id} {status} 상태로 건너뜀")
+                
+            else:
+                # 아직 진행 중인 배치 (in_progress)는 로그만 남김
+                self.logger.debug(f"⏳ Batch {batch_id} 아직 {status} 상태")
+        
+        return processed_count
 
 
 
