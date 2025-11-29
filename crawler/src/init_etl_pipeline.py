@@ -86,8 +86,8 @@ class ETLController:
 
         jobs = [
             ("Extract Job", "extract_job.py", extract_args),
-            ("Classification Job", "classification_job.py", []),
-            ("Parsing Job", "parsing_job.py", []),
+            ("Classify Job", "classify_job.py", []),
+            ("Parse Job", "parse_job.py", []),
             ("Load Job", "load_job.py", load_args),
         ]
         
