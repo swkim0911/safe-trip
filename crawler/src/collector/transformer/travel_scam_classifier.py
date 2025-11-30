@@ -31,8 +31,7 @@ class TravelScamClassifier:
         if not output_text:  # None, "" 방어
             return False
 
-        return self.__extract_label_from_output(output_text)
-
+        return self.extract_label_from_output(output_text)
     """
     raw data를 리스트로 받아서 비동기 배치 요청을 하고 관련 메타데이터를 db에 저장
     """
@@ -114,7 +113,8 @@ class TravelScamClassifier:
     output_text의 결과를 bool 타입으로 치환한다
     숫자 이외가 섞여오면 첫 번째 '1' 또는 '0'만 취함 (안전장치)
     '''
-    def __extract_label_from_output(self, output_text):
+    @staticmethod
+    def extract_label_from_output(output_text):
         if "1" in output_text and "0" in output_text:
             return output_text.index("1") < output_text.index("0")
         if "1" in output_text:
