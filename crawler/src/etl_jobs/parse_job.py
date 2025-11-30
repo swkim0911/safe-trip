@@ -22,7 +22,7 @@ def main():
         
         # 1. 파싱 배치 요청
         logger.info("분류된 문서 배치 파싱 작업 시작")
-        transformer.parse_classified_documents_in_batch()
+        transformer.parse_classified_documents_in_batch(limit=args.limit)
         logger.info("분류된 문서 배치 파싱 작업 완료 - 배치 요청 제출됨")
         
         # 2. Polling으로 완료 대기
