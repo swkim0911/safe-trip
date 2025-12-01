@@ -65,7 +65,7 @@ def create_evaluation_batch_file(test_set, system_content, prompt_template, temp
             body = item["body"]
             prompt = prompt_template.format(text=body)
             
-            req = {
+            request_payload = {
                 "custom_id": reddit_id,
                 "method": "POST",
                 "url": "/v1/responses",
@@ -78,7 +78,7 @@ def create_evaluation_batch_file(test_set, system_content, prompt_template, temp
                     "temperature": temperature
                 }
             }
-            f.write(json.dumps(req, ensure_ascii=False) + "\n")
+            f.write(json.dumps(request_payload, ensure_ascii=False) + "\n")
     
     return str(filename)
 

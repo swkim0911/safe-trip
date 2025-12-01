@@ -42,7 +42,7 @@ def write_jsonl(jsons: list[dict[str, str]], job_type: str) -> str:
             
             prompt = prompt_map[job_type](body)
 
-            req = {
+            request_payload = {
                 "custom_id": reddit_id, 
                 "method": "POST",
                 "url": "/v1/responses",
@@ -55,6 +55,6 @@ def write_jsonl(jsons: list[dict[str, str]], job_type: str) -> str:
                     "temperature": 0
                 }
             }
-            f.write(json.dumps(req, ensure_ascii=False) + "\n")
+            f.write(json.dumps(request_payload, ensure_ascii=False) + "\n")
 
     return filename
