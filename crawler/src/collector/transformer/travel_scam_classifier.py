@@ -80,7 +80,7 @@ class TravelScamClassifier:
                     reddit_id = record["custom_id"]
                     text = record["response"]["body"]["output"][0]["content"][0]["text"]
 
-                    is_travel_scam = self.__extract_label_from_output(text)
+                    is_travel_scam = self.extract_label_from_output(text)
 
                     classification_results.append({"reddit_id": reddit_id,"is_travel_scam": is_travel_scam})
 
