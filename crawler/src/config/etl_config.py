@@ -8,7 +8,7 @@ class ETLConfig:
     
     # Batch 관련 설정
     BATCH_SIZE: int = 1000
-    TOKEN_LIMIT: int = 500_000  # OpenAI Batch API 토큰 제한 (보수적 설정)
+    TOKEN_LIMIT: int = 100_000  # OpenAI Batch API 토큰 제한 (보수적 설정)
     
     # Batch Polling 설정
     BATCH_POLL_INTERVAL: int = int(os.getenv("BATCH_POLL_INTERVAL", "300"))  # 5분
