@@ -32,9 +32,22 @@ class TravelScamTransformer:
         limit: 처리할 최대 문서 수 (None이면 전체)
     '''
     def classify_raw_documents_in_batch(self, limit: int | None = None):
-        unclassified_docs = self.reddit_repository.find_raw_documents(
-            {"classification": {"$exists": False}}, 
-            limit=limit
+        # 현재 프롬프트 버전
+        current_version = self.etl_config.CLASSIFICATION_PROMPT_VERSION
+        
+        # 미분류 OR 버전 불일치 문서 조회
+        query = {
+            "$or": [
+                {"classification": {"$exists": False}},  # 미분류 문서
+                {"classification.classification_prompt_version": {"$ne": current_version}}  # 버전 다른 문서
+            ]
+        }
+        
+        unclassified_docs = self.reddit_repository.find_raw_documents(query, limit=limit)
+        
+        self.logger.info(
+            "분류 대상 조회 완료: 미분류 OR 버전 불일치 (현재 버전: %s)", 
+            current_version
         )
 
         batch_docs = []
