@@ -1,7 +1,7 @@
 """
 MongoDB에서 classification 테스트용 샘플 추출 스크립트
 """
-import json
+import json, sys
 from pathlib import Path
 
 from adapters import mongo_client
@@ -55,7 +55,6 @@ def extract_samples(n_samples=30):
 
 
 if __name__ == "__main__":
-    import sys
     
     # 커맨드라인 인자로 샘플 수 지정 가능
     n_samples = int(sys.argv[1]) if len(sys.argv) > 1 else 30

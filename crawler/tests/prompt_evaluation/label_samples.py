@@ -1,8 +1,7 @@
 """
 대화형 JSONL 샘플 라벨링 도구
 """
-import json
-import sys
+import argparse, json
 from pathlib import Path
 
 
@@ -155,8 +154,6 @@ def show_progress(filepath):
 
 
 if __name__ == "__main__":
-    import argparse
-    
     # 기본 경로
     default_input = Path(__file__).parent.parent.parent / "data" / "evaluation" / "classification_samples_unlabeled.jsonl"
     default_output = Path(__file__).parent.parent.parent / "data" / "evaluation" / "classification_samples_labeled.jsonl"
