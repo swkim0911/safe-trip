@@ -7,25 +7,64 @@ Keep only texts with useful, experience-based information for other travelers.
 
 1. Personal first-hand experience
   The text must clearly describe a real scam personally experienced by the author abroad, written in first-person perspective (e.g., "I", "we", "my experience").
-  Examples: pickpocketing, theft, aggressive sales, Overcharging, fraud, system tampering
-  Exclude: General advice or safety tips without a personal incident, Poor service complaints or vague, generic grievances, News articles, rumors, or second-hand reports, Jokes, satire, or humorous exaggerations, Advertisements or promotional content, Experiences that happened to others (not first-hand)
+  Examples: pickpocketing, theft, aggressive sales, overcharging, fraud, system tampering
+  Exclude: General advice or safety tips without a personal incident, poor service complaints or vague grievances, news articles, rumors, or second-hand reports, jokes, satire, or humorous exaggerations, advertisements or promotional content, experiences that happened to others (not first-hand)
 
 2. Value for sharing
-
   Must mention a country, or a subnational region (such as a city, state, or province) where the corresponding country can reasonably be inferred.
-  The text must provide enough context to be useful for other travelers. Specifically, it should mention:
-    Where the scam happened
-    How the scam was carried out
-    What result or outcome occurred (e.g., money lost, forced payment, learned lesson)
-
-  Exclude: texts that fail to provide at least two of the above three elements
+  The text must provide enough context to be useful for other travelers. Specifically, it should mention at least TWO of the following:
+    - Where the scam happened (specific location)
+    - How the scam was carried out (method/tactics)
+    - What result or outcome occurred (impact/consequence)
+  
+  Exclude: texts that provide fewer than two of the above elements
 
 [Decision Rules]
 
-- If all criteria are met AND the text clearly covers where, how, and what result (at least two elements required) → 1
-- If the scam is mentioned but the text lacks context → 0
-- If any criterion is not met or it’s uncertain if the scam was personally experienced → 0
-- Output must be a single digit 1 or 0 only. No other text, spaces, or explanations.
+Output "1" if ALL of the following are met:
+- First-person travel scam experience abroad
+- Mentions location (country/region identifiable)
+- Provides at least 2 of 3 context elements (where/how/what)
+
+Output "0" if ANY of the following apply:
+- Not first-person experience (second-hand, news, rumors)
+- No location mentioned or not identifiable
+- Lacks sufficient context (fewer than 2 elements)
+- General advice, complaints, jokes, or promotional content
+
+Output format: Single digit only (1 or 0). No explanations.
+
+[Examples]
+
+Example 1:
+Text: "I was in Rome near the Colosseum when three men surrounded me. One distracted me asking for directions while another pickpocketed my wallet. I lost €200 and my credit cards."
+Output: 1
+Reason: First-person ✓, Location (Rome, Colosseum) ✓, Where/How/What all present ✓
+
+Example 2:
+Text: "Be careful of taxi scams in Southeast Asia. They often overcharge tourists."
+Output: 0
+Reason: No first-person experience, too vague, general advice only
+
+Example 3:
+Text: "My friend told me about a scam in Bangkok where a tuk-tuk driver took her to a fake jewelry store."
+Output: 0
+Reason: Second-hand experience (happened to friend), not first-person
+
+Example 4:
+Text: "I got scammed in Paris. It was terrible and I lost money."
+Output: 0
+Reason: Lacks context - no details about how the scam happened or what exactly occurred
+
+Example 5:
+Text: "In Barcelona, someone tried to sell me fake tickets to Sagrada Familia. I almost bought them but noticed they looked suspicious and walked away."
+Output: 1
+Reason: First-person ✓, Location (Barcelona, Sagrada Familia) ✓, Where/How/What provided ✓
+
+Example 6:
+Text: "Watch out for pickpockets in tourist areas! I read about it happening a lot."
+Output: 0
+Reason: No personal experience, just general warning based on reading
 
 [Text to Evaluate]
 {text}
