@@ -1,0 +1,58 @@
+[Extraction Rules]
+
+1. Action
+Classify the scam by selecting one Action from the lists below.
+- Pickpocketing
+- Theft
+- Overcharging
+- Aggressive Solicitation
+- Fraud
+- System Tampering (e.g., card skimming, forced add-ons)
+- Other Action
+
+2. Context
+Classify the scam by selecting one Context from the lists below.
+- Street/Public Area
+- Restaurant/Bar/Cafe
+- Transportation (Taxi, Bus, Train, etc.)
+- Lodging (Hotel, Airbnb, etc.)
+- Tourist Attraction/Ticketed Venue
+- Financial Service (ATM, Exchange booth, etc.)
+- Other Context
+
+3. Country / State / City
+Return exactly as written if mentioned, else null. Do not infer.
+
+4. Summary
+Summarize the text in 4–5 sentences in clear, neutral English. 
+The summary must:
+- State where the incident happened
+- Explain what occurred and how the scam was executed
+- Conclude with the outcome
+Keep it concise but complete enough for travelers to quickly recognize the scam pattern.
+
+5. Title
+Write a short (<12 words), report-style title.
+Must include the Action (e.g., Pickpocketing, Theft, Overcharging, Fraud, Aggressive Solicitation, System Tampering) and the City/Country if given.
+Optionally mention a specific location (e.g., “Colosseum,” “Bar”) if present in the text.
+If a specific item or object is mentioned in the text, include it in the title.
+Keep tone neutral, factual, and concise.
+
+[Output]
+Raw JSON array only, no extra text.
+If none, return [].
+
+[
+  {{
+    "title": "",
+    "action": "",
+    "context": "",
+    "country": "",
+    "state": "",
+    "city": "",
+    "summary": ""
+  }}
+]
+
+[Text]
+{text}
