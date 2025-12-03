@@ -172,12 +172,17 @@ class RedditRepository:
             return
 
         ops = []
-
         for record in records:
-            ops.append(InsertOne(record))
+            ops.append(
+                UpdateOne(
+                    {"reddit_id": record["reddit_id"]},
+                    {"$set": record},
+                    upsert=True
+                )
+            )
 
         try:
-            self.parsed_collection.bulk_write(ops, ordered=False)
+            result = self.parsed_collection.bulk_write(ops, ordered=False)
         except Exception as e:
             self.logger.error(
                 "Bulk write failed on parsed_collection "
@@ -187,5 +192,7 @@ class RedditRepository:
         else:
             self.logger.info(
                 f"Flushed {len(records)} parsing results to parsed_collection "
+                f"(Matched={result.matched_count}, Modified={result.modified_count}, "
+                f"Upserted={len(result.upserted_ids)})"
             )
             records.clear()
