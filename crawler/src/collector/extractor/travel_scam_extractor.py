@@ -2,13 +2,7 @@ from datetime import datetime, timezone
 
 
 class TravelScamExtractor:
-    """Reddit에서 여행 사기 관련 데이터를 추출하는 클래스
 
-    Args:
-        reddit_client: Reddit API 클라이언트
-        reddit_repository: Reddit 데이터 저장소
-        etl_config: ETL 설정 객체
-    """
     def __init__(self, reddit_client, reddit_repository, etl_config):
         self.reddit_client = reddit_client
         self.reddit_repository = reddit_repository 
