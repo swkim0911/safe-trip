@@ -84,34 +84,13 @@ class TravelScamTransformer:
             batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
             self.reddit_repository.save_batch_job(batch_metadata)
 
-    '''
-    비동기로 요청한 classification batch 결과를 mongo에 저장
-    
-    Returns:
-        int: 처리된 배치 수
-    '''
     def process_classification_batch_results(self):
         return self.travel_scam_classifier.process_batch_results()
     
     def get_unprocessed_batch_count(self, job_type: str) -> int:
-        """
-        미처리 배치 수 반환
-        
-        Args:
-            job_type: 배치 작업 타입 (classification 또는 parsing)
-            
-        Returns:
-            int: 미처리 배치 수
-        """
         unprocessed_batches = list(self.reddit_repository.find_unprocessed_batches(job_type))
         return len(unprocessed_batches)
 
-    '''
-    classified된 도큐먼트를 batch 작업으로 파싱(parsing)한다.
-    
-    Args:
-        limit: 처리할 최대 문서 수 (테스트용, None이면 전체)
-    '''
     def parse_classified_documents_in_batch(self, limit: int | None = None):
 
         find_travel_scam_docs = self.reddit_repository.find_raw_documents(
@@ -160,7 +139,7 @@ class TravelScamTransformer:
             self.reddit_repository.save_batch_job(batch_metadata)
 
     '''
-    비동기로 요청한 parsing batch 결과를 mongo에 저장
+    비동기로 요청한 parsing batch 결과를 mongo에 저장 (1단계:LLM 결과 저장)
     
     Returns:
         int: 처리된 배치 수
@@ -178,7 +157,7 @@ class TravelScamTransformer:
             
             # 3. 배치 상태별 처리
             if status == "completed" and content:
-                # 결과 가공 및 저장
+                # 결과 가공 및 저장 (Raw LLM 출력 + 메타데이터)
                 parsing_results = []
                 for line in content.splitlines():
                     if not line.strip():
@@ -191,27 +170,39 @@ class TravelScamTransformer:
 
                     parsed_body_results = self.travel_scam_parser.safe_json_loads(text)
                     for parsed_body_result in parsed_body_results:
-                        location_info = self.world_repository.lookup_location(parsed_body_result.get("country"),parsed_body_result.get("state"),parsed_body_result.get("city"))
-                        if location_info is None:
-                            continue
-                        # 완전체 저장
                         now = datetime.now(UTC)
                         raw_json = self.reddit_repository.find_one_raw_document({"reddit_id": reddit_id})
+
                         doc = {
+                            # 기본 메타데이터
                             "reddit_id": reddit_id,
                             "source": "reddit",
                             "url": raw_json.get("url"),
                             "author": raw_json.get("author"),
+                            "posted_at": raw_json.get("posted_at"),
+                            "created_at": now,
+                            "updated_at": now,
+
                             "title": parsed_body_result.get("title"),
                             "action": parsed_body_result.get("action"),
                             "context": parsed_body_result.get("context"),
-                            "country_id": location_info.get("country_id"),
-                            "state_id": location_info.get("state_id"),
-                            "city_id": location_info.get("city_id"),
                             "summary": parsed_body_result.get("summary"),
-                            "posted_at": raw_json.get("posted_at"),
-                            "updated_at": now,
-                            "created_at": now,
+                            "country": parsed_body_result.get("country"),
+                            "state": parsed_body_result.get("state"),
+                            "city": parsed_body_result.get("city"),
+                            
+                            # DB Enrichment 결과 (초기값 None, 별도 enrichment 단계에서 채움)
+                            "country_id": None,
+                            "state_id": None,
+                            "city_id": None,
+                            
+                            # 파싱 메타데이터
+                            "parsing": {
+                                "model_name": self.etl_config.MODEL_NAME,
+                                "parsing_prompt_version": self.etl_config.PARSING_PROMPT_VERSION,
+                                "parsed_at": now,
+                                "location_enriched": False  # Location DB lookup 완료 여부
+                            }
                         }
                         parsing_results.append(doc)
 
@@ -226,7 +217,7 @@ class TravelScamTransformer:
                 # 처리 완료 표시
                 self.reddit_repository.mark_batch_as_processed(batch_id)
                 processed_count += 1
-                self.logger.info(f"✅ Batch {batch_id} 처리 완료")
+                self.logger.info(f"✅ Batch {batch_id} 처리 완료 (Raw LLM 결과 저장)")
                 
             elif status in ["failed", "expired", "cancelled"]:
                 # 실패한 배치는 실패로 표시하고 건너뜀
@@ -238,8 +229,6 @@ class TravelScamTransformer:
                 self.logger.debug(f"⏳ Batch {batch_id} 아직 {status} 상태")
         
         return processed_count
-
-
 
 
     '''
