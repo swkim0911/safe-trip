@@ -50,13 +50,7 @@ def call_openai_api_with_batch(filename: str):
 
 def get_completed_batch_result(batch_id: str):
     """
-        주어진 batch_id로 OpenAI Batch API 결과(JSONL)를 가져온다.
-        완료되지 않았으면 None 반환.
-        
-        Returns:
-            tuple: (content: str | None, status: str)
-            - content: 배치 결과 JSONL 문자열 (완료된 경우만)
-            - status: 배치 상태 (completed, failed, expired, cancelled, in_progress, etc.)
+        Returns (content, status). content is None if not completed.
     """
     client = get_openai_client()
 

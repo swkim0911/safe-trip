@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 
 load_dotenv()  # .env 파일 불러오기
 
-
 def get_instance():
     reddit = praw.Reddit(
         client_id=os.getenv("CLIENT_ID"),
