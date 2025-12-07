@@ -59,8 +59,13 @@ Rules:
 - If only a city is mentioned, infer the most likely country based on context.
   Example: "Manila" → `"country": "Philippines"`, `"city": "Manila"`
   Example: "Paris" → `"country": "France"` unless clearly indicated otherwise (e.g., "Paris, Texas")
-- If a famous landmark is mentioned, infer the corresponding city and country.
-  Example: "Eiffel Tower" → `"city": "Paris"`, `"country": "France"`
+- If only a state/province/region is mentioned, infer the country.
+  Example: "California" → `"country": "United States"`, `"state": "California"`
+  Example: "Hawaii" → `"country": "United States"`, `"state": "Hawaii"`
+  Example: "Bali" → `"country": "Indonesia"`, `"state": "Bali"`
+- If a famous landmark is mentioned, infer the corresponding city, state (if applicable), and country.
+  Example: "Eiffel Tower" → `"city": "Paris"`, `"state": "Île-de-France"`, `"country": "France"`
+  Example: "Statue of Liberty" → `"city": "New York City"`, `"state": "New York"`, `"country": "United States"`
 
 ---
 
