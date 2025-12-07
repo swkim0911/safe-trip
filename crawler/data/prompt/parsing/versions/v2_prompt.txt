@@ -71,12 +71,21 @@ Write a clear, factual summary in 3–5 sentences that describes the incident in
 Structure:
 - Where and when the incident occurred
 - How the scam was executed (step-by-step if possible)
+- Include concrete evidence and comparisons that reveal the scale (e.g., actual prices, distances, time)
 - What happened (money lost, item stolen, scam avoided)
 
-Write in simple, direct language. Focus on actionable details. Do not add opinions or advice.
+Write in simple, direct language. Prioritize concrete evidence over general descriptions. Do not add opinions or advice.
 
-Example:
-"A taxi driver in Bangkok picked up a tourist from the airport. The driver claimed the meter was broken and quoted a flat rate of 1,500 baht for a trip that normally costs 300 baht. When the tourist questioned the price, the driver became aggressive and refused to unlock the doors until payment was made. The tourist paid under pressure."
+Examples:
+
+Transportation:
+"A taxi driver in Bangkok manipulated the meter to reach an inflated fare quickly. After traveling 5 km from the airport, the tourist paid 1,500 baht and exited. They then took an Uber for the remaining 10 km and paid only 300 baht, revealing the taxi driver had overcharged by 5x for a shorter distance."
+
+Street Encounter:
+"In Rome, a man approached a tourist near the Colosseum and forcibly tied a bracelet onto their wrist. He demanded 20 euros and became aggressive when refused. The entire interaction lasted less than 30 seconds, and the tourist eventually paid to avoid confrontation."
+
+Food & Beverage:
+"At a Venice restaurant, a couple ordered two pasta dishes and water. The bill showed 80 euros, including a 30 euro service charge and 15 euros for bread they never ordered. The menu prices indicated the meal should have cost around 35 euros."
 
 ---
 
