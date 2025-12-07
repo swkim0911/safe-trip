@@ -12,9 +12,8 @@ API_KEY = os.getenv("OPENAI_API_KEY")
 
 logger = logging.getLogger(__name__)
 
-@lru_cache(maxsize=1)
 def get_openai_client() -> OpenAI:
-    return OpenAI(api_key=API_KEY) # OpenAI 클라이언트를 캐싱(싱글톤)해서 재사용
+    return OpenAI(api_key=API_KEY)
 
 def call_openai_api(system_content:str, prompt: str, temperature: float = 0.0) -> str:
     
