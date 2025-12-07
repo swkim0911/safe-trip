@@ -8,12 +8,7 @@ from utils import prompt_utils, batch_utils
 
 class TravelScamClassifier:
     """여행 사기 여부를 분류하는 클래스"""
-    
-    """
-    Args:
-        reddit_repository: Reddit 데이터 저장소
-        config: ETL 설정 객체
-    """
+
     def __init__(self, reddit_repository, etl_config):
         self.reddit_repository = reddit_repository
         self.etl_config = etl_config
@@ -32,6 +27,7 @@ class TravelScamClassifier:
             return False
 
         return self.extract_label_from_output(output_text)
+
     """
     raw data를 리스트로 받아서 비동기 배치 요청을 하고 관련 메타데이터를 db에 저장
     """
