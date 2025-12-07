@@ -7,35 +7,26 @@ from utils.token_utils import estimate_classification_request_tokens, estimate_p
 
 
 class TravelScamTransformer:
-    """여행 사기 데이터 변환을 담당하는 클래스 (분류 및 파싱 orchestration)"""
+    """여행 사기 데이터 변환을 담당하는 클래스 (분류 및 파싱)"""
     
-    def __init__(self, travel_scam_classifier, travel_scam_parser, reddit_repository, world_repository, etl_config):
-        """
-        Args:
-            travel_scam_classifier: 분류 담당 객체
-            travel_scam_parser: 파싱 담당 객체
-            reddit_repository: Reddit 데이터 저장소
-            world_repository: 위치 정보 저장소
-            etl_config: ETL 설정 객체
-        """
+    def __init__(self, travel_scam_classifier, travel_scam_parser, travel_scam_enricher, reddit_repository, etl_config):
         self.travel_scam_classifier = travel_scam_classifier
         self.travel_scam_parser = travel_scam_parser
+        self.travel_scam_enricher = travel_scam_enricher
         self.reddit_repository = reddit_repository
-        self.world_repository = world_repository
         self.etl_config = etl_config
         self.logger = logging.getLogger(__name__)
 
     '''
-    raw 도큐먼트를 batch 작업으로 분류(classification)한다.
+    raw 도큐먼트를 batch 작업으로 분류한다.
     
     Args:
         limit: 처리할 최대 문서 수 (None이면 전체)
     '''
     def classify_raw_documents_in_batch(self, limit: int | None = None):
-        # 현재 프롬프트 버전
         current_version = self.etl_config.CLASSIFICATION_PROMPT_VERSION
         
-        # 미분류 OR 버전 불일치 문서 조회
+        # 미분류 OR 버전 불일치(이전 버전) 문서 조회
         query = {
             "$or": [
                 {"classification": {"$exists": False}},  # 미분류 문서
@@ -230,6 +221,49 @@ class TravelScamTransformer:
         
         return processed_count
 
+    '''
+    Location Enrichment - parsed_documents의 location 정보를 DB lookup하여 enrichment
+    
+    Returns:
+        int: 처리된 문서 수
+    '''
+    def enrich_parsed_locations(self):
+        query = {
+            "parsing.location_enriched": False
+        }
+        
+        unenriched_docs = self.reddit_repository.find_parsed_documents(query)
+        
+        enriched_count = 0
+        
+        for doc in unenriched_docs:
+            reddit_id = doc["reddit_id"]
+            country = doc.get("country")
+            state = doc.get("state")
+            city = doc.get("city")
+            
+            self.logger.debug(f"Processing {reddit_id}: country={country}, state={state}, city={city}")
+            
+            # Enricher를 통해 location 정보 조회
+            location = self.travel_scam_enricher.enrich_location(country, state, city)
+            
+            if location:
+                # 성공: country, state, city 이름과 각각의 id, 그리고 location_enriched=True로 업데이트
+                self.reddit_repository.update_parsed_document_location(
+                    reddit_id=reddit_id,
+                    country_id=location.get("country_id"),
+                    state_id=location.get("state_id"),
+                    city_id=location.get("city_id"),
+                    location_enriched=True
+                )
+                enriched_count += 1
+                self.logger.info(f"✅ {reddit_id} enrichment 성공")
+            else:
+                # 실패: location_enriched는 여전히 False로 남음 (나중에 재시도 가능)
+                self.logger.warning(f"⚠️ {reddit_id} enrichment 실패: country={country}, state={state}, city={city}")
+        
+        return enriched_count
+
 
     '''
         매일 실행되는 job
@@ -281,9 +315,11 @@ class TravelScamTransformer:
             if find_travel_scam_doc["reddit_id"] in reddit_ids: continue
             parsed_body_results = self.travel_scam_parser.parse(find_travel_scam_doc["body"])
             for parsed_body_result in parsed_body_results:
-                location_info = self.world_repository.lookup_location(parsed_body_result.get("country"),
-                                                                      parsed_body_result.get("state"),
-                                                                      parsed_body_result.get("city"))
+                location_info = self.travel_scam_enricher.enrich_location(
+                    parsed_body_result.get("country"),
+                    parsed_body_result.get("state"),
+                    parsed_body_result.get("city")
+                )
                 if location_info is None:
                     continue
                 # 완전체 저장
