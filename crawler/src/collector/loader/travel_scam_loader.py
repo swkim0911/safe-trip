@@ -6,14 +6,9 @@ from dotenv import load_dotenv
 
 
 class TravelScamLoader:
-    """MongoDB에서 MySQL로 데이터를 적재하는 클래스"""
+    """MongoDB에서 MySQL로 Parsing된 데이터를 적재하는 클래스"""
     
     def __init__(self, reddit_repository, etl_config):
-        """
-        Args:
-            reddit_repository: Reddit 데이터 저장소
-            etl_config: ETL 설정 객체
-        """
         self.reddit_repository = reddit_repository
         self.etl_config = etl_config
         self.logger = logging.getLogger(__name__)
