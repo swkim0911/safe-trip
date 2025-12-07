@@ -1,25 +1,17 @@
 import sys
 from pathlib import Path
 
-# 프로젝트 루트 추가
 project_root = Path(__file__).parent.parent.parent / "src"
 sys.path.insert(0, str(project_root))
 
-import os
 import json
 from repository.reddit_repository import RedditRepository
 from adapters import mongo_client
 from config.etl_config import ETLConfig
 from collector.transformer.travel_scam_parser import TravelScamParser
 
-def test_single_parsing(reddit_id: str):
-    """
-    특정 reddit_id의 문서를 파싱하여 결과를 출력합니다.
-    
-    Args:
-        reddit_id: 파싱할 reddit 문서의 ID
-    """
-    # 초기화
+def test_parsing_prompt_with_reddit_id(reddit_id: str):
+ 
     etl_config = ETLConfig()
     reddit_repository = RedditRepository(
         mongo_client.get_raw_collection(),
@@ -29,7 +21,6 @@ def test_single_parsing(reddit_id: str):
     )
     parser = TravelScamParser(etl_config)
     
-    # reddit_id로 문서 조회
     document = reddit_repository.raw_collection.find_one({"reddit_id": reddit_id})
     
     if not document:
@@ -51,7 +42,6 @@ def test_single_parsing(reddit_id: str):
     print("-" * 80)
     print()
     
-    # 파싱 실행
     print("🔄 Parsing...")
     try:
         result = parser.parse(document['body'])
@@ -109,5 +99,5 @@ if __name__ == "__main__":
         sys.exit(1)
     
     reddit_id = sys.argv[1]
-    test_single_parsing(reddit_id)
+    test_parsing_prompt_with_reddit_id(reddit_id)
 
