@@ -28,6 +28,17 @@ class WorldRepository:
         doc["state_id"] = doc.pop("_id")
         return doc
 
+    def find_country_exact(self, country_name: str | None):
+
+        doc = self.country_collection.find_one(
+            {"name": country_name},
+            {"_id": 1},
+            collation={"locale": "en", "strength": 1}
+        )
+
+        return doc["_id"] if doc else None
+
+
     def _find_country(self, query):
         doc = self.country_collection.find_one(
             query,
