@@ -8,7 +8,7 @@ class WorldRepository:
         doc = self.city_collection.find_one(
             query,
             {"_id": 1, "country_id": 1, "state_id": 1},
-            collation={"locale": "en", "strength": 1},
+            collation={"locale": "en", "strength": 1}, # 대소문자, 악센트, 기호 무시 (A == a == Á == ä)
         )
         
         if not doc:
@@ -20,7 +20,7 @@ class WorldRepository:
         doc = self.state_collection.find_one(
             query,
             {"_id": 1, "country_id": 1},
-            collation={"locale": "en", "strength": 1}, # 대소문자, 악센트, 기호 무시 (A == a == Á == ä)
+            collation={"locale": "en", "strength": 1},
         )
         
         if not doc:
@@ -41,50 +41,47 @@ class WorldRepository:
         return doc
 
     def lookup_location(self, country_name, state_name, city_name):
-        queries = {
-            "country:state:city": {"name": city_name, "state_name": state_name, "country_name": country_name},
-            "country:city": {"name": city_name, "country_name": country_name},
-            "state:city": {"name": city_name, "state_name": state_name},
-            "country:state": {"name": state_name, "country_name": country_name},
-            "city": {"name": city_name},
-            "state": {"name": state_name},
-            "country": {"name": country_name},
-        }
-
         match (bool(country_name), bool(state_name), bool(city_name)):
             case (True, True, True):
-                return (
-                    self._find_city(queries["country:state:city"])
-                    or self._find_city(queries["country:city"])
-                    or self._find_city(queries["state:city"])
-                    or self._find_state(queries["country:state"])
-                    or self._find_city(queries["city"])
-                    or self._find_state(queries["state"])
-                    or self._find_country(queries["country"])
-                )
+                return self._find_city({
+                    "name": city_name,
+                    "state_name": state_name,
+                    "country_name": country_name,
+                })
+
             case (True, True, False):
-                return (
-                    self._find_state(queries["country:state"])
-                    or self._find_state(queries["state"])
-                    or self._find_country(queries["country"])
-                )
+                return self._find_state({
+                    "name": state_name,
+                    "country_name": country_name,
+                })
+
             case (True, False, True):
-                return (
-                    self._find_city(queries["country:city"])
-                    or self._find_city(queries["city"])
-                    or self._find_country(queries["country"])
-                )
+                return self._find_city({
+                    "name": city_name,
+                    "country_name": country_name,
+                })
+
             case (False, True, True):
-                return (
-                    self._find_city(queries["state:city"])
-                    or self._find_city(queries["city"])
-                    or self._find_state(queries["state"])
-                )
+                return self._find_city({
+                    "name": city_name,
+                    "state_name": state_name,
+                })
+
             case (True, False, False):
-                return self._find_country(queries["country"])
+                return self._find_country({
+                    "name": country_name,
+                })
+
             case (False, True, False):
-                return self._find_state(queries["state"])
+                return self._find_state({
+                    "name": state_name,
+                })
+
             case (False, False, True):
-                return self._find_city(queries["city"])
+                return self._find_city({
+                    "name": city_name,
+                })
+
             case _:
                 return None
+
