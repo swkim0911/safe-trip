@@ -40,6 +40,12 @@ class WorldRepository:
         doc["country_id"] = doc.pop("_id")
         return doc
 
+    def get_all_countries(self):
+        return self.country_collection.find(
+            {},
+            {"_id": 1, "name": 1, "native": 1}
+        )
+
     def lookup_location(self, country_name, state_name, city_name):
         match (bool(country_name), bool(state_name), bool(city_name)):
             case (True, True, True):
