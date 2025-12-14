@@ -1,7 +1,6 @@
 package com.swkim.safetrip.repository;
 
 import com.swkim.safetrip.entity.world.City;
-import com.swkim.safetrip.entity.world.State;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
