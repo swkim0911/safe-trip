@@ -178,9 +178,9 @@ class TravelScamTransformer:
                             "action": parsed_body_result.get("action"),
                             "context": parsed_body_result.get("context"),
                             "summary": parsed_body_result.get("summary"),
-                            "country": parsed_body_result.get("country"),
-                            "state": parsed_body_result.get("state"),
-                            "city": parsed_body_result.get("city"),
+                            "country_name": parsed_body_result.get("country"),
+                            "state_name": parsed_body_result.get("state"),
+                            "city_name": parsed_body_result.get("city"),
                             
                             # DB Enrichment 결과 (초기값 None, 별도 enrichment 단계에서 채움)
                             "country_id": None,
