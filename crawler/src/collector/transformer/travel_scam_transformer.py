@@ -98,6 +98,7 @@ class TravelScamTransformer:
             reddit_id = find_travel_scam_doc["reddit_id"]
             body = find_travel_scam_doc["body"]
 
+            # 이미 parsed된 데이터는 pass
             if reddit_id in parsed_ids:
                 continue
 
