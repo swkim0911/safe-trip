@@ -47,11 +47,18 @@ class WorldRepository:
                     "name": city_name,
                     "state_name": state_name,
                     "country_name": country_name,
+                }) or self.find_city({
+                    "native": city_name,
+                    "state_name": state_name,
+                    "country_name": country_name,
                 })
 
             case (True, True, False):
                 return self.find_state({
                     "name": state_name,
+                    "country_name": country_name,
+                }) or self.find_state({
+                    "native": state_name,
                     "country_name": country_name,
                 })
 
@@ -59,27 +66,39 @@ class WorldRepository:
                 return self.find_city({
                     "name": city_name,
                     "country_name": country_name,
+                }) or self.find_city({
+                    "native": city_name,
+                    "country_name": country_name,
                 })
 
             case (False, True, True):
                 return self.find_city({
                     "name": city_name,
                     "state_name": state_name,
+                }) or self.find_city({
+                    "native": city_name,
+                    "state_name": state_name,
                 })
 
             case (True, False, False):
                 return self.find_country({
                     "name": country_name,
+                }) or self.find_country({
+                    "native": country_name,
                 })
 
             case (False, True, False):
                 return self.find_state({
                     "name": state_name,
+                }) or self.find_state({
+                    "native": state_name,
                 })
 
             case (False, False, True):
                 return self.find_city({
                     "name": city_name,
+                }) or self.find_city({
+                    "native": city_name,
                 })
 
             case _:
