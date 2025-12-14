@@ -128,13 +128,13 @@ Return only a JSON array, with zero or one object:
 ```json
 [
   {{
-    "title": "string",
-    "action": "string (from Action list)",
-    "context": "string (from Context list)",
-    "country": "string or null",
-    "state": "string or null",
-    "city": "string or null",
-    "summary": "string"
+    "title": "",
+    "action": "" (from Action list),
+    "context": "" (from Context list),
+    "country": "" or null,
+    "state": "" or null,
+    "city": "" or null,
+    "summary": ""
   }}
 ]
 ```
@@ -142,6 +142,7 @@ Return only a JSON array, with zero or one object:
 Notes:
 - Return only the JSON array, no backticks or extra text.
 - Ensure valid JSON format.
+- Use JSON null (not the string "null").
 
 ---
 
