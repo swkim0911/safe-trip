@@ -16,77 +16,77 @@ class WorldRepository:
         """
         if city_name:
             return (
-                    self.find_city_by_name(city_name, state_name, country_name)
-                    or self.find_city_by_native(city_name, state_name, country_name)
+                    self._find_city_by_name(city_name, state_name, country_name)
+                    or self._find_city_by_native(city_name, state_name, country_name)
             )
 
         if state_name:
             return (
-                    self.find_state_by_name(state_name, country_name)
-                    or self.find_state_by_native(state_name, country_name)
+                    self._find_state_by_name(state_name, country_name)
+                    or self._find_state_by_native(state_name, country_name)
             )
 
         if country_name:
             return (
-                    self.find_country_by_name(country_name)
-                    or self.find_country_by_native(country_name)
+                    self._find_country_by_name(country_name)
+                    or self._find_country_by_native(country_name)
             )
 
         return None
-
-    def find_city_by_name(self, city_name, state_name=None, country_name=None):
-        query = self._build_city_query(
-            field="name",
-            value=city_name,
-            state_name=state_name,
-            country_name=country_name,
-        )
-        return self._find_city(query)
-
-    def find_city_by_native(self, city_name, state_name=None, country_name=None):
-        query = self._build_city_query(
-            field="native",
-            value=city_name,
-            state_name=state_name,
-            country_name=country_name,
-        )
-        return self._find_city(query)
-
-    def find_state_by_name(self, state_name, country_name=None):
-        query = self._build_state_query(
-            field="name",
-            value=state_name,
-            country_name=country_name,
-        )
-        return self._find_state(query)
-
-    def find_state_by_native(self, state_name, country_name=None):
-        query = self._build_state_query(
-            field="native",
-            value=state_name,
-            country_name=country_name,
-        )
-        return self._find_state(query)
-
-    def find_country_by_name(self, country_name):
-        query = self._build_country_query(
-            field="name",
-            value=country_name
-        )
-        return self._find_country(query)
-
-    def find_country_by_native(self, country_name):
-        query = self._build_country_query(
-            field="native",
-            value=country_name
-        )
-        return self._find_country(query)
 
     def get_all_countries(self):
         return self.country_collection.find(
             {},
             {"_id": 1, "name": 1, "native": 1, "population": 1}
         )
+
+    def _find_city_by_name(self, city_name, state_name=None, country_name=None):
+        query = self._build_city_query(
+            field="name",
+            value=city_name,
+            state_name=state_name,
+            country_name=country_name,
+        )
+        return self._find_city(query)
+
+    def _find_city_by_native(self, city_name, state_name=None, country_name=None):
+        query = self._build_city_query(
+            field="native",
+            value=city_name,
+            state_name=state_name,
+            country_name=country_name,
+        )
+        return self._find_city(query)
+
+    def _find_state_by_name(self, state_name, country_name=None):
+        query = self._build_state_query(
+            field="name",
+            value=state_name,
+            country_name=country_name,
+        )
+        return self._find_state(query)
+
+    def _find_state_by_native(self, state_name, country_name=None):
+        query = self._build_state_query(
+            field="native",
+            value=state_name,
+            country_name=country_name,
+        )
+        return self._find_state(query)
+
+    def _find_country_by_name(self, country_name):
+        query = self._build_country_query(
+            field="name",
+            value=country_name
+        )
+        return self._find_country(query)
+
+    def _find_country_by_native(self, country_name):
+        query = self._build_country_query(
+            field="native",
+            value=country_name
+        )
+        return self._find_country(query)
 
     def _find_city(self, query):
         doc = self.city_collection.find_one(
