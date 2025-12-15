@@ -40,6 +40,18 @@ class WorldRepository:
             {"_id": 1, "name": 1, "native": 1, "population": 1}
         )
 
+    def get_cities_by_country_id(self, country_id):
+        return self.city_collection.find(
+            {"country_id": country_id},
+            {"_id": 1, "name": 1, "native": 1, "population": 1}
+        )
+
+    def get_states_by_country_id(self, country_id):
+        return self.state_collection.find(
+            {"country_id": country_id},
+            {"_id": 1, "name": 1, "native": 1, "population": 1}
+        )
+
     def _find_city_by_name(self, city_name, state_name=None, country_name=None):
         query = self._build_city_query(
             field="name",
