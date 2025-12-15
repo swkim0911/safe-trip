@@ -85,7 +85,7 @@ class WorldRepository:
     def get_all_countries(self):
         return self.country_collection.find(
             {},
-            {"_id": 1, "name": 1, "native": 1}
+            {"_id": 1, "name": 1, "native": 1, "population": 1}
         )
 
     def _find_city(self, query):
