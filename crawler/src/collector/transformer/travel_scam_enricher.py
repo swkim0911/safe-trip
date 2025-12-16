@@ -12,9 +12,20 @@ class TravelScamEnricher:
         self.logger = logging.getLogger(__name__)
 
     def normalize(self, text):
+        """
+        부분 문자열 비교용
+        """
         if not text:
             return None
         return unidecode(text).lower().strip()
+
+    def normalize_compact(self, text):
+        """
+        공백까지 제거한 정규화 (fuzzy 비교용)
+        """
+        if not text:
+            return None
+        return unidecode(text).lower().replace(" ", "").strip()
 
     def enrich_location(self, country_name: str | None, state_name: str | None, city_name: str | None) -> dict | None:
         """
@@ -332,9 +343,11 @@ class TravelScamEnricher:
 
     def _find_fuzzy_matches(self, entities, target_name, field_name, fuzzy_threshold):
         """fuzzy matching으로 유사한 엔티티들을 찾는다."""
+        target_name = self.normalize_compact(target_name)
         candidates = []
+
         for entity in entities:
-            entity_name = self.normalize(entity.get(field_name, ""))
+            entity_name = self.normalize_compact(entity.get(field_name, ""))
             ratio = get_fuzz_ratio(entity_name, target_name)
             if ratio > fuzzy_threshold:
                 candidates.append({
