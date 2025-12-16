@@ -239,17 +239,17 @@ class TravelScamTransformer:
         
         for doc in unenriched_docs:
             reddit_id = doc["reddit_id"]
-            country = doc.get("country")
-            state = doc.get("state")
-            city = doc.get("city")
+            country_name = doc.get("country_name")
+            state_name = doc.get("state_name")
+            city_name = doc.get("city_name")
             
-            self.logger.debug(f"Processing {reddit_id}: country={country}, state={state}, city={city}")
+            self.logger.debug(f"Processing {reddit_id}: country_name={country_name}, state_name={state_name}, city_name={city_name}")
             
             # Enricher를 통해 location 정보 조회
-            location = self.travel_scam_enricher.enrich_location(country, state, city)
+            location = self.travel_scam_enricher.enrich_location(country_name, state_name, city_name)
             
             if location:
-                # 성공: country, state, city 이름과 각각의 id, 그리고 location_enriched=True로 업데이트
+                # 성공: country_name, state_name, city_name 이름과 각각의 id, 그리고 location_enriched=True로 업데이트
                 self.reddit_repository.update_parsed_document_location(
                     reddit_id=reddit_id,
                     country_id=location.get("country_id"),
@@ -261,7 +261,7 @@ class TravelScamTransformer:
                 self.logger.info(f"✅ {reddit_id} enrichment 성공")
             else:
                 # 실패: location_enriched는 여전히 False로 남음 (나중에 재시도 가능)
-                self.logger.warning(f"⚠️ {reddit_id} enrichment 실패: country={country}, state={state}, city={city}")
+                self.logger.warning(f"⚠️ {reddit_id} enrichment 실패: country_name={country_name}, state_name={state_name}, city_name={city_name}")
         
         return enriched_count
 
