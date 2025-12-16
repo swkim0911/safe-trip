@@ -126,7 +126,7 @@ class TravelScamEnricher:
             if location:
                 return location
 
-        return None
+        return country
 
     def _fuzzy_match_country(self, target_country_name: str):
         """
