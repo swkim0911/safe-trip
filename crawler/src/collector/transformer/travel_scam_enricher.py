@@ -371,7 +371,8 @@ class TravelScamEnricher:
         if max_candidate["population"] is not None:
             return self._build_result(max_candidate, id_key, additional_fields)
 
-        return None
+        return self._build_result(candidates[0], id_key, additional_fields) # 인구수로 판단할 수 없는 경우 db에서 먼저 나오는 것으로 처리
+
 
     def _build_result(self, candidate, id_key, additional_fields=None):
         """
