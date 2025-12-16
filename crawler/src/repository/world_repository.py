@@ -43,13 +43,26 @@ class WorldRepository:
     def get_cities_by_country_id(self, country_id):
         return self.city_collection.find(
             {"country_id": country_id},
-            {"_id": 1, "name": 1, "native": 1, "population": 1}
+            {"_id": 1, "name": 1, "native": 1, "population": 1, "state_id": 1}
         )
 
     def get_states_by_country_id(self, country_id):
         return self.state_collection.find(
             {"country_id": country_id},
             {"_id": 1, "name": 1, "native": 1, "population": 1}
+        )
+
+    def get_states_by_ids(self, state_ids):
+        """
+        여러 state_id에 해당하는 state 문서를 조회한다.
+        """
+        return self.state_collection.find(
+            {"_id": {"$in": state_ids}},
+            {
+                "_id": 1,
+                "name": 1,
+                "native": 1
+            }
         )
 
     def _find_city_by_name(self, city_name, state_name=None, country_name=None):
