@@ -148,8 +148,8 @@ class RedditRepository:
     def find_parsed_documents(self, query, projection=None):
         return self.parsed_collection.find(query, projection)
 
-    def find_one_raw_document(self, query):
-        return self.raw_collection.find_one(query)
+    def find_raw_document_by_reddit_id(self, reddit_id: str):
+        return self.raw_collection.find_one({"reddit_id": reddit_id})
 
     def update_parsed_document_location(self, reddit_id: str, country_id, state_id, city_id, location_enriched: bool):
         """

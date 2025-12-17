@@ -163,7 +163,7 @@ class TravelScamTransformer:
                     parsed_body_results = self.travel_scam_parser.safe_json_loads(text)
                     for parsed_body_result in parsed_body_results:
                         now = datetime.now(UTC)
-                        raw_json = self.reddit_repository.find_one_raw_document({"reddit_id": reddit_id})
+                        raw_json = self.reddit_repository.find_raw_document_by_reddit_id(reddit_id)
 
                         doc = {
                             # 기본 메타데이터
