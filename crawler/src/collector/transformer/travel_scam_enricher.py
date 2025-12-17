@@ -349,6 +349,10 @@ class TravelScamEnricher:
         for entity in entities:
             entity_name = self.normalize_compact(entity.get(field_name, ""))
             ratio = get_fuzz_ratio(entity_name, target_name)
+
+            if len(target_name) == 3 and len(entity_name) == 3:
+                fuzzy_threshold = 66
+
             if ratio > fuzzy_threshold:
                 candidates.append({
                     "id": entity["_id"],
