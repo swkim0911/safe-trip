@@ -109,9 +109,6 @@ class RedditRepository:
         }
         self.batch_job_collection.insert_one(doc)
 
-    def find_batch_job_documents(self, query):
-        return self.batch_job_collection.find(query)
-    
     def find_unprocessed_batches(self, job_type: str):
         """미처리 배치 조회"""
         query = {
