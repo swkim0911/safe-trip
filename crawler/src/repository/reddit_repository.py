@@ -8,13 +8,6 @@ class RedditRepository:
     """Reddit 데이터에 대한 MongoDB 접근을 담당하는 Repository 클래스"""
     
     def __init__(self, raw_collection, parsed_collection, batch_job_collection, etl_config):
-        """
-        Args:
-            raw_collection: MongoDB raw 데이터 컬렉션
-            parsed_collection: MongoDB parsed 데이터 컬렉션
-            batch_job_collection: MongoDB batch job 컬렉션
-            etl_config: ETL 설정 객체
-        """
         self.raw_collection = raw_collection
         self.parsed_collection = parsed_collection
         self.batch_job_collection = batch_job_collection
@@ -160,6 +153,30 @@ class RedditRepository:
 
     def find_one_raw_document(self, query):
         return self.raw_collection.find_one(query)
+
+    def update_parsed_document_location(self, reddit_id: str, country_id, state_id, city_id, location_enriched: bool):
+        """
+        Parsed document의 location 정보 업데이트
+        
+        Args:
+            reddit_id: Reddit ID
+            country_id: Country ID (또는 None)
+            state_id: State ID (또는 None)
+            city_id: City ID (또는 None)
+            location_enriched: Location enrichment 완료 여부
+        """
+        self.parsed_collection.update_one(
+            {"reddit_id": reddit_id},
+            {
+                "$set": {
+                    "country_id": country_id,
+                    "state_id": state_id,
+                    "city_id": city_id,
+                    "parsing.location_enriched": location_enriched,
+                    "updated_at": datetime.now(UTC)
+                }
+            }
+        )
 
     """
     Flush parsing results to MongoDB.
