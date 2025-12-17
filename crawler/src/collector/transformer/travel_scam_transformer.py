@@ -229,11 +229,7 @@ class TravelScamTransformer:
         int: 처리된 문서 수
     '''
     def enrich_parsed_locations(self):
-        query = {
-            "parsing.location_enriched": False
-        }
-        
-        unenriched_docs = self.reddit_repository.find_parsed_documents(query)
+        unenriched_docs = self.reddit_repository.find_unenriched_parsed_documents()
         
         enriched_count = 0
         
