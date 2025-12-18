@@ -155,6 +155,7 @@ class TravelScamEnricher:
             entities=all_states,
             target_name=target_state_name,
             id_key="state_id",
+            additional_fields=["country_id"]
         )
 
     def _fuzzy_match_city(self, country, target_city_name, target_state_name=None):
