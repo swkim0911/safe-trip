@@ -12,9 +12,8 @@ API_KEY = os.getenv("OPENAI_API_KEY")
 
 logger = logging.getLogger(__name__)
 
-@lru_cache(maxsize=1)
 def get_openai_client() -> OpenAI:
-    return OpenAI(api_key=API_KEY) # OpenAI 클라이언트를 캐싱(싱글톤)해서 재사용
+    return OpenAI(api_key=API_KEY)
 
 def call_openai_api(system_content:str, prompt: str, temperature: float = 0.0) -> str:
     
@@ -51,24 +50,25 @@ def call_openai_api_with_batch(filename: str):
 
 def get_completed_batch_result(batch_id: str):
     """
-        주어진 batch_id로 OpenAI Batch API 결과(JSONL)를 가져온다.
-        완료되지 않았으면 None 반환.
+        Returns (content, status). content is None if not completed.
     """
     client = get_openai_client()
 
     batch = client.batches.retrieve(batch_id)
-    if batch.status == "completed":
+    status = batch.status
+    
+    if status == "completed":
         output_file_id = batch.output_file_id
         file_obj = client.files.content(output_file_id)
 
         # JSONL 콘텐츠 반환
         logger.info(f"✅ Batch {batch_id} completed. Output file_id={output_file_id}")
         content = file_obj.content.decode("utf-8")
-        return content
+        return content, status
 
-    elif batch.status in ["failed", "expired", "cancelled"]:
-        logger.error(f"❌ Batch {batch_id} ended with status {batch.status}")
+    elif status in ["failed", "expired", "cancelled"]:
+        logger.error(f"❌ Batch {batch_id} ended with status {status}")
     else:
-        logger.info(f"⏳ Batch {batch_id} still not ready, status={batch.status}")
+        logger.info(f"⏳ Batch {batch_id} still not ready, status={status}")
 
-    return None
+    return None, status

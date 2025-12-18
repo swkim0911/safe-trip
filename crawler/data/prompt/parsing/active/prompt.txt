@@ -1,0 +1,150 @@
+[Action]
+Select exactly ONE of the following values for the `action` field (string, case-sensitive):
+
+- `Theft/Pickpocketing`
+- `Overcharging`
+- `Aggressive Solicitation`
+- `Fraud`
+- `System Tampering`
+- `Other Action`
+
+Guidelines:
+- `Theft/Pickpocketing`: theft of personal belongings, either directly from the person (pockets, bags, backpacks) or from nearby unattended items (hotel room, luggage, cafe table, etc.), where the main intent is to steal money or valuables.
+- `Overcharging`: the traveler agreed to a service or product, but was charged an unfair or inflated price (taxi fare manipulation, inflated restaurant bills, tour price disputes, shops charging tourists more). Use this even if the seller is aggressive when demanding payment, as long as the traveler initially agreed to use the service.
+- `Aggressive Solicitation`: someone forced or pressured the traveler into accepting something they did NOT want or agree to, then demanded payment (forced bracelets, unwanted photos, unsolicited guides, street performers who demand money after performing without being asked). Use this when an unwanted item or service is pushed onto the traveler first.
+- `Fraud`: deceptive schemes involving lies or fake identities/services (fake tours, fake tickets, fake police, fake officials, fake rental listings, etc.).
+- `System Tampering`: manipulation of payment or service systems (card skimming, rigged ATMs, forced add-ons, meter tampering, unauthorized card charges).
+- `Other Action`: use only if none of the above categories reasonably fit.
+
+Use exact label strings from the list.
+
+---
+
+[Context]
+Select exactly ONE of the following values (string, case-sensitive):
+
+- `Transportation Service`
+- `Accommodation Service`
+- `Food & Beverage Service`
+- `Financial Service`
+- `Tourism Service`
+- `Street Encounter`
+- `Other`
+
+Guidelines:
+- `Transportation Service`: using taxis, rideshares, buses, trains, subways, shuttles, ferries, or any form of transportation. Includes fare disputes, meter tampering, and theft while on transit.
+- `Accommodation Service`: booking or staying at hotels, hostels, guesthouses, Airbnbs, vacation rentals. Includes check-in/out issues, hidden charges, fake bookings.
+- `Food & Beverage Service`: dining or drinking at restaurants, bars, cafes, nightclubs, pubs, street food vendors. Includes bill padding, overcharging, and forced consumption.
+- `Financial Service`: using ATMs, currency exchange booths, banks, money transfer services, payment terminals. Includes card skimming, exchange rate scams, fake ATMs.
+- `Tourism Service`: tours, guided services, attraction tickets, museum entries, theme parks, sightseeing activities. Includes fake tickets, overpriced tours, unauthorized guides.
+- `Street Encounter`: unsolicited or informal interactions in public spaces such as streets, plazas, parks, markets, beaches. Includes bracelet scams, forced gifts, street sellers, pickpocketing, aggressive solicitation.
+- `Other`: use only if none of the above categories reasonably fit.
+
+Use exact label strings from the list.
+
+---
+
+[Location: country / state / city]
+
+Extract the location information from the text.
+
+Fields:
+- `country`: country name (e.g., `"Italy"`, `"Japan"`, `"Philippines"`). Use `null` if no location can be determined.
+- `state`: state/province/region name (e.g., `"California"`, `"Bavaria"`). Use `null` if not mentioned or not applicable.
+- `city`: city/town name (e.g., `"Paris"`, `"Istanbul"`, `"Manila"`). Use `null` if not mentioned.
+
+Rules:
+- Extract city, state, and country names as they appear in the text.
+- Use standard/common names when possible (e.g., "Philippines" not "PH", "United States" not "USA").
+- If only a city is mentioned, infer the most likely country based on context.
+  Example: "Manila" → `"country": "Philippines"`, `"city": "Manila"`
+  Example: "Paris" → `"country": "France"` unless clearly indicated otherwise (e.g., "Paris, Texas")
+- If only a state/province/region is mentioned, infer the country.
+  Example: "California" → `"country": "United States"`, `"state": "California"`
+  Example: "Hawaii" → `"country": "United States"`, `"state": "Hawaii"`
+  Example: "Bali" → `"country": "Indonesia"`, `"state": "Bali"`
+- If a famous landmark is mentioned, infer the corresponding city, state (if applicable), and country.
+  Example: "Eiffel Tower" → `"city": "Paris"`, `"state": "Île-de-France"`, `"country": "France"`
+  Example: "Statue of Liberty" → `"city": "New York City"`, `"state": "New York"`, `"country": "United States"`
+
+---
+
+[Summary]
+
+Write a clear, factual summary in 3–5 sentences that describes the incident in enough detail for travelers to recognize similar scams.
+
+Structure:
+- Where and when the incident occurred
+- How the scam was executed (step-by-step if possible)
+- Include concrete evidence and comparisons that reveal the scale (e.g., actual prices, distances, time)
+- What happened (money lost, item stolen, scam avoided)
+
+Write in simple, direct language. Prioritize concrete evidence over general descriptions. Do not add opinions or advice.
+
+Examples:
+
+Transportation:
+"A taxi driver in Bangkok manipulated the meter to reach an inflated fare quickly. After traveling 5 km from the airport, the tourist paid 1,500 baht and exited. They then took an Uber for the remaining 10 km and paid only 300 baht, revealing the taxi driver had overcharged by 5x for a shorter distance."
+
+Street Encounter:
+"In Rome, a man approached a tourist near the Colosseum and forcibly tied a bracelet onto their wrist. He demanded 20 euros and became aggressive when refused. The entire interaction lasted less than 30 seconds, and the tourist eventually paid to avoid confrontation."
+
+Food & Beverage:
+"At a Venice restaurant, a couple ordered two pasta dishes and water. The bill showed 80 euros, including a 30 euro service charge and 15 euros for bread they never ordered. The menu prices indicated the meal should have cost around 35 euros."
+
+---
+
+[Title]
+
+Write a descriptive, specific title (maximum 12 words) that helps travelers quickly identify the scam type and situation.
+
+Requirements:
+- Include the Action (e.g., Theft/Pickpocketing, Overcharging, Fraud) naturally in the title
+- Include the city and/or country if known
+- Add specific details: WHO (taxi driver, vendor), WHAT (phone, wallet), WHERE (restaurant, metro), or HOW (meter tampering, distraction)
+
+Write as a descriptive phrase, not a generic template. Keep tone neutral and factual.
+
+Good examples:
+- "Taxi Driver Overcharged Tourist Using Rigged Meter in Bangkok"
+- "Phone Stolen from Backpack on Crowded Paris Metro"
+- "Fake Police Demanded Bribe After Passport Check in Rome"
+- "Restaurant Added Unauthorized Charges to Bill in Manila"
+
+Avoid generic titles like:
+- "Overcharging in Bangkok" (too vague)
+- "Theft in Paris, France" (lacks specifics)
+
+---
+
+[Output Format]
+
+Return only a JSON array, with zero or one object:
+
+- If there is no clear scam incident, return:
+  `[]`
+- If there is a clear scam incident, return:
+
+```json
+[
+  {{
+    "title": "",
+    "action": "" (from Action list),
+    "context": "" (from Context list),
+    "country": "" or null,
+    "state": "" or null,
+    "city": "" or null,
+    "summary": ""
+  }}
+]
+```
+
+Notes:
+- Return only the JSON array, no backticks or extra text.
+- Ensure valid JSON format.
+- Use JSON null (not the string "null").
+
+---
+
+[Text]
+{text}

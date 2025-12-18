@@ -8,21 +8,17 @@ class RedditRepository:
     """Reddit 데이터에 대한 MongoDB 접근을 담당하는 Repository 클래스"""
     
     def __init__(self, raw_collection, parsed_collection, batch_job_collection, etl_config):
-        """
-        Args:
-            raw_collection: MongoDB raw 데이터 컬렉션
-            parsed_collection: MongoDB parsed 데이터 컬렉션
-            batch_job_collection: MongoDB batch job 컬렉션
-            etl_config: ETL 설정 객체
-        """
         self.raw_collection = raw_collection
         self.parsed_collection = parsed_collection
         self.batch_job_collection = batch_job_collection
         self.etl_config = etl_config
         self.logger = logging.getLogger(__name__)
 
-    def find_raw_documents(self, query):
-        return self.raw_collection.find(query)
+    def find_raw_documents(self, query, limit: int | None = None):
+        cursor = self.raw_collection.find(query)
+        if limit is not None:
+            cursor = cursor.limit(limit)
+        return cursor
     
     def flush_raw_records(self, records: list[dict]):
         if not records:
@@ -107,17 +103,83 @@ class RedditRepository:
             "input_file_id": batch_metadata["input_file_id"],
             "job_type": batch_metadata["job_type"],
             "submitted_at": datetime.now(UTC),
+            "processed": False,  # 처리 여부
+            "processed_at": None,  # 처리 완료 시각
+            "status": "submitted"  # submitted, completed, failed, expired, cancelled
         }
         self.batch_job_collection.insert_one(doc)
 
-    def find_batch_job_documents(self, query):
+    def find_unprocessed_batches(self, job_type: str):
+        """미처리 배치 조회"""
+        query = {
+            "job_type": job_type,
+            "processed": False
+        }
         return self.batch_job_collection.find(query)
+    
+    def mark_batch_as_processed(self, batch_id: str):
+        """배치를 처리 완료로 표시"""
+        self.batch_job_collection.update_one(
+            {"batch_id": batch_id},
+            {
+                "$set": {
+                    "processed": True,
+                    "processed_at": datetime.now(UTC),
+                    "status": "completed"
+                }
+            }
+        )
+        self.logger.info(f"Batch {batch_id} marked as processed")
+    
+    def mark_batch_as_failed(self, batch_id: str, status: str):
+        """실패/만료 배치 표시"""
+        self.batch_job_collection.update_one(
+            {"batch_id": batch_id},
+            {
+                "$set": {
+                    "processed": True,
+                    "processed_at": datetime.now(UTC),
+                    "status": status
+                }
+            }
+        )
+        self.logger.warning(f"Batch {batch_id} marked as {status}")
 
     def find_parsed_documents(self, query, projection=None):
         return self.parsed_collection.find(query, projection)
 
-    def find_one_raw_document(self, query):
-        return self.raw_collection.find_one(query)
+    def find_unenriched_parsed_documents(self):
+        query = {
+            "parsing.location_enriched": False
+        }
+        return self.parsed_collection.find(query)
+
+    def find_raw_document_by_reddit_id(self, reddit_id: str):
+        return self.raw_collection.find_one({"reddit_id": reddit_id})
+
+    def update_parsed_document_location(self, reddit_id: str, country_id, state_id, city_id, location_enriched: bool):
+        """
+        Parsed document의 location 정보 업데이트
+        
+        Args:
+            reddit_id: Reddit ID
+            country_id: Country ID (또는 None)
+            state_id: State ID (또는 None)
+            city_id: City ID (또는 None)
+            location_enriched: Location enrichment 완료 여부
+        """
+        self.parsed_collection.update_one(
+            {"reddit_id": reddit_id},
+            {
+                "$set": {
+                    "country_id": country_id,
+                    "state_id": state_id,
+                    "city_id": city_id,
+                    "parsing.location_enriched": location_enriched,
+                    "updated_at": datetime.now(UTC)
+                }
+            }
+        )
 
     """
     Flush parsing results to MongoDB.
@@ -130,12 +192,17 @@ class RedditRepository:
             return
 
         ops = []
-
         for record in records:
-            ops.append(InsertOne(record))
+            ops.append(
+                UpdateOne(
+                    {"reddit_id": record["reddit_id"]},
+                    {"$set": record},
+                    upsert=True
+                )
+            )
 
         try:
-            self.parsed_collection.bulk_write(ops, ordered=False)
+            result = self.parsed_collection.bulk_write(ops, ordered=False)
         except Exception as e:
             self.logger.error(
                 "Bulk write failed on parsed_collection "
@@ -145,5 +212,7 @@ class RedditRepository:
         else:
             self.logger.info(
                 f"Flushed {len(records)} parsing results to parsed_collection "
+                f"(Matched={result.matched_count}, Modified={result.modified_count}, "
+                f"Upserted={len(result.upserted_ids)})"
             )
             records.clear()

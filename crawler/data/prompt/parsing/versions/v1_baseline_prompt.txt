@@ -46,10 +46,10 @@ If none, return [].
   {{
     "title": "",
     "action": "",
-    "context": ""   
-    "country": "",  
+    "context": "",
+    "country": "",
     "state": "",
-    "city": "",   
+    "city": "",
     "summary": ""
   }}
 ]

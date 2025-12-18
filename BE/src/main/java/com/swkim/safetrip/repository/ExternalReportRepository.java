@@ -1,11 +1,9 @@
 package com.swkim.safetrip.repository;
 
 import com.swkim.safetrip.dto.response.ExternalReportDetailResponse;
-import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.ExternalReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 

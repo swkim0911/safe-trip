@@ -6,26 +6,21 @@ from dotenv import load_dotenv
 
 
 class TravelScamLoader:
-    """MongoDB에서 MySQL로 데이터를 적재하는 클래스"""
+    """MongoDB에서 MySQL로 Parsing된 데이터를 적재하는 클래스"""
     
-    def __init__(self, reddit_repository, config):
-        """
-        Args:
-            reddit_repository: Reddit 데이터 저장소
-            config: ETL 설정 객체
-        """
+    def __init__(self, reddit_repository, etl_config):
         self.reddit_repository = reddit_repository
-        self.config = config
+        self.etl_config = etl_config
         self.logger = logging.getLogger(__name__)
 
     def mongo_to_mysql(self, load_scope=None):
         load_dotenv()
 
-        host = self.config.MYSQL_HOST
-        port = self.config.MYSQL_PORT
-        user = self.config.MYSQL_USER
-        password = self.config.MYSQL_PASSWORD
-        database = self.config.MYSQL_DATABASE
+        host = self.etl_config.MYSQL_HOST
+        port = self.etl_config.MYSQL_PORT
+        user = self.etl_config.MYSQL_USER
+        password = self.etl_config.MYSQL_PASSWORD
+        database = self.etl_config.MYSQL_DATABASE
 
         mysql_conn = mysql.connector.connect(
             host=host,
@@ -37,11 +32,13 @@ class TravelScamLoader:
         )
 
         cursor = mysql_conn.cursor()
-        query = {}
+        query = {"parsing.location_enriched": True}
+
         if load_scope == "daily":
             today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) # 오늘의 자정 시간 ex) 2025-09-11 00:00:00+00:00
             tomorrow = today + timedelta(days=1) # 내일 자정 시간 ex) 2025-09-12 00:00:00+00:00
             query = {
+                "parsing.location_enriched": True,
                 "created_at": {
                     "$gte": today,
                     "$lt": tomorrow

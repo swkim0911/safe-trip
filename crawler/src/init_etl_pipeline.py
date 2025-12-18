@@ -1,4 +1,5 @@
 import subprocess
+import argparse
 import sys
 import time
 from pathlib import Path
@@ -68,13 +69,13 @@ class ETLController:
             self.logger.error("%s 실행 중 예외 발생: %s", job_name, e, exc_info=True)
             return False
     
-    def run_pipeline(self, extract_args: list = None, load_args: list = None) -> bool:
+    def run_pipeline(self, extract_args: list[str] | None = None, load_args: list[str] | None = None) -> bool:
         """
         전체 ETL 파이프라인 실행
         
         Args:
-            extract_args: Extract Job에 전달할 인자 (기본값: ["all"])            
-            load_args: Load Job에 전달할 인자 (기본값: ["all"]) 
+            extract_args: Extract Job에 전달할 인자 (기본값: ["all"])
+            load_args: Load Job에 전달할 인자 (기본값: ["all"])
         Returns:
             성공 여부
         """
@@ -82,10 +83,11 @@ class ETLController:
             extract_args = ["all"]
         if load_args is None:
             load_args = ["all"]
+
         jobs = [
             ("Extract Job", "extract_job.py", extract_args),
-            ("Classification Job", "classification_job.py", []),
-            ("Parsing Job", "parsing_job.py", []),
+            ("Classify Job", "classify_job.py", []),
+            ("Parse Job", "parse_job.py", []),
             ("Load Job", "load_job.py", load_args),
         ]
         
@@ -108,14 +110,18 @@ class ETLController:
 
 
 def main():
- 
-    # 명령줄 인자 파싱 (python3 init_etl_pipeline.py <time_filter> [limit] <load_scope>)
-    if len(sys.argv) == 4:
-        extract_args = [sys.argv[1], sys.argv[2]]
-        load_args = [sys.argv[3]]
-    else:  # (python3 init_etl_pipeline.py <time_filter> <load_scope>)
-        extract_args = [sys.argv[1]] if len(sys.argv) > 1 else None
-        load_args = [sys.argv[2]] if len(sys.argv) > 2 else None
+
+    parser = argparse.ArgumentParser(description="Run the ETL pipeline (extract → classify → parse → load)."
+)
+    parser.add_argument("time_filter", choices=["week", "all"])
+    parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("load_scope", choices=["daily", "all"])
+    parsed_args = parser.parse_args()
+
+    extract_args = [parsed_args.time_filter]
+    if parsed_args.limit is not None:
+        extract_args.append(str(parsed_args.limit))
+    load_args = [parsed_args.load_scope]
   
     # ETL 파이프라인 실행
     controller = ETLController()

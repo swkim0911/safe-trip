@@ -4,7 +4,6 @@ import com.swkim.safetrip.dto.response.RegionScamStatisticsItem;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.dto.response.world.CitiesResponse;
 import com.swkim.safetrip.dto.response.world.CitiesResponse.CityDto;
-import com.swkim.safetrip.dto.response.world.StatesResponse;
 import com.swkim.safetrip.entity.world.City;
 import com.swkim.safetrip.global.exception.custom.CityNotFoundException;
 import com.swkim.safetrip.repository.CityRepository;
