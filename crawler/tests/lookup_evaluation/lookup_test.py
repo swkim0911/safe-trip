@@ -26,7 +26,9 @@ failed_cases = [
   { "country_name": "Vietnam", "state_name": None, "city_name": "Saigon" }, # 옛이름
   { "country_name": "Turkey", "state_name": None, "city_name": "Cappadocia" }, # 관광지
   { "country_name": "Bahamas", "state_name": None, "city_name": "Cabbage Beach" }, # 관광지
-  { "country_name": "Jordan", "state_name": None, "city_name": "Wadi Rum" } # 관광지
+  { "country_name": "Jordan", "state_name": None, "city_name": "Wadi Rum" }, # 관광지
+  { "country_name": "United States", "state_name": "Hawaii", "city_name": "Waikiki"},  # 관광지인데 그러면 country,state가 enrich돼야 하는데 state만 되었음
+  { "country_name": "El Salvador", "state_name": "La Libertad", "city_name": "El Tunco"}, # 관광지인데 그러면 country,state가 enrich돼야 하는데 state만 되었음
 ]
 
 print("=" * 80)
