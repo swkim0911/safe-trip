@@ -32,11 +32,13 @@ class TravelScamLoader:
         )
 
         cursor = mysql_conn.cursor()
-        query = {}
+        query = {"parsing.location_enriched": True}
+
         if load_scope == "daily":
             today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) # 오늘의 자정 시간 ex) 2025-09-11 00:00:00+00:00
             tomorrow = today + timedelta(days=1) # 내일 자정 시간 ex) 2025-09-12 00:00:00+00:00
             query = {
+                "parsing.location_enriched": True,
                 "created_at": {
                     "$gte": today,
                     "$lt": tomorrow
