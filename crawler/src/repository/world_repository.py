@@ -49,7 +49,7 @@ class WorldRepository:
     def get_states_by_country_id(self, country_id):
         return self.state_collection.find(
             {"country_id": country_id},
-            {"_id": 1, "name": 1, "native": 1, "population": 1}
+            {"_id": 1, "name": 1, "native": 1, "population": 1, "country_id": 1}
         )
 
     def get_states_by_ids(self, state_ids):
