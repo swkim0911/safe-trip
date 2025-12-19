@@ -14,9 +14,10 @@ class ETLController:
         self.logger = setup_logging("init_etl_pipeline")
         self.src_dir = Path(__file__).parent
         
-    def _get_job_path(self, job_file: str) -> str:
-        """Job 파일의 절대 경로 반환"""
-        return str(self.src_dir / "etl_jobs" / job_file)
+    def _get_job_module(self, job_file: str) -> str:
+        """Job 파일명을 python -m 으로 실행할 모듈명으로 변환"""
+        module_name = Path(job_file).stem
+        return f"etl_jobs.{module_name}"
     
     def run_job(self, job_name: str, job_file: str, args: list = None) -> bool:
         """
@@ -30,8 +31,8 @@ class ETLController:
         Returns:
             성공 여부 (True: 성공, False: 실패)
         """
-        job_path = self._get_job_path(job_file)
-        cmd = [sys.executable, job_path] + (args or [])
+        job_module = self._get_job_module(job_file)
+        cmd = [sys.executable, "-m", job_module] + (args or [])
         
         self.logger.info("=" * 60)
         self.logger.info("%s 시작", job_name)
@@ -68,7 +69,7 @@ class ETLController:
         except Exception as e:
             self.logger.error("%s 실행 중 예외 발생: %s", job_name, e, exc_info=True)
             return False
-    
+
     def run_pipeline(self, extract_args: list[str] | None = None, load_args: list[str] | None = None) -> bool:
         """
         전체 ETL 파이프라인 실행
@@ -88,13 +89,13 @@ class ETLController:
             ("Extract Job", "extract_job.py", extract_args),
             ("Classify Job", "classify_job.py", []),
             ("Parse Job", "parse_job.py", []),
+            ("Enrich Location Job", "enrich_location_job.py", []),
             ("Load Job", "load_job.py", load_args),
         ]
         
         pipeline_start = time.time()
         self.logger.info("=" * 60)
         self.logger.info("ETL 파이프라인 시작")
-        self.logger.info("=" * 60)
         
         for job_name, job_file, args in jobs:
             success = self.run_job(job_name, job_file, args)
@@ -111,8 +112,7 @@ class ETLController:
 
 def main():
 
-    parser = argparse.ArgumentParser(description="Run the ETL pipeline (extract → classify → parse → load)."
-)
+    parser = argparse.ArgumentParser(description="Run the ETL pipeline (extract → classify → parse → load).")
     parser.add_argument("time_filter", choices=["week", "all"])
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("load_scope", choices=["daily", "all"])
@@ -132,4 +132,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
