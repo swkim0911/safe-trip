@@ -2,7 +2,7 @@ import time, sys
 
 from config.dependencies import container
 from config.logging_config import setup_logging
-from etl_jobs.job_argparsers import create_parse_job_parser
+from etl_jobs.cli.job_argparsers import create_parse_job_parser
 
 """Parse Job - 분류된 데이터를 파싱하고 결과를 저장하는 Job"""
 def main():
