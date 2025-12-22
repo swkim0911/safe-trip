@@ -7,7 +7,7 @@ from pathlib import Path
 from config.logging_config import setup_logging
 
 
-class ETLController:
+class ETLOrchestrator:
     """각 ETL Job을 subprocess로 순차 실행하는 컨트롤러 클래스"""
     
     def __init__(self):
@@ -124,8 +124,8 @@ def main():
     load_args = [parsed_args.load_scope]
   
     # ETL 파이프라인 실행
-    controller = ETLController()
-    success = controller.run_pipeline(extract_args, load_args)
+    orchestrator = ETLOrchestrator()
+    success = orchestrator.run_pipeline(extract_args, load_args)
     
     sys.exit(0 if success else 1)
 
