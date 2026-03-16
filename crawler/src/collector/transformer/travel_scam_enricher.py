@@ -10,25 +10,6 @@ class TravelScamEnricher:
     def __init__(self, world_repository):
         self.world_repository = world_repository
         self.logger = logging.getLogger(__name__)
-        # Lazy 캐시: 처음 조회 시 DB에서 로드, 이후 재사용
-        self._countries_cache = None          # list[country_doc]
-        self._states_cache = {}               # country_id → list[state_doc]
-        self._cities_cache = {}               # country_id → list[city_doc]
-
-    def _get_all_countries(self) -> list:
-        if self._countries_cache is None:
-            self._countries_cache = list(self.world_repository.get_all_countries())
-        return self._countries_cache
-
-    def _get_states_by_country_id(self, country_id) -> list:
-        if country_id not in self._states_cache:
-            self._states_cache[country_id] = list(self.world_repository.get_states_by_country_id(country_id))
-        return self._states_cache[country_id]
-
-    def _get_cities_by_country_id(self, country_id) -> list:
-        if country_id not in self._cities_cache:
-            self._cities_cache[country_id] = list(self.world_repository.get_cities_by_country_id(country_id))
-        return self._cities_cache[country_id]
 
     def normalize(self, text):
         """
@@ -153,7 +134,7 @@ class TravelScamEnricher:
         Returns:
             {country_id: X} 또는 None
         """
-        all_countries = self._get_all_countries()
+        all_countries = list(self.world_repository.get_all_countries())
 
         return self._fuzzy_match_entity(
             entities=all_countries,
@@ -168,7 +149,7 @@ class TravelScamEnricher:
             {state_id: X} 또는 None
         """
         country_id = country["country_id"]
-        all_states = self._get_states_by_country_id(country_id)
+        all_states = list(self.world_repository.get_states_by_country_id(country_id))
 
         return self._fuzzy_match_entity(
             entities=all_states,
@@ -186,13 +167,12 @@ class TravelScamEnricher:
             {city_id: X, state_id: Y} 또는 None
         """
         country_id = country["country_id"]
-        all_cities = self._get_cities_by_country_id(country_id)
+        all_cities = list(self.world_repository.get_cities_by_country_id(country_id))
 
         # state 정보가 있는 경우
         if target_state_name:
             return self._fuzzy_match_city_with_state(
                 all_cities=all_cities,
-                all_states=self._get_states_by_country_id(country_id),
                 target_city_name=target_city_name,
                 target_state_name=target_state_name,
                 fuzzy_threshold=self._FUZZY_THRESHOLD
@@ -208,12 +188,12 @@ class TravelScamEnricher:
 
         return result
 
-    def _fuzzy_match_city_with_state(self, all_cities, all_states, target_city_name, target_state_name, fuzzy_threshold):
+    def _fuzzy_match_city_with_state(self, all_cities, target_city_name, target_state_name, fuzzy_threshold):
         """
         State 정보를 활용하여 City를 더 정확하게 매칭한다.
 
         전략:
-        1. 먼저 state를 매칭하여 state_id 목록을 얻음
+        1. cities의 state_id로 states를 조회하여 매칭되는 state_id 목록을 얻음
         2. 해당 state_id를 가진 cities만 필터링하여 city 매칭
         3. 실패하면 state 정보를 무시하고 전체 cities에서 재시도
         ex) Haikou, Hainan, China vs Haikou, Yunnan, China
@@ -222,7 +202,7 @@ class TravelScamEnricher:
             {city_id: X, state_id: Y} 또는 None
         """
         # Step 1: 먼저 state 매칭하여 가능한 state_id들을 얻기
-        state_ids = self._get_matching_state_ids(all_states, target_state_name, fuzzy_threshold)
+        state_ids = self._get_matching_state_ids(all_cities, target_state_name, fuzzy_threshold)
 
         if state_ids:
             # Step 2: 해당 state들에 속한 cities만 필터링
@@ -250,14 +230,16 @@ class TravelScamEnricher:
 
         return result
 
-    def _get_matching_state_ids(self, all_states, target_state_name, fuzzy_threshold):
+    def _get_matching_state_ids(self, all_cities, target_state_name, fuzzy_threshold):
         """
-        캐싱된 states 리스트에서 매칭되는 state_id들을 반환한다.
+        cities 리스트에서 고유한 state_id들을 추출한 뒤 DB에서 states를 조회하여
+        매칭되는 state_id들을 반환한다.
 
         Returns:
             list: 매칭된 state_id 리스트
         """
-        states = all_states
+        unique_state_ids = list({city["state_id"] for city in all_cities if city.get("state_id")})
+        states = list(self.world_repository.get_states_by_ids(unique_state_ids))
         if not states:
             return []
 
