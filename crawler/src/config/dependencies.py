@@ -1,5 +1,8 @@
 from functools import cached_property
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from adapters import mongo_client
 from adapters.reddit_client import get_instance as get_reddit_instance
 from collector.extractor.travel_scam_extractor import TravelScamExtractor

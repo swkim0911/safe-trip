@@ -2,10 +2,7 @@ import logging
 import os
 from functools import lru_cache
 
-from dotenv import load_dotenv
 from openai import OpenAI
-
-load_dotenv()
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 API_KEY = os.getenv("OPENAI_API_KEY")

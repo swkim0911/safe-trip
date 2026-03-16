@@ -2,7 +2,6 @@ import logging
 from datetime import datetime, UTC, timedelta, timezone
 
 import mysql.connector
-from dotenv import load_dotenv
 
 
 class TravelScamLoader:
@@ -14,8 +13,6 @@ class TravelScamLoader:
         self.logger = logging.getLogger(__name__)
 
     def mongo_to_mysql(self, load_scope=None):
-        load_dotenv()
-
         host = self.etl_config.MYSQL_HOST
         port = self.etl_config.MYSQL_PORT
         user = self.etl_config.MYSQL_USER

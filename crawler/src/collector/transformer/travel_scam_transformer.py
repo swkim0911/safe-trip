@@ -35,44 +35,48 @@ class TravelScamTransformer:
         }
         
         unclassified_docs = self.reddit_repository.find_raw_documents(query, limit=limit)
-        
+
         self.logger.info(
-            "분류 대상 조회 완료: 미분류 OR 버전 불일치 (현재 버전: %s)", 
+            "분류 대상 조회 완료: 미분류 OR 버전 불일치 (현재 버전: %s)",
             current_version
         )
 
+        self._submit_batches(
+            docs=unclassified_docs,
+            token_estimator=estimate_classification_request_tokens,
+            batch_label="classification",
+            submit_fn=self.travel_scam_classifier.submit_classification_batch,
+        )
+
+    def _submit_batches(self, docs, token_estimator, batch_label: str, submit_fn):
+        """토큰 한도 기반으로 배치를 나눠 제출한다."""
         batch_docs = []
         expected_tokens = 0
 
-        for unclassified_doc in unclassified_docs:
-            reddit_id = unclassified_doc["reddit_id"]
-            body = unclassified_doc["body"]
-            token_count = estimate_classification_request_tokens(body)
+        for doc in docs:
+            reddit_id = doc["reddit_id"]
+            body = doc["body"]
+            token_count = token_estimator(body)
 
-            # 단일 문서가 토큰 한도를 넘으면 스킵 (그럴일은 없지만 혹시 모를 경우 무한 루프 에러 발생)
             if token_count > self.etl_config.TOKEN_LIMIT:
-                self.logger.warning("(classification) 문서 %s 가 토큰 제한 초과, 스킵함",reddit_id)
+                self.logger.warning("(%s) 문서 %s 가 토큰 제한 초과, 스킵함", batch_label, reddit_id)
                 continue
 
             batch_doc = {"reddit_id": reddit_id, "body": body}
 
-            # 이번 문서를 넣으면 초과 → 지금까지 배치 flush
             if expected_tokens + token_count > self.etl_config.TOKEN_LIMIT:
-                self.logger.info("(classification) Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
-                batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
+                self.logger.info("(%s) Batch %d개 문서 (%d tokens) 요청", batch_label, len(batch_docs), expected_tokens)
+                batch_metadata = submit_fn(batch_docs)
                 self.reddit_repository.save_batch_job(batch_metadata)
-
-                # 새 배치 시작
                 batch_docs = [batch_doc]
                 expected_tokens = token_count
             else:
                 batch_docs.append(batch_doc)
                 expected_tokens += token_count
 
-        # 마지막 배치 처리
         if batch_docs:
-            self.logger.info("(classification) 마지막 Batch %d개 문서 (%d tokens) 분류 요청",len(batch_docs), expected_tokens)
-            batch_metadata = self.travel_scam_classifier.submit_classification_batch(batch_docs)
+            self.logger.info("(%s) 마지막 Batch %d개 문서 (%d tokens) 요청", batch_label, len(batch_docs), expected_tokens)
+            batch_metadata = submit_fn(batch_docs)
             self.reddit_repository.save_batch_job(batch_metadata)
 
     def process_classification_batch_results(self):
@@ -84,51 +88,21 @@ class TravelScamTransformer:
 
     def parse_classified_documents_in_batch(self, limit: int | None = None):
 
-        find_travel_scam_docs = self.reddit_repository.find_raw_documents(
+        all_travel_scam_docs = self.reddit_repository.find_raw_documents(
             {"classification.is_travel_scam": True},
             limit=limit
         )
 
         parsed_ids = {doc["reddit_id"] for doc in self.reddit_repository.find_parsed_documents({}, projection={"reddit_id": 1})}
 
-        batch_docs = []
-        expected_tokens = 0
+        unparsed_docs = (doc for doc in all_travel_scam_docs if doc["reddit_id"] not in parsed_ids)
 
-        for find_travel_scam_doc in find_travel_scam_docs:
-            reddit_id = find_travel_scam_doc["reddit_id"]
-            body = find_travel_scam_doc["body"]
-
-            # 이미 parsed된 데이터는 pass
-            if reddit_id in parsed_ids:
-                continue
-
-            token_count = estimate_parsing_request_tokens(body)
-
-            # 단일 문서가 토큰 한도를 넘으면 스킵 (그럴일은 없지만 혹시 모를 경우 무한 루프 에러 발생)
-            if token_count > self.etl_config.TOKEN_LIMIT:
-                self.logger.warning("(parsing) 문서 %s 가 토큰 제한 초과, 스킵함", reddit_id)
-                continue
-
-            batch_doc = {"reddit_id": reddit_id, "body": body}
-
-            # 이번 문서를 넣으면 초과 → 지금까지 배치 flush
-            if expected_tokens + token_count > self.etl_config.TOKEN_LIMIT:
-                self.logger.info("(parsing) Batch %d개 문서 (%d tokens) 파싱 요청", len(batch_docs), expected_tokens)
-                batch_metadata = self.travel_scam_parser.submit_parsing_batch(batch_docs)
-                self.reddit_repository.save_batch_job(batch_metadata)
-
-                # 새 배치 시작
-                batch_docs = [batch_doc]
-                expected_tokens = token_count
-            else:
-                batch_docs.append(batch_doc)
-                expected_tokens += token_count
-
-            # 마지막 배치 처리
-        if batch_docs:
-            self.logger.info("마지막 Batch %d개 문서 (%d tokens) 파싱 요청", len(batch_docs), expected_tokens)
-            batch_metadata = self.travel_scam_parser.submit_parsing_batch(batch_docs)
-            self.reddit_repository.save_batch_job(batch_metadata)
+        self._submit_batches(
+            docs=unparsed_docs,
+            token_estimator=estimate_parsing_request_tokens,
+            batch_label="parsing",
+            submit_fn=self.travel_scam_parser.submit_parsing_batch,
+        )
 
     '''
     비동기로 요청한 parsing batch 결과를 mongo에 저장 (1단계:LLM 결과 저장)
@@ -267,6 +241,7 @@ class TravelScamTransformer:
         MongoDB에서 Reddit raw 데이터를 가져와서 travel scam으로 분류 후
         keyword를 추출하고 정제된 결과를 MongoDB에 저장한다.
     '''
+    # todo: 이 함수를 없애고, subprocess로 실행시키기. 이 과정을 인터페이스를 통일하기. 단, 배치 요청을 할 필요는 없다.
     def daily_transform(self):
 
         one_week_ago = datetime.now(UTC) - timedelta(days=7)
@@ -304,12 +279,13 @@ class TravelScamTransformer:
         query = {
             "posted_at": {"$gte": one_week_ago},
             "classification.is_travel_scam": True
-        } # 최근 7일에 classification 서브 도큐먼트의 is_travel_scam = true인 도큐먼트 + updated_at != created_at (이 조건은 이전에 삽입된 데이터는 제외)
+        } # 최근 7일에 classification 서브 도큐먼트의 is_travel_scam = true인 도큐먼트
         find_travel_scam_docs = self.reddit_repository.find_raw_documents(query)
         parsing_results = []
 
         for find_travel_scam_doc in find_travel_scam_docs:
-            if find_travel_scam_doc["reddit_id"] in reddit_ids: continue
+            if find_travel_scam_doc["reddit_id"] in reddit_ids: continue # 이미 파싱되었다면 continue
+
             parsed_body_results = self.travel_scam_parser.parse(find_travel_scam_doc["body"])
             for parsed_body_result in parsed_body_results:
                 location_info = self.travel_scam_enricher.enrich_location(
