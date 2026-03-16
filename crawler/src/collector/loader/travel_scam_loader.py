@@ -61,23 +61,40 @@ class TravelScamLoader:
             collected_at = doc.get("created_at")
 
             # Action 매핑
-            action_name = doc.get("action").split(" (")[0].strip()
+            action_raw = doc.get("action")
+            if not action_raw:
+                self.logger.warning("action 필드 없음 (reddit_id=%s), 건너뜀", external_id)
+                continue
+            action_name = action_raw.split(" (")[0].strip()
             cursor.execute(
-                "SELECT id FROM scam_action WHERE name = %s", (action_name, ))
+                "SELECT id FROM scam_action WHERE name = %s", (action_name,))
             row = cursor.fetchone()
+            if not row:
+                self.logger.warning("scam_action 미존재: %s (reddit_id=%s), 건너뜀", action_name, external_id)
+                continue
             action_id = row[0]
 
             # Context 매핑
-            context_name = doc.get("context").split(" (")[0].strip()
+            context_raw = doc.get("context")
+            if not context_raw:
+                self.logger.warning("context 필드 없음 (reddit_id=%s), 건너뜀", external_id)
+                continue
+            context_name = context_raw.split(" (")[0].strip()
             cursor.execute(
                 "SELECT id FROM scam_context WHERE name = %s", (context_name,))
             row = cursor.fetchone()
+            if not row:
+                self.logger.warning("scam_context 미존재: %s (reddit_id=%s), 건너뜀", context_name, external_id)
+                continue
             context_id = row[0]
 
             cursor.execute(
                 "SELECT id FROM countries WHERE dataset_id = %s", (country_id,)
             )
             row = cursor.fetchone()
+            if not row:
+                self.logger.warning("country 미존재: dataset_id=%s (reddit_id=%s), 건너뜀", country_id, external_id)
+                continue
             country_id = row[0]
 
             if state_id:
@@ -85,13 +102,13 @@ class TravelScamLoader:
                     "SELECT id FROM states WHERE dataset_id = %s", (state_id,)
                 )
                 row = cursor.fetchone()
-                state_id = row[0]
+                state_id = row[0] if row else None
             if city_id:
                 cursor.execute(
                     "SELECT id FROM cities WHERE dataset_id = %s", (city_id,)
                 )
                 row = cursor.fetchone()
-                city_id = row[0]
+                city_id = row[0] if row else None
 
             now = datetime.now(UTC)
 
