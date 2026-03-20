@@ -11,16 +11,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent # /crawler
 
 def get_batch_filename(folder: str = "data/batch_inputs") -> str:
     abs_folder = BASE_DIR / folder
-    abs_folder.mkdir(parents=True, exist_ok=True) # 폴더 없으면 생성
+    abs_folder.mkdir(parents=True, exist_ok=True)
     filename = f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jsonl"
     return str(Path(abs_folder) / filename)
 
-"""
-docs 배열을 받아 JSONL 파일로 변환한다.
-jsons: [{"reddit_id": "xxx", "body": "..."}, ...]
-return: 생성된 파일 경로
-"""
 def write_jsonl(jsons: list[dict[str, str]], job_type: str) -> str:
+    """docs 리스트를 OpenAI Batch API용 JSONL 파일로 변환한다.
+
+    Args:
+        jsons: [{"reddit_id": "xxx", "body": "..."}, ...]
+        job_type: "classification" 또는 "parsing"
+
+    Returns:
+        생성된 JSONL 파일 경로
+    """
 
     system_content_map = {
         "classification": prompt_utils.get_classification_system_content,
@@ -61,6 +65,81 @@ def write_jsonl(jsons: list[dict[str, str]], job_type: str) -> str:
             f.write(json.dumps(request_payload, ensure_ascii=False) + "\n")
 
     return filename
+
+
+def wait_for_capacity(process_fn, count_fn, max_concurrent: int, poll_interval: int, logger=None):
+    """in-flight 배치 수가 max_concurrent 미만이 될 때까지 대기한다.
+
+    Args:
+        process_fn: 완료된 배치 결과를 처리하는 함수 () -> int
+        count_fn: 현재 in-flight 배치 수를 반환하는 함수 () -> int
+        max_concurrent: 허용할 최대 동시 in-flight 배치 수
+        poll_interval: 폴링 주기 (초)
+        logger: 로거 인스턴스
+    """
+    if logger is None:
+        logger = logging.getLogger(__name__)
+
+    while True:
+        process_fn()
+        count = count_fn()
+        if count < max_concurrent:
+            return
+        logger.info("배치 %d개 처리 중 (한도: %d), %d초 후 재확인...", count, max_concurrent, poll_interval)
+        time.sleep(poll_interval)
+
+
+def submit_batches_in_chunks(docs, token_estimator, token_limit: int, submit_fn, save_batch_fn, batch_label: str, logger=None, capacity_fn=None):
+    """토큰 한도 기반으로 docs를 배치로 나눠 제출한다.
+
+    배치 제출 전에 capacity_fn을 호출해 슬롯이 생길 때까지 대기한다.
+    슬롯이 생기는 즉시 다음 배치를 제출하는 슬라이딩 윈도우 방식이다.
+
+    Args:
+        docs: 처리할 문서 이터러블 (각 doc은 {"reddit_id": ..., "body": ...} 형태)
+        token_estimator: body를 받아 토큰 수를 반환하는 함수
+        token_limit: 배치당 최대 토큰 수
+        submit_fn: 배치 문서 리스트를 제출하고 batch_metadata를 반환하는 함수
+        save_batch_fn: batch_metadata를 저장하는 함수
+        batch_label: 로그용 레이블 ("classification" | "parsing")
+        logger: 로거 인스턴스 (없으면 모듈 로거 사용)
+        capacity_fn: 배치 제출 전 슬롯 확보를 대기하는 함수 (None이면 대기 없이 즉시 제출)
+    """
+    if logger is None:
+        logger = logging.getLogger(__name__)
+
+    batch_docs = []
+    expected_tokens = 0
+
+    for doc in docs:
+        reddit_id = doc["reddit_id"]
+        body = doc["body"]
+        token_count = token_estimator(body)
+
+        if token_count > token_limit:
+            logger.warning("(%s) 문서 %s 가 토큰 제한 초과, 스킵함", batch_label, reddit_id)
+            continue
+
+        batch_doc = {"reddit_id": reddit_id, "body": body}
+
+        if expected_tokens + token_count > token_limit:
+            if capacity_fn:
+                capacity_fn()
+            logger.info("(%s) Batch %d개 문서 (%d tokens) 요청", batch_label, len(batch_docs), expected_tokens)
+            batch_metadata = submit_fn(batch_docs)
+            save_batch_fn(batch_metadata)
+            batch_docs = [batch_doc]
+            expected_tokens = token_count
+        else:
+            batch_docs.append(batch_doc)
+            expected_tokens += token_count
+
+    if batch_docs:
+        if capacity_fn:
+            capacity_fn()
+        logger.info("(%s) 마지막 Batch %d개 문서 (%d tokens) 요청", batch_label, len(batch_docs), expected_tokens)
+        batch_metadata = submit_fn(batch_docs)
+        save_batch_fn(batch_metadata)
 
 
 def wait_for_batch(process_fn, count_fn, batch_type: str, poll_interval: int, max_wait_time: int, logger=None):
