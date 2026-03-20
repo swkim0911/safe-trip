@@ -68,20 +68,28 @@ class ETLOrchestrator:
             self.logger.error("%s 실행 중 예외 발생: %s", job_name, e, exc_info=True)
             return False
 
-    def run_pipeline(self, extract_args: list[str] | None = None, load_args: list[str] | None = None) -> bool:
+    def run_pipeline(self, mode: str = "init", limit: int | None = None) -> bool:
         """
         전체 ETL 파이프라인 실행
 
         Args:
-            extract_args: Extract Job에 전달할 인자 (기본값: ["all"])
-            load_args: Load Job에 전달할 인자 (기본값: ["all"])
+            mode: 실행 모드 ("init": 전체 수집, "daily": 일별 증분 수집)
+            limit: 최대 수집 게시글 수 (테스트용, 선택)
         Returns:
             성공 여부
         """
-        if extract_args is None:
-            extract_args = ["all"]
-        if load_args is None:
-            load_args = ["all"]
+        _MODE_ARGS = {
+            "init":  {"extract": ["all"],  "load": ["all"]},
+            "daily": {"extract": ["week"], "load": ["daily"]},
+        }
+        if mode not in _MODE_ARGS:
+            self.logger.error("알 수 없는 모드: %s (init 또는 daily만 허용)", mode)
+            return False
+
+        extract_args = _MODE_ARGS[mode]["extract"][:]
+        load_args = _MODE_ARGS[mode]["load"]
+        if limit is not None:
+            extract_args.append(str(limit))
 
         jobs = [
             ("Extract Job", "extract_job.py", extract_args),

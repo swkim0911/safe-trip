@@ -1,9 +1,10 @@
+"""Enrich Location Job - LLM이 추출한 location 문자열을 DB ID로 매핑하는 Job."""
 import time, sys
 
 from config.dependencies import container
 from config.logging_config import setup_logging
 
-"""Enrich Location Job - LLM으로 부터 location 정보를 DB lookup하여 enrichment"""
+
 def main():
     logger = setup_logging("enrich_location_job")
 
@@ -11,11 +12,11 @@ def main():
         start = time.time()
         logger.info("Enrich Location Job 시작")
 
-        transformer = container.transformer
+        enricher = container.enricher
 
         logger.info("Location enrichment 작업 시작")
-        enriched_count = transformer.enrich_parsed_locations()
-        logger.info("✅ Location enrichment 완료: %d개 문서", enriched_count)
+        enriched_count = enricher.enrich_all()
+        logger.info("Location enrichment 완료: %d개 문서", enriched_count)
 
         end = time.time()
         logger.info("Enrich Location Job 완료 (실행 시간: %.2f 초)", end - start)
@@ -27,6 +28,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-

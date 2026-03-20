@@ -14,14 +14,8 @@ def main():
     )
     args = parser.parse_args()
 
-    extract_args = ["all"]
-    if args.limit is not None:
-        extract_args.append(str(args.limit))
-    load_args = ["all"]
-  
-    # ETL 파이프라인 실행
     orchestrator = ETLOrchestrator(job_name="init_etl_pipeline")
-    success = orchestrator.run_pipeline(extract_args, load_args)
+    success = orchestrator.run_pipeline(mode="init", limit=args.limit)
     
     sys.exit(0 if success else 1)
 

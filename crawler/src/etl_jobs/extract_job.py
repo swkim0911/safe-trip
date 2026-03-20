@@ -1,13 +1,14 @@
+"""Extract Job - Reddit에서 여행 사기 관련 데이터를 추출하는 Job."""
 import time, sys
 
 from config.dependencies import container
 from config.logging_config import setup_logging
 from etl_jobs.cli.job_argparsers import create_extract_job_parser
 
-"""Extract Job - Reddit에서 여행 사기 관련 데이터를 추출하는 Job"""
+
 def main():
     parser = create_extract_job_parser()
-    args = parser.parse_args()  # {time_filter="all", limit=10}이 담긴 객체로 변환
+    args = parser.parse_args()
 
     logger = setup_logging("extract_job")
 

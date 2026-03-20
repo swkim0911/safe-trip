@@ -54,10 +54,11 @@ class RedditRepository:
             )
             records.clear()
 
-    """
-        records: [{"reddit_id": "xxx", "is_travel_scam": True}, ...]
-    """
     def flush_classification_results(self, records: list[dict]):
+        """
+        Args:
+            records: [{"reddit_id": "xxx", "is_travel_scam": True}, ...]
+        """
         if not records:
             return
         
@@ -129,7 +130,7 @@ class RedditRepository:
                 }
             }
         )
-        self.logger.info(f"Batch {batch_id} marked as processed")
+        self.logger.info("Batch %s marked as processed", batch_id)
     
     def mark_batch_as_failed(self, batch_id: str, status: str):
         """실패/만료 배치 표시"""
@@ -143,7 +144,7 @@ class RedditRepository:
                 }
             }
         )
-        self.logger.warning(f"Batch {batch_id} marked as {status}")
+        self.logger.warning("Batch %s marked as %s", batch_id, status)
 
     def find_parsed_documents(self, query, projection=None):
         return self.parsed_collection.find(query, projection)
@@ -156,6 +157,14 @@ class RedditRepository:
 
     def find_raw_document_by_reddit_id(self, reddit_id: str):
         return self.raw_collection.find_one({"reddit_id": reddit_id})
+
+    def find_raw_documents_by_reddit_ids(self, reddit_ids: list[str]) -> dict[str, dict]:
+        """reddit_id 목록으로 raw documents를 한 번에 조회"""
+        docs = self.raw_collection.find(
+            {"reddit_id": {"$in": reddit_ids}},
+            {"reddit_id": 1, "url": 1, "author": 1, "posted_at": 1}
+        )
+        return {doc["reddit_id"]: doc for doc in docs}
 
     def update_parsed_document_location(self, reddit_id: str, country_id, state_id, city_id, location_enriched: bool):
         """
@@ -181,13 +190,12 @@ class RedditRepository:
             }
         )
 
-    """
-    Flush parsing results to MongoDB.
-    
-    Args:
-        records (list[dict]): [{"reddit_id": str, "parsed_result": dict}, ...]
-    """
     def flush_parsing_results(self, records: list[dict]):
+        """Flush parsing results to MongoDB.
+
+        Args:
+            records: [{"reddit_id": str, ...}, ...]
+        """
         if not records:
             return
 
