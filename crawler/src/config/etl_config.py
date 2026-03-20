@@ -11,7 +11,7 @@ class ETLConfig:
     TOKEN_LIMIT: int = 100_000  # OpenAI Batch API 토큰 제한 (보수적 설정)
     
     # Batch Polling 설정
-    BATCH_POLL_INTERVAL: int = int(os.getenv("BATCH_POLL_INTERVAL", "300"))  # 5분
+    BATCH_POLL_INTERVAL: int = int(os.getenv("BATCH_POLL_INTERVAL", "120"))  # 2분
     BATCH_MAX_WAIT_TIME: int = int(os.getenv("BATCH_MAX_WAIT_TIME", "90000"))  # 25시간 (BATCH 작업이 24시간이니까 여유있게 25시간)
     
     # OpenAI 모델 설정
@@ -22,7 +22,10 @@ class ETLConfig:
     PARSING_PROMPT_VERSION: str = os.getenv("PARSING_PROMPT_VERSION", "v0")
     
     # Reddit 관련 설정
-    REDDIT_KEYWORDS: list[str] = field(default_factory=lambda: ["travel scam"])
+    REDDIT_SUBREDDITS: list[str] = field(default_factory=lambda: ["travel", "scams", "traveladvice", "solotravel", "femaletravel", "backpacking"])
+    REDDIT_KEYWORDS: list[str] = field(default_factory=lambda: [
+        "travel scam",
+    ])
     
     # MySQL 설정
     MYSQL_HOST: str = os.getenv("MYSQL_HOST")
