@@ -805,7 +805,6 @@ $sidebar-width: 560px;
 
 .list-group-item {
   position: relative;
-  overflow: hidden;
   background: linear-gradient(135deg, #ffffff, #f2f6ff);
   color: black;
   border-radius: 12px; /* 모서리를 둥글게 */
