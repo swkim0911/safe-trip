@@ -16,6 +16,7 @@
           :color="getColor(marker.riskLevel)"
           :fill-opacity="0.5"
           :weight="1"
+          @click="mapStore.selectMarker(marker, getGroupByZoom(zoom))"
         >
           <l-tooltip :options="{ direction: 'top', offset: [0, -5] }">
             <div class="tooltip-card">
@@ -82,6 +83,7 @@
 
 <script setup>
 import { useAuthStore } from '@/stores/auth';
+import { useMapStore } from '@/stores/map';
 
 import { ref, onMounted, watch, computed } from 'vue';
 import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker, LControl } from "@vue-leaflet/vue-leaflet";
@@ -95,6 +97,7 @@ const { show: openAuthModal } = useBootstrapModal('#authFormModal');
 const { show: openReportFormModal } = useBootstrapModal('#reportFormModal');
 
 const authStore = useAuthStore();
+const mapStore = useMapStore();
 const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
 const nickname = computed(() => authStore.user?.nickname || 'user');
 

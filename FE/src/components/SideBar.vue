@@ -191,13 +191,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, watch } from 'vue';
+import { useMapStore } from '@/stores/map';
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import ReportDetailModal from './ReportDetailModal.vue'
 import apiClient from '@/api/apiClient';
 import dayjs from 'dayjs'
 
 const { show } = useBootstrapModal('#reportDetailModal');
+
+const mapStore = useMapStore();
+
+watch(() => mapStore.selectedMarker, (marker) => {
+  if (!marker) return;
+  isOpen.value = true;
+  const { id, name, scamCnt, groupBy } = marker;
+  if (groupBy === 'country') {
+    showStatesByCountry(id, name, scamCnt);
+  } else if (groupBy === 'state') {
+    showCitiesByState(id, name, 'click', scamCnt);
+  } else if (groupBy === 'city') {
+    showReportsByCity(id, name);
+  }
+});
 
 const isOpen = ref(false);
 const searchText = ref('');
@@ -566,16 +582,15 @@ const loadStatesWithStatistics = async (countryId, countryName, mode = 'click') 
  * @param {string} stateName - 주(State) 이름
  * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
  */
-const showCitiesByState = async (stateId, stateName, mode = 'click') => {
+const showCitiesByState = async (stateId, stateName, mode = 'click', fallbackScamCnt = null) => {
   if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
 
   isLoadingCity.value = true;
 
   selectedState.id = stateId;
   selectedState.name = stateName;
-  // State의 scamCnt는 sidebarStates에서 찾아서 설정
   const state = sidebarStates.value.find(s => s.id === stateId);
-  selectedState.scamCnt = state?.scamCnt || 0;
+  selectedState.scamCnt = state?.scamCnt ?? fallbackScamCnt ?? 0;
 
   if (mode === 'click') {
     cityPage.value = 0;
