@@ -2,7 +2,7 @@ package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.response.RegionScamStatisticsItem;
 import com.swkim.safetrip.dto.response.RegionScamStatisticsResponse;
-import com.swkim.safetrip.enums.RiskLevel;
+import com.swkim.safetrip.entity.enums.RiskLevel;
 import com.swkim.safetrip.repository.ReportJdbcRepository;
 import com.swkim.safetrip.repository.ReportNativeRepository;
 import lombok.RequiredArgsConstructor;

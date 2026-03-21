@@ -1,4 +1,4 @@
-package com.swkim.safetrip.enums;
+package com.swkim.safetrip.entity.enums;
 
 public enum RiskLevel {
     HIGH, MEDIUM, LOW

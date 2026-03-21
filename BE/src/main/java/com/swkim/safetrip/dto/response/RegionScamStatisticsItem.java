@@ -1,7 +1,7 @@
 package com.swkim.safetrip.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.swkim.safetrip.enums.RiskLevel;
+import com.swkim.safetrip.entity.enums.RiskLevel;
 import lombok.Builder;
 
 @Builder
