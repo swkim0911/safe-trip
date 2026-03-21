@@ -27,8 +27,8 @@ public interface ExternalReportRepository extends JpaRepository<ExternalReport, 
     join er.scamAction sa
     join er.scamContext sc
     join er.country co
-    join er.state st
-    join er.city ci
+    left join er.state st
+    left join er.city ci
     where er.id = :id
     """)
     Optional<ExternalReportDetailResponse> findReportDetailById(Long id);
