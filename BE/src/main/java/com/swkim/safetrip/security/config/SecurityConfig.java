@@ -2,8 +2,8 @@ package com.swkim.safetrip.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;
-import com.swkim.safetrip.jwt.JwtProvider;
-import com.swkim.safetrip.jwt.filter.JwtAuthenticationProcessingFilter;
+import com.swkim.safetrip.security.jwt.JwtProvider;
+import com.swkim.safetrip.security.jwt.filter.JwtAuthenticationProcessingFilter;
 import com.swkim.safetrip.security.ProtectedEndpoint;
 import com.swkim.safetrip.service.UserService;
 import lombok.RequiredArgsConstructor;

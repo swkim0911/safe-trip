@@ -1,4 +1,4 @@
-package com.swkim.safetrip.jwt;
+package com.swkim.safetrip.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

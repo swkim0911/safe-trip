@@ -1,11 +1,11 @@
 package com.swkim.safetrip.service;
 
-import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
+import com.swkim.safetrip.dto.response.AuthTokensResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
-import com.swkim.safetrip.jwt.JwtProvider;
+import com.swkim.safetrip.security.jwt.JwtProvider;
 import com.swkim.safetrip.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -25,7 +25,7 @@ public class AuthService {
     private final TokenService tokenService;
     private final JwtProvider jwtProvider;
 
-    public AuthTokensResponseDto login(UserLoginRequest loginRequest) {
+    public AuthTokensResponse login(UserLoginRequest loginRequest) {
         String email = loginRequest.email();
         String password = loginRequest.password();
 
@@ -44,14 +44,14 @@ public class AuthService {
                 .accessToken(accessToken)
                 .build();
 
-        return AuthTokensResponseDto.builder()
+        return AuthTokensResponse.builder()
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();
 
     }
 
-    public AuthTokensResponseDto reIssueAccessToken(String refreshToken) {
+    public AuthTokensResponse reIssueAccessToken(String refreshToken) {
         if (tokenService.isRefreshTokenBlacklisted(refreshToken)) {
             throw new InvalidRefreshTokenException();
         }
@@ -73,7 +73,7 @@ public class AuthService {
                 .accessToken(reIssuedAccessToken)
                 .build();
 
-        return AuthTokensResponseDto.builder()
+        return AuthTokensResponse.builder()
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();

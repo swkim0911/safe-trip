@@ -2,7 +2,7 @@ package com.swkim.safetrip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
-import com.swkim.safetrip.jwt.JwtProvider;
+import com.swkim.safetrip.security.jwt.JwtProvider;
 import com.swkim.safetrip.security.config.SecurityConfig;
 import com.swkim.safetrip.service.UserService;
 import org.junit.jupiter.api.Test;
