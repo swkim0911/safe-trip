@@ -31,8 +31,7 @@
                     by {{ report.nickname }}
                   </span>
                   <span v-else>
-                    <span class="text-muted">by {{ report.author }}</span>
-                    <span class="fw-bold text-primary ms-1">on {{ report.source }}</span>
+                    <span class="fw-bold text-primary">{{ report.source }}</span>
                   </span>
                 </div>
                 <div v-if="report.sourceUrl">
