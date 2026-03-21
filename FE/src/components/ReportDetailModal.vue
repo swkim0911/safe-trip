@@ -9,9 +9,13 @@
 
           <div class="modal-body">
             <div class="d-flex justify-content-between align-items-start mb-3">
-              <h5 class="fw-bold mb-0">{{ report.title }}</h5>
+              <div>
+                <h5 class="fw-bold mb-2">{{ report.title }}</h5>
+                <span class="badge bg-danger me-1">{{ report.scamAction }}</span>
+                <span class="badge bg-warning text-dark">{{ report.scamContext }}</span>
+              </div>
 
-              <div class="text-end small ms-3">
+              <div class="text-end small ms-3 flex-shrink-0">
                 <div class="d-flex justify-content-end mb-1">
                   <span
                     v-if="report.source === 'SAFETRIP'"
@@ -43,10 +47,7 @@
 
             </div>
 
-            <div class="mb-3">
-              <span class="badge bg-danger me-1">{{ report.scamAction }}</span>
-              <span class="badge bg-warning">{{ report.scamContext }}</span>
-            </div>
+            <hr class="my-2" />
 
             <div class="mb-3">
               <span v-if="report.source === 'SAFETRIP'">
@@ -78,6 +79,8 @@
                 </div>
               </div>
             </div>
+
+            <hr class="my-2" />
 
             <div class="mb-3">
               <span class="fw-bold">Location</span>
