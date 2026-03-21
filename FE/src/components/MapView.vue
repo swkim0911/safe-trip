@@ -19,12 +19,23 @@
         >
           <l-tooltip :options="{ direction: 'top', offset: [0, -5] }">
             <div class="tooltip-card">
-              <strong>{{ marker.scamCnt }}</strong> reports
-              <span class="risk-badge" :class="marker.riskLevel?.toLowerCase()">{{ marker.riskLevel }}</span>
+              <div class="tooltip-name">{{ marker.name }}</div>
+              <div class="tooltip-bottom">
+                <strong>{{ marker.scamCnt }}</strong> reports
+                <span class="risk-badge" :class="marker.riskLevel?.toLowerCase()">{{ marker.riskLevel }}</span>
+              </div>
             </div>
           </l-tooltip>
         </l-circle-marker>
         <l-control-zoom position="bottomright"></l-control-zoom>
+        <l-control position="bottomleft">
+          <div class="map-legend">
+            <div class="legend-title">Scam Activity</div>
+            <div class="legend-item"><span class="dot high"></span> HIGH</div>
+            <div class="legend-item"><span class="dot medium"></span> MEDIUM</div>
+            <div class="legend-item"><span class="dot low"></span> LOW</div>
+          </div>
+        </l-control>
       </l-map>
     </div>  
     <div v-if="!isLoggedIn" >
@@ -73,7 +84,7 @@
 import { useAuthStore } from '@/stores/auth';
 
 import { ref, onMounted, watch, computed } from 'vue';
-import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker, LControl } from "@vue-leaflet/vue-leaflet";
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import ReportFormModal from './ReportFormModal.vue';
 import AuthFormModal from './AuthFormModal.vue';
@@ -251,8 +262,55 @@ onMounted(() => {
 
 .tooltip-card {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 100px;
+}
+
+.tooltip-name {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.tooltip-bottom {
+  display: flex;
   align-items: center;
   gap: 6px;
+  font-size: 12px;
+}
+
+.map-legend {
+  background: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.legend-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+
+  &.high   { background-color: #e74c3c; }
+  &.medium { background-color: #f39c12; }
+  &.low    { background-color: #2ecc71; }
 }
 
 .risk-badge {

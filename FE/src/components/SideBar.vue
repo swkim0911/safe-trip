@@ -711,7 +711,7 @@ $sidebar-width: 560px;
   position: fixed;
   display: flex;
   height: 100vh;
-  z-index: 1000;
+  z-index: 1001;
 }
 
 /* 사이드바 */
