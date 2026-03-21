@@ -6,10 +6,46 @@ class TravelScamEnricher:
     """Location 정보를 DB lookup하여 enrichment하는 클래스"""
 
     _FUZZY_THRESHOLD = 75
-    
-    def __init__(self, world_repository):
+
+    def __init__(self, world_repository, reddit_repository):
         self.world_repository = world_repository
+        self.reddit_repository = reddit_repository
         self.logger = logging.getLogger(__name__)
+
+    def enrich_all(self) -> int:
+        """미처리 parsed_documents의 location을 enrichment한다.
+
+        Returns:
+            int: 처리된 문서 수
+        """
+        unenriched_docs = self.reddit_repository.find_unenriched_parsed_documents()
+        enriched_count = 0
+
+        for doc in unenriched_docs:
+            reddit_id = doc["reddit_id"]
+            location = self.enrich_location(
+                doc.get("country_name"),
+                doc.get("state_name"),
+                doc.get("city_name"),
+            )
+
+            if location:
+                self.reddit_repository.update_parsed_document_location(
+                    reddit_id=reddit_id,
+                    country_id=location.get("country_id"),
+                    state_id=location.get("state_id"),
+                    city_id=location.get("city_id"),
+                    location_enriched=True,
+                )
+                enriched_count += 1
+                self.logger.info("%s enrichment 성공", reddit_id)
+            else:
+                self.logger.warning(
+                    "%s enrichment 실패: country=%s, state=%s, city=%s",
+                    reddit_id, doc.get("country_name"), doc.get("state_name"), doc.get("city_name"),
+                )
+
+        return enriched_count
 
     def normalize(self, text):
         """
@@ -46,44 +82,38 @@ class TravelScamEnricher:
 
         # 위치 정보가 모두 없다면 None 반환
         if not country_name and not state_name and not city_name:
-            self.logger.debug("country_name, state_name, city_name이 없어서 enrichment 불가")
             return None
-        
+
         # 1단계: parsing된 location 정보가 정확히 매치되는지 확인
         location = self._try_exact_match(country_name, state_name, city_name)
         if location:
-            self.logger.debug(f"정확한 매칭 성공: {country_name}, {state_name}, {city_name}")
             return location
-        
+
         # 2단계: city/state가 바뀐 경우 시도 (state, city) -> (state=city, city=state), (state, null) -> (state=null, city=state), (null, city) -> (state=city, city=null)
         if state_name or city_name:
             location = self._try_swapped(country_name, state_name, city_name)
             if location:
-                self.logger.debug(f"교환 매칭 성공: {country_name}, {state_name}, {city_name}")
                 return location
 
         # 3단계: country-only remapping (country만 있고, state, city가 없을 때 country를 state 혹은 city 재배치해서 시도)
         if country_name and not state_name and not city_name:
             location = self._try_country_only_remap(country_name)
             if location:
-                self.logger.debug(f"country-only remap 성공: '{country_name}' → state/city")
                 return location
-
 
         # 4단계: 이제는 문자열 정확하게는 찾을 수 없으므로 fuzzy match(유사도)으로 찾기
         if country_name:
             location = self._try_fuzzy(country_name, state_name, city_name)
             if location:
-                self.logger.debug(f"Fuzzy 매칭 성공: {location}")
                 return location
 
-            self.logger.warning(f"Fuzzy 매칭 실패: country={country_name}, state={state_name}, city={city_name}")
+            self.logger.warning("Fuzzy 매칭 실패: country=%s, state=%s, city=%s", country_name, state_name, city_name)
             return None
 
         # consider: 프롬프트에 country 필드가 NULL인 경우는 요구하지 않아서 country_name=NULL인 경우는 거의 없다.(99%) 그래도 나중에 필요하면 처리 로직을 구현한다.
 
         
-        self.logger.warning(f"매칭 실패: country={country_name}, state={state_name}, city={city_name}")
+        self.logger.warning("매칭 실패: country=%s, state=%s, city=%s", country_name, state_name, city_name)
         return None
     
     def _try_exact_match(self, country_name: str, state_name: str | None, city_name: str | None) -> dict | None:
@@ -193,7 +223,7 @@ class TravelScamEnricher:
         State 정보를 활용하여 City를 더 정확하게 매칭한다.
 
         전략:
-        1. 먼저 state를 매칭하여 state_id 목록을 얻음
+        1. cities의 state_id로 states를 조회하여 매칭되는 state_id 목록을 얻음
         2. 해당 state_id를 가진 cities만 필터링하여 city 매칭
         3. 실패하면 state 정보를 무시하고 전체 cities에서 재시도
         ex) Haikou, Hainan, China vs Haikou, Yunnan, China
@@ -232,16 +262,16 @@ class TravelScamEnricher:
 
     def _get_matching_state_ids(self, all_cities, target_state_name, fuzzy_threshold):
         """
-        cities 데이터에서 state 정보를 추출하여 매칭되는 state_id들을 반환한다.
+        cities 리스트에서 고유한 state_id들을 추출한 뒤 DB에서 states를 조회하여
+        매칭되는 state_id들을 반환한다.
 
         Returns:
             list: 매칭된 state_id 리스트
         """
-        unique_state_ids = list(set(city.get("state_id") for city in all_cities if city.get("state_id")))
-        if not unique_state_ids:
-            return []
-
+        unique_state_ids = list({city["state_id"] for city in all_cities if city.get("state_id")})
         states = list(self.world_repository.get_states_by_ids(unique_state_ids))
+        if not states:
+            return []
 
         # 1차: 정확하게 일치하는 state 검색
         for state in states:

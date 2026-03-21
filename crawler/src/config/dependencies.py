@@ -1,5 +1,8 @@
 from functools import cached_property
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from adapters import mongo_client
 from adapters.reddit_client import get_instance as get_reddit_instance
 from collector.extractor.travel_scam_extractor import TravelScamExtractor
@@ -7,7 +10,6 @@ from collector.loader.travel_scam_loader import TravelScamLoader
 from collector.transformer.travel_scam_classifier import TravelScamClassifier
 from collector.transformer.travel_scam_enricher import TravelScamEnricher
 from collector.transformer.travel_scam_parser import TravelScamParser
-from collector.transformer.travel_scam_transformer import TravelScamTransformer
 from config.etl_config import ETLConfig
 from repository.reddit_repository import RedditRepository
 from repository.world_repository import WorldRepository
@@ -60,24 +62,18 @@ class Container:
         )
 
     @cached_property
+    def parser(self) -> TravelScamParser:
+        return TravelScamParser(
+            config=self.etl_config,
+            reddit_repository=self.reddit_repository,
+        )
+
+    @cached_property
     def enricher(self) -> TravelScamEnricher:
         return TravelScamEnricher(
             world_repository=self.world_repository,
-        )
-
-    @cached_property
-    def transformer(self) -> TravelScamTransformer:
-        return TravelScamTransformer(
-            travel_scam_classifier=self.classifier,
-            travel_scam_parser=self.parser,
-            travel_scam_enricher=self.enricher,
             reddit_repository=self.reddit_repository,
-            etl_config=self.etl_config,
         )
-
-    @cached_property
-    def parser(self) -> TravelScamParser:
-        return TravelScamParser(config=self.etl_config)
 
     @cached_property
     def loader(self) -> TravelScamLoader:

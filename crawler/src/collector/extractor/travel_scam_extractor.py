@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 
 
@@ -5,8 +6,9 @@ class TravelScamExtractor:
 
     def __init__(self, reddit_client, reddit_repository, etl_config):
         self.reddit_client = reddit_client
-        self.reddit_repository = reddit_repository 
+        self.reddit_repository = reddit_repository
         self.etl_config = etl_config
+        self.logger = logging.getLogger(__name__)
         self._raw_records = []
 
     def _clean_text(self, text: str) -> str:
@@ -18,18 +20,25 @@ class TravelScamExtractor:
         self._raw_records.append(record)
         if len(self._raw_records) >= self.etl_config.BATCH_SIZE:
             self.reddit_repository.flush_raw_records(self._raw_records)
-    
+            self.logger.info("중간 flush: %d건 저장", len(self._raw_records))
+            self._raw_records.clear()
+
     def extract(self, time_filter: str, limit: int | None):
-        '''
-        Reddit에 있는 travel scam raw data -> MongoDB에 json 형태로 저장
+        """Reddit에서 travel scam 데이터를 추출하여 MongoDB에 저장한다.
 
         Args:
-            time_filter: week/all 중 하나
-            limit: 가져올 최대 게시글 수
-        '''
-        subreddit = self.reddit_client.subreddit("travel")
+            time_filter: 'week' 또는 'all'
+            limit: 최대 게시글 수 (None이면 전체)
+        """
+        subreddits = "+".join(self.etl_config.REDDIT_SUBREDDITS)
+        keywords = " OR ".join(self.etl_config.REDDIT_KEYWORDS)
+        self.logger.info("추출 시작 (subreddits=%s, keywords=%s, time_filter=%s, limit=%s)", subreddits, keywords, time_filter, limit)
 
-        for post in subreddit.search(" OR ".join(self.etl_config.REDDIT_KEYWORDS), sort="relevance", time_filter=time_filter, limit=limit):
+        subreddit = self.reddit_client.subreddit(subreddits)
+        post_count = 0
+        comment_count = 0
+
+        for post in subreddit.search(keywords, sort="relevance", time_filter=time_filter, limit=limit):
             if post.selftext and post.selftext not in ("[deleted]", "[removed]"):
                 post_record = {
                     "reddit_id": f"t3_{post.id}",
@@ -41,23 +50,27 @@ class TravelScamExtractor:
                     "posted_at": datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
                 }
                 self._add_raw_record_to_buffer(post_record)
+                post_count += 1
 
-            post.comments.replace_more(limit=0) # 댓글 트리 안의 "MoreComments" 객체를 실제 댓글로 치환
-            for comment in post.comments:
-                if comment.parent_id.startswith("t3_"): # depth = 1 댓글만 추출
-                    if not comment.body or comment.body in ("[deleted]", "[removed]"):
-                        continue
+            post.comments.replace_more(limit=0)  # MoreComments 객체 제거 (Reddit API lazy loading 방지)
+            for comment in post.comments:  # post.comments iterate는 최상위 댓글만 반환 (중첩 댓글 제외)
+                if not comment.body or comment.body in ("[deleted]", "[removed]"):
+                    continue
 
-                    comment_record = {
-                        "reddit_id": f"t1_{comment.id}",
-                        "source": "reddit",
-                        "author": str(comment.author) if comment.author else None,
-                        "body": self._clean_text(comment.body),
-                        "url": f"https://reddit.com{comment.permalink}",
-                        "type": "comment",
-                        "posted_at": datetime.fromtimestamp(comment.created_utc, tz=timezone.utc)
-                    }
-                    self._add_raw_record_to_buffer(comment_record)
-        
-        # 마지막 flush
-        self.reddit_repository.flush_raw_records(self._raw_records)
+                comment_record = {
+                    "reddit_id": f"t1_{comment.id}",
+                    "source": "reddit",
+                    "author": str(comment.author) if comment.author else None,
+                    "body": self._clean_text(comment.body),
+                    "url": f"https://reddit.com{comment.permalink}",
+                    "type": "comment",
+                    "posted_at": datetime.fromtimestamp(comment.created_utc, tz=timezone.utc)
+                }
+                self._add_raw_record_to_buffer(comment_record)
+                comment_count += 1
+
+        if self._raw_records:
+            self.reddit_repository.flush_raw_records(self._raw_records)
+            self._raw_records.clear()
+
+        self.logger.info("추출 완료 (posts=%d, comments=%d, total=%d)", post_count, comment_count, post_count + comment_count)

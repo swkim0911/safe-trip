@@ -2,7 +2,6 @@ import logging
 from datetime import datetime, UTC, timedelta, timezone
 
 import mysql.connector
-from dotenv import load_dotenv
 
 
 class TravelScamLoader:
@@ -14,8 +13,6 @@ class TravelScamLoader:
         self.logger = logging.getLogger(__name__)
 
     def mongo_to_mysql(self, load_scope=None):
-        load_dotenv()
-
         host = self.etl_config.MYSQL_HOST
         port = self.etl_config.MYSQL_PORT
         user = self.etl_config.MYSQL_USER
@@ -30,22 +27,25 @@ class TravelScamLoader:
             database=database,
             charset="utf8mb4"
         )
+        self.logger.info("MySQL 연결 성공 (%s:%s/%s)", host, port, database)
 
         cursor = mysql_conn.cursor()
         query = {"parsing.location_enriched": True}
 
         if load_scope == "daily":
-            today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) # 오늘의 자정 시간 ex) 2025-09-11 00:00:00+00:00
-            tomorrow = today + timedelta(days=1) # 내일 자정 시간 ex) 2025-09-12 00:00:00+00:00
+            today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+            tomorrow = today + timedelta(days=1)
             query = {
                 "parsing.location_enriched": True,
                 "created_at": {
                     "$gte": today,
                     "$lt": tomorrow
                 }
-            } # created_at >= {오늘 자정} 그리고 created_at < {내일 자정}
+            }
 
         parsed_docs = self.reddit_repository.find_parsed_documents(query)
+        loaded_count = 0
+        skipped_count = 0
 
         for doc in parsed_docs:
             country_id = doc.get("country_id")
@@ -60,24 +60,44 @@ class TravelScamLoader:
             posted_at = doc.get("posted_at")
             collected_at = doc.get("created_at")
 
-            # Action 매핑
-            action_name = doc.get("action").split(" (")[0].strip()
+            action_raw = doc.get("action")
+            if not action_raw:
+                self.logger.warning("action 필드 없음 (reddit_id=%s), 건너뜀", external_id)
+                skipped_count += 1
+                continue
+            action_name = action_raw.split(" (")[0].strip()
             cursor.execute(
-                "SELECT id FROM scam_action WHERE name = %s", (action_name, ))
+                "SELECT id FROM scam_action WHERE name = %s", (action_name,))
             row = cursor.fetchone()
+            if not row:
+                self.logger.warning("scam_action 미존재: %s (reddit_id=%s), 건너뜀", action_name, external_id)
+                skipped_count += 1
+                continue
             action_id = row[0]
 
-            # Context 매핑
-            context_name = doc.get("context").split(" (")[0].strip()
+            context_raw = doc.get("context")
+            if not context_raw:
+                self.logger.warning("context 필드 없음 (reddit_id=%s), 건너뜀", external_id)
+                skipped_count += 1
+                continue
+            context_name = context_raw.split(" (")[0].strip()
             cursor.execute(
                 "SELECT id FROM scam_context WHERE name = %s", (context_name,))
             row = cursor.fetchone()
+            if not row:
+                self.logger.warning("scam_context 미존재: %s (reddit_id=%s), 건너뜀", context_name, external_id)
+                skipped_count += 1
+                continue
             context_id = row[0]
 
             cursor.execute(
                 "SELECT id FROM countries WHERE dataset_id = %s", (country_id,)
             )
             row = cursor.fetchone()
+            if not row:
+                self.logger.warning("country 미존재: dataset_id=%s (reddit_id=%s), 건너뜀", country_id, external_id)
+                skipped_count += 1
+                continue
             country_id = row[0]
 
             if state_id:
@@ -85,17 +105,16 @@ class TravelScamLoader:
                     "SELECT id FROM states WHERE dataset_id = %s", (state_id,)
                 )
                 row = cursor.fetchone()
-                state_id = row[0]
+                state_id = row[0] if row else None
             if city_id:
                 cursor.execute(
                     "SELECT id FROM cities WHERE dataset_id = %s", (city_id,)
                 )
                 row = cursor.fetchone()
-                city_id = row[0]
+                city_id = row[0] if row else None
 
             now = datetime.now(UTC)
 
-            # INSERT
             cursor.execute(
                 """
                 INSERT INTO external_report 
@@ -108,7 +127,9 @@ class TravelScamLoader:
                     posted_at, collected_at, now, now
                 )
             )
+            loaded_count += 1
 
         mysql_conn.commit()
         cursor.close()
         mysql_conn.close()
+        self.logger.info("로드 완료 (loaded=%d, skipped=%d)", loaded_count, skipped_count)
