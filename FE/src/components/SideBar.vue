@@ -17,6 +17,11 @@
 
       <div class="sidebar-body" @scroll="onSidebarScroll" ref="sidebarRef">
         <template v-if="viewType === 'country'">
+          <div v-if="isLoadingCountry && sidebarCountries.length === 0" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
@@ -70,6 +75,11 @@
 
           <!-- 하단: State 목록 -->
           <div>
+            <div v-if="isLoadingState && sidebarStates.length === 0" class="loading-spinner">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
             <ul class="list-group">
               <li
                 class="list-group-item d-flex justify-content-between align-items-start"
@@ -120,6 +130,11 @@
             </button>
           </div>
 
+          <div v-if="isLoadingCity && sidebarCities.length === 0" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
@@ -151,6 +166,11 @@
               <span v-else-if="selectedState.id">Reports from {{ selectedState.name }}</span>
               <span v-else>Reports from {{ selectedCountry.name }}</span>
             </h6>
+          </div>
+          <div v-if="isLoadingReport && sidebarReports.length === 0" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
           </div>
           <ul class="list-group">
             <li
@@ -886,6 +906,12 @@ $sidebar-width: 560px;
   &.high   { background-color: #e74c3c; }
   &.medium { background-color: #f39c12; }
   &.low    { background-color: #2ecc71; }
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
 }
 
 /* 토글 버튼 (사이드바 여닫기 버튼) */
