@@ -13,13 +13,14 @@
           :key="marker.id"
           :lat-lng="[marker.lat, marker.lng]"
           :radius="getRadius(marker.scamCnt)"
-          :color="getColor(marker.scamCnt)"
+          :color="getColor(marker.riskLevel)"
           :fill-opacity="0.5"
           :weight="1"
         >
           <l-tooltip :options="{ direction: 'top', offset: [0, -5] }">
             <div class="tooltip-card">
               <strong>{{ marker.scamCnt }}</strong> reports
+              <span class="risk-badge" :class="marker.riskLevel?.toLowerCase()">{{ marker.riskLevel }}</span>
             </div>
           </l-tooltip>
         </l-circle-marker>
@@ -91,7 +92,7 @@ const center = ref({ "lat": 42.8333, "lng": 12.8333 });
 
 const markers = ref([]);
 
-// maxCnt / minCnt를 computed로 미리 구해두기
+// maxCnt / minCnt를 computed로 미리 구해두기 (반경 계산에만 사용)
 const maxCnt = computed(() => Math.max(...markers.value.map(m => m.scamCnt)))
 const minCnt = computed(() => Math.min(...markers.value.map(m => m.scamCnt)))
 
@@ -135,13 +136,11 @@ const getRadius = (scamCnt) => {
   return radius
 }
 
-const getColor = (scamCnt) => {
-  if (!maxCnt.value) return "hsl(120, 90%, 50%)"
-
-  const ratio = Math.sqrt(scamCnt / maxCnt.value) // √ 스케일 적용
-  const hue = (1 - ratio) * 120
-
-  return `hsl(${hue}, ${60 + ratio*40}%, ${60 - ratio*20}%)`
+const getColor = (riskLevel) => {
+  if (riskLevel === 'HIGH') return '#e74c3c'
+  if (riskLevel === 'MEDIUM') return '#f39c12'
+  if (riskLevel === 'LOW') return '#2ecc71'
+  return '#95a5a6'
 }
 
 const loadMapSummary = async () => {
@@ -248,5 +247,23 @@ onMounted(() => {
 .dropdown-item:hover {
   background-color: #f1f3f5;
   color: #000;
+}
+
+.tooltip-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.risk-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: white;
+
+  &.high   { background-color: #e74c3c; }
+  &.medium { background-color: #f39c12; }
+  &.low    { background-color: #2ecc71; }
 }
 </style>
