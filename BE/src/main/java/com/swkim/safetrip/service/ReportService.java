@@ -9,10 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static com.swkim.safetrip.dto.response.RegionScamStatisticsResponse.RegionType.*;
 
@@ -44,20 +43,22 @@ public class ReportService {
     private List<RegionScamStatisticsItem> assignRiskLevels(List<RegionScamStatisticsItem> items) {
         if (items.isEmpty()) return items;
 
-        List<RegionScamStatisticsItem> sorted = items.stream()
-                .sorted(Comparator.comparingLong(RegionScamStatisticsItem::scamCnt))
+        List<Long> distinctCounts = items.stream()
+                .map(RegionScamStatisticsItem::scamCnt)
+                .distinct()
+                .sorted()
                 .toList();
 
-        int size = sorted.size();
-        int lowEnd = (int) Math.ceil(size * 0.2);
-        int highStart = (int) Math.floor(size * 0.8);
+        int n = distinctCounts.size();
+        int lowEnd = (int) Math.ceil(n * 0.2);
+        int highStart = (int) Math.floor(n * 0.8);
 
-        Map<Long, RiskLevel> riskMap = new HashMap<>();
-        for (int i = 0; i < size; i++) {
+        Map<Long, RiskLevel> countToLevel = new TreeMap<>();
+        for (int i = 0; i < n; i++) {
             RiskLevel level = i < lowEnd ? RiskLevel.LOW
                     : i >= highStart ? RiskLevel.HIGH
                     : RiskLevel.MEDIUM;
-            riskMap.put(sorted.get(i).id(), level);
+            countToLevel.put(distinctCounts.get(i), level);
         }
 
         return items.stream()
@@ -68,7 +69,7 @@ public class ReportService {
                         .lng(item.lng())
                         .scamCnt(item.scamCnt())
                         .iso2(item.iso2())
-                        .riskLevel(riskMap.get(item.id()))
+                        .riskLevel(countToLevel.get(item.scamCnt()))
                         .build())
                 .toList();
     }
