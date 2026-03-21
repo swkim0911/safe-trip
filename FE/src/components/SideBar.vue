@@ -30,9 +30,12 @@
                 </span>
                 <div class="fw-bold">{{ country.name }}</div>
               </div>
-              <span class="badge text-bg-primary rounded-pill">
-                {{ country.scamCnt }}
-              </span>
+              <div class="d-flex align-items-center gap-1">
+                <span v-if="country.riskLevel" class="badge risk-badge" :class="country.riskLevel.toLowerCase()">
+                  {{ country.riskLevel }}
+                </span>
+                <span class="badge text-bg-primary rounded-pill">{{ country.scamCnt }}</span>
+              </div>
             </li>
           </ul>
         </template>
@@ -77,7 +80,12 @@
                 <div class="ms-2 me-auto">
                   <div class="fw-bold">{{ state.name }}</div>
                 </div>
-                <span class="badge text-bg-primary rounded-pill">{{ state.scamCnt }}</span>
+                <div class="d-flex align-items-center gap-1">
+                  <span v-if="state.riskLevel" class="badge risk-badge" :class="state.riskLevel.toLowerCase()">
+                    {{ state.riskLevel }}
+                  </span>
+                  <span class="badge text-bg-primary rounded-pill">{{ state.scamCnt }}</span>
+                </div>
               </li>
             </ul>
           </div>
@@ -866,6 +874,18 @@ $sidebar-width: 560px;
     transform: translateY(0);
     box-shadow: 0 6px 14px rgba(13, 110, 253, 0.35);
   }
+}
+
+.risk-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+
+  &.high   { background-color: #e74c3c; }
+  &.medium { background-color: #f39c12; }
+  &.low    { background-color: #2ecc71; }
 }
 
 /* 토글 버튼 (사이드바 여닫기 버튼) */
