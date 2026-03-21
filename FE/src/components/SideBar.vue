@@ -745,7 +745,8 @@ $sidebar-width: 560px;
   left: -$sidebar-width; /* 기본적으로 숨김 */
   width: $sidebar-width;
   height: 100vh;
-  background-color: #e0e0e0bd;
+  background-color: #ffffff;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
   transition: left 0.3s ease;
   padding: 20px;
   flex-direction: column;
@@ -767,7 +768,7 @@ $sidebar-width: 560px;
   left: 24px;
   top: 39%;
   transform: translateY(-50%);
-  color: #0d6efd;
+  color: #3B82F6;
   z-index: 10;
   font-size: 1rem;
 }
@@ -775,10 +776,10 @@ $sidebar-width: 560px;
 .search-input {
   background: linear-gradient(135deg, #ffffff, #f2f6ff);
   border-radius: 50px;
-  border: 1px solid rgba(13, 110, 253, 0.25);
+  border: 1px solid rgba(59, 130, 246, 0.25);
   padding-left: 50px;
   font-size: 1rem;
-  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.08);
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.08);
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 
   &::placeholder {
@@ -786,8 +787,8 @@ $sidebar-width: 560px;
   }
 
   &:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 12px 26px rgba(13, 110, 253, 0.15);
+    border-color: #3B82F6;
+    box-shadow: 0 12px 26px rgba(59, 130, 246, 0.15);
   }
 }
 
@@ -811,8 +812,8 @@ $sidebar-width: 560px;
   padding: 14px; /* 내부 여백 */
   margin-bottom: 14px; /* 아래 여백 */
   margin-top: 14px;
-  border: 1px solid rgba(13, 110, 253, 0.15);
-  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.08); /* 그림자 효과 */
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.08); /* 그림자 효과 */
   cursor: pointer;
   transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   isolation: isolate;
@@ -823,20 +824,20 @@ $sidebar-width: 560px;
     inset: -30% auto auto -30%;
     width: 110px;
     height: 110px;
-    background: radial-gradient(circle, rgba(13, 110, 253, 0.15), transparent 70%);
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent 70%);
     z-index: -1;
   }
 
   &:hover {
     background: linear-gradient(135deg, #eef3ff, #ffffff);
     transform: translateY(-3px);
-    box-shadow: 0 12px 26px rgba(13, 110, 253, 0.15);
+    box-shadow: 0 12px 26px rgba(59, 130, 246, 0.15);
   }
 
   &:active {
     background: linear-gradient(135deg, #e0e9ff, #f7f9ff);
     transform: translateY(0);
-    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
   }
 }
 
@@ -844,8 +845,8 @@ $sidebar-width: 560px;
   position: relative;
   overflow: hidden;
   border-radius: 12px !important;
-  background: linear-gradient(135deg, #0d6efd, #6591ff);
-  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.2);
+  background: linear-gradient(135deg, #3B82F6, #60A5FA);
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.2);
   transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 
   &::before {
@@ -861,8 +862,8 @@ $sidebar-width: 560px;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 26px rgba(13, 110, 253, 0.3);
-    background: linear-gradient(135deg, #2b7bff, #0c5ad6);
+    box-shadow: 0 12px 26px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #2563EB, #3B82F6);
   }
 
   &:hover::before {
@@ -871,7 +872,7 @@ $sidebar-width: 560px;
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 6px 14px rgba(13, 110, 253, 0.35);
+    box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
   }
 }
 
@@ -893,7 +894,7 @@ $sidebar-width: 560px;
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  background-color: #0d6efd;
+  background-color: #3B82F6;
   color: white;
   border: none;
   padding: 10px 15px;

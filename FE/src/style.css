@@ -2,3 +2,24 @@
   margin: 0;
   box-sizing: border-box;
 }
+
+:root {
+  --bs-primary: #3B82F6;
+  --bs-primary-rgb: 59, 130, 246;
+  --bs-link-color: #3B82F6;
+  --bs-link-color-rgb: 59, 130, 246;
+}
+
+.btn-primary {
+  --bs-btn-bg: #3B82F6;
+  --bs-btn-border-color: #3B82F6;
+  --bs-btn-hover-bg: #2563EB;
+  --bs-btn-hover-border-color: #2563EB;
+  --bs-btn-active-bg: #1D4ED8;
+  --bs-btn-active-border-color: #1D4ED8;
+}
+
+.text-primary { color: #3B82F6 !important; }
+.border-primary { border-color: #3B82F6 !important; }
+.text-bg-primary { background-color: #3B82F6 !important; }
+.badge.text-bg-primary { background-color: #3B82F6 !important; }
