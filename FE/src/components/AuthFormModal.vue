@@ -6,7 +6,22 @@
             <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div v-if="mode === 'login'">
+            <!-- 탭 -->
+            <div class="auth-tabs">
+              <button
+                class="auth-tab"
+                :class="{ active: mode === 'login' }"
+                @click="mode = 'login'"
+              >Log In</button>
+              <button
+                class="auth-tab"
+                :class="{ active: mode === 'signup' }"
+                @click="mode = 'signup'"
+              >Sign Up</button>
+            </div>
+
+            <Transition name="fade" mode="out-in">
+            <div v-if="mode === 'login'" key="login">
               <form @submit.prevent class="px-3 py-3" style="max-width: 400px; margin: 0 auto;">
                 <h3 class="text-center mb-3 fw-bold">Welcome</h3>
                 <div class="mb-3">
@@ -38,6 +53,9 @@
                     </button>
                   </div>
                 </div>
+                <p v-if="loginSuccessMessage" class="text-center text-success fw-bold">
+                  {{ loginSuccessMessage }}
+                </p>
                 <p v-if="loginFormMessage" class="text-center text-danger fw-bold">
                       {{ loginFormMessage }}
                 </p>
@@ -46,12 +64,9 @@
                   <button type="submit" class="btn btn-primary w-100 py-2 mt-2" @click="submitLoginForm">Log In</button>
                 </div>
               </form>
-              <div class="text-center">
-                <button type="button" :disabled="isLoginSubmitting" class="btn btn-link" @click="mode = 'signup'">Sign Up</button>
-              </div>
             </div>
-            
-            <div v-else>
+
+            <div v-else key="signup">
               <form @submit.prevent class="px-3 py-3" style="max-width: 400px; margin: 0 auto;">
                 <h3 class="text-center mb-3 fw-bold">Create Your Account</h3>
 
@@ -139,13 +154,9 @@
                 </div>
                 <button :disabled="!isSignupFormValid() || isSignupSubmitting" type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
               </form>
-              <p class="text-center text-success fw-bold" v-if="signupSuccessMessage">{{ signupSuccessMessage }}</p>
               <p class="text-center text-danger fw-bold" v-if="signupFailureMessage">{{ signupFailureMessage }}</p>
-              <p class="text-center mt-3 mb-0">
-                Already have an account?
-                <a href="#" class="text-decoration-none" role="button" @click.prevent="mode = 'login'">Log In</a>
-              </p>
             </div>
+            </Transition>
           </div>
         </div>  
     </div>
@@ -164,7 +175,7 @@ const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
 
 const mode = ref('login')
-const signupSuccessMessage = ref('');
+const loginSuccessMessage = ref('');
 const signupFailureMessage = ref('');
 const loginFormMessage = ref('');
 const showLoginPassword = ref(false);
@@ -196,7 +207,7 @@ function resetForm() {
   mode.value = 'login';
   resetSignupForm();
   resetLoginForm();
-  signupSuccessMessage.value = '';
+  loginSuccessMessage.value = '';
   signupFailureMessage.value = '';
   loginFormMessage.value = '';
 }
@@ -368,7 +379,8 @@ const submitSignupForm = async () => {
       password: signupForm.password,
       nickname: signupForm.nickname
     })
-    signupSuccessMessage.value = 'Sign-up completed successfully. Please log in.';
+    loginSuccessMessage.value = 'Sign-up complete! Please log in.';
+    mode.value = 'login';
   } catch (error) {
     console.error(error);
 
@@ -424,7 +436,7 @@ const submitLoginForm = async () => {
 
     const { data: userInfoResponse } = await apiClient.get('/users/me');
     authStore.setUser(userInfoResponse.result);
-
+    loginSuccessMessage.value = '';
     hide();
   } catch (error) {
     console.error(error);
@@ -466,11 +478,11 @@ onMounted(() => {
 watch(mode, (newMode) => {
   if (newMode === 'login') {
     resetSignupForm();
-    signupSuccessMessage.value = '';
     signupFailureMessage.value = '';
   } else if (newMode == 'signup') {
     resetLoginForm();
     loginFormMessage.value = '';
+    loginSuccessMessage.value = '';
   }
 });
 
@@ -487,5 +499,51 @@ watch(() => signupForm.nickname, () => {
 
 </script>
 <style scoped lang="scss">
+.auth-tabs {
+  display: flex;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 8px;
+}
 
+.auth-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #adb5bd;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+
+  &.active {
+    color: #3B82F6;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #3B82F6;
+      border-radius: 2px 2px 0 0;
+    }
+  }
+
+  &:hover:not(.active) {
+    color: #6c757d;
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
