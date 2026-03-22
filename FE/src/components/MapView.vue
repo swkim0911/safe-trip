@@ -105,6 +105,7 @@ const mapStore = useMapStore();
 const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
 const nickname = computed(() => authStore.user?.nickname || 'user');
 
+const map = ref(null);
 const zoom = ref(3);
 const center = ref({ "lat": 42.8333, "lng": 12.8333 });
 
@@ -123,6 +124,11 @@ function getGroupByZoom(zoom) {
     return 'country';
   }
 }
+
+watch(() => mapStore.flyToTarget, (target) => {
+  if (!target || !map.value?.leafletObject) return;
+  map.value.leafletObject.flyTo([target.lat, target.lng], target.zoom);
+});
 
 watch(zoom, (newZoom, oldZoom) => {
   const prevGroup = getGroupByZoom(oldZoom);

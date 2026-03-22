@@ -3,8 +3,8 @@
     <div :class="['sidebar', {'open': isOpen}]">
       <!-- 검색창 -->
       <div class="sidebar-header form-group position-relative">
-        <font-awesome-icon 
-          :icon="['fas', 'search']" 
+        <font-awesome-icon
+          :icon="['fas', 'search']"
           class="search-icon"
         />
         <input
@@ -12,7 +12,21 @@
           v-model="searchText"
           placeholder="Search by country, state, or city"
           class="form-control form-control-lg mb-3 search-input"
+          @blur="closeDropdownDelayed"
+          @focus="onSearchFocus"
+          @keyup.enter="triggerSearch"
         />
+        <ul v-if="searchResults.length" class="search-dropdown">
+          <li
+            v-for="result in searchResults"
+            :key="`${result.type}-${result.id}`"
+            class="search-dropdown-item"
+            @mousedown.prevent="selectSearchResult(result)"
+          >
+            <span class="result-name">{{ result.name }}</span>
+            <span class="result-type">{{ result.type }}</span>
+          </li>
+        </ul>
       </div>
 
       <div class="sidebar-body" @scroll="onSidebarScroll" ref="sidebarRef">
@@ -31,7 +45,7 @@
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="country in sidebarCountries"
               :key="country.id"
-              @click="showStatesByCountry(country.id, country.name, country.scamCnt)"
+              @click="onCountryClick(country)"
             >
               <div class="ms-2 me-auto d-flex align-items-center">
                 <span v-if="country.iso2" class="me-2" style="font-size: 1.2em;">
@@ -77,6 +91,50 @@
             </button>
           </div>
 
+          <!-- 국가별 통계 -->
+          <div v-if="countryActionStats.length || countryContextStats.length" class="country-stats mb-3">
+            <div v-if="countryActionStats.length" class="stats-section">
+              <div class="stats-section-title">Scam Action</div>
+              <div class="rings-row">
+                <div v-for="item in countryActionStats" :key="item.name" class="ring-item">
+                  <svg width="56" height="56" viewBox="0 0 56 56">
+                    <circle cx="28" cy="28" r="22" fill="none" stroke="#e9ecef" stroke-width="4"/>
+                    <circle cx="28" cy="28" r="22" fill="none" stroke="#e74c3c" stroke-width="4"
+                      stroke-linecap="round"
+                      :stroke-dasharray="statCircumference"
+                      :stroke-dashoffset="getStatDashOffset(item.percentage)"
+                      transform="rotate(-90 28 28)"
+                    />
+                    <text x="28" y="32" text-anchor="middle" font-size="10" font-weight="600" fill="#333">
+                      {{ item.percentage }}%
+                    </text>
+                  </svg>
+                  <div class="ring-label">{{ item.name }}</div>
+                </div>
+              </div>
+            </div>
+            <div v-if="countryContextStats.length" class="stats-section mt-3">
+              <div class="stats-section-title">Scam Context</div>
+              <div class="rings-row">
+                <div v-for="item in countryContextStats" :key="item.name" class="ring-item">
+                  <svg width="56" height="56" viewBox="0 0 56 56">
+                    <circle cx="28" cy="28" r="22" fill="none" stroke="#e9ecef" stroke-width="4"/>
+                    <circle cx="28" cy="28" r="22" fill="none" stroke="#3B82F6" stroke-width="4"
+                      stroke-linecap="round"
+                      :stroke-dasharray="statCircumference"
+                      :stroke-dashoffset="getStatDashOffset(item.percentage)"
+                      transform="rotate(-90 28 28)"
+                    />
+                    <text x="28" y="32" text-anchor="middle" font-size="10" font-weight="600" fill="#333">
+                      {{ item.percentage }}%
+                    </text>
+                  </svg>
+                  <div class="ring-label">{{ item.name }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- 하단: State 목록 -->
           <div>
             <div v-if="isLoadingState && sidebarStates.length === 0" class="loading-spinner">
@@ -93,7 +151,7 @@
                 class="list-group-item d-flex justify-content-between align-items-start"
                 v-for="state in sidebarStates"
                 :key="state.id"
-                @click="showCitiesByState(state.id, state.name)"
+                @click="onStateClick(state)"
               >
                 <div class="ms-2 me-auto">
                   <div class="fw-bold">{{ state.name }}</div>
@@ -152,7 +210,7 @@
               class="list-group-item d-flex justify-content-between align-items-start"
               v-for="city in sidebarCities"
               :key="city.id"
-              @click="showReportsByCity(city.id, city.name)"
+              @click="onCityClick(city)"
             >
               <div class="ms-2 me-auto">
                 <div class="fw-bold">
@@ -249,18 +307,92 @@ const mapStore = useMapStore();
 watch(() => mapStore.selectedMarker, (marker) => {
   if (!marker) return;
   isOpen.value = true;
-  const { id, name, scamCnt, groupBy } = marker;
+  const { id, name, groupBy, lat, lng } = marker;
   if (groupBy === 'country') {
-    showStatesByCountry(id, name, scamCnt);
+    mapStore.setFlyTo(lat, lng, 4);
+    showStatesByCountry(id);
   } else if (groupBy === 'state') {
-    showCitiesByState(id, name, 'click', scamCnt);
+    mapStore.setFlyTo(lat, lng, 6);
+    showCitiesByState(id);
   } else if (groupBy === 'city') {
+    mapStore.setFlyTo(lat, lng, 9);
     showReportsByCity(id, name);
   }
 });
 
 const isOpen = ref(false);
 const searchText = ref('');
+const searchResults = ref([]);
+
+let searchDebounceTimer = null;
+
+watch(searchText, (val) => {
+  clearTimeout(searchDebounceTimer);
+  if (val.length < 2) {
+    searchResults.value = [];
+    return;
+  }
+  searchDebounceTimer = setTimeout(async () => {
+    try {
+      const response = await apiClient.get('/search', { params: { q: val } });
+      searchResults.value = response.data.result;
+    } catch (e) {
+      console.error('Search failed:', e);
+    }
+  }, 300);
+});
+
+const onCountryClick = (country) => {
+  mapStore.setFlyTo(country.lat, country.lng, 4);
+  showStatesByCountry(country.id);
+};
+
+const onStateClick = (state) => {
+  mapStore.setFlyTo(state.lat, state.lng, 6);
+  showCitiesByState(state.id);
+};
+
+const onCityClick = (city) => {
+  mapStore.setFlyTo(city.lat, city.lng, 9);
+  showReportsByCity(city.id, city.name);
+};
+
+const closeDropdownDelayed = () => {
+  setTimeout(() => { searchResults.value = []; }, 150);
+};
+
+const triggerSearch = async () => {
+  if (searchText.value.length < 2) return;
+  try {
+    const response = await apiClient.get('/search', { params: { q: searchText.value } });
+    searchResults.value = response.data.result;
+  } catch (e) {
+    console.error('Search failed:', e);
+  }
+};
+
+const onSearchFocus = () => {
+  if (searchText.value.length >= 2) triggerSearch();
+};
+
+const selectSearchResult = async (result) => {
+  isOpen.value = true;
+
+  if (result.type === 'COUNTRY') {
+    mapStore.setFlyTo(result.lat, result.lng, 4);
+    await showStatesByCountry(result.id);
+  } else if (result.type === 'STATE') {
+    mapStore.setFlyTo(result.lat, result.lng, 6);
+    await showStatesByCountry(result.countryId);
+    await showCitiesByState(result.id);
+  } else if (result.type === 'CITY') {
+    mapStore.setFlyTo(result.lat, result.lng, 9);
+    await showReportsByCity(result.id, result.name);
+  }
+
+  searchText.value = '';
+  searchResults.value = [];
+};
 
 const viewType = ref('country') // 'country' 또는 'state' 또는 'city' 또는 'report'
 
@@ -301,6 +433,30 @@ const selectedReport = reactive({
   postedAt: '',
   imageUrls: [],
 });
+
+const countryActionStats = ref([]);
+const countryContextStats = ref([]);
+const statCircumference = 2 * Math.PI * 22;
+
+const toStatPercentageItems = (stats) => {
+  const total = stats.reduce((sum, item) => sum + item.count, 0);
+  if (total === 0) return [];
+  return stats.map(item => ({
+    name: item.name,
+    percentage: Math.round(item.count / total * 100),
+  }));
+};
+
+const getStatDashOffset = (percentage) => statCircumference * (1 - percentage / 100);
+
+const loadCountryStats = async (countryId) => {
+  const [actionRes, contextRes] = await Promise.all([
+    apiClient.get(`/countries/${countryId}/scam-actions/statistics`),
+    apiClient.get(`/countries/${countryId}/scam-contexts/statistics`),
+  ]);
+  countryActionStats.value = toStatPercentageItems(actionRes.data.result);
+  countryContextStats.value = toStatPercentageItems(contextRes.data.result);
+};
 
 const size = 12;
 
@@ -466,14 +622,41 @@ const loadCountriesWithStatistics = async (mode = 'click') => {
   }
 }
 
-const showStatesByCountry = async (countryId, countryName, scamCnt) => {
-  selectedCountry.id = countryId;
-  selectedCountry.name = countryName;
-  selectedCountry.scamCnt = scamCnt;
-  
-  // 국가의 state 목록 로드
-  await loadStatesWithStatistics(countryId, countryName, 'click');
-  // viewType을 'state'로 설정
+const showStatesByCountry = async (countryId, mode = 'click') => {
+  if (mode === 'scroll' && (isLoadingState.value || isLastStatePage.value)) return;
+
+  if (mode === 'click') {
+    const res = await apiClient.get(`/countries/${countryId}/info`);
+    const info = res.data.result;
+    selectedCountry.id = countryId;
+    selectedCountry.name = info.name;
+    selectedCountry.scamCnt = info.scamCnt;
+    statePage.value = 0;
+    isLastStatePage.value = false;
+    sidebarStates.value = [];
+    countryActionStats.value = [];
+    countryContextStats.value = [];
+  }
+
+  isLoadingState.value = true;
+  try {
+    const [statesRes] = await Promise.all([
+      apiClient.get('/states/statistics', {
+        params: { countryId, page: statePage.value, size, sort: 'scamCnt,DESC' }
+      }),
+      ...(mode === 'click' ? [loadCountryStats(countryId)] : []),
+    ]);
+    const content = statesRes.data.result.content;
+    const last = statesRes.data.result.last;
+    sidebarStates.value.push(...content);
+    isLastStatePage.value = last;
+    statePage.value += 1;
+  } catch (e) {
+    console.error('Failed to load states sidebar info:', e);
+  } finally {
+    isLoadingState.value = false;
+  }
+
   viewType.value = 'state';
 };
 
@@ -575,92 +758,39 @@ const loadReportsByCountry = async (countryId, mode = 'click') => {
 };
 
 /**
- * 특정 국가의 통계 정보를 포함한 주(State) 목록을 조회합니다 (페이지네이션).
- * 스캠 리포트 개수 기준으로 내림차순 정렬하여 반환합니다.
- * @param {number} countryId - 조회할 국가 ID
- * @param {string} countryName - 국가 이름
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
- */
-const loadStatesWithStatistics = async (countryId, countryName, mode = 'click') => {
-  if (mode === 'scroll' && (isLoadingState.value || isLastStatePage.value)) return;
-
-  isLoadingState.value = true;
-  selectedCountry.id = countryId;
-  selectedCountry.name = countryName;
-
-  // 새로운 Country 클릭이면 초기화
-  if (mode === 'click') {
-    statePage.value = 0;
-    isLastStatePage.value = false;
-    sidebarStates.value = []; 
-  }
-
-  try {
-    const response = await apiClient.get('/states/statistics', {
-      params: {
-        countryId,
-        page: statePage.value,
-        size,
-        sort: "scamCnt,DESC"
-      }
-    });
-
-    const content = response.data.result.content;
-    const last = response.data.result.last;
-
-    sidebarStates.value.push(...content);
-    isLastStatePage.value = last;
-    statePage.value += 1;
-  } catch (e) {
-    console.error("Failed to load states sidebar info because of server error. Please try again later.", e);
-  } finally {
-    isLoadingState.value = false;
-  }
-};
-
-
-/**
  * 특정 주(State)의 도시(City) 목록을 보여줍니다 (페이지네이션 지원).
  * 스캠 리포트 개수 기준으로 내림차순 정렬하여 반환합니다.
  * @param {number} stateId - 조회할 주(State) ID
  * @param {string} stateName - 주(State) 이름
  * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
  */
-const showCitiesByState = async (stateId, stateName, mode = 'click', fallbackScamCnt = null) => {
+const showCitiesByState = async (stateId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
 
-  isLoadingCity.value = true;
-
-  selectedState.id = stateId;
-  selectedState.name = stateName;
-  const state = sidebarStates.value.find(s => s.id === stateId);
-  selectedState.scamCnt = state?.scamCnt ?? fallbackScamCnt ?? 0;
-
   if (mode === 'click') {
+    const res = await apiClient.get(`/states/${stateId}/info`);
+    const info = res.data.result;
+    selectedState.id = stateId;
+    selectedState.name = info.name;
+    selectedState.scamCnt = info.scamCnt;
     cityPage.value = 0;
     isLastCityPage.value = false;
-    sidebarCities.value = []; 
+    sidebarCities.value = [];
   }
 
+  isLoadingCity.value = true;
   try {
     const response = await apiClient.get('/cities/statistics', {
-      params: {
-        stateId: stateId,
-        page: cityPage.value,
-        size: size,
-        sort: "scamCnt,DESC"
-      }
+      params: { stateId, page: cityPage.value, size, sort: 'scamCnt,DESC' }
     });
     const content = response.data.result.content;
     const last = response.data.result.last;
-
     sidebarCities.value.push(...content);
     isLastCityPage.value = last;
     cityPage.value += 1;
-
     viewType.value = 'city';
   } catch (e) {
-    console.error("Failed to load cities sidebar info because of server error. Please try again later.", e);
+    console.error('Failed to load cities sidebar info:', e);
   } finally {
     isLoadingCity.value = false;
   }
@@ -741,9 +871,9 @@ const onSidebarScroll = () => {
   if (viewType.value === 'country') {
     loadCountriesWithStatistics('scroll');
   } else if (viewType.value === 'state') {
-    loadStatesWithStatistics(selectedCountry.id, selectedCountry.name, 'scroll');
+    showStatesByCountry(selectedCountry.id, 'scroll');
   } else if (viewType.value === 'city') {
-    showCitiesByState(selectedState.id, selectedState.name, 'scroll');
+    showCitiesByState(selectedState.id, 'scroll');
   } else if (viewType.value === 'report') {
     if (selectedCity.id) {
       showReportsByCity(selectedCity.id, selectedCity.name, 'scroll');
@@ -807,6 +937,49 @@ $sidebar-width: 560px;
   color: #3B82F6;
   z-index: 10;
   font-size: 1rem;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  z-index: 100;
+}
+
+.search-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #f1f5fe;
+  }
+}
+
+.result-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.result-type {
+  font-size: 11px;
+  color: #888;
+  background: #f1f3f5;
+  padding: 2px 8px;
+  border-radius: 20px;
 }
 
 .search-input {
@@ -911,6 +1084,43 @@ $sidebar-width: 560px;
   &.high   { background-color: #e74c3c; }
   &.medium { background-color: #f39c12; }
   &.low    { background-color: #2ecc71; }
+}
+
+.country-stats {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.stats-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #888;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.rings-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ring-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 64px;
+}
+
+.ring-label {
+  font-size: 10px;
+  color: #555;
+  text-align: center;
+  line-height: 1.3;
+  word-break: break-word;
 }
 
 .loading-spinner {
