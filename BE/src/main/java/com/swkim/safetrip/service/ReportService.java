@@ -18,23 +18,24 @@ public class ReportService {
 
     private final ReportJdbcRepository reportJdbcRepository;
     private final ReportNativeRepository reportNativeRepository;
+    private final RiskLevelService riskLevelService;
 
     @Transactional(readOnly = true)
     public RegionScamStatisticsResponse getCountryStatistics(){
-        List<RegionScamStatisticsItem> countryStatisticsItems = reportJdbcRepository.findCountryStatistics();
-        return new RegionScamStatisticsResponse(COUNTRY, countryStatisticsItems);
+        List<RegionScamStatisticsItem> items = reportJdbcRepository.findCountryStatistics();
+        return new RegionScamStatisticsResponse(COUNTRY, riskLevelService.assignRiskLevels(items));
     }
 
     @Transactional(readOnly = true)
     public RegionScamStatisticsResponse getStateStatistics(){
-        List<RegionScamStatisticsItem> stateStatisticsItems = reportJdbcRepository.findStateStatistics();
-        return new RegionScamStatisticsResponse(STATE, stateStatisticsItems);
+        List<RegionScamStatisticsItem> items = reportJdbcRepository.findStateStatistics();
+        return new RegionScamStatisticsResponse(STATE, riskLevelService.assignRiskLevels(items));
     }
 
     @Transactional(readOnly = true)
     public RegionScamStatisticsResponse getCityStatistics(){
-        List<RegionScamStatisticsItem> cityStatisticsItems = reportJdbcRepository.findCityStatistics();
-        return new RegionScamStatisticsResponse(CITY, cityStatisticsItems);
+        List<RegionScamStatisticsItem> items = reportJdbcRepository.findCityStatistics();
+        return new RegionScamStatisticsResponse(CITY, riskLevelService.assignRiskLevels(items));
     }
 
 }

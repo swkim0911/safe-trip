@@ -30,8 +30,10 @@
                 v-model="form.title"
                 maxlength="100"
               />
-              <div v-if="errors.title" class="text-danger small mt-1">
-                {{ errors.title }}
+              <div class="d-flex justify-content-between mt-1">
+                <div v-if="errors.title" class="text-danger small">{{ errors.title }}</div>
+                <div v-else></div>
+                <small class="text-muted">{{ form.title.length }} / 100</small>
               </div>
             </div>
 
@@ -47,7 +49,7 @@
                   v-model="form.scamActionId"
                   :class="['form-select', { 'is-invalid': errors.scamActionId }]"
                 >
-                  <option disabled value="">Select a Action</option>
+                  <option disabled value="">Select an Action</option>
                   <option v-for="a in scamActions" :key="a.id" :value="a.id">
                     {{ a.name }}
                   </option>
@@ -81,59 +83,87 @@
             <div class="mb-3">
               <label class="col-form-label fw-bold">
                 <font-awesome-icon :icon="['fas', 'map-location-dot']" class="modal-icon" />
-                Where did it happened
+                Location
               </label>
-              <div class="row g-2">
-                <div class="col-md-4">
-                  <select
-                    v-model="form.countryId"
-                    class="form-select"
-                    :class="{ 'is-invalid': errors.countryId }"
-                    @change="loadStates"
-                  >
-                    <option disabled value="">Select a country</option>
-                    <option v-for="c in countries" :key="c.id" :value="c.id">
-                      {{ c.name }}
-                    </option>
-                  </select>
-                  <div v-if="errors.countryId" class="text-danger small mt-1">
-                    {{ errors.countryId }}
-                  </div>
-                </div>
 
-                <div class="col-md-4">
-                  <select
-                    v-model="form.stateId"
-                    class="form-select"
-                    :disabled="!form.countryId"
-                    :class="{ 'is-invalid': errors.stateId }"
-                    @change="loadCities"
-                  >
-                    <option disabled value="">Select a state</option>
-                    <option v-for="s in states" :key="s.id" :value="s.id">
-                      {{ s.name }}
-                    </option>
-                  </select>
-                  <div v-if="errors.stateId" class="text-danger small mt-1">
-                    {{ errors.stateId }}
-                  </div>
-                </div>
+              <!-- Breadcrumb -->
+              <div v-if="form.countryId" class="text-muted small mb-2">
+                <span>{{ countrySearch }}</span>
+                <span v-if="form.stateId"> → {{ stateSearch }}</span>
+                <span v-if="form.cityId"> → {{ citySearch }}</span>
+              </div>
 
-                <div class="col-md-4">
-                  <select
-                    v-model="form.cityId"
-                    class="form-select"
-                    :disabled="!form.stateId"
-                    :class="{ 'is-invalid': errors.cityId }"
+              <!-- Country 검색 -->
+              <div class="position-relative mb-2">
+                <input
+                  type="text"
+                  v-model="countrySearch"
+                  :class="['form-control', { 'is-invalid': errors.countryId }]"
+                  placeholder="Search country..."
+                  @focus="showCountryDropdown = true"
+                  @blur="handleCountryBlur"
+                  autocomplete="off"
+                />
+                <ul v-if="showCountryDropdown && filteredCountries.length > 0" class="country-dropdown">
+                  <li
+                    v-for="c in filteredCountries"
+                    :key="c.id"
+                    @mousedown="selectCountry(c)"
                   >
-                    <option disabled value="">Select a city</option>
-                    <option v-for="c in cities" :key="c.id" :value="c.id">
+                    {{ c.name }}
+                  </li>
+                </ul>
+                <div v-if="errors.countryId" class="text-danger small mt-1">{{ errors.countryId }}</div>
+              </div>
+
+              <!-- State (Country 선택 후 노출) -->
+              <div v-if="form.countryId" class="position-relative mb-2">
+                <input
+                  type="text"
+                  v-model="stateSearch"
+                  :class="['form-control', { 'is-invalid': errors.stateId }]"
+                  placeholder="Search state... (optional)"
+                  @focus="showStateDropdown = true"
+                  @blur="handleStateBlur"
+                  autocomplete="off"
+                />
+                <ul v-if="showStateDropdown && filteredStates.length > 0" class="country-dropdown">
+                  <li
+                    v-for="s in filteredStates"
+                    :key="s.id"
+                    @mousedown="selectState(s)"
+                  >
+                    {{ s.name }}
+                  </li>
+                </ul>
+                <div v-if="errors.stateId" class="text-danger small mt-1">{{ errors.stateId }}</div>
+              </div>
+
+              <!-- City (State 선택 후 노출) -->
+              <div v-if="form.stateId">
+                <div v-if="cities.length === 0" class="text-muted small fst-italic ps-1">
+                  No cities available for this state.
+                </div>
+                <div v-else class="position-relative">
+                  <input
+                    type="text"
+                    v-model="citySearch"
+                    :class="['form-control', { 'is-invalid': errors.cityId }]"
+                    placeholder="Search city... (optional)"
+                    @focus="showCityDropdown = true"
+                    @blur="handleCityBlur"
+                    autocomplete="off"
+                  />
+                  <ul v-if="showCityDropdown && filteredCities.length > 0" class="country-dropdown">
+                    <li
+                      v-for="c in filteredCities"
+                      :key="c.id"
+                      @mousedown="selectCity(c)"
+                    >
                       {{ c.name }}
-                    </option>
-                  </select>
-                  <div v-if="errors.city" class="text-danger small mt-1">
-                    {{ errors.cityId }}
-                  </div>
+                    </li>
+                  </ul>
+                  <div v-if="errors.cityId" class="text-danger small mt-1">{{ errors.cityId }}</div>
                 </div>
               </div>
             </div>
@@ -155,6 +185,13 @@
               <div v-if="errors.imageFile" class="text-danger small mt-1">
                 {{ errors.imageFile }}
               </div>
+              <div v-if="imagePreviewUrl" class="mt-2">
+                <div class="position-relative d-inline-block">
+                  <img :src="imagePreviewUrl" alt="Preview" class="image-preview" />
+                  <button type="button" class="btn-remove-image" @click="removeImage">✕</button>
+                </div>
+                <div class="text-muted small mt-1">{{ form.imageFile?.name }} · {{ (form.imageFile?.size / 1024).toFixed(1) }} KB</div>
+              </div>
             </div>
 
             <!-- Description -->
@@ -171,8 +208,10 @@
                 rows="4"
                 placeholder="Please describe the scam in detail"
               ></textarea>
-              <div v-if="errors.description" class="text-danger small mt-1">
-                {{ errors.description }}
+              <div class="d-flex justify-content-between mt-1">
+                <div v-if="errors.description" class="text-danger small">{{ errors.description }}</div>
+                <div v-else></div>
+                <small class="text-muted">{{ form.description.length }} / 500</small>
               </div>
             </div>
 
@@ -198,7 +237,7 @@
 
 <script setup>
 import { useAuthStore } from '@/stores/auth';
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import apiClient from '@/api/apiClient';
 
@@ -208,7 +247,8 @@ const isLoggedIn = () => !!authStore.accessToken;
 const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
 
-const fileInput = ref(null);
+const fileInput = ref(null)
+const imagePreviewUrl = ref(null);
 
 const scamActions = ref([
   { id: 1, name: "Pickpocketing" },
@@ -233,6 +273,99 @@ const scamContexts = ref([
 const countries = ref([])
 const states = ref([])
 const cities = ref([])
+
+const countrySearch = ref('')
+const stateSearch = ref('')
+const citySearch = ref('')
+const showCountryDropdown = ref(false)
+const showStateDropdown = ref(false)
+const showCityDropdown = ref(false)
+
+const filteredCountries = computed(() => {
+  if (!countrySearch.value) return countries.value
+  return countries.value.filter(c =>
+    c.name.toLowerCase().includes(countrySearch.value.toLowerCase())
+  )
+})
+
+const filteredStates = computed(() => {
+  if (!stateSearch.value) return states.value
+  return states.value.filter(s =>
+    s.name.toLowerCase().includes(stateSearch.value.toLowerCase())
+  )
+})
+
+const filteredCities = computed(() => {
+  if (!citySearch.value) return cities.value
+  return cities.value.filter(c =>
+    c.name.toLowerCase().includes(citySearch.value.toLowerCase())
+  )
+})
+
+const selectCountry = (country) => {
+  form.countryId = country.id
+  countrySearch.value = country.name
+  showCountryDropdown.value = false
+  form.stateId = ''
+  form.cityId = ''
+  stateSearch.value = ''
+  citySearch.value = ''
+  states.value = []
+  cities.value = []
+  loadStates()
+}
+
+const selectState = (state) => {
+  form.stateId = state.id
+  stateSearch.value = state.name
+  showStateDropdown.value = false
+  form.cityId = ''
+  citySearch.value = ''
+  cities.value = []
+  loadCities()
+}
+
+const selectCity = (city) => {
+  form.cityId = city.id
+  citySearch.value = city.name
+  showCityDropdown.value = false
+}
+
+const handleCountryBlur = () => {
+  showCountryDropdown.value = false
+  const matched = countries.value.find(c => c.name === countrySearch.value)
+  if (!matched) {
+    countrySearch.value = ''
+    form.countryId = ''
+    form.stateId = ''
+    form.cityId = ''
+    stateSearch.value = ''
+    citySearch.value = ''
+    states.value = []
+    cities.value = []
+  }
+}
+
+const handleStateBlur = () => {
+  showStateDropdown.value = false
+  const matched = states.value.find(s => s.name === stateSearch.value)
+  if (!matched) {
+    stateSearch.value = ''
+    form.stateId = ''
+    form.cityId = ''
+    citySearch.value = ''
+    cities.value = []
+  }
+}
+
+const handleCityBlur = () => {
+  showCityDropdown.value = false
+  const matched = cities.value.find(c => c.name === citySearch.value)
+  if (!matched) {
+    citySearch.value = ''
+    form.cityId = ''
+  }
+}
 
 const form = reactive({
   title: '',
@@ -301,6 +434,15 @@ const handleFileChange = (event) => {
 
   form.imageFile = file;
   errors.imageFile = '';
+  if (imagePreviewUrl.value) URL.revokeObjectURL(imagePreviewUrl.value);
+  imagePreviewUrl.value = URL.createObjectURL(file);
+};
+
+const removeImage = () => {
+  form.imageFile = null;
+  if (imagePreviewUrl.value) URL.revokeObjectURL(imagePreviewUrl.value);
+  imagePreviewUrl.value = null;
+  if (fileInput.value) fileInput.value.value = '';
 };
 
 const extractJsonFromForm = () => {
@@ -331,15 +473,8 @@ const checkForm = () => {
     isValid = false;
   } else errors.countryId = '';
 
-  if (!form.stateId) {
-    errors.stateId = 'Please select a state.';
-    isValid = false;
-  } else errors.stateId = '';
-
-  if (!form.cityId) {
-    errors.cityId = 'Please select a city.';
-    isValid = false;
-  } 
+  errors.stateId = '';
+  errors.cityId = '';
 
   if (!form.description.trim()) {
     errors.description = 'Please provide a description.';
@@ -354,15 +489,20 @@ const resetForm = () => {
   form.title = '';
   form.scamActionId = '';
   form.scamContextId = '';
-  form.countryId = '';  
-  form.stateId = '';    
-  form.cityId = '';    
+  form.countryId = '';
+  form.stateId = '';
+  form.cityId = '';
   form.description = '';
   form.imageFile = null;
+  countrySearch.value = '';
+  stateSearch.value = '';
+  citySearch.value = '';
+  states.value = [];
+  cities.value = [];
 
-  if (fileInput.value) {
-    fileInput.value.value = '';
-  }
+  if (fileInput.value) fileInput.value.value = '';
+  if (imagePreviewUrl.value) URL.revokeObjectURL(imagePreviewUrl.value);
+  imagePreviewUrl.value = null;
 
   Object.keys(errors).forEach((key) => (errors[key] = ''));
 };
@@ -437,5 +577,66 @@ onMounted(() => {
 <style scoped lang="scss">
 .modal-icon {
   font-size: 95%;
+}
+
+.image-preview-wrap {
+  display: inline-block;
+}
+
+.image-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  background: #f8f9fa;
+}
+
+.btn-remove-image {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #dc3545;
+  color: white;
+  border: none;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: #bb2d3b;
+  }
+}
+
+.country-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    padding: 8px 12px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #f0f4ff;
+    }
+  }
 }
 </style>

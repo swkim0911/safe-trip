@@ -56,8 +56,8 @@ Reddit의 여행 관련 커뮤니티(ex: r/travel, r/scams, r/solotravel, r/back
 - [x] 지역 드릴다운 (국가 → 주 → 도시)
 - [x] 리포트 상세 조회
 - [x] 사용자 직접 제보
-- [ ] Reddit ETL 파이프라인 (일일 자동화)
-- [ ] Risk Score 계산 및 표시
+- [x] Reddit ETL 파이프라인 (일일 자동화)
+- [x] Risk Score 계산 및 표시
 - [ ] 트렌드 집계 및 표시
 - [ ] 검색 연결
 - [ ] 모바일 반응형

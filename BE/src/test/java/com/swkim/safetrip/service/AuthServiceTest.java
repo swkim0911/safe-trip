@@ -1,11 +1,11 @@
 package com.swkim.safetrip.service;
 
-import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
+import com.swkim.safetrip.dto.response.AuthTokensResponse;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
-import com.swkim.safetrip.jwt.JwtProvider;
+import com.swkim.safetrip.security.jwt.JwtProvider;
 import com.swkim.safetrip.security.CustomUserDetails;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -73,7 +73,7 @@ class AuthServiceTest {
                 .build();
 
         // when
-        AuthTokensResponseDto authTokensResponseDto = authService.login(loginRequest);
+        AuthTokensResponse authTokensResponseDto = authService.login(loginRequest);
 
         // then
         AccessTokenResponse accessTokenResponse = authTokensResponseDto.accessTokenResponse();

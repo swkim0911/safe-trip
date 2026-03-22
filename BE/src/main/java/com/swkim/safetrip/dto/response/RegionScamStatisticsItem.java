@@ -1,6 +1,7 @@
 package com.swkim.safetrip.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.swkim.safetrip.entity.enums.RiskLevel;
 import lombok.Builder;
 
 @Builder
@@ -12,6 +13,7 @@ public record RegionScamStatisticsItem (
     Double lat,
     Double lng,
     Long scamCnt,
-    String iso2 // ISO2 country code (country가 아니면 null)
+    String iso2, // ISO2 country code (country가 아니면 null)
+    RiskLevel riskLevel
 ){}
 

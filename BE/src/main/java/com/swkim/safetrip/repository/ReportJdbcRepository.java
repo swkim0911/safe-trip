@@ -56,6 +56,7 @@ public class ReportJdbcRepository {
                 rs.getDouble("lat"),
                 rs.getDouble("lng"),
                 rs.getLong("scam_cnt"),
+                null,
                 null
                 ));
     }
@@ -67,6 +68,7 @@ public class ReportJdbcRepository {
                 rs.getDouble("lat"),
                 rs.getDouble("lng"),
                 rs.getLong("scam_cnt"),
+                null,
                 null
         ));
     }
@@ -78,6 +80,7 @@ public class ReportJdbcRepository {
                 rs.getDouble("lat"),
                 rs.getDouble("lng"),
                 rs.getLong("scam_cnt"),
+                null,
                 null
         ));
     }

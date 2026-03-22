@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: dev infra stop
+.PHONY: dev infra stop be fe stop-be stop-fe
 
 # 전체 기동: docker + BE + FE 병렬 실행 (Ctrl+C로 BE+FE 종료)
 dev:
@@ -9,11 +9,27 @@ dev:
 	(cd FE && npm run dev) & \
 	wait
 
-# docker 인프라만 기동 (BE는 IntelliJ, FE는 VSCode에서 따로 실행할 때)
+# BE만 기동
+be:
+	cd BE && ./gradlew bootRun
+
+# FE만 기동
+fe:
+	cd FE && npm run dev
+
+# docker 인프라만 기동
 infra:
 	docker compose -f docker-compose.dev.yml up -d
 
-# 전체 종료 (BE + FE 프로세스 + docker)
+# BE만 종료
+stop-be:
+	-pkill -f 'bootRun'
+
+# FE만 종료
+stop-fe:
+	-pkill -f 'vite'
+
+# 전체 종료 (BE + FE + docker)
 stop:
 	-pkill -f 'bootRun'
 	-pkill -f 'vite'

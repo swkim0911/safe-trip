@@ -1,11 +1,10 @@
-package com.swkim.safetrip.dto;
+package com.swkim.safetrip.dto.response;
 
-import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import lombok.Builder;
 import org.springframework.http.ResponseCookie;
 
 @Builder
-public record AuthTokensResponseDto (
+public record AuthTokensResponse(
 
     AccessTokenResponse accessTokenResponse,
 

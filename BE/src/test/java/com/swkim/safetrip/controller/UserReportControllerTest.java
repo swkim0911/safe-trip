@@ -9,7 +9,7 @@ import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.enums.Role;
 import com.swkim.safetrip.global.exception.custom.AccessTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.InvalidAccessTokenException;
-import com.swkim.safetrip.jwt.JwtProvider;
+import com.swkim.safetrip.security.jwt.JwtProvider;
 import com.swkim.safetrip.security.config.SecurityConfig;
 import com.swkim.safetrip.service.UserReportService;
 import com.swkim.safetrip.service.UserService;

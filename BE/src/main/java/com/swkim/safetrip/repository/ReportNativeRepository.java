@@ -264,7 +264,8 @@ public class ReportNativeRepository {
                                 ((Number) row[2]).doubleValue(),
                                 ((Number) row[3]).doubleValue(),
                                 ((Number) row[5]).longValue(),
-                                (String) row[4]
+                                (String) row[4],
+                                null
                         );
                     } else {
                         return new RegionScamStatisticsItem(
@@ -273,6 +274,7 @@ public class ReportNativeRepository {
                                 ((Number) row[2]).doubleValue(),
                                 ((Number) row[3]).doubleValue(),
                                 ((Number) row[4]).longValue(),
+                                null,
                                 null
                         );
                     }

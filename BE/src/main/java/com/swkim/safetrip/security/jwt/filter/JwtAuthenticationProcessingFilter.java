@@ -1,11 +1,11 @@
-package com.swkim.safetrip.jwt.filter;
+package com.swkim.safetrip.security.jwt.filter;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.global.exception.custom.AccessTokenMissingException;
-import com.swkim.safetrip.jwt.JwtProvider;
 import com.swkim.safetrip.security.CustomUserDetails;
 import com.swkim.safetrip.security.ProtectedEndpoint;
+import com.swkim.safetrip.security.jwt.JwtProvider;
 import com.swkim.safetrip.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

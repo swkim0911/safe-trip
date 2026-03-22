@@ -1,13 +1,13 @@
 package com.swkim.safetrip.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swkim.safetrip.dto.AuthTokensResponseDto;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
+import com.swkim.safetrip.dto.response.AuthTokensResponse;
 import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenExpiredException;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenMissingException;
-import com.swkim.safetrip.jwt.JwtProvider;
+import com.swkim.safetrip.security.jwt.JwtProvider;
 import com.swkim.safetrip.security.config.SecurityConfig;
 import com.swkim.safetrip.service.AuthService;
 import com.swkim.safetrip.service.UserService;
@@ -71,7 +71,7 @@ class AuthControllerTest {
                 .accessToken(accessToken)
                 .build();
 
-        AuthTokensResponseDto authTokensResponseDto = AuthTokensResponseDto.builder()
+        AuthTokensResponse authTokensResponseDto = AuthTokensResponse.builder()
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(ResponseCookie.from("refreshToken", refreshToken).build())
                 .build();
@@ -193,7 +193,7 @@ class AuthControllerTest {
                 .accessToken(reIssuedAccessToken)
                 .build();
 
-        AuthTokensResponseDto tokensResponseDto = AuthTokensResponseDto.builder()
+        AuthTokensResponse tokensResponseDto = AuthTokensResponse.builder()
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(refreshTokenCookie)
                 .build();

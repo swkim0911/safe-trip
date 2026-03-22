@@ -13,66 +13,84 @@
           :key="marker.id"
           :lat-lng="[marker.lat, marker.lng]"
           :radius="getRadius(marker.scamCnt)"
-          :color="getColor(marker.scamCnt)"
+          :color="getColor(marker.riskLevel)"
           :fill-opacity="0.5"
           :weight="1"
+          @click="mapStore.selectMarker(marker, getGroupByZoom(zoom))"
         >
           <l-tooltip :options="{ direction: 'top', offset: [0, -5] }">
             <div class="tooltip-card">
-              <strong>{{ marker.scamCnt }}</strong> reports
+              <div class="tooltip-name">{{ marker.name }}</div>
+              <div class="tooltip-bottom">
+                <strong>{{ marker.scamCnt }}</strong> reports
+                <span class="risk-badge" :class="marker.riskLevel?.toLowerCase()">{{ marker.riskLevel }}</span>
+              </div>
             </div>
           </l-tooltip>
         </l-circle-marker>
         <l-control-zoom position="bottomright"></l-control-zoom>
+        <l-control position="bottomleft">
+          <div class="map-legend">
+            <div class="legend-title">Scam Activity</div>
+            <div class="legend-item"><span class="dot high"></span> HIGH</div>
+            <div class="legend-item"><span class="dot medium"></span> MEDIUM</div>
+            <div class="legend-item"><span class="dot low"></span> LOW</div>
+          </div>
+        </l-control>
       </l-map>
     </div>  
-    <div v-if="!isLoggedIn" >
-      <button 
-        type="button" 
-        class="btn btn-primary position-fixed top-0 end-0 mt-4 me-4 shadow-sm login-btn"
-        @click="openAuthModal"
-      >
-        <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
-        LOGIN
-      </button>
-    </div>
-    <div v-else class="dropdown">
-      <button 
-        type="button" 
-        class="btn btn-danger position-fixed top-0 start-50 translate-middle-x mt-4 shadow-sm report-btn px-3" 
-        @click="openReportFormModal"
+    <div class="position-fixed top-0 end-0 mt-4 me-4 d-flex gap-2" style="z-index: 1000;">
+      <div v-if="!isLoggedIn">
+        <button
+          type="button"
+          class="btn btn-primary shadow-sm login-btn"
+          @click="openAuthModal"
+        >
+          <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
+          LOGIN
+        </button>
+      </div>
+      <template v-else>
+        <button
+          type="button"
+          class="btn btn-primary shadow-sm report-btn"
+          @click="openReportFormModal"
         >
           <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
           Report
-      </button>
-      <ReportFormModal/>
-      <button
-        class="btn btn-primary dropdown-toggle position-fixed top-0 end-0 mt-4 me-4 shadow-sm dropdown-btn"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-      >
-        <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />  
-        {{ nickname }}
-      </button>
-      <ul class="dropdown-menu">
-        <li>
-          <button class="dropdown-item" @click="logout">
-            <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="icon"/>
-            Logout
+        </button>
+        <div class="dropdown">
+          <button
+            class="btn btn-primary dropdown-toggle shadow-sm dropdown-btn"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
+            {{ nickname }}
           </button>
-        </li>
-      </ul>   
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <button class="dropdown-item" @click="logout">
+                <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="icon"/>
+                Logout
+              </button>
+            </li>
+          </ul>
+        </div>
+      </template>
     </div>
+    <ReportFormModal/>
     <AuthFormModal/>
   </div>
 </template>
 
 <script setup>
 import { useAuthStore } from '@/stores/auth';
+import { useMapStore } from '@/stores/map';
 
 import { ref, onMounted, watch, computed } from 'vue';
-import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LMarker } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LControl } from "@vue-leaflet/vue-leaflet";
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import ReportFormModal from './ReportFormModal.vue';
 import AuthFormModal from './AuthFormModal.vue';
@@ -83,6 +101,7 @@ const { show: openAuthModal } = useBootstrapModal('#authFormModal');
 const { show: openReportFormModal } = useBootstrapModal('#reportFormModal');
 
 const authStore = useAuthStore();
+const mapStore = useMapStore();
 const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
 const nickname = computed(() => authStore.user?.nickname || 'user');
 
@@ -91,7 +110,7 @@ const center = ref({ "lat": 42.8333, "lng": 12.8333 });
 
 const markers = ref([]);
 
-// maxCnt / minCnt를 computed로 미리 구해두기
+// maxCnt / minCnt를 computed로 미리 구해두기 (반경 계산에만 사용)
 const maxCnt = computed(() => Math.max(...markers.value.map(m => m.scamCnt)))
 const minCnt = computed(() => Math.min(...markers.value.map(m => m.scamCnt)))
 
@@ -135,13 +154,11 @@ const getRadius = (scamCnt) => {
   return radius
 }
 
-const getColor = (scamCnt) => {
-  if (!maxCnt.value) return "hsl(120, 90%, 50%)"
-
-  const ratio = Math.sqrt(scamCnt / maxCnt.value) // √ 스케일 적용
-  const hue = (1 - ratio) * 120
-
-  return `hsl(${hue}, ${60 + ratio*40}%, ${60 - ratio*20}%)`
+const getColor = (riskLevel) => {
+  if (riskLevel === 'HIGH') return '#e74c3c'
+  if (riskLevel === 'MEDIUM') return '#f39c12'
+  if (riskLevel === 'LOW') return '#2ecc71'
+  return '#95a5a6'
 }
 
 const loadMapSummary = async () => {
@@ -205,48 +222,108 @@ onMounted(() => {
     margin-right: 1px;
   }
 
-  .login-btn {
-    z-index: 1000; /* 다른 요소보다 위에 뜨도록 */
+  .login-btn, .report-btn, .dropdown-btn {
     border: none;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 18px;
-  }
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 
-  .report-btn{
-    z-index: 1000; /* 다른 요소보다 위에 뜨도록 */
-    border: none;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 19px;
-  }
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35) !important;
+    }
 
-  .dropdown-btn{
-    z-index: 1000; /* 다른 요소보다 위에 뜨도록 */
-    border: none;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 19px;
+    &:active {
+      transform: translateY(0);
+    }
   }
 
   .dropdown-menu {
-  background-color: white;
-}
-  .dropdown-item {
-    padding: 10px 16px;
-    font-size: 16px;
-    color: black;
-    font-weight: 500;
-    border-bottom: 1px solid black;
-    transition: background-color 0.15s ease-in-out;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 4px;
   }
 
-.dropdown-item:last-child {
-  border-bottom: none;
-}
+  .dropdown-item {
+    padding: 10px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: background-color 0.15s ease;
+  }
 
 .dropdown-item:hover {
   background-color: #f1f3f5;
   color: #000;
+}
+
+.tooltip-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 100px;
+}
+
+.tooltip-name {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.tooltip-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.map-legend {
+  background: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.legend-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+
+  &.high   { background-color: #e74c3c; }
+  &.medium { background-color: #f39c12; }
+  &.low    { background-color: #2ecc71; }
+}
+
+.risk-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: white;
+
+  &.high   { background-color: #e74c3c; }
+  &.medium { background-color: #f39c12; }
+  &.low    { background-color: #2ecc71; }
 }
 </style>

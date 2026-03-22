@@ -17,6 +17,15 @@
 
       <div class="sidebar-body" @scroll="onSidebarScroll" ref="sidebarRef">
         <template v-if="viewType === 'country'">
+          <div v-if="isLoadingCountry && sidebarCountries.length === 0" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <div v-else-if="!isLoadingCountry && sidebarCountries.length === 0" class="empty-state">
+            <font-awesome-icon :icon="['fas', 'globe']" class="empty-icon" />
+            <p>No countries found.</p>
+          </div>
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
@@ -30,9 +39,12 @@
                 </span>
                 <div class="fw-bold">{{ country.name }}</div>
               </div>
-              <span class="badge text-bg-primary rounded-pill">
-                {{ country.scamCnt }}
-              </span>
+              <div class="d-flex align-items-center gap-1">
+                <span v-if="country.riskLevel" class="badge risk-badge" :class="country.riskLevel.toLowerCase()">
+                  {{ country.riskLevel }}
+                </span>
+                <span class="badge text-bg-primary rounded-pill">{{ country.scamCnt }}</span>
+              </div>
             </li>
           </ul>
         </template>
@@ -67,6 +79,15 @@
 
           <!-- 하단: State 목록 -->
           <div>
+            <div v-if="isLoadingState && sidebarStates.length === 0" class="loading-spinner">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <div v-else-if="!isLoadingState && sidebarStates.length === 0" class="empty-state">
+              <font-awesome-icon :icon="['fas', 'map']" class="empty-icon" />
+              <p>No states found.</p>
+            </div>
             <ul class="list-group">
               <li
                 class="list-group-item d-flex justify-content-between align-items-start"
@@ -77,7 +98,12 @@
                 <div class="ms-2 me-auto">
                   <div class="fw-bold">{{ state.name }}</div>
                 </div>
-                <span class="badge text-bg-primary rounded-pill">{{ state.scamCnt }}</span>
+                <div class="d-flex align-items-center gap-1">
+                  <span v-if="state.riskLevel" class="badge risk-badge" :class="state.riskLevel.toLowerCase()">
+                    {{ state.riskLevel }}
+                  </span>
+                  <span class="badge text-bg-primary rounded-pill">{{ state.scamCnt }}</span>
+                </div>
               </li>
             </ul>
           </div>
@@ -112,6 +138,15 @@
             </button>
           </div>
 
+          <div v-if="isLoadingCity && sidebarCities.length === 0" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <div v-else-if="!isLoadingCity && sidebarCities.length === 0" class="empty-state">
+            <font-awesome-icon :icon="['fas', 'city']" class="empty-icon" />
+            <p>No cities found.</p>
+          </div>
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
@@ -143,6 +178,15 @@
               <span v-else-if="selectedState.id">Reports from {{ selectedState.name }}</span>
               <span v-else>Reports from {{ selectedCountry.name }}</span>
             </h6>
+          </div>
+          <div v-if="isLoadingReport && sidebarReports.length === 0" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <div v-else-if="!isLoadingReport && sidebarReports.length === 0" class="empty-state">
+            <font-awesome-icon :icon="['fas', 'file-circle-xmark']" class="empty-icon" />
+            <p>No reports found.</p>
           </div>
           <ul class="list-group">
             <li
@@ -191,13 +235,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, watch } from 'vue';
+import { useMapStore } from '@/stores/map';
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import ReportDetailModal from './ReportDetailModal.vue'
 import apiClient from '@/api/apiClient';
 import dayjs from 'dayjs'
 
 const { show } = useBootstrapModal('#reportDetailModal');
+
+const mapStore = useMapStore();
+
+watch(() => mapStore.selectedMarker, (marker) => {
+  if (!marker) return;
+  isOpen.value = true;
+  const { id, name, scamCnt, groupBy } = marker;
+  if (groupBy === 'country') {
+    showStatesByCountry(id, name, scamCnt);
+  } else if (groupBy === 'state') {
+    showCitiesByState(id, name, 'click', scamCnt);
+  } else if (groupBy === 'city') {
+    showReportsByCity(id, name);
+  }
+});
 
 const isOpen = ref(false);
 const searchText = ref('');
@@ -566,16 +626,15 @@ const loadStatesWithStatistics = async (countryId, countryName, mode = 'click') 
  * @param {string} stateName - 주(State) 이름
  * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
  */
-const showCitiesByState = async (stateId, stateName, mode = 'click') => {
+const showCitiesByState = async (stateId, stateName, mode = 'click', fallbackScamCnt = null) => {
   if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
 
   isLoadingCity.value = true;
 
   selectedState.id = stateId;
   selectedState.name = stateName;
-  // State의 scamCnt는 sidebarStates에서 찾아서 설정
   const state = sidebarStates.value.find(s => s.id === stateId);
-  selectedState.scamCnt = state?.scamCnt || 0;
+  selectedState.scamCnt = state?.scamCnt ?? fallbackScamCnt ?? 0;
 
   if (mode === 'click') {
     cityPage.value = 0;
@@ -711,7 +770,7 @@ $sidebar-width: 560px;
   position: fixed;
   display: flex;
   height: 100vh;
-  z-index: 1000;
+  z-index: 1001;
 }
 
 /* 사이드바 */
@@ -722,7 +781,8 @@ $sidebar-width: 560px;
   left: -$sidebar-width; /* 기본적으로 숨김 */
   width: $sidebar-width;
   height: 100vh;
-  background-color: #e0e0e0bd;
+  background-color: #ffffff;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
   transition: left 0.3s ease;
   padding: 20px;
   flex-direction: column;
@@ -744,27 +804,27 @@ $sidebar-width: 560px;
   left: 24px;
   top: 39%;
   transform: translateY(-50%);
-  color: #0d6efd;
+  color: #3B82F6;
   z-index: 10;
   font-size: 1rem;
 }
 
 .search-input {
-  background: linear-gradient(135deg, #ffffff, #f2f6ff);
+  background: #ffffff;
   border-radius: 50px;
-  border: 1px solid rgba(13, 110, 253, 0.25);
+  border: 1px solid #dee2e6;
   padding-left: 50px;
   font-size: 1rem;
-  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 
   &::placeholder {
-    color: #8aa0c2;
+    color: #adb5bd;
   }
 
   &:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 12px 26px rgba(13, 110, 253, 0.15);
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 }
 
@@ -782,39 +842,27 @@ $sidebar-width: 560px;
 
 .list-group-item {
   position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, #ffffff, #f2f6ff);
+  background: #ffffff;
   color: black;
-  border-radius: 12px; /* 모서리를 둥글게 */
-  padding: 14px; /* 내부 여백 */
-  margin-bottom: 14px; /* 아래 여백 */
-  margin-top: 14px;
-  border: 1px solid rgba(13, 110, 253, 0.15);
-  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.08); /* 그림자 효과 */
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
+  margin-top: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   cursor: pointer;
-  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-  isolation: isolate;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: -30% auto auto -30%;
-    width: 110px;
-    height: 110px;
-    background: radial-gradient(circle, rgba(13, 110, 253, 0.15), transparent 70%);
-    z-index: -1;
-  }
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
-    background: linear-gradient(135deg, #eef3ff, #ffffff);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 26px rgba(13, 110, 253, 0.15);
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
   &:active {
-    background: linear-gradient(135deg, #e0e9ff, #f7f9ff);
+    background: #f1f3f5;
     transform: translateY(0);
-    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   }
 }
 
@@ -822,8 +870,8 @@ $sidebar-width: 560px;
   position: relative;
   overflow: hidden;
   border-radius: 12px !important;
-  background: linear-gradient(135deg, #0d6efd, #6591ff);
-  box-shadow: 0 8px 18px rgba(13, 110, 253, 0.2);
+  background: linear-gradient(135deg, #3B82F6, #60A5FA);
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.2);
   transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 
   &::before {
@@ -839,8 +887,8 @@ $sidebar-width: 560px;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 26px rgba(13, 110, 253, 0.3);
-    background: linear-gradient(135deg, #2b7bff, #0c5ad6);
+    box-shadow: 0 12px 26px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #2563EB, #3B82F6);
   }
 
   &:hover::before {
@@ -849,7 +897,43 @@ $sidebar-width: 560px;
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 6px 14px rgba(13, 110, 253, 0.35);
+    box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
+  }
+}
+
+.risk-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+
+  &.high   { background-color: #e74c3c; }
+  &.medium { background-color: #f39c12; }
+  &.low    { background-color: #2ecc71; }
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 0;
+  color: #adb5bd;
+
+  .empty-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0;
   }
 }
 
@@ -859,12 +943,25 @@ $sidebar-width: 560px;
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  background-color: #0d6efd;
+  background-color: #3B82F6;
   color: white;
   border: none;
-  padding: 10px 15px;
-  font-size: 18px;
+  padding: 14px 10px;
+  font-size: 15px;
   cursor: pointer;
-  transition: all 0.3s;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 3px 0 12px rgba(59, 130, 246, 0.35);
+  transition: left 0.3s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: #2563EB;
+    box-shadow: 4px 0 18px rgba(59, 130, 246, 0.5);
+    transform: translateY(-50%) translateX(2px);
+  }
+
+  &:active {
+    background-color: #1D4ED8;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 </style>

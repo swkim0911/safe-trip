@@ -1,6 +1,6 @@
 package com.swkim.safetrip.controller;
 
-import com.swkim.safetrip.dto.AuthTokensResponseDto;
+import com.swkim.safetrip.dto.response.AuthTokensResponse;
 import com.swkim.safetrip.dto.request.UserLoginRequest;
 import com.swkim.safetrip.dto.response.AccessTokenResponse;
 import com.swkim.safetrip.global.exception.custom.RefreshTokenMissingException;
@@ -28,7 +28,7 @@ public class AuthController {
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 인증을 시도하고, 성공 시 JWT 토큰을 반환한다.")
     @PostMapping("/login")
     public ApiResult<AccessTokenResponse> login(@RequestBody @Valid UserLoginRequest loginRequest, HttpServletResponse httpServletResponse) {
-        AuthTokensResponseDto authTokensResponseDto = authService.login(loginRequest);
+        AuthTokensResponse authTokensResponseDto = authService.login(loginRequest);
         httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.refreshTokenCookie().toString());
 
         return ApiResult.of(HttpStatus.OK.value(), "Login successful", authTokensResponseDto.accessTokenResponse());
@@ -45,7 +45,7 @@ public class AuthController {
         if (refreshToken == null)  return ResponseEntity.noContent().build();
         if (refreshToken.isBlank()) throw new RefreshTokenMissingException();
 
-        AuthTokensResponseDto authTokensResponseDto = authService.reIssueAccessToken(refreshToken);
+        AuthTokensResponse authTokensResponseDto = authService.reIssueAccessToken(refreshToken);
         httpServletResponse.addHeader("Set-Cookie", authTokensResponseDto.refreshTokenCookie().toString());
 
         return ResponseEntity.ok(ApiResult.of(HttpStatus.OK.value(), "Access Token is reissued under RTR", authTokensResponseDto.accessTokenResponse()));
