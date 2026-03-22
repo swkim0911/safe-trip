@@ -7,6 +7,7 @@ import com.swkim.safetrip.dto.response.world.StatesResponse.StateDto;
 import com.swkim.safetrip.entity.enums.RiskLevel;
 import com.swkim.safetrip.entity.world.State;
 import com.swkim.safetrip.global.exception.custom.StateNotFoundException;
+import com.swkim.safetrip.repository.ReportJdbcRepository;
 import com.swkim.safetrip.repository.ReportNativeRepository;
 import com.swkim.safetrip.repository.StateRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class StateService{
 
     private final StateRepository stateRepository;
     private final ReportNativeRepository reportNativeRepository;
+    private final ReportJdbcRepository reportJdbcRepository;
     private final RiskLevelService riskLevelService;
 
     public State findStateByIdWithCountry(Long id) {
@@ -37,6 +39,10 @@ public class StateService{
                 .toList();
 
         return new StatesResponse(states);
+    }
+
+    public RegionScamStatisticsItem getStateInfo(Long stateId) {
+        return reportJdbcRepository.findStateInfo(stateId);
     }
 
     @Transactional(readOnly = true)
