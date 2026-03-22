@@ -957,9 +957,22 @@ $sidebar-width: 560px;
   background-color: #3B82F6;
   color: white;
   border: none;
-  padding: 10px 15px;
-  font-size: 18px;
+  padding: 14px 10px;
+  font-size: 15px;
   cursor: pointer;
-  transition: all 0.3s;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 3px 0 12px rgba(59, 130, 246, 0.35);
+  transition: left 0.3s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: #2563EB;
+    box-shadow: 4px 0 18px rgba(59, 130, 246, 0.5);
+    transform: translateY(-50%) translateX(2px);
+  }
+
+  &:active {
+    background-color: #1D4ED8;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 </style>
