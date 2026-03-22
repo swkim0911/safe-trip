@@ -810,21 +810,21 @@ $sidebar-width: 560px;
 }
 
 .search-input {
-  background: linear-gradient(135deg, #ffffff, #f2f6ff);
+  background: #ffffff;
   border-radius: 50px;
-  border: 1px solid rgba(59, 130, 246, 0.25);
+  border: 1px solid #dee2e6;
   padding-left: 50px;
   font-size: 1rem;
-  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 
   &::placeholder {
-    color: #8aa0c2;
+    color: #adb5bd;
   }
 
   &:focus {
     border-color: #3B82F6;
-    box-shadow: 0 12px 26px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 }
 
@@ -842,38 +842,27 @@ $sidebar-width: 560px;
 
 .list-group-item {
   position: relative;
-  background: linear-gradient(135deg, #ffffff, #f2f6ff);
+  background: #ffffff;
   color: black;
-  border-radius: 12px; /* 모서리를 둥글게 */
-  padding: 14px; /* 내부 여백 */
-  margin-bottom: 14px; /* 아래 여백 */
-  margin-top: 14px;
-  border: 1px solid rgba(59, 130, 246, 0.15);
-  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.08); /* 그림자 효과 */
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
+  margin-top: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   cursor: pointer;
-  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-  isolation: isolate;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: -30% auto auto -30%;
-    width: 110px;
-    height: 110px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent 70%);
-    z-index: -1;
-  }
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
-    background: linear-gradient(135deg, #eef3ff, #ffffff);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 26px rgba(59, 130, 246, 0.15);
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
   &:active {
-    background: linear-gradient(135deg, #e0e9ff, #f7f9ff);
+    background: #f1f3f5;
     transform: translateY(0);
-    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   }
 }
 
