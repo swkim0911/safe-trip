@@ -22,6 +22,10 @@
               <span class="visually-hidden">Loading...</span>
             </div>
           </div>
+          <div v-else-if="!isLoadingCountry && sidebarCountries.length === 0" class="empty-state">
+            <font-awesome-icon :icon="['fas', 'globe']" class="empty-icon" />
+            <p>No countries found.</p>
+          </div>
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
@@ -80,6 +84,10 @@
                 <span class="visually-hidden">Loading...</span>
               </div>
             </div>
+            <div v-else-if="!isLoadingState && sidebarStates.length === 0" class="empty-state">
+              <font-awesome-icon :icon="['fas', 'map']" class="empty-icon" />
+              <p>No states found.</p>
+            </div>
             <ul class="list-group">
               <li
                 class="list-group-item d-flex justify-content-between align-items-start"
@@ -135,6 +143,10 @@
               <span class="visually-hidden">Loading...</span>
             </div>
           </div>
+          <div v-else-if="!isLoadingCity && sidebarCities.length === 0" class="empty-state">
+            <font-awesome-icon :icon="['fas', 'city']" class="empty-icon" />
+            <p>No cities found.</p>
+          </div>
           <ul class="list-group">
             <li
               class="list-group-item d-flex justify-content-between align-items-start"
@@ -171,6 +183,10 @@
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
+          </div>
+          <div v-else-if="!isLoadingReport && sidebarReports.length === 0" class="empty-state">
+            <font-awesome-icon :icon="['fas', 'file-circle-xmark']" class="empty-icon" />
+            <p>No reports found.</p>
           </div>
           <ul class="list-group">
             <li
@@ -912,6 +928,24 @@ $sidebar-width: 560px;
   display: flex;
   justify-content: center;
   padding: 40px 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 0;
+  color: #adb5bd;
+
+  .empty-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0;
+  }
 }
 
 /* 토글 버튼 (사이드바 여닫기 버튼) */
