@@ -3,6 +3,8 @@ package com.swkim.safetrip.controller;
 import com.swkim.safetrip.dto.response.RegionScamStatisticsItem;
 import com.swkim.safetrip.dto.response.RegionScamStatisticsResponse;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
+import com.swkim.safetrip.dto.response.ScamActionStatItem;
+import com.swkim.safetrip.dto.response.SearchResultItem;
 import com.swkim.safetrip.dto.response.world.CitiesResponse;
 import com.swkim.safetrip.dto.response.world.CountriesResponse;
 import com.swkim.safetrip.dto.response.world.StatesResponse;
@@ -10,8 +12,10 @@ import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.service.CityService;
 import com.swkim.safetrip.service.CountryService;
 import com.swkim.safetrip.service.ReportService;
+import com.swkim.safetrip.service.SearchService;
 import com.swkim.safetrip.service.StateService;
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -26,6 +30,7 @@ public class WorldController {
     private final CountryService countryService;
     private final StateService stateService;
     private final CityService cityService;
+    private final SearchService searchService;
     private final ReportService reportService;
 
     @Operation(
@@ -58,8 +63,20 @@ public class WorldController {
         return ApiResult.of(HttpStatus.OK.value(), "All cities retrieved successfully", allCities);
     }
 
+    @Operation(summary = "국가 기본 정보 조회", description = "국가 ID로 이름과 scam 건수를 조회합니다.")
+    @GetMapping("/countries/{countryId}/info")
+    public ApiResult<RegionScamStatisticsItem> getCountryInfo(@PathVariable Long countryId) {
+        return ApiResult.of(HttpStatus.OK.value(), "Country info", countryService.getCountryInfo(countryId));
+    }
+
+    @Operation(summary = "주 기본 정보 조회", description = "주 ID로 이름과 scam 건수를 조회합니다.")
+    @GetMapping("/states/{stateId}/info")
+    public ApiResult<RegionScamStatisticsItem> getStateInfo(@PathVariable Long stateId) {
+        return ApiResult.of(HttpStatus.OK.value(), "State info", stateService.getStateInfo(stateId));
+    }
+
     @Operation(
-        summary = "국가별 리포트 통계 조회", 
+        summary = "국가별 리포트 통계 조회",
         description = "각 국가별 리포트 개수 및 통계 정보를 조회합니다. " +
                      "향후 스캠 유형별 분포, 위험도 점수, 트렌드 등의 통계 정보가 추가될 수 있습니다."
     )
@@ -117,6 +134,56 @@ public class WorldController {
     public ApiResult<Slice<ReportSummaryItem>> getReportsByCity(@PathVariable Long cityId, Pageable pageable) {
         Slice<ReportSummaryItem> reports = cityService.getReportsByCity(cityId, pageable);
         return ApiResult.of(HttpStatus.OK.value(), "All report summaries in city", reports);
+    }
+
+    @Operation(
+            summary = "사기 유형별 건수 통계 조회",
+            description = "전체 리포트를 사기 유형(scam_action)별로 집계하여 건수 내림차순으로 반환합니다."
+    )
+    @GetMapping("/scam-actions/statistics")
+    public ApiResult<List<ScamActionStatItem>> getScamActionStatistics() {
+        List<ScamActionStatItem> stats = reportService.getScamActionStats();
+        return ApiResult.of(HttpStatus.OK.value(), "Scam action statistics", stats);
+    }
+
+    @Operation(
+            summary = "국가/주/도시 통합 검색",
+            description = "검색어로 국가, 주, 도시를 통합 검색합니다. 최대 10건 반환."
+    )
+    @GetMapping("/search")
+    public ApiResult<List<SearchResultItem>> search(@RequestParam String q) {
+        List<SearchResultItem> results = searchService.search(q);
+        return ApiResult.of(HttpStatus.OK.value(), "Search results", results);
+    }
+
+    @Operation(
+            summary = "사기 맥락별 건수 통계 조회",
+            description = "전체 리포트를 사기 맥락(scam_context)별로 집계하여 건수 내림차순으로 반환합니다."
+    )
+    @GetMapping("/scam-contexts/statistics")
+    public ApiResult<List<ScamActionStatItem>> getScamContextStatistics() {
+        List<ScamActionStatItem> stats = reportService.getScamContextStats();
+        return ApiResult.of(HttpStatus.OK.value(), "Scam context statistics", stats);
+    }
+
+    @Operation(
+            summary = "특정 국가의 사기 유형별 건수 통계 조회",
+            description = "선택한 국가의 리포트를 사기 유형(scam_action)별로 집계하여 건수 내림차순으로 반환합니다."
+    )
+    @GetMapping("/countries/{countryId}/scam-actions/statistics")
+    public ApiResult<List<ScamActionStatItem>> getScamActionStatsByCountry(@PathVariable Long countryId) {
+        List<ScamActionStatItem> stats = reportService.getScamActionStatsByCountry(countryId);
+        return ApiResult.of(HttpStatus.OK.value(), "Scam action statistics by country", stats);
+    }
+
+    @Operation(
+            summary = "특정 국가의 사기 맥락별 건수 통계 조회",
+            description = "선택한 국가의 리포트를 사기 맥락(scam_context)별로 집계하여 건수 내림차순으로 반환합니다."
+    )
+    @GetMapping("/countries/{countryId}/scam-contexts/statistics")
+    public ApiResult<List<ScamActionStatItem>> getScamContextStatsByCountry(@PathVariable Long countryId) {
+        List<ScamActionStatItem> stats = reportService.getScamContextStatsByCountry(countryId);
+        return ApiResult.of(HttpStatus.OK.value(), "Scam context statistics by country", stats);
     }
 
     @Operation(
