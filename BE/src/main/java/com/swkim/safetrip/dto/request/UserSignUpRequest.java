@@ -26,11 +26,7 @@ public record UserSignUpRequest (
     @NotBlank(message = "please enter your password.")
     String password,
 
-    @Size(min = 2, max = 15, message = "nickname must be between 2 and 15 characters.")
-    @Pattern(
-            regexp = "^[a-zA-Z0-9가-힣_-]+$",
-            message = "nickname can contain Korean, English letters, digits, _ and - only."
-    )
     @NotBlank(message = "please enter nickname.")
+    @Size(min = 2, max = 15, message = "nickname must be between 2 and 15 characters.")
     String nickname
 ){}

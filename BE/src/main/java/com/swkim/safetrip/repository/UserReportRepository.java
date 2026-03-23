@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,7 +33,20 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     join ur.country co
     join ur.state st
     join ur.city ci
-    where ur.id = :id
+    where ur.id = :id and ur.deletedAt is null
     """)
     Optional<UserReportDetailResponse> findReportDetailById(@Param("id") Long id);
+
+    @Query("""
+    select ur from UserReport ur
+    join fetch ur.scamAction
+    join fetch ur.scamContext
+    join fetch ur.country
+    left join fetch ur.state
+    left join fetch ur.city
+    left join fetch ur.images
+    where ur.user.email = :email and ur.deletedAt is null
+    order by ur.createdAt desc
+    """)
+    List<UserReport> findMyReports(@Param("email") String email);
 }

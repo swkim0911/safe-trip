@@ -4,6 +4,7 @@ import com.swkim.safetrip.entity.enums.Source;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class UserReport extends BaseReport{
     @OneToMany(mappedBy = "userReport", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Builder
     public UserReport(Source source, String title, String description) {
         this.source = source;
@@ -37,5 +41,18 @@ public class UserReport extends BaseReport{
     public void addImage(Image image){
         images.add(image);
         image.setUserReport(this);
+    }
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
     }
 }

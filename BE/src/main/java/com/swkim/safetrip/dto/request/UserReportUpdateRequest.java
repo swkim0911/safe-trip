@@ -2,10 +2,9 @@ package com.swkim.safetrip.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
 
-@Builder
-public record UserReportSaveRequest(
+public record UserReportUpdateRequest(
+
         @NotBlank(message = "Title must not be blank.")
         String title,
 
@@ -24,4 +23,4 @@ public record UserReportSaveRequest(
 
         @NotBlank(message = "Description must not be blank")
         String description
-){}
+) {}

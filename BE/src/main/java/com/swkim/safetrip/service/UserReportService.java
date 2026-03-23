@@ -1,12 +1,15 @@
 package com.swkim.safetrip.service;
 
 import com.swkim.safetrip.dto.request.UserReportSaveRequest;
+import com.swkim.safetrip.dto.request.UserReportUpdateRequest;
+import com.swkim.safetrip.dto.response.MyReportItem;
 import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.*;
 import com.swkim.safetrip.entity.world.City;
 import com.swkim.safetrip.entity.world.Country;
 import com.swkim.safetrip.entity.world.State;
 import com.swkim.safetrip.global.exception.custom.CityStateMismatchException;
+import com.swkim.safetrip.global.exception.custom.ForbiddenReportAccessException;
 import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.StateCountryMismatchException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
@@ -19,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -57,14 +61,20 @@ public class UserReportService {
 
         // 5. country, state, city 데이터 정합성 확인 후 set
         Country findCountry = countryService.findCountryById(userReportSaveRequest.countryId());
-        State findState = stateService.findStateByIdWithCountry(userReportSaveRequest.stateId());
 
-        if (!isStateOfCountry(findState, findCountry)) {
+        State findState = Optional.ofNullable(userReportSaveRequest.stateId())
+                .map(stateService::findStateByIdWithCountry)
+                .orElse(null);
+
+        if (findState != null && !isStateOfCountry(findState, findCountry)) {
             throw new StateCountryMismatchException();
         }
 
-        City findCity = cityService.findCityByIdWithState(userReportSaveRequest.cityId());
-        if (!isCityOfState(findCity, findState)) {
+        City findCity = Optional.ofNullable(userReportSaveRequest.cityId())
+                .map(cityService::findCityByIdWithState)
+                .orElse(null);
+
+        if (findCity != null && findState != null && !isCityOfState(findCity, findState)) {
             throw new CityStateMismatchException();
         }
         userReport.setCountry(findCountry);
@@ -106,6 +116,89 @@ public class UserReportService {
 
     private boolean isCityOfState(City findCity, State findState) {
         return Objects.equals(findCity.getState().getId(), findState.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyReportItem> getMyReports(String email) {
+        return userReportRepository.findMyReports(email).stream()
+                .map(ur -> new MyReportItem(
+                        ur.getId(),
+                        ur.getTitle(),
+                        ur.getScamAction().getId(),
+                        ur.getScamAction().getName(),
+                        ur.getScamContext().getId(),
+                        ur.getScamContext().getName(),
+                        ur.getCountry().getId(),
+                        ur.getCountry().getName(),
+                        ur.getState() != null ? ur.getState().getId() : null,
+                        ur.getState() != null ? ur.getState().getName() : null,
+                        ur.getCity() != null ? ur.getCity().getId() : null,
+                        ur.getCity() != null ? ur.getCity().getName() : null,
+                        ur.getContent(),
+                        ur.getCreatedAt(),
+                        ur.getImages().isEmpty() ? null : ur.getImages().get(0).getAccessURL()
+                ))
+                .toList();
+    }
+
+    @Transactional
+    public void updateUserReport(Long reportId, String email, UserReportUpdateRequest request, List<MultipartFile> images) {
+        UserReport report = userReportRepository.findById(reportId)
+                .filter(r -> !r.isDeleted())
+                .orElseThrow(ReportNotFoundException::new);
+
+        if (!email.equals(report.getUser().getEmail())) {
+            throw new ForbiddenReportAccessException();
+        }
+
+        report.update(request.title(), request.description());
+
+        ScamAction scamAction = scamService.findScamActionById(request.scamActionId());
+        report.setScamAction(scamAction);
+
+        ScamContext scamContext = scamService.findScamContextById(request.scamContextId());
+        report.setScamContext(scamContext);
+
+        Country country = countryService.findCountryById(request.countryId());
+        report.setCountry(country);
+
+        State state = Optional.ofNullable(request.stateId())
+                .map(stateService::findStateByIdWithCountry)
+                .orElse(null);
+
+        if (state != null && !isStateOfCountry(state, country)) {
+            throw new StateCountryMismatchException();
+        }
+        report.setState(state);
+
+        City city = Optional.ofNullable(request.cityId())
+                .map(cityService::findCityByIdWithState)
+                .orElse(null);
+
+        if (city != null && state != null && !isCityOfState(city, state)) {
+            throw new CityStateMismatchException();
+        }
+        report.setCity(city);
+
+        // 새 이미지가 있으면 기존 이미지 교체
+        if (images != null && !images.isEmpty()) {
+            report.getImages().clear();
+            List<Image> newImages = imageService.saveImagesInS3Bucket(images);
+            newImages.forEach(report::addImage);
+        }
+    }
+
+    @Transactional
+    public void deleteUserReport(Long reportId, String email) {
+        UserReport report = userReportRepository.findById(reportId)
+                .filter(r -> !r.isDeleted())
+                .orElseThrow(ReportNotFoundException::new);
+
+        if (!email.equals(report.getUser().getEmail())) {
+            throw new ForbiddenReportAccessException();
+        }
+
+        report.softDelete();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.swkim.safetrip.service;
 
+import com.swkim.safetrip.dto.request.UpdateNicknameRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.dto.response.ValidationResponse;
 import com.swkim.safetrip.entity.User;
@@ -87,6 +88,14 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    @Transactional
+    public void updateNickname(String email, UpdateNicknameRequest request) {
+        if (userRepository.existsByNicknameAndEmailNot(request.nickname(), email)) {
+            throw new DuplicateUserNicknameException();
+        }
 
+        User user = userRepository.findByEmail(email).orElseThrow();
+        user.updateNickname(request.nickname());
+    }
 
 }
