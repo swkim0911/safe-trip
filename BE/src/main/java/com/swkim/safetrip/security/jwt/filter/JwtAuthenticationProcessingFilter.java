@@ -24,6 +24,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import org.springframework.util.AntPathMatcher;
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -36,6 +38,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private final AuthenticationEntryPoint entryPoint;
 
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -72,7 +75,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         String method = request.getMethod().toUpperCase();
 
         return Arrays.stream(ProtectedEndpoint.values())
-                .anyMatch(ep -> ep.getPath().equals(requestURI) && ep.getMethod().equals(method));
+                .anyMatch(ep -> pathMatcher.match(ep.getPath(), requestURI) && ep.getMethod().equals(method));
     }
 
 
