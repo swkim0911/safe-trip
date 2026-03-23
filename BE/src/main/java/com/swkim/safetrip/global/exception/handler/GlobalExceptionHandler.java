@@ -26,7 +26,7 @@ public class GlobalExceptionHandler{
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResult<Map<String, String>>> invalidRequestHandler(MethodArgumentNotValidException e){
-        log.error("error", e);
+        log.warn("Validation failed: {}", e.getMessage());
         Map<String, String> map = new HashMap<>();
         List<FieldError> fieldErrors = e.getFieldErrors();
         for (FieldError fieldError : fieldErrors) {
@@ -41,13 +41,16 @@ public class GlobalExceptionHandler{
 
     @ExceptionHandler(GeneralException.class)
     public ResponseEntity<ApiResult<Object>> generalExceptionHandler(GeneralException e) {
-        log.error("error", e);
-
         Error error = e.getError();
+        if (error.getStatusCode() >= 500) {
+            log.error("Server error: {}", error.getMessage(), e);
+        } else {
+            log.warn("Client error [{}]: {}", error.getStatusCode(), error.getMessage());
+        }
 
         return ResponseEntity
                 .status(error.getStatusCode())
-                .body(ApiResult.of(error.getStatusCode(), error.getMessage(), "Request Failed"));
+                .body(ApiResult.of(error.getStatusCode(), error.getMessage(), null));
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

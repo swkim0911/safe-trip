@@ -19,8 +19,8 @@ public enum Error {
     CITY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "City not found"),
     USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND.value(), "User not found by email"),
     S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST.value(), "Unable to upload image to s3 bucket"),
-    DUPLICATE_USER_EMAIL_ERROR(HttpStatus.BAD_REQUEST.value(), "This email is already in use"),
-    DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.BAD_REQUEST.value(), "This nickname is already in use"),
+    DUPLICATE_USER_EMAIL_ERROR(HttpStatus.CONFLICT.value(), "This email is already in use"),
+    DUPLICATE_USER_NICKNAME_ERROR(HttpStatus.CONFLICT.value(), "This nickname is already in use"),
     STATE_COUNTRY_MISMATCH_ERROR(HttpStatus.BAD_REQUEST.value(), "State and Country is mismatch"),
     CITY_STATE_MISMATCH_ERROR(HttpStatus.BAD_REQUEST.value(), "City and State is mismatch"),
     INVALID_SORT_KEY_ERROR(HttpStatus.BAD_REQUEST.value(), "Sort Key is invalid"),
@@ -33,6 +33,8 @@ public enum Error {
     ACCESS_TOKEN_EXPIRED_ERROR(40101, "Access token is expired"),
     EMAIL_CLAIM_MISSING_ERROR(HttpStatus.UNAUTHORIZED.value(), "Email claim is missing"),
     INVALID_ACCESS_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid"),
+
+    FORBIDDEN_REPORT_ACCESS_ERROR(HttpStatus.FORBIDDEN.value(), "You do not have permission to access this report"),
 
     TOKEN_HASHING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed token hashing");
 

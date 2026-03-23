@@ -18,10 +18,8 @@ public record UserReportSaveRequest(
         @NotNull(message = "Country must not be null.")
         Long countryId,
 
-        @NotNull(message = "State must not be null.")
         Long stateId,
 
-        @NotNull(message = "City must not be null")
         Long cityId,
 
         @NotBlank(message = "Description must not be blank")
