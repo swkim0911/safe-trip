@@ -71,6 +71,13 @@
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li>
+              <button class="dropdown-item" @click="openMyPageModal">
+                <font-awesome-icon :icon="['fas', 'user-gear']" class="icon"/>
+                My Page
+              </button>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
               <button class="dropdown-item" @click="logout">
                 <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="icon"/>
                 Logout
@@ -82,6 +89,8 @@
     </div>
     <ReportFormModal/>
     <AuthFormModal/>
+    <MyPageModal ref="myPageModalRef" @edit-report="handleEditReport"/>
+    <ReportEditModal :report="editingReport" @updated="handleReportUpdated"/>
   </div>
 </template>
 
@@ -94,11 +103,27 @@ import { LMap, LTileLayer, LControlZoom, LCircleMarker, LTooltip, LControl } fro
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import ReportFormModal from './ReportFormModal.vue';
 import AuthFormModal from './AuthFormModal.vue';
+import MyPageModal from './MyPageModal.vue';
+import ReportEditModal from './ReportEditModal.vue';
 import apiClient from '@/api/apiClient';
 import "leaflet/dist/leaflet.css";
 
 const { show: openAuthModal } = useBootstrapModal('#authFormModal');
 const { show: openReportFormModal } = useBootstrapModal('#reportFormModal');
+const { show: openMyPageModal } = useBootstrapModal('#myPageModal');
+const { show: openReportEditModal } = useBootstrapModal('#reportEditModal');
+
+const myPageModalRef = ref(null);
+const editingReport = ref(null);
+
+const handleEditReport = (report) => {
+  editingReport.value = report;
+  openReportEditModal();
+};
+
+const handleReportUpdated = () => {
+  myPageModalRef.value?.refreshReports();
+};
 
 const authStore = useAuthStore();
 const mapStore = useMapStore();
