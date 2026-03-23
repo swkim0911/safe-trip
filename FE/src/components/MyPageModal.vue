@@ -50,7 +50,7 @@
                 Save
               </button>
             </div>
-            <div v-if="nicknameMessage" class="mt-2 small" :class="nicknameStatus === 'success' ? 'text-success' : 'text-danger'">
+            <div v-if="nicknameMessage" class="mt-2 small text-danger">
               {{ nicknameMessage }}
             </div>
           </div>
@@ -95,6 +95,7 @@
 import { ref, onMounted } from 'vue';
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import { useAuthStore } from '@/stores/auth';
+import { useToast } from '@/composables/useToast';
 import apiClient from '@/api/apiClient';
 
 const emit = defineEmits(['edit-report']);
@@ -102,6 +103,7 @@ const emit = defineEmits(['edit-report']);
 const authStore = useAuthStore();
 const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
+const toast = useToast();
 
 const tab = ref('profile');
 
@@ -109,7 +111,6 @@ const tab = ref('profile');
 const nickname = ref(authStore.user?.nickname || '');
 const nicknameError = ref('');
 const nicknameMessage = ref('');
-const nicknameStatus = ref('');
 const isSavingNickname = ref(false);
 
 const saveNickname = async () => {
@@ -131,13 +132,11 @@ const saveNickname = async () => {
   try {
     await apiClient.patch('/users/me/nickname', { nickname: nickname.value });
     authStore.setUser({ ...authStore.user, nickname: nickname.value });
-    nicknameMessage.value = 'Nickname updated successfully.';
-    nicknameStatus.value = 'success';
+    toast.show('Nickname updated successfully.');
   } catch (e) {
     const result = e.response?.data?.result;
     const fieldMessage = result && typeof result === 'object' ? Object.values(result)[0] : null;
     nicknameMessage.value = fieldMessage || e.response?.data?.message || 'Failed to update nickname.';
-    nicknameStatus.value = 'error';
   } finally {
     isSavingNickname.value = false;
   }
@@ -172,6 +171,7 @@ const deleteReport = async (id) => {
     await apiClient.delete(`/user-reports/${id}`);
     reports.value = reports.value.filter(r => r.id !== id);
     confirmDeleteId.value = null;
+    toast.show('Report deleted.');
   } catch (e) {
     console.error('Failed to delete report', e);
   } finally {
@@ -192,7 +192,6 @@ const resetState = () => {
   nickname.value = authStore.user?.nickname || '';
   nicknameError.value = '';
   nicknameMessage.value = '';
-  nicknameStatus.value = '';
   reports.value = [];
   confirmDeleteId.value = null;
 };
