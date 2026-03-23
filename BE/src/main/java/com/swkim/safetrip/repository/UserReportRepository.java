@@ -34,7 +34,7 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     join ur.country co
     join ur.state st
     join ur.city ci
-    where ur.id = :id
+    where ur.id = :id and ur.deletedAt is null
     """)
     Optional<UserReportDetailResponse> findReportDetailById(@Param("id") Long id);
 
@@ -61,7 +61,7 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     join ur.country co
     left join ur.state st
     left join ur.city ci
-    where ur.user.email = :email
+    where ur.user.email = :email and ur.deletedAt is null
     order by ur.createdAt desc
     """)
     List<MyReportItem> findMyReports(@Param("email") String email);

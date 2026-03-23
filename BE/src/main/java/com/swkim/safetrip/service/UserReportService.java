@@ -126,6 +126,7 @@ public class UserReportService {
     @Transactional
     public void updateUserReport(Long reportId, String email, UserReportUpdateRequest request) {
         UserReport report = userReportRepository.findById(reportId)
+                .filter(r -> !r.isDeleted())
                 .orElseThrow(ReportNotFoundException::new);
 
         if (!email.equals(report.getUser().getEmail())) {
@@ -165,13 +166,14 @@ public class UserReportService {
     @Transactional
     public void deleteUserReport(Long reportId, String email) {
         UserReport report = userReportRepository.findById(reportId)
+                .filter(r -> !r.isDeleted())
                 .orElseThrow(ReportNotFoundException::new);
 
         if (!email.equals(report.getUser().getEmail())) {
             throw new ForbiddenReportAccessException();
         }
 
-        userReportRepository.delete(report);
+        report.softDelete();
     }
 
 }
