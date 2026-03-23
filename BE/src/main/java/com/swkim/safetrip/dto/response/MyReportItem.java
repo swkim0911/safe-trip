@@ -16,5 +16,6 @@ public record MyReportItem(
         Long cityId,
         String cityName,
         String description,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String imageUrl
 ) {}

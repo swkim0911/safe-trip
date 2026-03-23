@@ -119,6 +119,15 @@
         <font-awesome-icon :icon="['fas', 'camera']" class="modal-icon" />
         Upload Image (Optional)
       </label>
+
+      <!-- 기존 이미지 (새 파일 선택 전까지 표시) -->
+      <div v-if="existingImageUrl && !imagePreviewUrl" class="mb-2">
+        <div class="position-relative d-inline-block">
+          <img :src="existingImageUrl" alt="Current image" class="image-preview" />
+        </div>
+        <div class="text-muted small mt-1">Current image · Upload a new file to replace</div>
+      </div>
+
       <input
         ref="fileInput"
         class="form-control"
@@ -194,6 +203,7 @@ const showCityDropdown = ref(false);
 const fileInput = ref(null);
 const imageFile = ref(null);
 const imagePreviewUrl = ref(null);
+const existingImageUrl = ref(null);
 
 const form = reactive({
   title: '',
@@ -355,6 +365,7 @@ const reset = () => {
   states.value = [];
   cities.value = [];
   Object.keys(errors).forEach(k => (errors[k] = ''));
+  existingImageUrl.value = null;
   removeImage();
 };
 
@@ -390,6 +401,7 @@ watch(() => props.initialData, async (data) => {
     citySearch.value = data.cityName ?? '';
   }
 
+  existingImageUrl.value = data.imageUrl ?? null;
   removeImage();
 });
 

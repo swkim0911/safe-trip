@@ -120,7 +120,25 @@ public class UserReportService {
 
     @Transactional(readOnly = true)
     public List<MyReportItem> getMyReports(String email) {
-        return userReportRepository.findMyReports(email);
+        return userReportRepository.findMyReports(email).stream()
+                .map(ur -> new MyReportItem(
+                        ur.getId(),
+                        ur.getTitle(),
+                        ur.getScamAction().getId(),
+                        ur.getScamAction().getName(),
+                        ur.getScamContext().getId(),
+                        ur.getScamContext().getName(),
+                        ur.getCountry().getId(),
+                        ur.getCountry().getName(),
+                        ur.getState() != null ? ur.getState().getId() : null,
+                        ur.getState() != null ? ur.getState().getName() : null,
+                        ur.getCity() != null ? ur.getCity().getId() : null,
+                        ur.getCity() != null ? ur.getCity().getName() : null,
+                        ur.getContent(),
+                        ur.getCreatedAt(),
+                        ur.getImages().isEmpty() ? null : ur.getImages().get(0).getAccessURL()
+                ))
+                .toList();
     }
 
     @Transactional
