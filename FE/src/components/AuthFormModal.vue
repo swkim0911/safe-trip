@@ -53,9 +53,6 @@
                     </button>
                   </div>
                 </div>
-                <p v-if="loginSuccessMessage" class="text-center text-success fw-bold">
-                  {{ loginSuccessMessage }}
-                </p>
                 <p v-if="loginFormMessage" class="text-center text-danger fw-bold">
                       {{ loginFormMessage }}
                 </p>
@@ -167,15 +164,16 @@ import { useAuthStore } from '@/stores/auth';
 
 import { ref, reactive, watch, onMounted, computed } from 'vue'
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
+import { useToast } from '@/composables/useToast';
 import apiClient from '@/api/apiClient';
 
 const authStore = useAuthStore();
 
 const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
+const toast = useToast();
 
 const mode = ref('login')
-const loginSuccessMessage = ref('');
 const signupFailureMessage = ref('');
 const loginFormMessage = ref('');
 const showLoginPassword = ref(false);
@@ -207,7 +205,6 @@ function resetForm() {
   mode.value = 'login';
   resetSignupForm();
   resetLoginForm();
-  loginSuccessMessage.value = '';
   signupFailureMessage.value = '';
   loginFormMessage.value = '';
 }
@@ -372,8 +369,8 @@ const submitSignupForm = async () => {
       password: signupForm.password,
       nickname: signupForm.nickname
     })
-    loginSuccessMessage.value = 'Sign-up complete! Please log in.';
     mode.value = 'login';
+    toast.show('Sign-up complete! Please log in.');
   } catch (error) {
     console.error(error);
 
@@ -429,8 +426,7 @@ const submitLoginForm = async () => {
 
     const { data: userInfoResponse } = await apiClient.get('/users/me');
     authStore.setUser(userInfoResponse.result);
-    loginSuccessMessage.value = '';
-    hide();
+      hide();
   } catch (error) {
     console.error(error);
     if (error.response) {
@@ -475,8 +471,7 @@ watch(mode, (newMode) => {
   } else if (newMode == 'signup') {
     resetLoginForm();
     loginFormMessage.value = '';
-    loginSuccessMessage.value = '';
-  }
+    }
 });
 
 // 회원가입란에 email이 변경되면 다시 검증이 필요하다고 판단
