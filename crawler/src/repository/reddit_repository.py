@@ -151,7 +151,8 @@ class RedditRepository:
 
     def find_unenriched_parsed_documents(self):
         query = {
-            "parsing.location_enriched": False
+            "parsing.location_enriched": False,
+            "empty_result": {"$ne": True},
         }
         return self.parsed_collection.find(query)
 
