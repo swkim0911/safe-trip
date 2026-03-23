@@ -20,10 +20,7 @@
 
           <!-- Footer -->
           <div class="modal-footer px-0">
-            <div
-              v-if="submitMessage"
-              :class="['me-3 fw-bold', submitStatus === 'success' ? 'text-success' : 'text-danger']"
-            >
+            <div v-if="submitMessage" class="me-3 fw-bold text-danger">
               {{ submitMessage }}
             </div>
             <button type="button" class="btn btn-secondary" @click="hide">Close</button>
@@ -41,6 +38,7 @@
 import { ref } from 'vue';
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import { useAuthStore } from '@/stores/auth';
+import { useToast } from '@/composables/useToast';
 import ReportFormFields from '@/components/ReportFormFields.vue';
 import apiClient from '@/api/apiClient';
 
@@ -50,9 +48,9 @@ const isLoggedIn = () => !!authStore.accessToken;
 const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
 const formRef = ref(null);
+const toast = useToast();
 
 const submitMessage = ref('');
-const submitStatus = ref('');
 const isSubmitting = ref(false);
 
 const closeForm = () => {
@@ -98,13 +96,11 @@ const submitForm = async () => {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
-    submitMessage.value = 'Your report has been successfully submitted.';
-    submitStatus.value = 'success';
-    formRef.value.reset();
+    hide();
+    toast.show('Your report has been successfully submitted.');
   } catch (error) {
     console.error(error);
     submitMessage.value = 'Submission failed. Please try again.';
-    submitStatus.value = 'error';
   } finally {
     isSubmitting.value = false;
   }

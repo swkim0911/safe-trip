@@ -18,11 +18,7 @@
           <ReportFormFields ref="formRef" :initialData="report" />
 
           <div class="modal-footer px-0">
-            <div
-              v-if="submitMessage"
-              class="me-3 fw-bold small"
-              :class="submitStatus === 'success' ? 'text-success' : 'text-danger'"
-            >
+            <div v-if="submitMessage" class="me-3 fw-bold small text-danger">
               {{ submitMessage }}
             </div>
             <button type="button" class="btn btn-secondary" @click="hide">Cancel</button>
@@ -39,6 +35,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
+import { useToast } from '@/composables/useToast';
 import ReportFormFields from '@/components/ReportFormFields.vue';
 import apiClient from '@/api/apiClient';
 
@@ -50,9 +47,9 @@ const emit = defineEmits(['updated']);
 const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
 const formRef = ref(null);
+const toast = useToast();
 
 const submitMessage = ref('');
-const submitStatus = ref('');
 const isSubmitting = ref(false);
 
 const submitForm = async () => {
@@ -72,10 +69,9 @@ const submitForm = async () => {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
-    submitMessage.value = 'Report updated successfully.';
-    submitStatus.value = 'success';
     emit('updated');
-    setTimeout(hide, 1000);
+    hide();
+    toast.show('Report updated successfully.');
   } catch (e) {
     submitMessage.value = 'Failed to update. Please try again.';
     submitStatus.value = 'error';

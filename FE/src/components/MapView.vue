@@ -91,6 +91,7 @@
     <AuthFormModal/>
     <MyPageModal ref="myPageModalRef" @edit-report="handleEditReport"/>
     <ReportEditModal :report="editingReport" @updated="handleReportUpdated"/>
+    <AppToast/>
   </div>
 </template>
 
@@ -105,6 +106,7 @@ import ReportFormModal from './ReportFormModal.vue';
 import AuthFormModal from './AuthFormModal.vue';
 import MyPageModal from './MyPageModal.vue';
 import ReportEditModal from './ReportEditModal.vue';
+import AppToast from './AppToast.vue';
 import apiClient from '@/api/apiClient';
 import "leaflet/dist/leaflet.css";
 
