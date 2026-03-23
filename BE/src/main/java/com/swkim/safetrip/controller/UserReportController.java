@@ -42,12 +42,13 @@ public class UserReportController {
     }
 
     @Operation(summary = "유저 리포트 수정", description = "본인이 작성한 리포트의 내용을 수정합니다", security = @SecurityRequirement(name = "BearerAuth"))
-    @PutMapping("/{reportId}")
+    @PutMapping(value = "/{reportId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ApiResult<Void> updateReport(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long reportId,
-            @RequestBody @Valid UserReportUpdateRequest request) {
-        userReportService.updateUserReport(reportId, userDetails.getUsername(), request);
+            @RequestPart @Valid UserReportUpdateRequest request,
+            @RequestPart(required = false) List<MultipartFile> images) {
+        userReportService.updateUserReport(reportId, userDetails.getUsername(), request, images);
         return ApiResult.of(HttpStatus.OK.value(), "User report updated", null);
     }
 

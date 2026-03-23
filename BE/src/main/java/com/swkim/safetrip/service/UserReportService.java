@@ -124,7 +124,7 @@ public class UserReportService {
     }
 
     @Transactional
-    public void updateUserReport(Long reportId, String email, UserReportUpdateRequest request) {
+    public void updateUserReport(Long reportId, String email, UserReportUpdateRequest request, List<MultipartFile> images) {
         UserReport report = userReportRepository.findById(reportId)
                 .filter(r -> !r.isDeleted())
                 .orElseThrow(ReportNotFoundException::new);
@@ -161,6 +161,13 @@ public class UserReportService {
             throw new CityStateMismatchException();
         }
         report.setCity(city);
+
+        // 새 이미지가 있으면 기존 이미지 교체
+        if (images != null && !images.isEmpty()) {
+            report.getImages().clear();
+            List<Image> newImages = imageService.saveImagesInS3Bucket(images);
+            newImages.forEach(report::addImage);
+        }
     }
 
     @Transactional
