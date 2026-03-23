@@ -1,6 +1,7 @@
 package com.swkim.safetrip.controller;
 
 import com.swkim.safetrip.dto.request.UserReportSaveRequest;
+import com.swkim.safetrip.dto.request.UserReportUpdateRequest;
 import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.security.CustomUserDetails;
@@ -38,5 +39,24 @@ public class UserReportController {
     public ApiResult<UserReportDetailResponse> getUserReport(@PathVariable Long reportId) {
         UserReportDetailResponse report = userReportService.getUserReport(reportId);
         return ApiResult.of(HttpStatus.OK.value(), "User report retrieved", report);
+    }
+
+    @Operation(summary = "유저 리포트 수정", description = "본인이 작성한 리포트의 내용을 수정합니다", security = @SecurityRequirement(name = "BearerAuth"))
+    @PutMapping("/{reportId}")
+    public ApiResult<Void> updateReport(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long reportId,
+            @RequestBody @Valid UserReportUpdateRequest request) {
+        userReportService.updateUserReport(reportId, userDetails.getUsername(), request);
+        return ApiResult.of(HttpStatus.OK.value(), "User report updated", null);
+    }
+
+    @Operation(summary = "유저 리포트 삭제", description = "본인이 작성한 리포트를 삭제합니다", security = @SecurityRequirement(name = "BearerAuth"))
+    @DeleteMapping("/{reportId}")
+    public ApiResult<Void> deleteReport(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long reportId) {
+        userReportService.deleteUserReport(reportId, userDetails.getUsername());
+        return ApiResult.of(HttpStatus.OK.value(), "User report deleted", null);
     }
 }

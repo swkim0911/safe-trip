@@ -1,16 +1,20 @@
 package com.swkim.safetrip.controller;
 
+import com.swkim.safetrip.dto.request.UpdateNicknameRequest;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
+import com.swkim.safetrip.dto.response.MyReportItem;
 import com.swkim.safetrip.dto.response.UserInfoResponse;
 import com.swkim.safetrip.dto.response.ValidationResponse;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.security.CustomUserDetails;
+import com.swkim.safetrip.service.UserReportService;
 import com.swkim.safetrip.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final UserReportService userReportService;
 
     @Operation(summary = "회원가입", description = "이메일, 비밀번호, 닉네임을 입력하여 회원가입을 진행합니다.")
     @ApiResponses({
@@ -55,6 +60,27 @@ public class UserController {
                 .build();
 
         return ApiResult.of(HttpStatus.OK.value(), "User information has been successfully retrieved", userInfoResponse);
+    }
+
+    @Operation(summary = "닉네임 수정", description = "사용자의 닉네임을 변경합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "닉네임 변경 성공"),
+            @ApiResponse(responseCode = "400", description = "이미 사용 중인 닉네임")
+    })
+    @PatchMapping("/me/nickname")
+    public ApiResult<Void> updateNickname(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid UpdateNicknameRequest request) {
+        userService.updateNickname(userDetails.getUsername(), request);
+
+        return ApiResult.of(HttpStatus.OK.value(), "Nickname updated successfully", null);
+    }
+
+    @Operation(summary = "내 리포트 목록 조회", description = "로그인한 사용자가 작성한 리포트 목록을 조회합니다.")
+    @GetMapping("/me/reports")
+    public ApiResult<List<MyReportItem>> getMyReports(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<MyReportItem> reports = userReportService.getMyReports(userDetails.getUsername());
+        return ApiResult.of(HttpStatus.OK.value(), "My reports retrieved", reports);
     }
 
 }
