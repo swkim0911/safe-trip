@@ -100,7 +100,7 @@
 
           <div class="mb-3">
             <span class="fw-bold">{{ report.source === 'SAFETRIP' ? 'Description' : 'Summary' }}</span>
-            <p class="text-body mt-1">{{ report.content }}</p>
+            <p class="text-body mt-1" style="white-space: pre-wrap; overflow-wrap: break-word;">{{ report.content }}</p>
           </div>
 
           <!-- 이미지 표시 (User Report만) -->
