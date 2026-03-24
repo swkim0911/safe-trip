@@ -5,6 +5,7 @@ export const useMapStore = defineStore('map', {
     selectedMarker: null,
     flyToTarget: null,
     pendingOpenExternalReportId: null,
+    pendingOpenUserReportId: null,
     returnToMyFeedback: false,
     pendingReturnToMyFeedback: false,
   }),
@@ -24,6 +25,12 @@ export const useMapStore = defineStore('map', {
     },
     clearOpenExternalReport() {
       this.pendingOpenExternalReportId = null;
+    },
+    requestOpenUserReport(id) {
+      this.pendingOpenUserReportId = id;
+    },
+    clearOpenUserReport() {
+      this.pendingOpenUserReportId = null;
     },
     triggerReturnToMyFeedback() {
       this.pendingReturnToMyFeedback = true;

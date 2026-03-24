@@ -38,11 +38,13 @@
 import { ref } from 'vue';
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import { useAuthStore } from '@/stores/auth';
+import { useMapStore } from '@/stores/map';
 import { useToast } from '@/composables/useToast';
 import ReportFormFields from '@/components/ReportFormFields.vue';
 import apiClient from '@/api/apiClient';
 
 const authStore = useAuthStore();
+const mapStore = useMapStore();
 const isLoggedIn = () => !!authStore.accessToken;
 
 const modalRef = ref(null);
@@ -92,12 +94,13 @@ const submitForm = async () => {
     formData.append('request', new Blob([JSON.stringify(data)], { type: 'application/json' }));
     if (imageFile) formData.append('images', imageFile);
 
-    await apiClient.post('/user-reports', formData, {
+    const res = await apiClient.post('/user-reports', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
     hide();
     toast.show('Your report has been successfully submitted.');
+    mapStore.requestOpenUserReport(res.data.result);
   } catch (error) {
     console.error(error);
     submitMessage.value = 'Submission failed. Please try again.';

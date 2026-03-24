@@ -327,6 +327,13 @@ watch(() => mapStore.pendingOpenExternalReportId, async (reportId) => {
   mapStore.clearOpenExternalReport();
 });
 
+watch(() => mapStore.pendingOpenUserReportId, async (reportId) => {
+  if (!reportId) return;
+  await loadUserReportDetailInfo(reportId);
+  show();
+  mapStore.clearOpenUserReport();
+});
+
 watch(() => mapStore.selectedMarker, (marker) => {
   if (!marker) return;
   isOpen.value = true;
