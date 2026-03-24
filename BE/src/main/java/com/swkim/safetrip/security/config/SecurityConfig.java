@@ -52,6 +52,9 @@ public class SecurityConfig {
                                     .authenticated()
                             );
 
+                    // Admin 전용 엔드포인트
+                    auth.requestMatchers("/v1/admin/**").hasRole("ADMIN");
+
                     // 공개 엔드포인트
                     auth.requestMatchers("/error").permitAll()
                             .requestMatchers(HttpMethod.GET, "/v1/reports/**").permitAll()

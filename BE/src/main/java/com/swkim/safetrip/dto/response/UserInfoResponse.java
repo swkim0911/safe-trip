@@ -4,5 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record UserInfoResponse(
-    String nickname
+    String nickname,
+    String role
 ){}

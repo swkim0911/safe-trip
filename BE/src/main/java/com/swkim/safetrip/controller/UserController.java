@@ -57,6 +57,7 @@ public class UserController {
     public ApiResult<UserInfoResponse> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         UserInfoResponse userInfoResponse = UserInfoResponse.builder()
                 .nickname(userDetails.getNickname())
+                .role(userDetails.getRole().name())
                 .build();
 
         return ApiResult.of(HttpStatus.OK.value(), "User information has been successfully retrieved", userInfoResponse);

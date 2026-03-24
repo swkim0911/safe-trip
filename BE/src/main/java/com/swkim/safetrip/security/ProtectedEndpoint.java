@@ -11,7 +11,9 @@ public enum ProtectedEndpoint {
     USER_REPORT_DELETE("/v1/user-reports/*", HttpMethod.DELETE), // user report 삭제
     ME("/v1/users/me", HttpMethod.GET),                       // user 개인 정보 요청
     ME_REPORTS("/v1/users/me/reports", HttpMethod.GET),       // 내 리포트 목록
-    ME_NICKNAME("/v1/users/me/nickname", HttpMethod.PATCH);   // 닉네임 수정
+    ME_NICKNAME("/v1/users/me/nickname", HttpMethod.PATCH),
+    REPORT_INACCURACY("/v1/external-reports/*/inaccuracies", HttpMethod.POST),
+    MY_REPORT_INACCURACY("/v1/external-reports/*/inaccuracies/my", HttpMethod.GET);   // 닉네임 수정
 
     @Getter
     private final String path;

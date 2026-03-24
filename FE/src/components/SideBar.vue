@@ -551,8 +551,9 @@ function mapUserReportDetail(result) {
   })
 }
 
-function mapExternalReportDetail(result) {
+function mapExternalReportDetail(result, reportId) {
   Object.assign(selectedReport, {
+    reportId,
     source: result.source,
     sourceUrl: result.sourceUrl,
     author: result.author,
@@ -591,9 +592,8 @@ const loadUserReportDetailInfo = async (reportId) => {
 const loadExternalReportDetailInfo = async (reportId) => {
   try {
     const response = await apiClient.get(`/external-reports/${reportId}`);
-
     const result = response.data.result;
-    mapExternalReportDetail(result);
+    mapExternalReportDetail(result, reportId);
 
   } catch (e) {
     console.error('API 요청 실패:', e);

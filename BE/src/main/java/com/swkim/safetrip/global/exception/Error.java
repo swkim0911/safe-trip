@@ -35,6 +35,7 @@ public enum Error {
     INVALID_ACCESS_TOKEN_ERROR(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid"),
 
     FORBIDDEN_REPORT_ACCESS_ERROR(HttpStatus.FORBIDDEN.value(), "You do not have permission to access this report"),
+    DUPLICATE_REPORT_INACCURACY_ERROR(HttpStatus.CONFLICT.value(), "You have already reported this report"),
 
     TOKEN_HASHING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed token hashing");
 
