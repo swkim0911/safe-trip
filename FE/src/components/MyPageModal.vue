@@ -27,6 +27,11 @@
             :class="{ active: tab === 'reports' }"
             @click="switchToReports"
           >My Reports</button>
+          <button
+            class="tab-btn"
+            :class="{ active: tab === 'feedback' }"
+            @click="switchToFeedback"
+          >My Feedback</button>
         </div>
 
         <div class="modal-body">
@@ -53,6 +58,24 @@
             <div v-if="nicknameMessage" class="mt-2 small text-danger">
               {{ nicknameMessage }}
             </div>
+          </div>
+
+          <!-- My Feedback 탭 -->
+          <div v-else-if="tab === 'feedback'">
+            <div v-if="isLoadingFeedback" class="text-center py-4 text-muted">Loading...</div>
+            <div v-else-if="feedbacks.length === 0" class="text-center py-4 text-muted">
+              No feedback submitted yet.
+            </div>
+            <ul v-else class="report-list">
+              <li v-for="item in feedbacks" :key="item.id" class="report-item">
+                <div class="report-title">{{ item.externalReportTitle }}</div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                  <span class="badge bg-warning text-dark small">{{ formatReason(item.reason) }}</span>
+                  <span class="text-muted small">{{ formatDate(item.createdAt) }}</span>
+                </div>
+                <div v-if="item.description" class="text-muted small mt-1">{{ item.description }}</div>
+              </li>
+            </ul>
           </div>
 
           <!-- My Reports 탭 -->
@@ -142,6 +165,37 @@ const saveNickname = async () => {
   }
 };
 
+// My Feedback
+const feedbacks = ref([]);
+const isLoadingFeedback = ref(false);
+
+const switchToFeedback = () => {
+  tab.value = 'feedback';
+  loadFeedback();
+};
+
+const loadFeedback = async () => {
+  isLoadingFeedback.value = true;
+  try {
+    const res = await apiClient.get('/users/me/inaccuracies');
+    feedbacks.value = res.data.result;
+  } catch (e) {
+    console.error('Failed to load feedback', e);
+  } finally {
+    isLoadingFeedback.value = false;
+  }
+};
+
+const reasonLabels = {
+  WRONG_LOCATION: 'Wrong Location',
+  WRONG_SCAM_TYPE: 'Wrong Scam Type',
+  NOT_A_SCAM: 'Not a Scam',
+  INACCURATE_CONTENT: 'Inaccurate Content',
+  OTHER: 'Other',
+};
+
+const formatReason = (reason) => reasonLabels[reason] ?? reason;
+
 // My Reports
 const reports = ref([]);
 const isLoadingReports = ref(false);
@@ -193,6 +247,7 @@ const resetState = () => {
   nicknameError.value = '';
   nicknameMessage.value = '';
   reports.value = [];
+  feedbacks.value = [];
   confirmDeleteId.value = null;
 };
 

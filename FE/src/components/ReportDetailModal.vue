@@ -80,6 +80,7 @@
                 placeholder="Describe the inaccuracy... (optional)"
                 maxlength="500"
               ></textarea>
+              <div class="text-end text-muted" style="font-size: 0.75rem;">{{ inaccuracyDescription.length }} / 500</div>
             </div>
             <div class="d-flex justify-content-end gap-2">
               <button type="button" class="btn btn-sm btn-secondary" @click="cancelInaccuracy">Cancel</button>

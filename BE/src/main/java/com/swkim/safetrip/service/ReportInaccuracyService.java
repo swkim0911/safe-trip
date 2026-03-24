@@ -69,4 +69,21 @@ public class ReportInaccuracyService {
                 ))
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<ReportInaccuracyItem> getMyInaccuracyReports(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+        return reportInaccuracyRepository.findAllByUser(user).stream()
+                .map(ri -> new ReportInaccuracyItem(
+                        ri.getId(),
+                        ri.getExternalReport().getId(),
+                        ri.getExternalReport().getTitle(),
+                        ri.getUser().getNickname(),
+                        ri.getReason().name(),
+                        ri.getDescription(),
+                        ri.getCreatedAt()
+                ))
+                .toList();
+    }
 }

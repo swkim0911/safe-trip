@@ -13,7 +13,9 @@ public enum ProtectedEndpoint {
     ME_REPORTS("/v1/users/me/reports", HttpMethod.GET),       // 내 리포트 목록
     ME_NICKNAME("/v1/users/me/nickname", HttpMethod.PATCH),
     REPORT_INACCURACY("/v1/external-reports/*/inaccuracies", HttpMethod.POST),
-    MY_REPORT_INACCURACY("/v1/external-reports/*/inaccuracies/my", HttpMethod.GET);   // 닉네임 수정
+    MY_REPORT_INACCURACY("/v1/external-reports/*/inaccuracies/my", HttpMethod.GET),
+    ME_INACCURACIES("/v1/users/me/inaccuracies", HttpMethod.GET),
+    ADMIN_REPORT_INACCURACIES("/v1/admin/report-inaccuracies", HttpMethod.GET);
 
     @Getter
     private final String path;
