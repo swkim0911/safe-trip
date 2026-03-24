@@ -31,8 +31,8 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     join ur.scamAction sa
     join ur.scamContext sc
     join ur.country co
-    join ur.state st
-    join ur.city ci
+    left join ur.state st
+    left join ur.city ci
     where ur.id = :id and ur.deletedAt is null
     """)
     Optional<UserReportDetailResponse> findReportDetailById(@Param("id") Long id);
