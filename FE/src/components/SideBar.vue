@@ -527,13 +527,9 @@ const listSortOptions = [
 ];
 
 const onListSortChange = () => {
-  if (viewType.value === 'country') {
-    loadCountriesWithStatistics('click');
-  } else if (viewType.value === 'state') {
-    showStatesByCountry(selectedCountry.id, 'click');
-  } else if (viewType.value === 'city') {
-    showCitiesByState(selectedState.id, 'click');
-  }
+  if (viewType.value === 'country') loadCountriesWithStatistics('click');
+  else if (viewType.value === 'state') showStatesByCountry(selectedCountry.id, 'click');
+  else if (viewType.value === 'city') showCitiesByState(selectedState.id, 'click');
 };
 
 const toggleSortOrder = () => {
@@ -700,6 +696,7 @@ const showStatesByCountry = async (countryId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingState.value || isLastStatePage.value)) return;
 
   if (mode === 'click') {
+    if (viewType.value !== 'state') listSort.value = 'scamCnt,DESC';
     const res = await apiClient.get(`/countries/${countryId}/info`);
     const info = res.data.result;
     selectedCountry.id = countryId;
@@ -836,6 +833,7 @@ const showCitiesByState = async (stateId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
 
   if (mode === 'click') {
+    if (viewType.value !== 'city') listSort.value = 'scamCnt,DESC';
     const res = await apiClient.get(`/states/${stateId}/info`);
     const info = res.data.result;
     selectedState.id = stateId;
@@ -906,6 +904,8 @@ const showReportsByCity = async (cityId, cityName, mode = 'click') => {
 const goToParentView = (type) => {
   listSort.value = 'scamCnt,DESC';
   viewType.value = type;
+  if (type === 'country') loadCountriesWithStatistics('click');
+  else if (type === 'state') showStatesByCountry(selectedCountry.id, 'click');
 }
 
 const backFromReport = () => {
