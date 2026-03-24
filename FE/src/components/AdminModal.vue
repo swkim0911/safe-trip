@@ -62,36 +62,49 @@
           <button type="button" class="btn-close" @click="closeDetail" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3">
-            <div class="detail-label">Report</div>
-            <div class="small">{{ selectedItem.externalReportTitle }}</div>
-          </div>
-          <div class="mb-3">
-            <div class="detail-label">Reason</div>
-            <span class="badge bg-warning text-dark">{{ formatReason(selectedItem.reason) }}</span>
-          </div>
-          <div class="mb-3">
-            <div class="detail-label">Description</div>
-            <div class="small text-muted" style="white-space: pre-wrap; overflow-wrap: break-word;">
-              {{ selectedItem.description || '—' }}
+          <!-- Report Info -->
+          <div class="detail-section">
+            <div class="detail-section-title">Report Info</div>
+            <div class="mb-2">
+              <div class="detail-label">Report</div>
+              <div class="small">{{ selectedItem.externalReportTitle }}</div>
+            </div>
+            <div class="mb-2">
+              <div class="detail-label">Reason</div>
+              <span class="badge bg-warning text-dark">{{ formatReason(selectedItem.reason) }}</span>
+            </div>
+            <div>
+              <div class="detail-label">Description</div>
+              <div class="small text-muted" style="white-space: pre-wrap; overflow-wrap: break-word;">
+                {{ selectedItem.description || '—' }}
+              </div>
             </div>
           </div>
-          <div class="mb-3">
-            <div class="detail-label">Status</div>
-            <span :class="selectedItem.status === 'RESOLVED' ? 'badge bg-success' : 'badge bg-secondary'">
-              {{ selectedItem.status === 'RESOLVED' ? 'Resolved' : 'Under Review' }}
-            </span>
-            <span v-if="selectedItem.resolvedAt" class="text-muted small ms-2">
-              {{ formatDate(selectedItem.resolvedAt) }}
-            </span>
+
+          <!-- Submission Info -->
+          <div class="detail-section">
+            <div class="detail-section-title">Submission Info</div>
+            <div class="mb-2">
+              <div class="detail-label">Reporter</div>
+              <div class="small">{{ selectedItem.reporterNickname }}</div>
+            </div>
+            <div>
+              <div class="detail-label">Submitted At</div>
+              <div class="small text-muted">{{ formatDate(selectedItem.createdAt) }}</div>
+            </div>
           </div>
-          <div class="mb-1">
-            <div class="detail-label">Reporter</div>
-            <div class="small">{{ selectedItem.reporterNickname }}</div>
-          </div>
-          <div class="mb-1">
-            <div class="detail-label">Submitted At</div>
-            <div class="small text-muted">{{ formatDate(selectedItem.createdAt) }}</div>
+
+          <!-- Status -->
+          <div :class="selectedItem.status === 'RESOLVED' ? 'detail-section status-resolved' : 'detail-section status-pending'">
+            <div class="detail-section-title">Status</div>
+            <div class="d-flex align-items-center gap-2">
+              <span :class="selectedItem.status === 'RESOLVED' ? 'badge bg-success' : 'badge bg-secondary'">
+                {{ selectedItem.status === 'RESOLVED' ? 'Resolved' : 'Under Review' }}
+              </span>
+              <span v-if="selectedItem.resolvedAt" class="text-muted small">
+                {{ formatDate(selectedItem.resolvedAt) }}
+              </span>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -135,11 +148,13 @@ const load = async () => {
 const openDetail = async (item) => {
   selectedItem.value = item;
   await nextTick();
+  Modal.getOrCreateInstance(document.getElementById('adminModal')).hide();
   Modal.getOrCreateInstance(document.getElementById('adminDetailModal')).show();
 };
 
 const closeDetail = () => {
   Modal.getOrCreateInstance(document.getElementById('adminDetailModal')).hide();
+  Modal.getOrCreateInstance(document.getElementById('adminModal')).show();
 };
 
 const resolveItem = async (item) => {
@@ -195,11 +210,31 @@ defineExpose({ load });
   text-overflow: ellipsis;
 }
 
+.detail-section {
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  margin-bottom: 10px;
+
+  &.status-resolved { background: #f0faf4; }
+  &.status-pending  { background: #f5f5f5; }
+}
+
+.detail-section-title {
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #adb5bd;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef;
+}
+
 .detail-label {
   font-weight: 600;
   font-size: 0.75rem;
-  text-transform: uppercase;
   color: #6c757d;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 </style>
