@@ -309,6 +309,13 @@ const { show } = useBootstrapModal('#reportDetailModal');
 
 const mapStore = useMapStore();
 
+watch(() => mapStore.pendingOpenExternalReportId, async (reportId) => {
+  if (!reportId) return;
+  await loadExternalReportDetailInfo(reportId);
+  show();
+  mapStore.clearOpenExternalReport();
+});
+
 watch(() => mapStore.selectedMarker, (marker) => {
   if (!marker) return;
   isOpen.value = true;

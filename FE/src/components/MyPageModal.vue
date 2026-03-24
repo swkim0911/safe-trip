@@ -68,12 +68,18 @@
             </div>
             <ul v-else class="report-list">
               <li v-for="item in feedbacks" :key="item.id" class="report-item">
-                <div class="report-title">{{ item.externalReportTitle }}</div>
-                <div class="d-flex align-items-center justify-content-between mt-1">
+                <div class="report-title feedback-title" @click="openFeedbackReport(item)">{{ item.externalReportTitle }}</div>
+                <hr class="my-2" />
+                <div class="d-flex align-items-center justify-content-between">
                   <span class="badge bg-warning text-dark small">{{ formatReason(item.reason) }}</span>
                   <span class="text-muted small">{{ formatDate(item.createdAt) }}</span>
                 </div>
-                <div v-if="item.description" class="text-muted small mt-1">{{ item.description }}</div>
+                <div v-if="item.description" class="text-muted small mt-1">
+                  <div style="white-space: pre-wrap; overflow-wrap: break-word;">{{ getDisplayDescription(item) }}</div>
+                  <button v-if="isLongDescription(item.description)" class="btn btn-link btn-sm p-0" style="font-size: 0.75rem;" @click="toggleExpand(item.id)">
+                    {{ expandedFeedbackIds.has(item.id) ? 'Less' : 'More' }}
+                  </button>
+                </div>
               </li>
             </ul>
           </div>
@@ -116,6 +122,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useMapStore } from '@/stores/map';
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from '@/composables/useToast';
@@ -124,6 +131,7 @@ import apiClient from '@/api/apiClient';
 const emit = defineEmits(['edit-report']);
 
 const authStore = useAuthStore();
+const mapStore = useMapStore();
 const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
 const toast = useToast();
@@ -168,6 +176,7 @@ const saveNickname = async () => {
 // My Feedback
 const feedbacks = ref([]);
 const isLoadingFeedback = ref(false);
+const expandedFeedbackIds = ref(new Set());
 
 const switchToFeedback = () => {
   tab.value = 'feedback';
@@ -195,6 +204,38 @@ const reasonLabels = {
 };
 
 const formatReason = (reason) => reasonLabels[reason] ?? reason;
+
+const MAX_LINES = 3;
+const MAX_CHARS = 150;
+
+const isLongDescription = (text) => text.split('\n').length > MAX_LINES || text.length > MAX_CHARS;
+
+const getDisplayDescription = (item) => {
+  if (expandedFeedbackIds.value.has(item.id) || !isLongDescription(item.description)) {
+    return item.description;
+  }
+  const byLines = item.description.split('\n').slice(0, MAX_LINES).join('\n');
+  const truncated = byLines.length > MAX_CHARS ? byLines.slice(0, MAX_CHARS) : byLines;
+  return truncated + '...';
+};
+
+const openFeedbackReport = async (item) => {
+  try {
+    await apiClient.get(`/external-reports/${item.externalReportId}`);
+    hide();
+    mapStore.requestOpenExternalReport(item.externalReportId);
+  } catch (e) {
+    if (e.response?.status === 404) {
+      toast.show('This report is no longer available.');
+    }
+  }
+};
+
+const toggleExpand = (id) => {
+  const next = new Set(expandedFeedbackIds.value);
+  next.has(id) ? next.delete(id) : next.add(id);
+  expandedFeedbackIds.value = next;
+};
 
 // My Reports
 const reports = ref([]);
@@ -248,6 +289,7 @@ const resetState = () => {
   nicknameMessage.value = '';
   reports.value = [];
   feedbacks.value = [];
+  expandedFeedbackIds.value = new Set();
   confirmDeleteId.value = null;
 };
 
@@ -308,6 +350,16 @@ defineExpose({ refreshReports });
   font-weight: 500;
   margin-bottom: 8px;
   color: #212529;
+}
+
+.feedback-title {
+  cursor: pointer;
+  margin-bottom: 0;
+
+  &:hover {
+    color: #0d6efd;
+    text-decoration: underline;
+  }
 }
 
 .report-actions {
