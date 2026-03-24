@@ -309,6 +309,17 @@ const { show } = useBootstrapModal('#reportDetailModal');
 
 const mapStore = useMapStore();
 
+onMounted(() => {
+  const el = document.getElementById('reportDetailModal');
+  if (el) {
+    el.addEventListener('hide.bs.modal', () => {
+      if (mapStore.returnToMyFeedback) {
+        mapStore.triggerReturnToMyFeedback();
+      }
+    });
+  }
+});
+
 watch(() => mapStore.pendingOpenExternalReportId, async (reportId) => {
   if (!reportId) return;
   await loadExternalReportDetailInfo(reportId);

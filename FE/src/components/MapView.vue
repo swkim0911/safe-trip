@@ -144,6 +144,13 @@ const handleReportUpdated = () => {
 
 const authStore = useAuthStore();
 const mapStore = useMapStore();
+
+watch(() => mapStore.pendingReturnToMyFeedback, (val) => {
+  if (!val) return;
+  myPageModalRef.value?.openOnFeedback();
+  openMyPageModal();
+  mapStore.clearPendingReturnToMyFeedback();
+});
 const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
 const isAdmin = computed(() => authStore.user?.role === 'ADMIN');
 const nickname = computed(() => authStore.user?.nickname || 'user');

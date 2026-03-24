@@ -282,8 +282,11 @@ const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
+const pendingTab = ref(null);
+
 const resetState = () => {
-  tab.value = 'profile';
+  tab.value = pendingTab.value ?? 'profile';
+  pendingTab.value = null;
   nickname.value = authStore.user?.nickname || '';
   nicknameError.value = '';
   nicknameMessage.value = '';
@@ -291,6 +294,7 @@ const resetState = () => {
   feedbacks.value = [];
   expandedFeedbackIds.value = new Set();
   confirmDeleteId.value = null;
+  if (tab.value === 'feedback') loadFeedback();
 };
 
 onMounted(() => {
@@ -301,7 +305,11 @@ const refreshReports = () => {
   if (tab.value === 'reports') loadReports();
 };
 
-defineExpose({ refreshReports });
+const openOnFeedback = () => {
+  pendingTab.value = 'feedback';
+};
+
+defineExpose({ refreshReports, openOnFeedback });
 </script>
 
 <style scoped lang="scss">

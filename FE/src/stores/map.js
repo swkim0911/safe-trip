@@ -5,6 +5,8 @@ export const useMapStore = defineStore('map', {
     selectedMarker: null,
     flyToTarget: null,
     pendingOpenExternalReportId: null,
+    returnToMyFeedback: false,
+    pendingReturnToMyFeedback: false,
   }),
   actions: {
     selectMarker(marker, groupBy) {
@@ -18,9 +20,17 @@ export const useMapStore = defineStore('map', {
     },
     requestOpenExternalReport(id) {
       this.pendingOpenExternalReportId = id;
+      this.returnToMyFeedback = true;
     },
     clearOpenExternalReport() {
       this.pendingOpenExternalReportId = null;
+    },
+    triggerReturnToMyFeedback() {
+      this.pendingReturnToMyFeedback = true;
+      this.returnToMyFeedback = false;
+    },
+    clearPendingReturnToMyFeedback() {
+      this.pendingReturnToMyFeedback = false;
     },
   }
 })
