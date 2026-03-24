@@ -138,18 +138,18 @@ const handleEditReport = (report) => {
   openReportEditModal();
 };
 
-const handleReportUpdated = () => {
-  myPageModalRef.value?.refreshReports();
+const handleReportUpdated = (reportId) => {
+  mapStore.requestOpenUserReportFromEdit(reportId);
 };
 
 const authStore = useAuthStore();
 const mapStore = useMapStore();
 
-watch(() => mapStore.pendingReturnToMyFeedback, (val) => {
-  if (!val) return;
-  myPageModalRef.value?.openOnFeedback();
+watch(() => mapStore.pendingReturnToMyPageTab, (tab) => {
+  if (!tab) return;
+  myPageModalRef.value?.openOnTab(tab);
   openMyPageModal();
-  mapStore.clearPendingReturnToMyFeedback();
+  mapStore.clearPendingReturnToMyPage();
 });
 const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
 const isAdmin = computed(() => authStore.user?.role === 'ADMIN');

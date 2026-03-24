@@ -6,8 +6,8 @@ export const useMapStore = defineStore('map', {
     flyToTarget: null,
     pendingOpenExternalReportId: null,
     pendingOpenUserReportId: null,
-    returnToMyFeedback: false,
-    pendingReturnToMyFeedback: false,
+    returnToMyPageTab: null,       // 'feedback' | 'reports' | null
+    pendingReturnToMyPageTab: null,
   }),
   actions: {
     selectMarker(marker, groupBy) {
@@ -21,7 +21,7 @@ export const useMapStore = defineStore('map', {
     },
     requestOpenExternalReport(id) {
       this.pendingOpenExternalReportId = id;
-      this.returnToMyFeedback = true;
+      this.returnToMyPageTab = 'feedback';
     },
     clearOpenExternalReport() {
       this.pendingOpenExternalReportId = null;
@@ -29,15 +29,19 @@ export const useMapStore = defineStore('map', {
     requestOpenUserReport(id) {
       this.pendingOpenUserReportId = id;
     },
+    requestOpenUserReportFromEdit(id) {
+      this.pendingOpenUserReportId = id;
+      this.returnToMyPageTab = 'reports';
+    },
     clearOpenUserReport() {
       this.pendingOpenUserReportId = null;
     },
-    triggerReturnToMyFeedback() {
-      this.pendingReturnToMyFeedback = true;
-      this.returnToMyFeedback = false;
+    triggerReturnToMyPage() {
+      this.pendingReturnToMyPageTab = this.returnToMyPageTab;
+      this.returnToMyPageTab = null;
     },
-    clearPendingReturnToMyFeedback() {
-      this.pendingReturnToMyFeedback = false;
+    clearPendingReturnToMyPage() {
+      this.pendingReturnToMyPageTab = null;
     },
   }
 })

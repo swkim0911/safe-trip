@@ -313,8 +313,8 @@ onMounted(() => {
   const el = document.getElementById('reportDetailModal');
   if (el) {
     el.addEventListener('hide.bs.modal', () => {
-      if (mapStore.returnToMyFeedback) {
-        mapStore.triggerReturnToMyFeedback();
+      if (mapStore.returnToMyPageTab) {
+        mapStore.triggerReturnToMyPage();
       }
     });
   }

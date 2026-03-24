@@ -275,6 +275,7 @@ const deleteReport = async (id) => {
 };
 
 const editReport = (report) => {
+  hide();
   emit('edit-report', report);
 };
 
@@ -295,6 +296,7 @@ const resetState = () => {
   expandedFeedbackIds.value = new Set();
   confirmDeleteId.value = null;
   if (tab.value === 'feedback') loadFeedback();
+  else if (tab.value === 'reports') loadReports();
 };
 
 onMounted(() => {
@@ -305,11 +307,11 @@ const refreshReports = () => {
   if (tab.value === 'reports') loadReports();
 };
 
-const openOnFeedback = () => {
-  pendingTab.value = 'feedback';
+const openOnTab = (tab) => {
+  pendingTab.value = tab;
 };
 
-defineExpose({ refreshReports, openOnFeedback });
+defineExpose({ refreshReports, openOnTab });
 </script>
 
 <style scoped lang="scss">

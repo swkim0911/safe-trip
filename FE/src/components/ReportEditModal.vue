@@ -69,7 +69,7 @@ const submitForm = async () => {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
-    emit('updated');
+    emit('updated', props.report.id);
     hide();
     toast.show('Report updated successfully.');
   } catch (e) {
