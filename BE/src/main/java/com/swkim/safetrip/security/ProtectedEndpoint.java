@@ -15,7 +15,8 @@ public enum ProtectedEndpoint {
     REPORT_INACCURACY("/v1/external-reports/*/inaccuracies", HttpMethod.POST),
     MY_REPORT_INACCURACY("/v1/external-reports/*/inaccuracies/my", HttpMethod.GET),
     ME_INACCURACIES("/v1/users/me/inaccuracies", HttpMethod.GET),
-    ADMIN_REPORT_INACCURACIES("/v1/admin/report-inaccuracies", HttpMethod.GET);
+    ADMIN_REPORT_INACCURACIES("/v1/admin/report-inaccuracies", HttpMethod.GET),
+    ADMIN_RESOLVE_INACCURACY("/v1/admin/report-inaccuracies/*/resolve", HttpMethod.PATCH);
 
     @Getter
     private final String path;

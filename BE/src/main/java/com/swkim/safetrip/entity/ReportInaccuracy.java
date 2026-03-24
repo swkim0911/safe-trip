@@ -1,12 +1,14 @@
 package com.swkim.safetrip.entity;
 
 import com.swkim.safetrip.entity.enums.ReportInaccuracyReason;
+import com.swkim.safetrip.entity.enums.ReportInaccuracyStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "report_inaccuracy",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "external_report_id"}))
+@Table(name = "report_inaccuracy")
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -31,4 +33,17 @@ public class ReportInaccuracy extends BaseEntity {
 
     @Column(length = 500)
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    @Builder.Default
+    private ReportInaccuracyStatus status = ReportInaccuracyStatus.PENDING;
+
+    @Column
+    private LocalDateTime resolvedAt;
+
+    public void resolve() {
+        this.status = ReportInaccuracyStatus.RESOLVED;
+        this.resolvedAt = LocalDateTime.now();
+    }
 }

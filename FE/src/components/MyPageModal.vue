@@ -80,6 +80,12 @@
                     {{ expandedFeedbackIds.has(item.id) ? 'Less' : 'More' }}
                   </button>
                 </div>
+                <div :class="item.status === 'RESOLVED' ? 'status-bar resolved' : 'status-bar pending'">
+                  <span class="status-label">Feedback Status</span>
+                  <span :class="item.status === 'RESOLVED' ? 'badge bg-success' : 'badge bg-secondary'" class="small">
+                    {{ item.status === 'RESOLVED' ? 'Resolved' : 'Under Review' }}
+                  </span>
+                </div>
               </li>
             </ul>
           </div>
@@ -381,5 +387,28 @@ defineExpose({ refreshReports, openOnTab });
   background: #fff5f5;
   border-radius: 6px;
   border: 1px solid #ffcccc;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+
+  &.resolved {
+    background: #f0faf4;
+  }
+
+  &.pending {
+    background: #f5f5f5;
+  }
+}
+
+.status-label {
+  color: #6c757d;
+  font-weight: 500;
 }
 </style>

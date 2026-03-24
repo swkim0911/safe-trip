@@ -55,4 +55,12 @@ public class ReportInaccuracyController {
         List<ReportInaccuracyItem> items = reportInaccuracyService.getInaccuracyReports();
         return ApiResult.of(HttpStatus.OK.value(), "Inaccuracy reports retrieved", items);
     }
+
+    @Operation(summary = "[Admin] 신고 처리 완료", description = "신고를 RESOLVED로 처리합니다 (ADMIN 전용)", security = @SecurityRequirement(name = "BearerAuth"))
+    @ResponseStatus(HttpStatus.OK)
+    @PatchMapping("/v1/admin/report-inaccuracies/{id}/resolve")
+    public ApiResult<Void> resolveInaccuracy(@PathVariable Long id) {
+        reportInaccuracyService.resolve(id);
+        return ApiResult.of(HttpStatus.OK.value(), "Inaccuracy report resolved", null);
+    }
 }

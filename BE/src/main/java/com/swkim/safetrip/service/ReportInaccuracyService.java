@@ -5,6 +5,7 @@ import com.swkim.safetrip.dto.response.ReportInaccuracyItem;
 import com.swkim.safetrip.entity.ExternalReport;
 import com.swkim.safetrip.entity.ReportInaccuracy;
 import com.swkim.safetrip.entity.User;
+import com.swkim.safetrip.entity.enums.ReportInaccuracyStatus;
 import com.swkim.safetrip.global.exception.custom.DuplicateReportInaccuracyException;
 import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
@@ -32,7 +33,8 @@ public class ReportInaccuracyService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
 
-        if (reportInaccuracyRepository.existsByExternalReportAndUser(externalReport, user)) {
+        if (reportInaccuracyRepository.existsByExternalReportAndUserAndStatus(
+                externalReport, user, ReportInaccuracyStatus.PENDING)) {
             throw new DuplicateReportInaccuracyException();
         }
 
@@ -52,21 +54,14 @@ public class ReportInaccuracyService {
                 .orElseThrow(ReportNotFoundException::new);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
-        return reportInaccuracyRepository.existsByExternalReportAndUser(externalReport, user);
+        return reportInaccuracyRepository.existsByExternalReportAndUserAndStatus(
+                externalReport, user, ReportInaccuracyStatus.PENDING);
     }
 
     @Transactional(readOnly = true)
     public List<ReportInaccuracyItem> getInaccuracyReports() {
         return reportInaccuracyRepository.findAllWithDetails().stream()
-                .map(ri -> new ReportInaccuracyItem(
-                        ri.getId(),
-                        ri.getExternalReport().getId(),
-                        ri.getExternalReport().getTitle(),
-                        ri.getUser().getNickname(),
-                        ri.getReason().name(),
-                        ri.getDescription(),
-                        ri.getCreatedAt()
-                ))
+                .map(this::toItem)
                 .toList();
     }
 
@@ -75,15 +70,28 @@ public class ReportInaccuracyService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
         return reportInaccuracyRepository.findAllByUser(user).stream()
-                .map(ri -> new ReportInaccuracyItem(
-                        ri.getId(),
-                        ri.getExternalReport().getId(),
-                        ri.getExternalReport().getTitle(),
-                        ri.getUser().getNickname(),
-                        ri.getReason().name(),
-                        ri.getDescription(),
-                        ri.getCreatedAt()
-                ))
+                .map(this::toItem)
                 .toList();
+    }
+
+    @Transactional
+    public void resolve(Long inaccuracyId) {
+        ReportInaccuracy inaccuracy = reportInaccuracyRepository.findById(inaccuracyId)
+                .orElseThrow(ReportNotFoundException::new);
+        inaccuracy.resolve();
+    }
+
+    private ReportInaccuracyItem toItem(ReportInaccuracy ri) {
+        return new ReportInaccuracyItem(
+                ri.getId(),
+                ri.getExternalReport().getId(),
+                ri.getExternalReport().getTitle(),
+                ri.getUser().getNickname(),
+                ri.getReason().name(),
+                ri.getDescription(),
+                ri.getStatus().name(),
+                ri.getResolvedAt(),
+                ri.getCreatedAt()
+        );
     }
 }

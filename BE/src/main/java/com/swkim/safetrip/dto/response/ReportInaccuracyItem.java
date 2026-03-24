@@ -9,5 +9,7 @@ public record ReportInaccuracyItem(
         String reporterNickname,
         String reason,
         String description,
+        String status,
+        LocalDateTime resolvedAt,
         LocalDateTime createdAt
 ) {}
