@@ -236,6 +236,11 @@
               <span v-else-if="selectedState.id">Reports from {{ selectedState.name }}</span>
               <span v-else>Reports from {{ selectedCountry.name }}</span>
             </h6>
+
+            <button class="btn btn-sm btn-outline-secondary position-absolute end-0 d-flex align-items-center gap-1" @click="toggleSortOrder">
+              <font-awesome-icon :icon="sortOrder === 'DESC' ? ['fas', 'arrow-down-wide-short'] : ['fas', 'arrow-up-wide-short']" />
+              <span style="font-size: 0.75rem;">{{ sortOrder === 'DESC' ? 'Newest' : 'Oldest' }}</span>
+            </button>
           </div>
           <div v-if="isLoadingReport && sidebarReports.length === 0" class="loading-spinner">
             <div class="spinner-border text-primary" role="status">
@@ -475,6 +480,21 @@ const isLoadingCity = ref(false);
 const reportPage = ref(0);
 const isLastReportPage = ref(false);
 const isLoadingReport = ref(false);
+const sortOrder = ref('DESC');
+
+const toggleSortOrder = () => {
+  sortOrder.value = sortOrder.value === 'DESC' ? 'ASC' : 'DESC';
+  reportPage.value = 0;
+  isLastReportPage.value = false;
+  sidebarReports.value = [];
+  if (selectedCity.id) {
+    showReportsByCity(selectedCity.id, selectedCity.name, 'click');
+  } else if (selectedState.id) {
+    loadReportsByState(selectedState.id, 'click');
+  } else {
+    loadReportsByCountry(selectedCountry.id, 'click');
+  }
+};
 
 const sidebarRef = ref(null);
 
@@ -703,10 +723,7 @@ const loadReportsByState = async (stateId, mode = 'click') => {
 
   try {
     const response = await apiClient.get(`/states/${stateId}/reports`, {
-      params: {
-        page: reportPage.value,
-        size: size
-      }
+      params: { page: reportPage.value, size, sort: `createdAt,${sortOrder.value}` }
     });
     
     const content = response.data.result.content;
@@ -739,10 +756,7 @@ const loadReportsByCountry = async (countryId, mode = 'click') => {
 
   try {
     const response = await apiClient.get(`/countries/${countryId}/reports`, {
-      params: {
-        page: reportPage.value,
-        size: size
-      }
+      params: { page: reportPage.value, size, sort: `createdAt,${sortOrder.value}` }
     });
     
     const content = response.data.result.content;
@@ -818,10 +832,7 @@ const showReportsByCity = async (cityId, cityName, mode = 'click') => {
 
   try {
     const response = await apiClient.get(`/cities/${cityId}/reports`, {
-      params: {
-        page: reportPage.value,
-        size: size
-      }
+      params: { page: reportPage.value, size, sort: `createdAt,${sortOrder.value}` }
     });
     const content = response.data.result.content;
     const last = response.data.result.last;
@@ -843,6 +854,7 @@ const goToParentView = (type) => {
 }
 
 const backFromReport = () => {
+  sortOrder.value = 'DESC';
   if (selectedCity.id) {
     // 도시에서 온 경우
     viewType.value = 'city';
