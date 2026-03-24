@@ -31,6 +31,11 @@
 
       <div class="sidebar-body" @scroll="onSidebarScroll" ref="sidebarRef">
         <template v-if="viewType === 'country'">
+          <div class="d-flex justify-content-end mb-2">
+            <select class="sort-select" v-model="listSort" @change="onListSortChange">
+              <option v-for="opt in listSortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
           <div v-if="isLoadingCountry && sidebarCountries.length === 0" class="loading-spinner">
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
@@ -64,14 +69,14 @@
         </template>
 
         <template v-else-if="viewType === 'state'">
-          <div class="d-flex align-items-center justify-content-center position-relative mb-3">
-            <button
-              class="btn position-absolute start-0"
-              @click="goToParentView('country')"
-            >
+          <div class="d-flex align-items-center mb-3 gap-2">
+            <button class="btn btn-sm p-0 me-1" @click="goToParentView('country')">
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
-            <h6 class="fw-bold mb-0 text-center">{{ selectedCountry.name }}</h6>
+            <h6 class="fw-bold mb-0 flex-grow-1 text-center">{{ selectedCountry.name }}</h6>
+            <select class="sort-select flex-shrink-0" v-model="listSort" @change="onListSortChange">
+              <option v-for="opt in listSortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
           </div>
 
           <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
@@ -169,14 +174,14 @@
 
 
         <template v-else-if="viewType === 'city'">
-          <div class="d-flex align-items-center justify-content-center position-relative mb-3">
-            <button
-              class="btn position-absolute start-0"
-              @click="goToParentView('state')"
-            >
+          <div class="d-flex align-items-center mb-3 gap-2">
+            <button class="btn btn-sm p-0 me-1" @click="goToParentView('state')">
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
-            <h6 class="fw-bold mb-0 text-center">Cities in {{ selectedState.name }}</h6>
+            <h6 class="fw-bold mb-0 flex-grow-1 text-center">Cities in {{ selectedState.name }}</h6>
+            <select class="sort-select flex-shrink-0" v-model="listSort" @change="onListSortChange">
+              <option v-for="opt in listSortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
           </div>
 
           <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
@@ -514,6 +519,23 @@ const isLastReportPage = ref(false);
 const isLoadingReport = ref(false);
 const sortOrder = ref('DESC');
 
+const listSort = ref('scamCnt,DESC');
+const listSortOptions = [
+  { label: 'Most Scams', value: 'scamCnt,DESC' },
+  { label: 'A → Z', value: 'name,ASC' },
+  { label: 'Z → A', value: 'name,DESC' },
+];
+
+const onListSortChange = () => {
+  if (viewType.value === 'country') {
+    loadCountriesWithStatistics('click');
+  } else if (viewType.value === 'state') {
+    showStatesByCountry(selectedCountry.id, 'click');
+  } else if (viewType.value === 'city') {
+    showCitiesByState(selectedState.id, 'click');
+  }
+};
+
 const toggleSortOrder = () => {
   sortOrder.value = sortOrder.value === 'DESC' ? 'ASC' : 'DESC';
   reportPage.value = 0;
@@ -658,7 +680,7 @@ const loadCountriesWithStatistics = async (mode = 'click') => {
         page: countryPage.value,
         size: size,
         // sort: "countryName,ASC"
-        sort: "scamCnt,DESC"
+        sort: listSort.value
       }
     });
     const content = response.data.result.content;
@@ -694,7 +716,7 @@ const showStatesByCountry = async (countryId, mode = 'click') => {
   try {
     const [statesRes] = await Promise.all([
       apiClient.get('/states/statistics', {
-        params: { countryId, page: statePage.value, size, sort: 'scamCnt,DESC' }
+        params: { countryId, page: statePage.value, size, sort: listSort.value }
       }),
       ...(mode === 'click' ? [loadCountryStats(countryId)] : []),
     ]);
@@ -827,7 +849,7 @@ const showCitiesByState = async (stateId, mode = 'click') => {
   isLoadingCity.value = true;
   try {
     const response = await apiClient.get('/cities/statistics', {
-      params: { stateId, page: cityPage.value, size, sort: 'scamCnt,DESC' }
+      params: { stateId, page: cityPage.value, size, sort: listSort.value }
     });
     const content = response.data.result.content;
     const last = response.data.result.last;
@@ -882,6 +904,7 @@ const showReportsByCity = async (cityId, cityName, mode = 'click') => {
 
 
 const goToParentView = (type) => {
+  listSort.value = 'scamCnt,DESC';
   viewType.value = type;
 }
 
@@ -1080,6 +1103,22 @@ $sidebar-width: 560px;
     background: #f1f3f5;
     transform: translateY(0);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.sort-select {
+  font-size: 0.75rem;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  padding: 3px 10px;
+  background: #fff;
+  cursor: pointer;
+  appearance: auto;
+
+  &:focus {
+    outline: none;
+    border-color: #adb5bd;
   }
 }
 

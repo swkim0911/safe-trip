@@ -93,14 +93,23 @@ public class UserReportService {
 
     @Transactional(readOnly = true)
     public UserReportDetailResponse getUserReport(Long id){
-        UserReportDetailResponse userReportDetailResponse
-                = userReportRepository.findReportDetailById(id).orElseThrow(ReportNotFoundException::new);// consider UserReport용 예외 만들까?
+        UserReport ur = userReportRepository.findDetailById(id).orElseThrow(ReportNotFoundException::new);
 
-        List<String> URLs = getImageUrlsById(id);
+        UserReportDetailResponse response = UserReportDetailResponse.builder()
+                .source(ur.getSource())
+                .nickname(ur.getUser().getNickname())
+                .scamAction(ur.getScamAction().getName())
+                .scamContext(ur.getScamContext().getName())
+                .countryName(ur.getCountry().getName())
+                .stateName(ur.getState() != null ? ur.getState().getName() : null)
+                .cityName(ur.getCity() != null ? ur.getCity().getName() : null)
+                .title(ur.getTitle())
+                .description(ur.getContent())
+                .createdAt(ur.getCreatedAt())
+                .build();
 
-        userReportDetailResponse.setURLs(URLs);
-
-        return userReportDetailResponse;
+        response.setURLs(getImageUrlsById(id));
+        return response;
     }
 
     private List<String> getImageUrlsById(Long id) {

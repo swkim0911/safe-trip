@@ -19,7 +19,7 @@ public class ReportJdbcRepository {
     private static final String findScamActionStatsSQL = """
         SELECT sa.name, COUNT(*) AS cnt
         FROM (
-            SELECT scam_action_id FROM user_report   WHERE scam_action_id IS NOT NULL
+            SELECT scam_action_id FROM user_report   WHERE scam_action_id IS NOT NULL AND deleted_at IS NULL
             UNION ALL
             SELECT scam_action_id FROM external_report WHERE scam_action_id IS NOT NULL
         ) r
@@ -31,7 +31,7 @@ public class ReportJdbcRepository {
     private static final String findScamActionStatsByCountrySQL = """
         SELECT sa.name, COUNT(*) AS cnt
         FROM (
-            SELECT scam_action_id FROM user_report   WHERE scam_action_id IS NOT NULL AND country_id = :countryId
+            SELECT scam_action_id FROM user_report   WHERE scam_action_id IS NOT NULL AND country_id = :countryId AND deleted_at IS NULL
             UNION ALL
             SELECT scam_action_id FROM external_report WHERE scam_action_id IS NOT NULL AND country_id = :countryId
         ) r
@@ -44,7 +44,7 @@ public class ReportJdbcRepository {
         SELECT id, name, 'COUNTRY' AS type, lat, lng, NULL AS country_id
         FROM countries WHERE name LIKE :q
           AND EXISTS (
-            SELECT 1 FROM user_report WHERE country_id = countries.id
+            SELECT 1 FROM user_report WHERE country_id = countries.id AND deleted_at IS NULL
             UNION ALL
             SELECT 1 FROM external_report WHERE country_id = countries.id
           )
@@ -52,7 +52,7 @@ public class ReportJdbcRepository {
         SELECT id, name, 'STATE', lat, lng, country_id
         FROM states WHERE name LIKE :q AND lat IS NOT NULL
           AND EXISTS (
-            SELECT 1 FROM user_report WHERE state_id = states.id
+            SELECT 1 FROM user_report WHERE state_id = states.id AND deleted_at IS NULL
             UNION ALL
             SELECT 1 FROM external_report WHERE state_id = states.id
           )
@@ -60,7 +60,7 @@ public class ReportJdbcRepository {
         SELECT id, name, 'CITY', lat, lng, country_id
         FROM cities WHERE name LIKE :q AND lat IS NOT NULL
           AND EXISTS (
-            SELECT 1 FROM user_report WHERE city_id = cities.id
+            SELECT 1 FROM user_report WHERE city_id = cities.id AND deleted_at IS NULL
             UNION ALL
             SELECT 1 FROM external_report WHERE city_id = cities.id
           )
@@ -70,7 +70,7 @@ public class ReportJdbcRepository {
     private static final String findScamContextStatsSQL = """
         SELECT sc.name, COUNT(*) AS cnt
         FROM (
-            SELECT scam_context_id FROM user_report   WHERE scam_context_id IS NOT NULL
+            SELECT scam_context_id FROM user_report   WHERE scam_context_id IS NOT NULL AND deleted_at IS NULL
             UNION ALL
             SELECT scam_context_id FROM external_report WHERE scam_context_id IS NOT NULL
         ) r
@@ -82,7 +82,7 @@ public class ReportJdbcRepository {
     private static final String findScamContextStatsByCountrySQL = """
         SELECT sc.name, COUNT(*) AS cnt
         FROM (
-            SELECT scam_context_id FROM user_report   WHERE scam_context_id IS NOT NULL AND country_id = :countryId
+            SELECT scam_context_id FROM user_report   WHERE scam_context_id IS NOT NULL AND country_id = :countryId AND deleted_at IS NULL
             UNION ALL
             SELECT scam_context_id FROM external_report WHERE scam_context_id IS NOT NULL AND country_id = :countryId
         ) r
@@ -93,14 +93,14 @@ public class ReportJdbcRepository {
 
     private static final String findCountryInfoSQL = """
         SELECT c.id, c.name, NULL AS lat, NULL AS lng,
-          (SELECT COUNT(*) FROM user_report WHERE country_id = c.id) +
+          (SELECT COUNT(*) FROM user_report WHERE country_id = c.id AND deleted_at IS NULL) +
           (SELECT COUNT(*) FROM external_report WHERE country_id = c.id) AS scam_cnt
         FROM countries c WHERE c.id = :id
     """;
 
     private static final String findStateInfoSQL = """
         SELECT s.id, s.name, NULL AS lat, NULL AS lng,
-          (SELECT COUNT(*) FROM user_report WHERE state_id = s.id) +
+          (SELECT COUNT(*) FROM user_report WHERE state_id = s.id AND deleted_at IS NULL) +
           (SELECT COUNT(*) FROM external_report WHERE state_id = s.id) AS scam_cnt
         FROM states s WHERE s.id = :id
     """;
@@ -108,7 +108,7 @@ public class ReportJdbcRepository {
     private static final String findCountryStatisticsSQL = """
         SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
         FROM (
-            SELECT country_id FROM user_report
+            SELECT country_id FROM user_report WHERE deleted_at IS NULL
             UNION ALL
             SELECT country_id FROM external_report
         ) r
@@ -119,7 +119,7 @@ public class ReportJdbcRepository {
     private static final String findStateStatisticsSQL = """
         SELECT s.id, s.name, s.lat, s.lng, COUNT(*) AS scam_cnt
         FROM (
-            SELECT state_id FROM user_report
+            SELECT state_id FROM user_report WHERE deleted_at IS NULL
             UNION ALL
             SELECT state_id FROM external_report
         ) r
@@ -131,7 +131,7 @@ public class ReportJdbcRepository {
     private static final String findCityStatisticsSQL = """
         SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
         FROM (
-            SELECT city_id FROM user_report
+            SELECT city_id FROM user_report WHERE deleted_at IS NULL
             UNION ALL
             SELECT city_id FROM external_report
         ) r
