@@ -318,6 +318,16 @@ onMounted(() => {
       }
     });
   }
+
+  const authEl = document.getElementById('authFormModal');
+  if (authEl) {
+    authEl.addEventListener('hide.bs.modal', () => {
+      if (mapStore.pendingReopenReportDetail) {
+        mapStore.clearReopenReportDetail();
+        show();
+      }
+    });
+  }
 });
 
 watch(() => mapStore.pendingOpenExternalReportId, async (reportId) => {

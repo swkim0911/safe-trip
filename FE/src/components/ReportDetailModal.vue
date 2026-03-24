@@ -45,13 +45,13 @@
               </div>
 
               <!-- Report Inaccuracy 영역 -->
-              <div v-if="report.source !== 'SAFETRIP' && authStore.accessToken" class="mt-2">
+              <div v-if="report.source !== 'SAFETRIP'" class="mt-2">
                 <span v-if="alreadySubmitted" class="text-muted small">✅ Feedback submitted</span>
                 <button
                   v-else-if="!showInaccuracyForm"
                   type="button"
                   class="btn btn-sm btn-outline-warning"
-                  @click="showInaccuracyForm = true"
+                  @click="handleInaccuracyClick"
                 >
                   ⚠️ Report Inaccuracy
                 </button>
@@ -157,12 +157,17 @@
 import { ref, watch, onMounted } from 'vue'
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import { useAuthStore } from '@/stores/auth';
+import { useMapStore } from '@/stores/map';
+import { useToast } from '@/composables/useToast';
 import apiClient from '@/api/apiClient';
 
 const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
 
 const authStore = useAuthStore();
+const mapStore = useMapStore();
+const toast = useToast();
+const { show: openAuthModal } = useBootstrapModal('#authFormModal');
 const selectedImage = ref(null);
 
 const alreadySubmitted = ref(false);
@@ -196,6 +201,17 @@ const cancelInaccuracy = () => {
   showInaccuracyForm.value = false;
   inaccuracyReason.value = '';
   inaccuracyDescription.value = '';
+};
+
+const handleInaccuracyClick = () => {
+  if (!authStore.accessToken) {
+    toast.show('Login is required to report inaccuracies.');
+    mapStore.requestReopenReportDetail();
+    hide();
+    openAuthModal();
+    return;
+  }
+  showInaccuracyForm.value = true;
 };
 
 const submitInaccuracy = async () => {

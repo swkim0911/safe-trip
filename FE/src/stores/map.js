@@ -8,6 +8,7 @@ export const useMapStore = defineStore('map', {
     pendingOpenUserReportId: null,
     returnToMyPageTab: null,       // 'feedback' | 'reports' | null
     pendingReturnToMyPageTab: null,
+    pendingReopenReportDetail: false,
   }),
   actions: {
     selectMarker(marker, groupBy) {
@@ -42,6 +43,12 @@ export const useMapStore = defineStore('map', {
     },
     clearPendingReturnToMyPage() {
       this.pendingReturnToMyPageTab = null;
+    },
+    requestReopenReportDetail() {
+      this.pendingReopenReportDetail = true;
+    },
+    clearReopenReportDetail() {
+      this.pendingReopenReportDetail = false;
     },
   }
 })
