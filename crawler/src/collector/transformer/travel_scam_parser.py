@@ -72,9 +72,11 @@ class TravelScamParser:
 
                     parsed_items = self.safe_json_loads(text)
                     raw_doc = self.reddit_repository.find_raw_document_by_reddit_id(reddit_id)
-                    for item in parsed_items:
-                        now = datetime.now(UTC)
+                    now = datetime.now(UTC)
 
+                    if not parsed_items:
+                        # OpenAI가 빈 배열 반환 → 재제출 방지용 마커 저장
+                        self.logger.info("(parsing) %s 빈 결과 — empty_result 마킹", reddit_id)
                         parsing_results.append({
                             "reddit_id": reddit_id,
                             "source": "reddit",
@@ -83,16 +85,7 @@ class TravelScamParser:
                             "posted_at": raw_doc.get("posted_at"),
                             "created_at": now,
                             "updated_at": now,
-                            "title": item.get("title"),
-                            "action": item.get("action"),
-                            "context": item.get("context"),
-                            "summary": item.get("summary"),
-                            "country_name": item.get("country"),
-                            "state_name": item.get("state"),
-                            "city_name": item.get("city"),
-                            "country_id": None,
-                            "state_id": None,
-                            "city_id": None,
+                            "empty_result": True,
                             "parsing": {
                                 "model_name": self.config.MODEL_NAME,
                                 "parsing_prompt_version": self.config.PARSING_PROMPT_VERSION,
@@ -100,6 +93,33 @@ class TravelScamParser:
                                 "location_enriched": False,
                             },
                         })
+                    else:
+                        for item in parsed_items:
+                            parsing_results.append({
+                                "reddit_id": reddit_id,
+                                "source": "reddit",
+                                "url": raw_doc.get("url"),
+                                "author": raw_doc.get("author"),
+                                "posted_at": raw_doc.get("posted_at"),
+                                "created_at": now,
+                                "updated_at": now,
+                                "title": item.get("title"),
+                                "action": item.get("action"),
+                                "context": item.get("context"),
+                                "summary": item.get("summary"),
+                                "country_name": item.get("country"),
+                                "state_name": item.get("state"),
+                                "city_name": item.get("city"),
+                                "country_id": None,
+                                "state_id": None,
+                                "city_id": None,
+                                "parsing": {
+                                    "model_name": self.config.MODEL_NAME,
+                                    "parsing_prompt_version": self.config.PARSING_PROMPT_VERSION,
+                                    "parsed_at": now,
+                                    "location_enriched": False,
+                                },
+                            })
 
                     if len(parsing_results) >= self.config.BATCH_SIZE:
                         self.reddit_repository.flush_parsing_results(parsing_results)

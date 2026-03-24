@@ -30,7 +30,7 @@ public class ReportNativeRepository {
         String sql = String.format("""
             SELECT c.id, c.name, c.lat, c.lng, c.iso2, COUNT(*) AS scam_cnt
             FROM (
-                SELECT country_id FROM user_report
+                SELECT country_id FROM user_report WHERE deleted_at IS NULL
                 UNION ALL
                 SELECT country_id FROM external_report
             ) r
@@ -67,7 +67,7 @@ public class ReportNativeRepository {
         String sql = String.format("""
             SELECT s.id, s.name, s.lat, s.lng, COUNT(*) AS scam_cnt
             FROM (
-                SELECT state_id FROM user_report WHERE country_id = :countryId
+                SELECT state_id FROM user_report WHERE country_id = :countryId AND deleted_at IS NULL
                 UNION ALL
                 SELECT state_id FROM external_report WHERE country_id = :countryId
             ) r
@@ -104,7 +104,7 @@ public class ReportNativeRepository {
         String sql = String.format("""
             SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
             FROM (
-                SELECT city_id FROM user_report WHERE state_id = :stateId
+                SELECT city_id FROM user_report WHERE state_id = :stateId AND deleted_at IS NULL
                 UNION ALL
                 SELECT city_id FROM external_report WHERE state_id = :stateId
             ) r
@@ -141,7 +141,7 @@ public class ReportNativeRepository {
         String sql = String.format("""
                 SELECT r.id, r.source, r.title, sa.name as scam_action_name, sc.name as scam_context_name, r.created_at
                 FROM (
-                    SELECT id, source, title, scam_action_id, scam_context_id, created_at FROM user_report WHERE country_id = :countryId
+                    SELECT id, source, title, scam_action_id, scam_context_id, created_at FROM user_report WHERE country_id = :countryId AND deleted_at IS NULL
                     UNION ALL
                     SELECT id, source, title, scam_action_id, scam_context_id, posted_at as created_at FROM external_report WHERE country_id = :countryId
                 ) r
@@ -176,7 +176,7 @@ public class ReportNativeRepository {
         String sql = String.format("""
                 SELECT r.id, r.source, r.title, sa.name as scam_action_name, sc.name as scam_context_name, r.created_at
                 FROM (
-                    SELECT id, source, title, scam_action_id, scam_context_id, created_at FROM user_report WHERE state_id = :stateId
+                    SELECT id, source, title, scam_action_id, scam_context_id, created_at FROM user_report WHERE state_id = :stateId AND deleted_at IS NULL
                     UNION ALL
                     SELECT id, source, title, scam_action_id, scam_context_id, posted_at as created_at FROM external_report WHERE state_id = :stateId
                 ) r
@@ -211,7 +211,7 @@ public class ReportNativeRepository {
         String sql = String.format("""
                 SELECT r.id, r.source, r.title, sa.name as scam_action_name, sc.name as scam_context_name, r.created_at
                 FROM (
-                    SELECT id, source, title, scam_action_id, scam_context_id, created_at FROM user_report WHERE city_id = :cityId
+                    SELECT id, source, title, scam_action_id, scam_context_id, created_at FROM user_report WHERE city_id = :cityId AND deleted_at IS NULL
                     UNION ALL
                     SELECT id, source, title, scam_action_id, scam_context_id, posted_at as created_at FROM external_report WHERE city_id = :cityId
                 ) r
@@ -293,6 +293,7 @@ public class ReportNativeRepository {
         Map<String, String> SORT_MAPPING = Map.of(
                 "countryName", "c.name",
                 "stateName", "s.name",
+                "name", "name",
                 "scamCnt", "scam_cnt",
                 "createdAt", "created_at"
         );

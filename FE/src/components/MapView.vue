@@ -76,6 +76,12 @@
                 My Page
               </button>
             </li>
+            <li v-if="isAdmin">
+              <button class="dropdown-item" @click="openAdminModal">
+                <font-awesome-icon :icon="['fas', 'shield-halved']" class="icon"/>
+                Admin
+              </button>
+            </li>
             <li><hr class="dropdown-divider"></li>
             <li>
               <button class="dropdown-item" @click="logout">
@@ -91,6 +97,7 @@
     <AuthFormModal/>
     <MyPageModal ref="myPageModalRef" @edit-report="handleEditReport"/>
     <ReportEditModal :report="editingReport" @updated="handleReportUpdated"/>
+    <AdminModal ref="adminModalRef"/>
     <AppToast/>
   </div>
 </template>
@@ -106,6 +113,7 @@ import ReportFormModal from './ReportFormModal.vue';
 import AuthFormModal from './AuthFormModal.vue';
 import MyPageModal from './MyPageModal.vue';
 import ReportEditModal from './ReportEditModal.vue';
+import AdminModal from './AdminModal.vue';
 import AppToast from './AppToast.vue';
 import apiClient from '@/api/apiClient';
 import "leaflet/dist/leaflet.css";
@@ -114,22 +122,37 @@ const { show: openAuthModal } = useBootstrapModal('#authFormModal');
 const { show: openReportFormModal } = useBootstrapModal('#reportFormModal');
 const { show: openMyPageModal } = useBootstrapModal('#myPageModal');
 const { show: openReportEditModal } = useBootstrapModal('#reportEditModal');
+const { show: showAdminModal } = useBootstrapModal('#adminModal');
 
 const myPageModalRef = ref(null);
+const adminModalRef = ref(null);
 const editingReport = ref(null);
+
+const openAdminModal = () => {
+  adminModalRef.value?.load();
+  showAdminModal();
+};
 
 const handleEditReport = (report) => {
   editingReport.value = report;
   openReportEditModal();
 };
 
-const handleReportUpdated = () => {
-  myPageModalRef.value?.refreshReports();
+const handleReportUpdated = (reportId) => {
+  mapStore.requestOpenUserReportFromEdit(reportId);
 };
 
 const authStore = useAuthStore();
 const mapStore = useMapStore();
+
+watch(() => mapStore.pendingReturnToMyPageTab, (tab) => {
+  if (!tab) return;
+  myPageModalRef.value?.openOnTab(tab);
+  openMyPageModal();
+  mapStore.clearPendingReturnToMyPage();
+});
 const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
+const isAdmin = computed(() => authStore.user?.role === 'ADMIN');
 const nickname = computed(() => authStore.user?.nickname || 'user');
 
 const map = ref(null);

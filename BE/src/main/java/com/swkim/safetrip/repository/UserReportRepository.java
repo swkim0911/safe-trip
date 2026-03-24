@@ -1,6 +1,5 @@
 package com.swkim.safetrip.repository;
 
-import com.swkim.safetrip.dto.response.UserReportDetailResponse;
 import com.swkim.safetrip.entity.UserReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,28 +13,16 @@ import java.util.Optional;
 public interface UserReportRepository extends JpaRepository<UserReport, Long>{
 
     @Query("""
-    select new com.swkim.safetrip.dto.response.UserReportDetailResponse(
-        ur.source,
-        u.nickname,
-        sa.name,
-        sc.name,
-        co.name,
-        st.name,
-        ci.name,
-        ur.title,
-        ur.content,
-        ur.createdAt
-    )
-    from UserReport ur
-    join ur.user u
-    join ur.scamAction sa
-    join ur.scamContext sc
-    join ur.country co
-    join ur.state st
-    join ur.city ci
+    select ur from UserReport ur
+    join fetch ur.user
+    join fetch ur.scamAction
+    join fetch ur.scamContext
+    join fetch ur.country
+    left join fetch ur.state
+    left join fetch ur.city
     where ur.id = :id and ur.deletedAt is null
     """)
-    Optional<UserReportDetailResponse> findReportDetailById(@Param("id") Long id);
+    Optional<UserReport> findDetailById(@Param("id") Long id);
 
     @Query("""
     select ur from UserReport ur

@@ -27,6 +27,11 @@
             :class="{ active: tab === 'reports' }"
             @click="switchToReports"
           >My Reports</button>
+          <button
+            class="tab-btn"
+            :class="{ active: tab === 'feedback' }"
+            @click="switchToFeedback"
+          >My Feedback</button>
         </div>
 
         <div class="modal-body">
@@ -53,6 +58,36 @@
             <div v-if="nicknameMessage" class="mt-2 small text-danger">
               {{ nicknameMessage }}
             </div>
+          </div>
+
+          <!-- My Feedback 탭 -->
+          <div v-else-if="tab === 'feedback'">
+            <div v-if="isLoadingFeedback" class="text-center py-4 text-muted">Loading...</div>
+            <div v-else-if="feedbacks.length === 0" class="text-center py-4 text-muted">
+              No feedback submitted yet.
+            </div>
+            <ul v-else class="report-list">
+              <li v-for="item in feedbacks" :key="item.id" class="report-item">
+                <div class="report-title feedback-title" @click="openFeedbackReport(item)">{{ item.externalReportTitle }}</div>
+                <hr class="my-2" />
+                <div class="d-flex align-items-center justify-content-between">
+                  <span class="badge bg-warning text-dark small">{{ formatReason(item.reason) }}</span>
+                  <span class="text-muted small">{{ formatDate(item.createdAt) }}</span>
+                </div>
+                <div v-if="item.description" class="text-muted small mt-1">
+                  <div style="white-space: pre-wrap; overflow-wrap: break-word;">{{ getDisplayDescription(item) }}</div>
+                  <button v-if="isLongDescription(item.description)" class="btn btn-link btn-sm p-0" style="font-size: 0.75rem;" @click="toggleExpand(item.id)">
+                    {{ expandedFeedbackIds.has(item.id) ? 'Less' : 'More' }}
+                  </button>
+                </div>
+                <div :class="item.status === 'RESOLVED' ? 'status-bar resolved' : 'status-bar pending'">
+                  <span class="status-label">Feedback Status</span>
+                  <span :class="item.status === 'RESOLVED' ? 'badge bg-success' : 'badge bg-secondary'" class="small">
+                    {{ item.status === 'RESOLVED' ? 'Resolved' : 'Under Review' }}
+                  </span>
+                </div>
+              </li>
+            </ul>
           </div>
 
           <!-- My Reports 탭 -->
@@ -93,6 +128,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useMapStore } from '@/stores/map';
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from '@/composables/useToast';
@@ -101,6 +137,7 @@ import apiClient from '@/api/apiClient';
 const emit = defineEmits(['edit-report']);
 
 const authStore = useAuthStore();
+const mapStore = useMapStore();
 const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
 const toast = useToast();
@@ -142,6 +179,70 @@ const saveNickname = async () => {
   }
 };
 
+// My Feedback
+const feedbacks = ref([]);
+const isLoadingFeedback = ref(false);
+const expandedFeedbackIds = ref(new Set());
+
+const switchToFeedback = () => {
+  tab.value = 'feedback';
+  loadFeedback();
+};
+
+const loadFeedback = async () => {
+  isLoadingFeedback.value = true;
+  try {
+    const res = await apiClient.get('/users/me/inaccuracies');
+    feedbacks.value = res.data.result;
+  } catch (e) {
+    console.error('Failed to load feedback', e);
+  } finally {
+    isLoadingFeedback.value = false;
+  }
+};
+
+const reasonLabels = {
+  WRONG_LOCATION: 'Wrong Location',
+  WRONG_SCAM_TYPE: 'Wrong Scam Type',
+  NOT_A_SCAM: 'Not a Scam',
+  INACCURATE_CONTENT: 'Inaccurate Content',
+  OTHER: 'Other',
+};
+
+const formatReason = (reason) => reasonLabels[reason] ?? reason;
+
+const MAX_LINES = 3;
+const MAX_CHARS = 150;
+
+const isLongDescription = (text) => text.split('\n').length > MAX_LINES || text.length > MAX_CHARS;
+
+const getDisplayDescription = (item) => {
+  if (expandedFeedbackIds.value.has(item.id) || !isLongDescription(item.description)) {
+    return item.description;
+  }
+  const byLines = item.description.split('\n').slice(0, MAX_LINES).join('\n');
+  const truncated = byLines.length > MAX_CHARS ? byLines.slice(0, MAX_CHARS) : byLines;
+  return truncated + '...';
+};
+
+const openFeedbackReport = async (item) => {
+  try {
+    await apiClient.get(`/external-reports/${item.externalReportId}`);
+    hide();
+    mapStore.requestOpenExternalReport(item.externalReportId);
+  } catch (e) {
+    if (e.response?.status === 404) {
+      toast.show('This report is no longer available.');
+    }
+  }
+};
+
+const toggleExpand = (id) => {
+  const next = new Set(expandedFeedbackIds.value);
+  next.has(id) ? next.delete(id) : next.add(id);
+  expandedFeedbackIds.value = next;
+};
+
 // My Reports
 const reports = ref([]);
 const isLoadingReports = ref(false);
@@ -180,6 +281,7 @@ const deleteReport = async (id) => {
 };
 
 const editReport = (report) => {
+  hide();
   emit('edit-report', report);
 };
 
@@ -187,13 +289,20 @@ const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
+const pendingTab = ref(null);
+
 const resetState = () => {
-  tab.value = 'profile';
+  tab.value = pendingTab.value ?? 'profile';
+  pendingTab.value = null;
   nickname.value = authStore.user?.nickname || '';
   nicknameError.value = '';
   nicknameMessage.value = '';
   reports.value = [];
+  feedbacks.value = [];
+  expandedFeedbackIds.value = new Set();
   confirmDeleteId.value = null;
+  if (tab.value === 'feedback') loadFeedback();
+  else if (tab.value === 'reports') loadReports();
 };
 
 onMounted(() => {
@@ -204,7 +313,11 @@ const refreshReports = () => {
   if (tab.value === 'reports') loadReports();
 };
 
-defineExpose({ refreshReports });
+const openOnTab = (tab) => {
+  pendingTab.value = tab;
+};
+
+defineExpose({ refreshReports, openOnTab });
 </script>
 
 <style scoped lang="scss">
@@ -255,6 +368,16 @@ defineExpose({ refreshReports });
   color: #212529;
 }
 
+.feedback-title {
+  cursor: pointer;
+  margin-bottom: 0;
+
+  &:hover {
+    color: #0d6efd;
+    text-decoration: underline;
+  }
+}
+
 .report-actions {
   display: flex;
 }
@@ -264,5 +387,28 @@ defineExpose({ refreshReports });
   background: #fff5f5;
   border-radius: 6px;
   border: 1px solid #ffcccc;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+
+  &.resolved {
+    background: #f0faf4;
+  }
+
+  &.pending {
+    background: #f5f5f5;
+  }
+}
+
+.status-label {
+  color: #6c757d;
+  font-weight: 500;
 }
 </style>

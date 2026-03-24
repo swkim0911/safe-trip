@@ -2,12 +2,14 @@ package com.swkim.safetrip.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "external_report")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ExternalReport extends BaseReport {
 

@@ -31,6 +31,11 @@
 
       <div class="sidebar-body" @scroll="onSidebarScroll" ref="sidebarRef">
         <template v-if="viewType === 'country'">
+          <div class="d-flex justify-content-end mb-2">
+            <select class="sort-select" v-model="listSort" @change="onListSortChange">
+              <option v-for="opt in listSortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
           <div v-if="isLoadingCountry && sidebarCountries.length === 0" class="loading-spinner">
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
@@ -64,14 +69,14 @@
         </template>
 
         <template v-else-if="viewType === 'state'">
-          <div class="d-flex align-items-center justify-content-center position-relative mb-3">
-            <button
-              class="btn position-absolute start-0"
-              @click="goToParentView('country')"
-            >
+          <div class="d-flex align-items-center mb-3 gap-2">
+            <button class="btn btn-sm p-0 me-1" @click="goToParentView('country')">
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
-            <h6 class="fw-bold mb-0 text-center">{{ selectedCountry.name }}</h6>
+            <h6 class="fw-bold mb-0 flex-grow-1 text-center">{{ selectedCountry.name }}</h6>
+            <select class="sort-select flex-shrink-0" v-model="listSort" @change="onListSortChange">
+              <option v-for="opt in listSortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
           </div>
 
           <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
@@ -169,14 +174,14 @@
 
 
         <template v-else-if="viewType === 'city'">
-          <div class="d-flex align-items-center justify-content-center position-relative mb-3">
-            <button
-              class="btn position-absolute start-0"
-              @click="goToParentView('state')"
-            >
+          <div class="d-flex align-items-center mb-3 gap-2">
+            <button class="btn btn-sm p-0 me-1" @click="goToParentView('state')">
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
-            <h6 class="fw-bold mb-0 text-center">Cities in {{ selectedState.name }}</h6>
+            <h6 class="fw-bold mb-0 flex-grow-1 text-center">Cities in {{ selectedState.name }}</h6>
+            <select class="sort-select flex-shrink-0" v-model="listSort" @change="onListSortChange">
+              <option v-for="opt in listSortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
           </div>
 
           <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
@@ -223,19 +228,21 @@
         </template>
 
         <template v-else-if="viewType === 'report'">
-          <div class="d-flex align-items-center justify-content-center position-relative mb-2">
-            <button
-              class="btn position-absolute start-0"
-              @click="backFromReport"
-            >
+          <div class="d-flex align-items-center mb-3 gap-2">
+            <button class="btn btn-sm p-0 me-1" @click="backFromReport">
               <font-awesome-icon :icon="['fas', 'chevron-left']" />
             </button>
 
-            <h6 class="fw-bold mb-0 text-center">
+            <h6 class="fw-bold mb-0 flex-grow-1 text-center">
               <span v-if="selectedCity.id">Reports from {{ selectedCity.name }}</span>
               <span v-else-if="selectedState.id">Reports from {{ selectedState.name }}</span>
               <span v-else>Reports from {{ selectedCountry.name }}</span>
             </h6>
+
+            <button class="sort-btn d-flex align-items-center gap-1 flex-shrink-0" @click="toggleSortOrder">
+              <font-awesome-icon :icon="sortOrder === 'DESC' ? ['fas', 'arrow-down-wide-short'] : ['fas', 'arrow-up-wide-short']" />
+              <span>{{ sortOrder === 'DESC' ? 'Newest' : 'Oldest' }}</span>
+            </button>
           </div>
           <div v-if="isLoadingReport && sidebarReports.length === 0" class="loading-spinner">
             <div class="spinner-border text-primary" role="status">
@@ -254,11 +261,11 @@
               @click="openReportDetailModal(report.source, report.reportId)"
             >
               <span class="badge bg-primary position-absolute top-0 end-0 translate-middle-y me-2">
-                {{ report.source === 'SAFETRIP' ? 'SAFETRIP' : '🤖 AI Bot' }}
+                {{ report.source === 'SAFETRIP' ? '✍️ SafeTrip' : '🤖 AI Bot' }}
               </span>
 
               <div class="fw-bold mb-1 mt-3 d-flex align-items-start">
-                <font-awesome-icon :icon="['fas', 'shield-alt']" class="me-2 text-danger mt-1" />
+                <font-awesome-icon :icon="['fas', 'shield-alt']" class="me-2 text-danger mt-1 flex-shrink-0" />
                 <span>{{ report.title }}</span>
               </div>
 
@@ -303,6 +310,41 @@ import dayjs from 'dayjs'
 const { show } = useBootstrapModal('#reportDetailModal');
 
 const mapStore = useMapStore();
+
+onMounted(() => {
+  const el = document.getElementById('reportDetailModal');
+  if (el) {
+    el.addEventListener('hide.bs.modal', () => {
+      if (mapStore.returnToMyPageTab) {
+        mapStore.triggerReturnToMyPage();
+      }
+    });
+  }
+
+  const authEl = document.getElementById('authFormModal');
+  if (authEl) {
+    authEl.addEventListener('hide.bs.modal', () => {
+      if (mapStore.pendingReopenReportDetail) {
+        mapStore.clearReopenReportDetail();
+        show();
+      }
+    });
+  }
+});
+
+watch(() => mapStore.pendingOpenExternalReportId, async (reportId) => {
+  if (!reportId) return;
+  await loadExternalReportDetailInfo(reportId);
+  show();
+  mapStore.clearOpenExternalReport();
+});
+
+watch(() => mapStore.pendingOpenUserReportId, async (reportId) => {
+  if (!reportId) return;
+  await loadUserReportDetailInfo(reportId);
+  show();
+  mapStore.clearOpenUserReport();
+});
 
 watch(() => mapStore.selectedMarker, (marker) => {
   if (!marker) return;
@@ -475,6 +517,34 @@ const isLoadingCity = ref(false);
 const reportPage = ref(0);
 const isLastReportPage = ref(false);
 const isLoadingReport = ref(false);
+const sortOrder = ref('DESC');
+
+const listSort = ref('scamCnt,DESC');
+const listSortOptions = [
+  { label: 'Most Scams', value: 'scamCnt,DESC' },
+  { label: 'A → Z', value: 'name,ASC' },
+  { label: 'Z → A', value: 'name,DESC' },
+];
+
+const onListSortChange = () => {
+  if (viewType.value === 'country') loadCountriesWithStatistics('click');
+  else if (viewType.value === 'state') showStatesByCountry(selectedCountry.id, 'click');
+  else if (viewType.value === 'city') showCitiesByState(selectedState.id, 'click');
+};
+
+const toggleSortOrder = () => {
+  sortOrder.value = sortOrder.value === 'DESC' ? 'ASC' : 'DESC';
+  reportPage.value = 0;
+  isLastReportPage.value = false;
+  sidebarReports.value = [];
+  if (selectedCity.id) {
+    showReportsByCity(selectedCity.id, selectedCity.name, 'click');
+  } else if (selectedState.id) {
+    loadReportsByState(selectedState.id, 'click');
+  } else {
+    loadReportsByCountry(selectedCountry.id, 'click');
+  }
+};
 
 const sidebarRef = ref(null);
 
@@ -531,8 +601,9 @@ function mapUserReportDetail(result) {
   })
 }
 
-function mapExternalReportDetail(result) {
+function mapExternalReportDetail(result, reportId) {
   Object.assign(selectedReport, {
+    reportId,
     source: result.source,
     sourceUrl: result.sourceUrl,
     author: result.author,
@@ -571,9 +642,8 @@ const loadUserReportDetailInfo = async (reportId) => {
 const loadExternalReportDetailInfo = async (reportId) => {
   try {
     const response = await apiClient.get(`/external-reports/${reportId}`);
-
     const result = response.data.result;
-    mapExternalReportDetail(result);
+    mapExternalReportDetail(result, reportId);
 
   } catch (e) {
     console.error('API 요청 실패:', e);
@@ -606,7 +676,7 @@ const loadCountriesWithStatistics = async (mode = 'click') => {
         page: countryPage.value,
         size: size,
         // sort: "countryName,ASC"
-        sort: "scamCnt,DESC"
+        sort: listSort.value
       }
     });
     const content = response.data.result.content;
@@ -626,6 +696,7 @@ const showStatesByCountry = async (countryId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingState.value || isLastStatePage.value)) return;
 
   if (mode === 'click') {
+    if (viewType.value !== 'state') listSort.value = 'scamCnt,DESC';
     const res = await apiClient.get(`/countries/${countryId}/info`);
     const info = res.data.result;
     selectedCountry.id = countryId;
@@ -642,7 +713,7 @@ const showStatesByCountry = async (countryId, mode = 'click') => {
   try {
     const [statesRes] = await Promise.all([
       apiClient.get('/states/statistics', {
-        params: { countryId, page: statePage.value, size, sort: 'scamCnt,DESC' }
+        params: { countryId, page: statePage.value, size, sort: listSort.value }
       }),
       ...(mode === 'click' ? [loadCountryStats(countryId)] : []),
     ]);
@@ -703,10 +774,7 @@ const loadReportsByState = async (stateId, mode = 'click') => {
 
   try {
     const response = await apiClient.get(`/states/${stateId}/reports`, {
-      params: {
-        page: reportPage.value,
-        size: size
-      }
+      params: { page: reportPage.value, size, sort: `createdAt,${sortOrder.value}` }
     });
     
     const content = response.data.result.content;
@@ -739,10 +807,7 @@ const loadReportsByCountry = async (countryId, mode = 'click') => {
 
   try {
     const response = await apiClient.get(`/countries/${countryId}/reports`, {
-      params: {
-        page: reportPage.value,
-        size: size
-      }
+      params: { page: reportPage.value, size, sort: `createdAt,${sortOrder.value}` }
     });
     
     const content = response.data.result.content;
@@ -768,6 +833,7 @@ const showCitiesByState = async (stateId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
 
   if (mode === 'click') {
+    if (viewType.value !== 'city') listSort.value = 'scamCnt,DESC';
     const res = await apiClient.get(`/states/${stateId}/info`);
     const info = res.data.result;
     selectedState.id = stateId;
@@ -781,7 +847,7 @@ const showCitiesByState = async (stateId, mode = 'click') => {
   isLoadingCity.value = true;
   try {
     const response = await apiClient.get('/cities/statistics', {
-      params: { stateId, page: cityPage.value, size, sort: 'scamCnt,DESC' }
+      params: { stateId, page: cityPage.value, size, sort: listSort.value }
     });
     const content = response.data.result.content;
     const last = response.data.result.last;
@@ -818,10 +884,7 @@ const showReportsByCity = async (cityId, cityName, mode = 'click') => {
 
   try {
     const response = await apiClient.get(`/cities/${cityId}/reports`, {
-      params: {
-        page: reportPage.value,
-        size: size
-      }
+      params: { page: reportPage.value, size, sort: `createdAt,${sortOrder.value}` }
     });
     const content = response.data.result.content;
     const last = response.data.result.last;
@@ -839,10 +902,14 @@ const showReportsByCity = async (cityId, cityName, mode = 'click') => {
 
 
 const goToParentView = (type) => {
+  listSort.value = 'scamCnt,DESC';
   viewType.value = type;
+  if (type === 'country') loadCountriesWithStatistics('click');
+  else if (type === 'state') showStatesByCountry(selectedCountry.id, 'click');
 }
 
 const backFromReport = () => {
+  sortOrder.value = 'DESC';
   if (selectedCity.id) {
     // 도시에서 온 경우
     viewType.value = 'city';
@@ -1003,7 +1070,7 @@ $sidebar-width: 560px;
 
 .sidebar-body {
   padding-left: 4px;
-  padding-right: 4px;
+  padding-right: 8px;
   overflow-y: auto;
   overscroll-behavior: contain; /* 스크롤 범위를 벗어나면 움직이지 않게 */
 }
@@ -1037,6 +1104,44 @@ $sidebar-width: 560px;
     transform: translateY(0);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   }
+}
+
+.sort-select {
+  font-size: 0.75rem;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  padding: 3px 10px;
+  background: #fff;
+  cursor: pointer;
+  appearance: auto;
+
+  &:focus {
+    outline: none;
+    border-color: #adb5bd;
+  }
+}
+
+.sort-btn {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  font-size: 0.75rem;
+  color: #495057;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: #f1f3f5;
+    border-color: #adb5bd;
+    color: #212529;
+  }
+}
+
+.source-tag {
+  font-size: 0.72rem;
+  color: #6c757d;
 }
 
 .report-cta {
