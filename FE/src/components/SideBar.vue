@@ -583,8 +583,9 @@ const openReportDetailModal = (source, reportId) => {
   show();
 }
 
-function mapUserReportDetail(result) {
+function mapUserReportDetail(result, reportId) {
   Object.assign(selectedReport, {
+    reportId,
     source: result.source,
     sourceUrl: '',
     author: '',
@@ -628,7 +629,7 @@ const loadUserReportDetailInfo = async (reportId) => {
     const response = await apiClient.get(`/user-reports/${reportId}`);
 
     const result = response.data.result;
-    mapUserReportDetail(result);
+    mapUserReportDetail(result, reportId);
 
   } catch (e) {
     console.error('API 요청 실패:', e);
