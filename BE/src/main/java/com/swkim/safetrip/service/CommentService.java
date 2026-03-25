@@ -5,8 +5,11 @@ import com.swkim.safetrip.dto.request.CommentUpdateRequest;
 import com.swkim.safetrip.dto.response.CommentItem;
 import com.swkim.safetrip.entity.Comment;
 import com.swkim.safetrip.entity.ExternalReport;
+import com.swkim.safetrip.entity.Likes;
 import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.UserReport;
+import com.swkim.safetrip.entity.enums.Status;
+import com.swkim.safetrip.entity.enums.TargetType;
 import com.swkim.safetrip.global.exception.custom.CommentNotFoundException;
 import com.swkim.safetrip.global.exception.custom.ForbiddenCommentAccessException;
 import com.swkim.safetrip.global.exception.custom.InvalidParentCommentException;
@@ -14,14 +17,18 @@ import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.repository.CommentRepository;
 import com.swkim.safetrip.repository.ExternalReportRepository;
+import com.swkim.safetrip.repository.LikesRepository;
 import com.swkim.safetrip.repository.UserReportRepository;
 import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +39,7 @@ public class CommentService {
     private final UserReportRepository userReportRepository;
     private final ExternalReportRepository externalReportRepository;
     private final UserRepository userRepository;
+    private final LikesRepository likesRepository;
 
     // ── UserReport 댓글 ──────────────────────────────────────────
 
@@ -58,12 +66,12 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentItem> getCommentsForUserReport(Long reportId) {
+    public List<CommentItem> getCommentsForUserReport(Long reportId, String email) {
         userReportRepository.findById(reportId)
                 .filter(r -> !r.isDeleted())
                 .orElseThrow(ReportNotFoundException::new);
 
-        return buildCommentTree(commentRepository.findTopLevelByUserReportId(reportId));
+        return buildCommentTree(commentRepository.findTopLevelByUserReportId(reportId), email);
     }
 
     @Transactional
@@ -106,11 +114,11 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentItem> getCommentsForExternalReport(Long reportId) {
+    public List<CommentItem> getCommentsForExternalReport(Long reportId, String email) {
         externalReportRepository.findById(reportId)
                 .orElseThrow(ReportNotFoundException::new);
 
-        return buildCommentTree(commentRepository.findTopLevelByExternalReportId(reportId));
+        return buildCommentTree(commentRepository.findTopLevelByExternalReportId(reportId), email);
     }
 
     @Transactional
@@ -131,11 +139,22 @@ public class CommentService {
 
     // ── 공통 ────────────────────────────────────────────────────
 
-    private List<CommentItem> buildCommentTree(List<Comment> topLevel) {
+    private List<CommentItem> buildCommentTree(List<Comment> topLevel, String email) {
         if (topLevel.isEmpty()) return List.of();
 
         List<Long> topLevelIds = topLevel.stream().map(Comment::getId).toList();
         List<Comment> replies = commentRepository.findRepliesByParentIds(topLevelIds);
+
+        List<Long> allCommentIds = new ArrayList<>(topLevelIds);
+        replies.forEach(r -> allCommentIds.add(r.getId()));
+
+        Set<Long> likedIds = email != null
+                ? likesRepository.findAllByUser_EmailAndTargetTypeAndTargetIdIn(email, TargetType.COMMENT, allCommentIds)
+                        .stream()
+                        .filter(l -> l.getStatus() == Status.ACTIVE)
+                        .map(Likes::getTargetId)
+                        .collect(Collectors.toSet())
+                : Set.of();
 
         Map<Long, List<Comment>> repliesByParentId = replies.stream()
                 .filter(c -> !c.getIsDeleted())
@@ -143,7 +162,7 @@ public class CommentService {
 
         return topLevel.stream()
                 .filter(c -> !c.getIsDeleted() || repliesByParentId.containsKey(c.getId()))
-                .map(c -> toItem(c, repliesByParentId.getOrDefault(c.getId(), List.of())))
+                .map(c -> toItem(c, repliesByParentId.getOrDefault(c.getId(), List.of()), likedIds))
                 .toList();
     }
 
@@ -170,14 +189,15 @@ public class CommentService {
         }
     }
 
-    private CommentItem toItem(Comment comment, List<Comment> replies) {
+    private CommentItem toItem(Comment comment, List<Comment> replies, Set<Long> likedIds) {
         String authorNickname = comment.getUser() != null
                 ? comment.getUser().getNickname()
                 : "탈퇴한 사용자";
         String content = comment.getIsDeleted() ? null : comment.getContent();
+        boolean likedByMe = likedIds.contains(comment.getId());
 
         List<CommentItem> replyItems = replies.stream()
-                .map(r -> toItem(r, List.of()))
+                .map(r -> toItem(r, List.of(), likedIds))
                 .toList();
 
         return new CommentItem(
@@ -185,8 +205,8 @@ public class CommentService {
                 authorNickname,
                 content,
                 comment.getLikeCnt(),
-                false, // likedByMe — 좋아요 기능 구현 시 반영
-                comment.getCreatedAt(),
+                likedByMe,
+                comment.getCreatedAt().atZone(ZoneId.systemDefault()).toOffsetDateTime(),
                 comment.getIsDeleted(),
                 replyItems
         );

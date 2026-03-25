@@ -19,4 +19,8 @@ export const commentApi = {
   deleteComment(reportType, reportId, commentId) {
     return apiClient.delete(`${basePath(reportType, reportId)}/${commentId}`)
   },
+
+  toggleLike(commentId) {
+    return apiClient.post(`/comments/${commentId}/like`)
+  },
 }

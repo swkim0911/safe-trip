@@ -1,6 +1,6 @@
 package com.swkim.safetrip.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public record CommentItem(
@@ -9,7 +9,7 @@ public record CommentItem(
         String content,       // null if isDeleted=true
         int likeCnt,
         boolean likedByMe,
-        LocalDateTime createdAt,
+        OffsetDateTime createdAt,
         boolean isDeleted,
         List<CommentItem> replies
 ) {}

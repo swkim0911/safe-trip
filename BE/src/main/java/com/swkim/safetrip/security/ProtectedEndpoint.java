@@ -24,7 +24,9 @@ public enum ProtectedEndpoint {
 
     EXTERNAL_COMMENT_CREATE("/v1/external-reports/*/comments", HttpMethod.POST),
     EXTERNAL_COMMENT_UPDATE("/v1/external-reports/*/comments/*", HttpMethod.PATCH),
-    EXTERNAL_COMMENT_DELETE("/v1/external-reports/*/comments/*", HttpMethod.DELETE);
+    EXTERNAL_COMMENT_DELETE("/v1/external-reports/*/comments/*", HttpMethod.DELETE),
+
+    COMMENT_LIKE("/v1/comments/*/like", HttpMethod.POST);
 
     @Getter
     private final String path;

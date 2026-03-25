@@ -3,9 +3,11 @@ package com.swkim.safetrip.controller;
 import com.swkim.safetrip.dto.request.CommentCreateRequest;
 import com.swkim.safetrip.dto.request.CommentUpdateRequest;
 import com.swkim.safetrip.dto.response.CommentItem;
+import com.swkim.safetrip.dto.response.LikeToggleResponse;
 import com.swkim.safetrip.global.response.ApiResult;
 import com.swkim.safetrip.security.CustomUserDetails;
 import com.swkim.safetrip.service.CommentService;
+import com.swkim.safetrip.service.LikeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -21,6 +23,7 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
+    private final LikeService likeService;
 
     // ── UserReport 댓글 ──────────────────────────────────────────
 
@@ -37,9 +40,12 @@ public class CommentController {
 
     @Operation(summary = "UserReport 댓글 목록 조회")
     @GetMapping("/v1/user-reports/{reportId}/comments")
-    public ApiResult<List<CommentItem>> getCommentsForUserReport(@PathVariable Long reportId) {
+    public ApiResult<List<CommentItem>> getCommentsForUserReport(
+            @PathVariable Long reportId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String email = userDetails != null ? userDetails.getUsername() : null;
         return ApiResult.of(HttpStatus.OK.value(), "Comments retrieved",
-                commentService.getCommentsForUserReport(reportId));
+                commentService.getCommentsForUserReport(reportId, email));
     }
 
     @Operation(summary = "UserReport 댓글 수정", security = @SecurityRequirement(name = "BearerAuth"))
@@ -78,9 +84,12 @@ public class CommentController {
 
     @Operation(summary = "ExternalReport 댓글 목록 조회")
     @GetMapping("/v1/external-reports/{reportId}/comments")
-    public ApiResult<List<CommentItem>> getCommentsForExternalReport(@PathVariable Long reportId) {
+    public ApiResult<List<CommentItem>> getCommentsForExternalReport(
+            @PathVariable Long reportId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String email = userDetails != null ? userDetails.getUsername() : null;
         return ApiResult.of(HttpStatus.OK.value(), "Comments retrieved",
-                commentService.getCommentsForExternalReport(reportId));
+                commentService.getCommentsForExternalReport(reportId, email));
     }
 
     @Operation(summary = "ExternalReport 댓글 수정", security = @SecurityRequirement(name = "BearerAuth"))
@@ -102,5 +111,16 @@ public class CommentController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         commentService.deleteForExternalReport(reportId, commentId, userDetails.getUsername());
         return ApiResult.of(HttpStatus.OK.value(), "Comment deleted", null);
+    }
+
+    // ── 좋아요 ────────────────────────────────────────────────────
+
+    @Operation(summary = "댓글 좋아요 토글", security = @SecurityRequirement(name = "BearerAuth"))
+    @PostMapping("/v1/comments/{commentId}/like")
+    public ApiResult<LikeToggleResponse> toggleCommentLike(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResult.of(HttpStatus.OK.value(), "Like toggled",
+                likeService.toggleCommentLike(commentId, userDetails.getUsername()));
     }
 }

@@ -18,6 +18,7 @@
           @reply="handleReply"
           @edit="handleEdit"
           @delete="handleDelete"
+          @like="handleLike"
         />
 
         <!-- 대댓글 -->
@@ -29,6 +30,7 @@
               :is-reply="true"
               @edit="handleEdit"
               @delete="handleDelete"
+              @like="handleLike"
             />
           </div>
         </div>
@@ -107,7 +109,7 @@ const props = defineProps({
 const emit = defineEmits(['request-login'])
 
 const authStore = useAuthStore()
-const { comments, isLoading, fetchComments, submitComment, editComment, removeComment } = useComment()
+const { comments, isLoading, fetchComments, submitComment, editComment, removeComment, toggleLike } = useComment()
 
 const newComment = ref('')
 const replyTargetId = ref(null)
@@ -173,6 +175,18 @@ async function handleDelete(commentId) {
     await removeComment(props.reportType, props.reportId, commentId)
   } catch (e) {
     console.error('Failed to delete comment', e)
+  }
+}
+
+async function handleLike(commentId) {
+  if (!authStore.accessToken) {
+    emit('request-login')
+    return
+  }
+  try {
+    await toggleLike(commentId)
+  } catch (e) {
+    console.error('Failed to toggle like', e)
   }
 }
 </script>

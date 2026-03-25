@@ -10,7 +10,7 @@
       <div class="d-flex justify-content-between align-items-start">
         <div class="flex-grow-1">
           <span class="fw-semibold small">{{ comment.authorNickname }}</span>
-          <span class="text-muted small ms-2">{{ formatDate(comment.createdAt) }}</span>
+          <span class="text-muted small ms-2">{{ formattedDate }}</span>
         </div>
 
         <!-- 수정/삭제 (본인 댓글만) -->
@@ -57,7 +57,14 @@
 
       <!-- 액션 버튼 -->
       <div v-if="!isEditing" class="d-flex align-items-center gap-3 mt-1">
-        <span class="text-muted small">❤️ {{ comment.likeCnt }}</span>
+        <button
+          class="btn btn-sm btn-link p-0 d-flex align-items-center gap-1"
+          :class="comment.likedByMe ? 'text-danger' : 'text-muted'"
+          style="font-size: 0.75rem;"
+          @click="emit('like', comment.id)"
+        >
+          👍 {{ comment.likeCnt }}
+        </button>
         <button
           v-if="!isReply"
           class="btn btn-sm btn-link text-muted p-0"
@@ -79,7 +86,7 @@ const props = defineProps({
   isReply: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['reply', 'edit', 'delete'])
+const emit = defineEmits(['reply', 'edit', 'delete', 'like'])
 
 const isEditing = ref(false)
 const editContent = ref('')
@@ -87,6 +94,8 @@ const editContent = ref('')
 const isOwner = computed(() =>
   props.currentUserNickname && props.currentUserNickname === props.comment.authorNickname
 )
+
+const formattedDate = computed(() => formatDate(props.comment.createdAt))
 
 function startEdit() {
   editContent.value = props.comment.content

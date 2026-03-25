@@ -30,4 +30,16 @@ public class Likes extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    public static Likes of(User user, Long targetId, TargetType targetType) {
+        Likes likes = new Likes();
+        likes.user = user;
+        likes.targetId = targetId;
+        likes.targetType = targetType;
+        likes.status = Status.ACTIVE;
+        return likes;
+    }
+
+    public void cancel() { this.status = Status.CANCELED; }
+    public void activate() { this.status = Status.ACTIVE; }
 }

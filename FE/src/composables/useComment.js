@@ -32,9 +32,33 @@ export function useComment() {
     await fetchComments(reportType, reportId)
   }
 
+  async function toggleLike(commentId) {
+    const toggle = (list) => {
+      for (const c of list) {
+        if (c.id === commentId) {
+          c.likedByMe = !c.likedByMe
+          c.likeCnt += c.likedByMe ? 1 : -1
+          return true
+        }
+        if (c.replies && toggle(c.replies)) return true
+      }
+      return false
+    }
+
+    toggle(comments.value)
+
+    try {
+      await commentApi.toggleLike(commentId)
+    } catch (e) {
+      toggle(comments.value) // 실패 시 되돌리기
+      throw e
+    }
+  }
+
   function reset() {
     comments.value = []
   }
 
-  return { comments, isLoading, fetchComments, submitComment, editComment, removeComment, reset }
+  return { comments, isLoading, fetchComments, submitComment, editComment, removeComment, toggleLike, reset }
+
 }
