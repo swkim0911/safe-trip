@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name= "likes")
+@Table(name = "likes", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_likes_user_target", columnNames = {"user_id", "target_id", "target_type"})
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Likes extends BaseEntity{
