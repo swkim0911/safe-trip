@@ -28,6 +28,7 @@ import org.springframework.util.AntPathMatcher;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -42,25 +43,32 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if(!requiresAuthentication(request)){
-            filterChain.doFilter(request, response);
+        boolean isProtected = requiresAuthentication(request);
+        Optional<String> tokenOpt = jwtProvider.extractAccessToken(request);
+
+        if (isProtected && tokenOpt.isEmpty()) {
+            entryPoint.commence(request, response, new AccessTokenMissingException());
             return;
         }
-        try {
-            String accessToken = jwtProvider.extractAccessToken(request)
-                    .orElseThrow(AccessTokenMissingException::new);
 
-            DecodedJWT decodedAccessToken = jwtProvider.verifyAccessToken(accessToken);
-            String email = jwtProvider.extractEmail(decodedAccessToken).orElseThrow(() -> new BadCredentialsException("Email claim is missing"));
-
-            User findUser = userService.findUserByEmail(email).orElseThrow(() -> new UsernameNotFoundException("The email does not exist"));
-            saveAuthentication(findUser);
-
-            filterChain.doFilter(request, response);
-        } catch (AuthenticationException ex) {
-            entryPoint.commence(request, response, ex);
+        if (tokenOpt.isPresent()) {
+            try {
+                DecodedJWT decodedAccessToken = jwtProvider.verifyAccessToken(tokenOpt.get());
+                String email = jwtProvider.extractEmail(decodedAccessToken)
+                        .orElseThrow(() -> new BadCredentialsException("Email claim is missing"));
+                User findUser = userService.findUserByEmail(email)
+                        .orElseThrow(() -> new UsernameNotFoundException("The email does not exist"));
+                saveAuthentication(findUser);
+            } catch (AuthenticationException ex) {
+                if (isProtected) {
+                    entryPoint.commence(request, response, ex);
+                    return;
+                }
+                // 비보호 엔드포인트: 토큰이 유효하지 않아도 비로그인으로 처리
+            }
         }
 
+        filterChain.doFilter(request, response);
     }
 
     private void saveAuthentication(User user){

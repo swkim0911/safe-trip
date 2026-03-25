@@ -93,6 +93,10 @@ Reddit API → Extract → Classify → Parse → Enrich Location → Load MySQL
 2. Backend API reads these and serves them alongside user-submitted `user_report`
 3. Frontend displays scam data on an interactive Leaflet map, aggregated by country/state/city
 
+## 커밋 규칙
+
+- `docs/spec.md`를 제외한 `docs/` 하위 파일은 커밋하지 않는다.
+
 ## Git Commit Convention
 
 커밋 메시지는 이슈 번호를 prefix로 포함한다:
