@@ -138,9 +138,11 @@ public class CommentService {
         List<Comment> replies = commentRepository.findRepliesByParentIds(topLevelIds);
 
         Map<Long, List<Comment>> repliesByParentId = replies.stream()
+                .filter(c -> !c.getIsDeleted())
                 .collect(Collectors.groupingBy(c -> c.getParentComment().getId()));
 
         return topLevel.stream()
+                .filter(c -> !c.getIsDeleted() || repliesByParentId.containsKey(c.getId()))
                 .map(c -> toItem(c, repliesByParentId.getOrDefault(c.getId(), List.of())))
                 .toList();
     }

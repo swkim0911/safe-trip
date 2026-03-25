@@ -111,7 +111,17 @@ function confirmDelete() {
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
+  const now = new Date()
   const date = new Date(dateStr)
+  const diffMs = now - date
+  const diffMin = Math.floor(diffMs / 60000)
+  const diffHour = Math.floor(diffMin / 60)
+  const diffDay = Math.floor(diffHour / 24)
+
+  if (diffMin < 1) return 'just now'
+  if (diffMin < 60) return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`
+  if (diffHour < 24) return `${diffHour} hour${diffHour > 1 ? 's' : ''} ago`
+  if (diffDay < 30) return `${diffDay} day${diffDay > 1 ? 's' : ''} ago`
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 </script>
