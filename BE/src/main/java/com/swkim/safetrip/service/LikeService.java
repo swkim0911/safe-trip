@@ -40,21 +40,22 @@ public class LikeService {
         boolean liked;
         if (existing.isEmpty()) {
             likesRepository.save(Likes.of(user, commentId, TargetType.COMMENT));
-            comment.incrementLikeCnt();
+            commentRepository.incrementLikeCnt(commentId);
             liked = true;
         } else {
             Likes like = existing.get();
             if (like.getStatus() == Status.ACTIVE) {
                 like.cancel();
-                comment.decrementLikeCnt();
+                commentRepository.decrementLikeCnt(commentId);
                 liked = false;
             } else {
                 like.activate();
-                comment.incrementLikeCnt();
+                commentRepository.incrementLikeCnt(commentId);
                 liked = true;
             }
         }
 
-        return new LikeToggleResponse(liked, comment.getLikeCnt());
+        int likeCnt = commentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new).getLikeCnt();
+        return new LikeToggleResponse(liked, likeCnt);
     }
 }

@@ -2,6 +2,7 @@ package com.swkim.safetrip.repository;
 
 import com.swkim.safetrip.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -34,4 +35,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
         order by c.createdAt asc
     """)
     List<Comment> findRepliesByParentIds(@Param("parentIds") List<Long> parentIds);
+
+    @Modifying
+    @Query("UPDATE Comment c SET c.likeCnt = c.likeCnt + 1 WHERE c.id = :id")
+    void incrementLikeCnt(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE Comment c SET c.likeCnt = c.likeCnt - 1 WHERE c.id = :id AND c.likeCnt > 0")
+    void decrementLikeCnt(@Param("id") Long id);
 }
