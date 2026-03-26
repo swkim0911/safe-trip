@@ -37,6 +37,10 @@ public enum Error {
     FORBIDDEN_REPORT_ACCESS_ERROR(HttpStatus.FORBIDDEN.value(), "You do not have permission to access this report"),
     DUPLICATE_REPORT_INACCURACY_ERROR(HttpStatus.CONFLICT.value(), "You have already reported this report"),
 
+    COMMENT_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND.value(), "Comment not found"),
+    FORBIDDEN_COMMENT_ACCESS_ERROR(HttpStatus.FORBIDDEN.value(), "You do not have permission to access this comment"),
+    INVALID_PARENT_COMMENT_ERROR(HttpStatus.BAD_REQUEST.value(), "Cannot reply to a reply"),
+
     TOKEN_HASHING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed token hashing");
 
     private final int statusCode;

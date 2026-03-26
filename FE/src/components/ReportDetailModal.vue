@@ -135,6 +135,14 @@
           <div class="text-end text-muted small mt-2">
             Posted: {{ report.postedAt }}
           </div>
+
+          <!-- 댓글 -->
+          <hr class="my-3" />
+          <CommentSection
+            :report-id="report.reportId"
+            :report-type="report.source === 'SAFETRIP' ? 'USER' : 'EXTERNAL'"
+            @request-login="handleRequestLogin"
+          />
         </div>
       </div>
     </div>
@@ -160,6 +168,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useMapStore } from '@/stores/map';
 import { useToast } from '@/composables/useToast';
 import apiClient from '@/api/apiClient';
+import CommentSection from './CommentSection.vue';
 
 const modalRef = ref(null);
 const { hide } = useBootstrapModal(modalRef);
@@ -229,6 +238,13 @@ const submitInaccuracy = async () => {
   } finally {
     isSubmitting.value = false;
   }
+};
+
+const handleRequestLogin = () => {
+  toast.show('Login is required to write a comment.');
+  mapStore.requestReopenReportDetail();
+  hide();
+  openAuthModal();
 };
 
 const closeModal = () => {

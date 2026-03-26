@@ -16,7 +16,17 @@ public enum ProtectedEndpoint {
     MY_REPORT_INACCURACY("/v1/external-reports/*/inaccuracies/my", HttpMethod.GET),
     ME_INACCURACIES("/v1/users/me/inaccuracies", HttpMethod.GET),
     ADMIN_REPORT_INACCURACIES("/v1/admin/report-inaccuracies", HttpMethod.GET),
-    ADMIN_RESOLVE_INACCURACY("/v1/admin/report-inaccuracies/*/resolve", HttpMethod.PATCH);
+    ADMIN_RESOLVE_INACCURACY("/v1/admin/report-inaccuracies/*/resolve", HttpMethod.PATCH),
+
+    COMMENT_CREATE("/v1/user-reports/*/comments", HttpMethod.POST),
+    COMMENT_UPDATE("/v1/user-reports/*/comments/*", HttpMethod.PATCH),
+    COMMENT_DELETE("/v1/user-reports/*/comments/*", HttpMethod.DELETE),
+
+    EXTERNAL_COMMENT_CREATE("/v1/external-reports/*/comments", HttpMethod.POST),
+    EXTERNAL_COMMENT_UPDATE("/v1/external-reports/*/comments/*", HttpMethod.PATCH),
+    EXTERNAL_COMMENT_DELETE("/v1/external-reports/*/comments/*", HttpMethod.DELETE),
+
+    COMMENT_LIKE("/v1/comments/*/like", HttpMethod.POST);
 
     @Getter
     private final String path;
