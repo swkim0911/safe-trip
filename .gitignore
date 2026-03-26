@@ -177,3 +177,10 @@ Temporary Items
 nodeenv-20
 # End of https://www.toptal.com/developers/gitignore/api/intellij,java,macos
 .vercel
+
+# docs/ 로컬 메모 (spec.md 제외)
+docs/*
+!docs/spec.md
+
+# obsidian
+.obsidian/
