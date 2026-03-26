@@ -96,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useComment } from '@/composables/useComment'
 import CommentCard from './CommentCard.vue'
@@ -116,9 +116,14 @@ const replyTargetId = ref(null)
 const replyContent = ref('')
 const isSubmitting = ref(false)
 
-onMounted(() => fetchComments(props.reportType, props.reportId))
+// reportId 변경 시 재조회 (글 전환)
 watch(() => props.reportId, (id) => {
   if (id) fetchComments(props.reportType, id)
+}, { immediate: true })
+
+// 로그인/로그아웃 시 재조회 (likedByMe 갱신)
+watch(() => authStore.accessToken, () => {
+  if (props.reportId) fetchComments(props.reportType, props.reportId)
 })
 
 async function submitNewComment() {

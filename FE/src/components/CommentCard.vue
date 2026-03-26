@@ -81,7 +81,6 @@ import { ref, computed } from 'vue'
 
 const props = defineProps({
   comment: { type: Object, required: true },
-  reportId: { type: Number, required: true },
   currentUserNickname: { type: String, default: null },
   isReply: { type: Boolean, default: false },
 })

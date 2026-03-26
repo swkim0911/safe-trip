@@ -6,6 +6,7 @@ export function useComment() {
   const isLoading = ref(false)
 
   async function fetchComments(reportType, reportId) {
+    comments.value = []
     isLoading.value = true
     try {
       const res = await commentApi.getComments(reportType, reportId)
@@ -55,10 +56,6 @@ export function useComment() {
     }
   }
 
-  function reset() {
-    comments.value = []
-  }
-
-  return { comments, isLoading, fetchComments, submitComment, editComment, removeComment, toggleLike, reset }
+  return { comments, isLoading, fetchComments, submitComment, editComment, removeComment, toggleLike }
 
 }
