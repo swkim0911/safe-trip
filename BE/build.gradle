@@ -48,6 +48,12 @@ dependencies {
 
 
 
+	// logging
+	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
+	// aop
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
