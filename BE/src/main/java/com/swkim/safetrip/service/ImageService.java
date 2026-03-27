@@ -6,6 +6,7 @@ import com.swkim.safetrip.entity.Image;
 import com.swkim.safetrip.global.exception.custom.S3UploadException;
 import com.swkim.safetrip.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageService {
@@ -60,6 +62,7 @@ public class ImageService {
         try {
             amazonS3Client.putObject(bucketName, fileName, file.getInputStream(), objectMetadata);
         } catch (IOException e) {
+            log.error("S3 upload failed: file={}, error={}", originalFilename, e.getMessage());
             throw new S3UploadException();
         }
 

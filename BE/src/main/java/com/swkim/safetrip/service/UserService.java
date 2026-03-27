@@ -10,12 +10,14 @@ import com.swkim.safetrip.global.validation.SignUpValidator;
 import com.swkim.safetrip.mapper.UserMapper;
 import com.swkim.safetrip.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -40,6 +42,7 @@ public class UserService {
         user.passwordEncode(passwordEncoder);
 
         User savedUser = userRepository.save(user);
+        log.info("New user registered: {}", signUpRequest.email());
         return savedUser.getId();
     }
 
@@ -96,6 +99,7 @@ public class UserService {
 
         User user = userRepository.findByEmail(email).orElseThrow();
         user.updateNickname(request.nickname());
+        log.info("User updated nickname: {}", email);
     }
 
 }
