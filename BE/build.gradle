@@ -51,6 +51,9 @@ dependencies {
 	// logging
 	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 
+	// actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 	// aop
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 

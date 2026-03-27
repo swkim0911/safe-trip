@@ -26,6 +26,15 @@ spring:
     resources:
       add-mappings: false
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always  # prod에서는 DB, Redis 상태까지 확인
+
 cloud:
   aws:
     credentials:
