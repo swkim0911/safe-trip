@@ -22,10 +22,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ImageService {
 
-    @Value("${cloud.aws.s3.bucket-name}")
+    @Value("${oci.storage.bucket-name}")
     private String bucketName;
 
-    @Value("${cloud.aws.s3.base-path}")
+    @Value("${oci.storage.base-path}")
     private String basePath;
 
     private final AmazonS3Client amazonS3Client;
