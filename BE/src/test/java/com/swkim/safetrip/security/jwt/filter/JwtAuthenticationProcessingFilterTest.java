@@ -67,17 +67,18 @@ class JwtAuthenticationProcessingFilterTest {
     }
 
     @Test
-    void 글_등록_요청이_아니라면_requiresAuthentication_false로_JWT_검증이_실행되지_않는다() throws Exception {
+    void 비보호_엔드포인트_요청시_토큰없어도_filterChain이_동작한다() throws Exception {
         // given
         when(request.getRequestURI()).thenReturn("/user-reports/1");
         when(request.getMethod()).thenReturn("GET");
+        when(jwtProvider.extractAccessToken(any())).thenReturn(Optional.empty());
 
         // when
         filter.doFilterInternal(request, response, filterChain);
 
-        // then (jwtService가 호출되지 않았고, filterChain이 동작하는지 확인)
-        verify(jwtProvider, never()).extractAccessToken(any());
+        // then: 비보호 엔드포인트는 토큰 없어도 filterChain 통과
         verify(filterChain).doFilter(request, response);
+        verify(entryPoint, never()).commence(any(), any(), any());
     }
 
     @Test
