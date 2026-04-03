@@ -9,8 +9,6 @@ services:
       - ./.env.backend
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-    depends_on:
-      - redis
     networks:
       - safetrip-network
 
@@ -19,14 +17,6 @@ services:
     container_name: safetrip-crawler
     env_file:
       - ./.env.crawler
-    networks:
-      - safetrip-network
-
-  redis:
-    image: redis:7.2
-    container_name: safetrip-redis
-    ports:
-      - "6379:6379"
     networks:
       - safetrip-network
 

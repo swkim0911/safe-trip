@@ -1,7 +1,5 @@
 package com.swkim.safetrip.service;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.swkim.safetrip.entity.Image;
 import com.swkim.safetrip.global.exception.custom.S3UploadException;
 import com.swkim.safetrip.repository.ImageRepository;
@@ -10,6 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,13 +23,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ImageService {
 
+    @Value("${oci.storage.endpoint}")
+    private String endpoint;
+
     @Value("${oci.storage.bucket-name}")
     private String bucketName;
 
     @Value("${oci.storage.base-path}")
     private String basePath;
 
-    private final AmazonS3Client amazonS3Client;
+    private final S3Client s3Client;
     private final ImageRepository imageRepository;
 
     public List<Image> findImagesByReportId(Long id) {
@@ -48,25 +52,29 @@ public class ImageService {
         return imageList;
     }
 
-    public Image saveImage(MultipartFile file){
+    public Image saveImage(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
         Image image = Image.builder()
                 .originalName(originalFilename)
                 .build();
         String fileName = basePath + image.getStoredName();
 
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentType(file.getContentType());
-        objectMetadata.setContentLength(file.getSize());
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(fileName)
+                .contentType(file.getContentType())
+                .contentLength(file.getSize())
+                .build();
 
         try {
-            amazonS3Client.putObject(bucketName, fileName, file.getInputStream(), objectMetadata);
+            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
         } catch (IOException e) {
-            log.error("S3 upload failed: file={}, error={}", originalFilename, e.getMessage());
+            log.error("OCI upload failed: file={}, error={}", originalFilename, e.getMessage());
             throw new S3UploadException();
         }
 
-        String accessURL = amazonS3Client.getUrl(bucketName, fileName).toString();
+        // path-style URL: {endpoint}/{bucket}/{key}
+        String accessURL = endpoint + "/" + bucketName + "/" + fileName;
         image.setAccessURL(accessURL);
         return image;
     }
