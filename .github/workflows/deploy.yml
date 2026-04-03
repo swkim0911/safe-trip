@@ -52,18 +52,22 @@ jobs:
     needs: build-and-push
 
     steps:
-      # 8. 배포 디렉토리로 이동 및 환경변수 파일 생성
+      # 8. 레포 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 9. 배포 디렉토리로 이동 및 환경변수 파일 생성
       - name: Write env files
         run: |
           mkdir -p /home/ubuntu/safe-trip
           echo "${{ secrets.ENV_BACKEND_FILE }}" > /home/ubuntu/safe-trip/.env.backend
           echo "${{ secrets.ENV_CRAWLER_FILE }}" > /home/ubuntu/safe-trip/.env.crawler
 
-      # 9. docker-compose 파일 복사
+      # 10. docker-compose 파일 복사
       - name: Copy compose file
         run: cp ${{ github.workspace }}/docker-compose.prod.yml /home/ubuntu/safe-trip/
 
-      # 10. 최신 이미지 pull & 재시작
+      # 11. 최신 이미지 pull & 재시작
       - name: Deploy
         run: |
           cd /home/ubuntu/safe-trip
