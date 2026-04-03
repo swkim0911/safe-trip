@@ -8,6 +8,7 @@ import com.swkim.safetrip.global.exception.custom.InvalidRefreshTokenException;
 import com.swkim.safetrip.security.jwt.JwtProvider;
 import com.swkim.safetrip.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import static com.swkim.safetrip.global.utils.CookieUtils.createRefreshTokenCookie;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -44,6 +46,7 @@ public class AuthService {
                 .accessToken(accessToken)
                 .build();
 
+        log.info("User logged in: {}", email);
         return AuthTokensResponse.builder()
                 .accessTokenResponse(accessTokenResponse)
                 .refreshTokenCookie(refreshTokenCookie)
@@ -68,6 +71,7 @@ public class AuthService {
 
         saveRefreshToken(findUser.getEmail(), reIssuedRefreshToken);
 
+        log.info("Access token reissued: {}", findUser.getEmail());
         ResponseCookie refreshTokenCookie = createRefreshTokenCookie(reIssuedRefreshToken);
         AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder()
                 .accessToken(reIssuedAccessToken)
@@ -90,7 +94,7 @@ public class AuthService {
         tokenService.blacklistRefreshToken(refreshToken, ttl);
 
         tokenService.deleteRefreshToken(email);
-
+        log.info("User logged out: {}", email);
     }
 
     private void saveRefreshToken(String email, String refreshToken) {

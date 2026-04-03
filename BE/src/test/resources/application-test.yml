@@ -32,18 +32,14 @@ logging:
     root: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-cloud:
-  aws:
-    credentials:
-      access-key: test-access-key
-      secret-key: test-secret-key
-    region:
-      static: ap-northeast-2
-    stack:
-      auto: false
-    s3:
-      bucket-name: test-bucket
-      base-path: test-path
+oci:
+  storage:
+    access-key: test-access-key
+    secret-key: test-secret-key
+    endpoint: https://test.compat.objectstorage.ap-seoul-1.oraclecloud.com
+    region: ap-seoul-1
+    bucket-name: test-bucket
+    base-path: test-path/
 
 jwt:
   secretKey: asdfc123fsjdcm

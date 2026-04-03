@@ -11,13 +11,13 @@ spring:
       port: ${REDIS_PORT}
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
         format_sql: true      # 쿼리 로그 포맷 (정렬)
         show_sql: true        # 쿼리 로그 출력
-    database-platform: org.hibernate.dialect.MySQL8Dialect
     defer-datasource-initialization: true
 
   mvc:
@@ -26,15 +26,20 @@ spring:
     resources:
       add-mappings: false
 
-cloud:
-  aws:
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
-    region:
-      static: ap-northeast-2
-    stack:
-      auto: false
-    s3:
-      bucket-name: ${AWS_BUCKET_NAME}
-      base-path: ${AWS_BASE_PATH}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always  # prod에서는 DB, Redis 상태까지 확인
+
+oci:
+  storage:
+    access-key: ${OCI_ACCESS_KEY}
+    secret-key: ${OCI_SECRET_KEY}
+    endpoint: ${OCI_STORAGE_ENDPOINT}   # https://{namespace}.compat.objectstorage.{region}.oraclecloud.com
+    region: ${OCI_REGION}
+    bucket-name: ${OCI_BUCKET_NAME}
+    base-path: ${OCI_BASE_PATH}

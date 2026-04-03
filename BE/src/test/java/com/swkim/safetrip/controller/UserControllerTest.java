@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.dto.request.UserSignUpRequest;
 import com.swkim.safetrip.security.jwt.JwtProvider;
 import com.swkim.safetrip.security.config.SecurityConfig;
+import com.swkim.safetrip.service.UserReportService;
 import com.swkim.safetrip.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public class UserControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private UserReportService userReportService;
 
     @MockBean
     private JwtProvider jwtProvider;

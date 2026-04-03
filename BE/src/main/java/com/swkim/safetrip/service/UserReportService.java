@@ -16,6 +16,7 @@ import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.UserReportRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserReportService {
@@ -82,7 +84,9 @@ public class UserReportService {
         userReport.setCity(findCity);
 
         // 6. report 저장
-        return save(userReport);
+        Long savedId = save(userReport);
+        log.info("User report created: id={}, user={}", savedId, email);
+        return savedId;
     }
 
     @Transactional
@@ -195,6 +199,7 @@ public class UserReportService {
             List<Image> newImages = imageService.saveImagesInS3Bucket(images);
             newImages.forEach(report::addImage);
         }
+        log.info("User report updated: id={}, user={}", reportId, email);
     }
 
     @Transactional
@@ -208,6 +213,7 @@ public class UserReportService {
         }
 
         report.softDelete();
+        log.info("User report deleted: id={}, user={}", reportId, email);
     }
 
 }
