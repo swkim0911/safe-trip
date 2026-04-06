@@ -224,4 +224,5 @@ logs/
 .env
 .env.crawler
 data/prompt_evaluation/
+.envrc
 # End of https://www.toptal.com/developers/gitignore/api/macos,python,venv
