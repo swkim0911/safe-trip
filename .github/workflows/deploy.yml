@@ -72,3 +72,8 @@ jobs:
           docker compose -f docker-compose.prod.yml pull crawler
           docker compose -f docker-compose.prod.yml down
           docker compose -f docker-compose.prod.yml up -d backend
+
+      # 11. Cron Job 설정 (daily ETL, UTC 02:00)
+      - name: Setup crawler cron job
+        run: |
+          (crontab -l 2>/dev/null | grep -v "safetrip-crawler"; echo "0 2 * * * cd /home/ubuntu/safe-trip && docker compose -f docker-compose.prod.yml run --rm crawler python src/daily_etl_pipeline.py >> /home/ubuntu/safe-trip/crawler.log 2>&1") | crontab -
