@@ -61,6 +61,14 @@ public class GlobalExceptionHandler{
         return ApiResult.of(404, "API does not exist", null);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResult<Object>> unexpectedExceptionHandler(Exception e) {
+        log.error("Unexpected error: {}", e.getMessage(), e);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResult.of(500, "Internal Server Error", null));
+    }
+
     @ExceptionHandler(MissingRequestCookieException.class)
     public ResponseEntity<ApiResult<String>> handleMissingCookie(MissingRequestCookieException ex) {
         log.error("error", ex);
