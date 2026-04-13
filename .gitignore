@@ -184,3 +184,6 @@ docs/*
 
 # obsidian
 .obsidian/
+
+# k6 load test scripts (run on remote server)
+k6/
