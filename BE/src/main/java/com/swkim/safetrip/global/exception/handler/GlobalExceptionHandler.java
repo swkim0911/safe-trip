@@ -6,6 +6,8 @@ import com.swkim.safetrip.global.response.ApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestCookieException;
@@ -62,7 +64,11 @@ public class GlobalExceptionHandler{
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResult<Object>> unexpectedExceptionHandler(Exception e) {
+    public ResponseEntity<ApiResult<Object>> unexpectedExceptionHandler(Exception e) throws Exception {
+        // Spring Security 예외는 ExceptionTranslationFilter가 처리하도록 다시 던짐
+        if (e instanceof AuthenticationException || e instanceof AccessDeniedException) {
+            throw e;
+        }
         log.error("Unexpected error: {}", e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

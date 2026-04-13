@@ -28,15 +28,16 @@ public class ReportNativeRepository {
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
-            SELECT c.id, c.name, c.lat, c.lng, c.iso2, COUNT(*) AS scam_cnt
-            FROM (
-                SELECT country_id FROM user_report WHERE deleted_at IS NULL
-                UNION ALL
-                SELECT country_id FROM external_report
-            ) r
-            JOIN countries c ON r.country_id = c.id
+            SELECT c.id, c.name, c.lat, c.lng, c.iso2,
+                   COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
+            FROM countries c
+            LEFT JOIN ext_country_stats es ON es.country_id = c.id
+            LEFT JOIN (
+                SELECT country_id, COUNT(*) AS scam_cnt
+                FROM user_report WHERE deleted_at IS NULL
+                GROUP BY country_id
+            ) ur ON ur.country_id = c.id
             WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
-            GROUP BY c.id, c.name, c.lat, c.lng, c.iso2
             ORDER BY %s
             LIMIT :limit OFFSET :offset
             """, orderBy);
@@ -65,15 +66,16 @@ public class ReportNativeRepository {
         String orderBy = getOrderBy(pageable);
 
         String sql = String.format("""
-            SELECT s.id, s.name, s.lat, s.lng, COUNT(*) AS scam_cnt
-            FROM (
-                SELECT state_id FROM user_report WHERE country_id = :countryId AND deleted_at IS NULL
-                UNION ALL
-                SELECT state_id FROM external_report WHERE country_id = :countryId
-            ) r
-            JOIN states s ON r.state_id = s.id
-            WHERE s.lat IS NOT NULL AND s.lng IS NOT NULL
-            GROUP BY s.id, s.name, s.lat, s.lng
+            SELECT s.id, s.name, s.lat, s.lng,
+                   COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
+            FROM states s
+            LEFT JOIN ext_state_stats es ON es.state_id = s.id
+            LEFT JOIN (
+                SELECT state_id, COUNT(*) AS scam_cnt
+                FROM user_report WHERE country_id = :countryId AND deleted_at IS NULL AND state_id IS NOT NULL
+                GROUP BY state_id
+            ) ur ON ur.state_id = s.id
+            WHERE s.country_id = :countryId AND s.lat IS NOT NULL AND s.lng IS NOT NULL
             ORDER BY %s
             LIMIT :limit OFFSET :offset
             """, orderBy);
