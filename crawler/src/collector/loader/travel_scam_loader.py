@@ -130,6 +130,28 @@ class TravelScamLoader:
             loaded_count += 1
 
         mysql_conn.commit()
+        self.logger.info("로드 완료 (loaded=%d, skipped=%d)", loaded_count, skipped_count)
+
+        self._refresh_aggregate_stats(mysql_conn)
+
         cursor.close()
         mysql_conn.close()
-        self.logger.info("로드 완료 (loaded=%d, skipped=%d)", loaded_count, skipped_count)
+
+    def _refresh_aggregate_stats(self, conn) -> None:
+        """external_report 집계 테이블 갱신 (ETL load 완료 후 호출)."""
+        self.logger.info("집계 테이블 갱신 시작")
+        statements = [
+            "REPLACE INTO ext_country_stats SELECT country_id, COUNT(*) FROM external_report GROUP BY country_id",
+            "REPLACE INTO ext_state_stats SELECT state_id, COUNT(*) FROM external_report WHERE state_id IS NOT NULL GROUP BY state_id",
+            "REPLACE INTO ext_city_stats SELECT city_id, COUNT(*) FROM external_report WHERE city_id IS NOT NULL GROUP BY city_id",
+            "REPLACE INTO ext_scam_action_stats SELECT 0, scam_action_id, COUNT(*) FROM external_report WHERE scam_action_id IS NOT NULL GROUP BY scam_action_id",
+            "REPLACE INTO ext_scam_action_stats SELECT country_id, scam_action_id, COUNT(*) FROM external_report WHERE scam_action_id IS NOT NULL GROUP BY country_id, scam_action_id",
+            "REPLACE INTO ext_scam_context_stats SELECT 0, scam_context_id, COUNT(*) FROM external_report WHERE scam_context_id IS NOT NULL GROUP BY scam_context_id",
+            "REPLACE INTO ext_scam_context_stats SELECT country_id, scam_context_id, COUNT(*) FROM external_report WHERE scam_context_id IS NOT NULL GROUP BY country_id, scam_context_id",
+        ]
+        cursor = conn.cursor()
+        for sql in statements:
+            cursor.execute(sql)
+        conn.commit()
+        cursor.close()
+        self.logger.info("집계 테이블 갱신 완료")

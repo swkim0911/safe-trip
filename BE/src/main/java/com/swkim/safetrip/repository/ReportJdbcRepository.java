@@ -17,26 +17,30 @@ public class ReportJdbcRepository {
     private final NamedParameterJdbcTemplate jdbc;
 
     private static final String findScamActionStatsSQL = """
-        SELECT sa.name, COUNT(*) AS cnt
-        FROM (
-            SELECT scam_action_id FROM user_report   WHERE scam_action_id IS NOT NULL AND deleted_at IS NULL
-            UNION ALL
-            SELECT scam_action_id FROM external_report WHERE scam_action_id IS NOT NULL
-        ) r
-        JOIN scam_action sa ON r.scam_action_id = sa.id
-        GROUP BY sa.id, sa.name
+        SELECT sa.name,
+               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS cnt
+        FROM scam_action sa
+        LEFT JOIN ext_scam_action_stats es ON es.scam_action_id = sa.id AND es.country_id = 0
+        LEFT JOIN (
+            SELECT scam_action_id, COUNT(*) AS scam_cnt
+            FROM user_report
+            WHERE scam_action_id IS NOT NULL AND deleted_at IS NULL
+            GROUP BY scam_action_id
+        ) ur ON ur.scam_action_id = sa.id
         ORDER BY cnt DESC
     """;
 
     private static final String findScamActionStatsByCountrySQL = """
-        SELECT sa.name, COUNT(*) AS cnt
-        FROM (
-            SELECT scam_action_id FROM user_report   WHERE scam_action_id IS NOT NULL AND country_id = :countryId AND deleted_at IS NULL
-            UNION ALL
-            SELECT scam_action_id FROM external_report WHERE scam_action_id IS NOT NULL AND country_id = :countryId
-        ) r
-        JOIN scam_action sa ON r.scam_action_id = sa.id
-        GROUP BY sa.id, sa.name
+        SELECT sa.name,
+               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS cnt
+        FROM scam_action sa
+        LEFT JOIN ext_scam_action_stats es ON es.scam_action_id = sa.id AND es.country_id = :countryId
+        LEFT JOIN (
+            SELECT scam_action_id, COUNT(*) AS scam_cnt
+            FROM user_report
+            WHERE scam_action_id IS NOT NULL AND country_id = :countryId AND deleted_at IS NULL
+            GROUP BY scam_action_id
+        ) ur ON ur.scam_action_id = sa.id
         ORDER BY cnt DESC
     """;
 
@@ -68,26 +72,30 @@ public class ReportJdbcRepository {
     """;
 
     private static final String findScamContextStatsSQL = """
-        SELECT sc.name, COUNT(*) AS cnt
-        FROM (
-            SELECT scam_context_id FROM user_report   WHERE scam_context_id IS NOT NULL AND deleted_at IS NULL
-            UNION ALL
-            SELECT scam_context_id FROM external_report WHERE scam_context_id IS NOT NULL
-        ) r
-        JOIN scam_context sc ON r.scam_context_id = sc.id
-        GROUP BY sc.id, sc.name
+        SELECT sc.name,
+               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS cnt
+        FROM scam_context sc
+        LEFT JOIN ext_scam_context_stats es ON es.scam_context_id = sc.id AND es.country_id = 0
+        LEFT JOIN (
+            SELECT scam_context_id, COUNT(*) AS scam_cnt
+            FROM user_report
+            WHERE scam_context_id IS NOT NULL AND deleted_at IS NULL
+            GROUP BY scam_context_id
+        ) ur ON ur.scam_context_id = sc.id
         ORDER BY cnt DESC
     """;
 
     private static final String findScamContextStatsByCountrySQL = """
-        SELECT sc.name, COUNT(*) AS cnt
-        FROM (
-            SELECT scam_context_id FROM user_report   WHERE scam_context_id IS NOT NULL AND country_id = :countryId AND deleted_at IS NULL
-            UNION ALL
-            SELECT scam_context_id FROM external_report WHERE scam_context_id IS NOT NULL AND country_id = :countryId
-        ) r
-        JOIN scam_context sc ON r.scam_context_id = sc.id
-        GROUP BY sc.id, sc.name
+        SELECT sc.name,
+               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS cnt
+        FROM scam_context sc
+        LEFT JOIN ext_scam_context_stats es ON es.scam_context_id = sc.id AND es.country_id = :countryId
+        LEFT JOIN (
+            SELECT scam_context_id, COUNT(*) AS scam_cnt
+            FROM user_report
+            WHERE scam_context_id IS NOT NULL AND country_id = :countryId AND deleted_at IS NULL
+            GROUP BY scam_context_id
+        ) ur ON ur.scam_context_id = sc.id
         ORDER BY cnt DESC
     """;
 
@@ -106,38 +114,42 @@ public class ReportJdbcRepository {
     """;
 
     private static final String findCountryStatisticsSQL = """
-        SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
-        FROM (
-            SELECT country_id FROM user_report WHERE deleted_at IS NULL
-            UNION ALL
-            SELECT country_id FROM external_report
-        ) r
-        JOIN countries c ON r.country_id = c.id
-        GROUP BY c.id, c.name, c.lat, c.lng
+        SELECT c.id, c.name, c.lat, c.lng,
+               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
+        FROM countries c
+        LEFT JOIN ext_country_stats es ON es.country_id = c.id
+        LEFT JOIN (
+            SELECT country_id, COUNT(*) AS scam_cnt
+            FROM user_report WHERE deleted_at IS NULL
+            GROUP BY country_id
+        ) ur ON ur.country_id = c.id
+        WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
     """;
 
     private static final String findStateStatisticsSQL = """
-        SELECT s.id, s.name, s.lat, s.lng, COUNT(*) AS scam_cnt
-        FROM (
-            SELECT state_id FROM user_report WHERE deleted_at IS NULL
-            UNION ALL
-            SELECT state_id FROM external_report
-        ) r
-        JOIN states s ON r.state_id = s.id
-        Where s.lat IS NOT NULL AND s.lng IS NOT NULL
-        GROUP BY s.id, s.name, s.lat, s.lng
+        SELECT s.id, s.name, s.lat, s.lng,
+               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
+        FROM states s
+        LEFT JOIN ext_state_stats es ON es.state_id = s.id
+        LEFT JOIN (
+            SELECT state_id, COUNT(*) AS scam_cnt
+            FROM user_report WHERE deleted_at IS NULL AND state_id IS NOT NULL
+            GROUP BY state_id
+        ) ur ON ur.state_id = s.id
+        WHERE s.lat IS NOT NULL AND s.lng IS NOT NULL
     """;
 
     private static final String findCityStatisticsSQL = """
-        SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
-        FROM (
-            SELECT city_id FROM user_report WHERE deleted_at IS NULL
-            UNION ALL
-            SELECT city_id FROM external_report
-        ) r
-        JOIN cities c ON r.city_id = c.id
-        Where c.lat IS NOT NULL AND c.lng IS NOT NULL
-        GROUP BY c.id, c.name, c.lat, c.lng
+        SELECT c.id, c.name, c.lat, c.lng,
+               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
+        FROM cities c
+        LEFT JOIN ext_city_stats es ON es.city_id = c.id
+        LEFT JOIN (
+            SELECT city_id, COUNT(*) AS scam_cnt
+            FROM user_report WHERE deleted_at IS NULL AND city_id IS NOT NULL
+            GROUP BY city_id
+        ) ur ON ur.city_id = c.id
+        WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
     """;
 
     public List<SearchResultItem> search(String keyword) {
