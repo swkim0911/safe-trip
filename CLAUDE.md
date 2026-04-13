@@ -115,6 +115,17 @@ Reddit API → Extract → Classify → Parse → Enrich Location → Load MySQL
 
 Push to `main` → GitHub Actions → build + test → Docker images to DockerHub → SSH deploy to EC2 via `docker-compose.prod.yml`.
 
+## Load Testing (k6)
+
+k6는 로컬이 아닌 **원격 서버에 설치**되어 있다. k6 명령어는 반드시 원격 서버에 SSH 접속 후 실행해야 한다.
+
+```bash
+# 원격 서버에서 실행
+k6 run \
+  -e BASE_URL=https://api.safetrip.world \
+  k6/smoke_test.js
+```
+
 ## Python Coding Style (crawler/)
 
 엄격한 규칙이 아닌, 읽기 좋은 코드를 위한 기준입니다.
