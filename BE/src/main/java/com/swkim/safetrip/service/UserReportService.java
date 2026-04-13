@@ -17,6 +17,8 @@ import com.swkim.safetrip.mapper.ReportMapper;
 import com.swkim.safetrip.repository.UserReportRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +41,13 @@ public class UserReportService {
 
     private final UserReportRepository userReportRepository;
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "map-countries", allEntries = true),
+            @CacheEvict(cacheNames = "map-states", allEntries = true),
+            @CacheEvict(cacheNames = "map-cities", allEntries = true),
+            @CacheEvict(cacheNames = "scam-action-stats", allEntries = true),
+            @CacheEvict(cacheNames = "scam-context-stats", allEntries = true)
+    })
     public Long saveUserReport(String email, UserReportSaveRequest userReportSaveRequest, List<MultipartFile> files) {
 
         // 1. reportRequest -> Report Mapping
@@ -154,6 +163,13 @@ public class UserReportService {
                 .toList();
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "map-countries", allEntries = true),
+            @CacheEvict(cacheNames = "map-states", allEntries = true),
+            @CacheEvict(cacheNames = "map-cities", allEntries = true),
+            @CacheEvict(cacheNames = "scam-action-stats", allEntries = true),
+            @CacheEvict(cacheNames = "scam-context-stats", allEntries = true)
+    })
     @Transactional
     public void updateUserReport(Long reportId, String email, UserReportUpdateRequest request, List<MultipartFile> images) {
         UserReport report = userReportRepository.findById(reportId)
@@ -202,6 +218,13 @@ public class UserReportService {
         log.info("User report updated: id={}, user={}", reportId, email);
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "map-countries", allEntries = true),
+            @CacheEvict(cacheNames = "map-states", allEntries = true),
+            @CacheEvict(cacheNames = "map-cities", allEntries = true),
+            @CacheEvict(cacheNames = "scam-action-stats", allEntries = true),
+            @CacheEvict(cacheNames = "scam-context-stats", allEntries = true)
+    })
     @Transactional
     public void deleteUserReport(Long reportId, String email) {
         UserReport report = userReportRepository.findById(reportId)
