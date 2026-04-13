@@ -16,6 +16,8 @@ spring:
   sql:
     init:
       mode: never  # schema.sql/data.sql 자동 실행 방지 (원하면 always로 변경)
+  cache:
+    type: none
   data:
     redis:
       host: localhost
