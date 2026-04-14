@@ -3,9 +3,9 @@ package com.swkim.safetrip.service;
 import com.swkim.safetrip.dto.response.RegionScamStatisticsItem;
 import com.swkim.safetrip.dto.response.ReportSummaryItem;
 import com.swkim.safetrip.dto.response.world.CountriesResponse;
-import com.swkim.safetrip.entity.enums.RiskLevel;
 import com.swkim.safetrip.entity.world.Country;
 import com.swkim.safetrip.global.exception.custom.CountryNotFoundException;
+import com.swkim.safetrip.global.exception.custom.InvalidSortKeyException;
 import com.swkim.safetrip.repository.CountryRepository;
 import com.swkim.safetrip.repository.ReportJdbcRepository;
 import com.swkim.safetrip.repository.ReportNativeRepository;
@@ -13,11 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import static com.swkim.safetrip.dto.response.world.CountriesResponse.*;
 
@@ -44,16 +45,37 @@ public class CountryService {
 
     @Transactional(readOnly = true)
     public Slice<RegionScamStatisticsItem> getCountryStatistics(Pageable pageable) {
-        Slice<RegionScamStatisticsItem> slice = reportNativeRepository.findCountryStatisticsSlice(pageable);
-        Map<Long, RiskLevel> riskLevels = riskLevelService.getCountryRiskLevels();
-        List<RegionScamStatisticsItem> content = slice.getContent().stream()
-                .map(item -> RegionScamStatisticsItem.builder()
-                        .id(item.id()).name(item.name()).lat(item.lat()).lng(item.lng())
-                        .scamCnt(item.scamCnt()).iso2(item.iso2())
-                        .riskLevel(riskLevels.get(item.id()))
-                        .build())
+        List<RegionScamStatisticsItem> all = reportJdbcRepository.findCountryStatistics();
+        List<RegionScamStatisticsItem> withRisk = riskLevelService.assignRiskLevels(all);
+
+        List<RegionScamStatisticsItem> sorted = withRisk.stream()
+                .sorted(buildComparator(pageable.getSort()))
                 .toList();
-        return new SliceImpl<>(content, pageable, slice.hasNext());
+
+        int pageSize = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+        int end = Math.min(offset + pageSize, sorted.size());
+        List<RegionScamStatisticsItem> content = offset >= sorted.size() ? List.of() : sorted.subList(offset, end);
+
+        return new SliceImpl<>(content, pageable, end < sorted.size());
+    }
+
+    private Comparator<RegionScamStatisticsItem> buildComparator(Sort sort) {
+        if (!sort.iterator().hasNext()) {
+            return Comparator.comparingLong(RegionScamStatisticsItem::scamCnt).reversed()
+                    .thenComparingLong(RegionScamStatisticsItem::id);
+        }
+        Comparator<RegionScamStatisticsItem> result = null;
+        for (Sort.Order order : sort) {
+            Comparator<RegionScamStatisticsItem> c = switch (order.getProperty()) {
+                case "scamCnt" -> Comparator.comparingLong(RegionScamStatisticsItem::scamCnt);
+                case "name", "countryName" -> Comparator.comparing(RegionScamStatisticsItem::name);
+                default -> throw new InvalidSortKeyException();
+            };
+            if (order.isDescending()) c = c.reversed();
+            result = result == null ? c : result.thenComparing(c);
+        }
+        return result.thenComparingLong(RegionScamStatisticsItem::id);
     }
 
     public RegionScamStatisticsItem getCountryInfo(Long countryId) {
