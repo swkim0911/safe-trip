@@ -252,6 +252,18 @@ public class ReportJdbcRepository {
         ));
     }
 
+    private static final String reconcileUserCountryStatsSQL = """
+        INSERT INTO user_country_stats (country_id, scam_cnt)
+        SELECT country_id, COUNT(*)
+        FROM user_report WHERE deleted_at IS NULL AND country_id IS NOT NULL
+        GROUP BY country_id
+        ON DUPLICATE KEY UPDATE scam_cnt = VALUES(scam_cnt)
+    """;
+
+    public void reconcileUserCountryStats() {
+        jdbc.update(reconcileUserCountryStatsSQL, Map.of());
+    }
+
     public RegionScamStatisticsItem findStateInfo(Long id) {
         return jdbc.queryForObject(findStateInfoSQL, Map.of("id", id), (rs, i) -> new RegionScamStatisticsItem(
                 rs.getLong("id"),
