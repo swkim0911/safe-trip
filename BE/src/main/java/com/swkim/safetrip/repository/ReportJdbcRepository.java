@@ -115,14 +115,10 @@ public class ReportJdbcRepository {
 
     private static final String findCountryStatisticsSQL = """
         SELECT c.id, c.name, c.lat, c.lng, c.iso2,
-               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
+               COALESCE(es.scam_cnt, 0) + COALESCE(ucs.scam_cnt, 0) AS scam_cnt
         FROM countries c
         LEFT JOIN ext_country_stats es ON es.country_id = c.id
-        LEFT JOIN (
-            SELECT country_id, COUNT(*) AS scam_cnt
-            FROM user_report WHERE deleted_at IS NULL
-            GROUP BY country_id
-        ) ur ON ur.country_id = c.id
+        LEFT JOIN user_country_stats ucs ON ucs.country_id = c.id
         WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
     """;
 
@@ -254,6 +250,18 @@ public class ReportJdbcRepository {
                 null,
                 null
         ));
+    }
+
+    private static final String reconcileUserCountryStatsSQL = """
+        INSERT INTO user_country_stats (country_id, scam_cnt)
+        SELECT country_id, COUNT(*)
+        FROM user_report WHERE deleted_at IS NULL AND country_id IS NOT NULL
+        GROUP BY country_id
+        ON DUPLICATE KEY UPDATE scam_cnt = VALUES(scam_cnt)
+    """;
+
+    public void reconcileUserCountryStats() {
+        jdbc.update(reconcileUserCountryStatsSQL, Map.of());
     }
 
     public RegionScamStatisticsItem findStateInfo(Long id) {

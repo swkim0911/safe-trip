@@ -14,6 +14,7 @@ import com.swkim.safetrip.global.exception.custom.ReportNotFoundException;
 import com.swkim.safetrip.global.exception.custom.StateCountryMismatchException;
 import com.swkim.safetrip.global.exception.custom.UserNotFoundException;
 import com.swkim.safetrip.mapper.ReportMapper;
+import com.swkim.safetrip.repository.UserCountryStatsRepository;
 import com.swkim.safetrip.repository.UserReportRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ public class UserReportService {
     private final CityService cityService;
 
     private final UserReportRepository userReportRepository;
+    private final UserCountryStatsRepository userCountryStatsRepository;
 
     @Caching(evict = {
             @CacheEvict(cacheNames = "map-countries", allEntries = true),
@@ -48,6 +50,7 @@ public class UserReportService {
             @CacheEvict(cacheNames = "scam-action-stats", allEntries = true),
             @CacheEvict(cacheNames = "scam-context-stats", allEntries = true)
     })
+    @Transactional
     public Long saveUserReport(String email, UserReportSaveRequest userReportSaveRequest, List<MultipartFile> files) {
 
         // 1. reportRequest -> Report Mapping
@@ -92,15 +95,11 @@ public class UserReportService {
         userReport.setState(findState);
         userReport.setCity(findCity);
 
-        // 6. report 저장
-        Long savedId = save(userReport);
-        log.info("User report created: id={}, user={}", savedId, email);
-        return savedId;
-    }
-
-    @Transactional
-    private Long save(UserReport userReport) {
+        // 6. report 저장 후 집계 테이블 갱신
         UserReport savedUserReport = userReportRepository.save(userReport);
+        userCountryStatsRepository.increment(findCountry.getId());
+
+        log.info("User report created: id={}, user={}", savedUserReport.getId(), email);
         return savedUserReport.getId();
     }
 
@@ -188,8 +187,14 @@ public class UserReportService {
         ScamContext scamContext = scamService.findScamContextById(request.scamContextId());
         report.setScamContext(scamContext);
 
+        Long oldCountryId = report.getCountry().getId();
         Country country = countryService.findCountryById(request.countryId());
         report.setCountry(country);
+
+        if (!oldCountryId.equals(country.getId())) {
+            userCountryStatsRepository.decrement(oldCountryId);
+            userCountryStatsRepository.increment(country.getId());
+        }
 
         State state = Optional.ofNullable(request.stateId())
                 .map(stateService::findStateByIdWithCountry)
@@ -236,6 +241,7 @@ public class UserReportService {
         }
 
         report.softDelete();
+        userCountryStatsRepository.decrement(report.getCountry().getId());
         log.info("User report deleted: id={}, user={}", reportId, email);
     }
 

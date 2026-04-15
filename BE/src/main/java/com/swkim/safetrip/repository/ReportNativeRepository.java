@@ -29,14 +29,10 @@ public class ReportNativeRepository {
 
         String sql = String.format("""
             SELECT c.id, c.name, c.lat, c.lng, c.iso2,
-                   COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
+                   COALESCE(es.scam_cnt, 0) + COALESCE(ucs.scam_cnt, 0) AS scam_cnt
             FROM countries c
             LEFT JOIN ext_country_stats es ON es.country_id = c.id
-            LEFT JOIN (
-                SELECT country_id, COUNT(*) AS scam_cnt
-                FROM user_report WHERE deleted_at IS NULL
-                GROUP BY country_id
-            ) ur ON ur.country_id = c.id
+            LEFT JOIN user_country_stats ucs ON ucs.country_id = c.id
             WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
             ORDER BY %s
             LIMIT :limit OFFSET :offset
