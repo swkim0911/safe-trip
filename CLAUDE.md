@@ -197,3 +197,20 @@ def enrich_location(self, country: str | None, ...) -> dict | None: ...
 BE(Spring Boot) 또는 Crawler(Python) 코드를 구현할 때,
 구현 완료 후 각 레이어(Repository → Service → Controller 또는 해당 모듈)에서
 무엇을 했는지 간단히 설명한다.
+
+## OCI 사용 규칙
+
+### 프로필
+- 모든 `oci` 명령어는 반드시 `--profile ai-agent` 옵션을 사용할 것
+- `DEFAULT` 프로필은 절대 사용 금지
+
+### 실행 규칙
+- `oci` 명령어 실행 전 반드시 나에게 먼저 보여주고 승인을 받을 것
+- `DELETE`, `TERMINATE` 가 포함된 명령어는 실행 불가
+- Bastion 생성 시 목적과 대상 인스턴스를 먼저 확인할 것
+
+### 사용 가능한 작업
+- Bastion 생성 및 세션 관리
+- Compute 인스턴스 조회 및 모니터링
+- MySQL HeatWave 조회 및 모니터링
+- 메트릭(CPU, 메모리) 조회
