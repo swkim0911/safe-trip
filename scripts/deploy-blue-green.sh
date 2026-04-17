@@ -88,6 +88,8 @@ oci lb backend update \
   --backend-name "$STANDBY_NAME" \
   --weight 1 \
   --offline false \
+  --backup false \
+  --drain false \
   --profile "$OCI_PROFILE" \
   --wait-for-state SUCCEEDED
 
@@ -97,6 +99,8 @@ oci lb backend update \
   --backend-name "$ACTIVE_NAME" \
   --weight 1 \
   --offline true \
+  --backup false \
+  --drain false \
   --profile "$OCI_PROFILE" \
   --wait-for-state SUCCEEDED
 
