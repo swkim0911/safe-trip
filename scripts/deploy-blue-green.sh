@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+export PATH="$PATH:/home/ubuntu/bin"
+
 # ── 설정 ────────────────────────────────────────────────────────────
 LB_ID="ocid1.loadbalancer.oc1.ap-chuncheon-1.aaaaaaaaboowr4zz4smwzpjuwcimjkd7nbaxbtbinqdg6ohbem5c4hyx46pq"
 BACKEND_SET="bs_lb_2026-0401-1645"
