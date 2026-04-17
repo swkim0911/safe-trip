@@ -53,25 +53,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 8. 배포 디렉토리 및 환경변수 파일 생성
-      - name: Write env files
+      # 8. Blue(자기 자신) 환경변수 + compose 파일 준비
+      - name: Prepare Blue instance files
         run: |
           mkdir -p /home/ubuntu/safe-trip
           echo "${{ secrets.ENV_BACKEND_FILE }}" > /home/ubuntu/safe-trip/.env.backend
           echo "${{ secrets.ENV_CRAWLER_FILE }}" > /home/ubuntu/safe-trip/.env.crawler
+          cp ${{ github.workspace }}/docker-compose.prod.yml /home/ubuntu/safe-trip/
 
-      # 9. docker-compose 파일 복사
-      - name: Copy compose file
-        run: cp ${{ github.workspace }}/docker-compose.prod.yml /home/ubuntu/safe-trip/
-
-      # 10. 최신 이미지 pull & 재시작 (docker compose v2)
-      - name: Deploy
+      # 9. Green 인스턴스에 환경변수 + compose 파일 전송
+      - name: Prepare Green instance files
         run: |
-          cd /home/ubuntu/safe-trip
-          docker compose -f docker-compose.prod.yml pull backend
-          docker compose -f docker-compose.prod.yml pull crawler
-          docker compose -f docker-compose.prod.yml down
-          docker compose -f docker-compose.prod.yml up -d backend
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ vars.GREEN_IP }} "mkdir -p /home/ubuntu/safe-trip"
+          echo "${{ secrets.ENV_BACKEND_FILE }}" | ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ vars.GREEN_IP }} "cat > /home/ubuntu/safe-trip/.env.backend"
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+            ${{ github.workspace }}/docker-compose.prod.yml \
+            ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/
+
+      # 10. Blue-Green 배포 스크립트 실행
+      - name: Blue-Green Deploy
+        env:
+          BLUE_IP: ${{ vars.BLUE_IP }}
+          GREEN_IP: ${{ vars.GREEN_IP }}
+        run: |
+          chmod +x ${{ github.workspace }}/scripts/deploy-blue-green.sh
+          ${{ github.workspace }}/scripts/deploy-blue-green.sh
 
       # 11. Cron Job 설정 (daily ETL, UTC 02:00)
       - name: Setup crawler cron job
