@@ -65,10 +65,14 @@ jobs:
       - name: Prepare Green instance files
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ vars.GREEN_IP }} "mkdir -p /home/ubuntu/safe-trip"
-          echo "${{ secrets.ENV_BACKEND_FILE }}" | ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ vars.GREEN_IP }} "cat > /home/ubuntu/safe-trip/.env.backend"
+          echo "${{ secrets.ENV_BACKEND_FILE }}" > /tmp/.env.backend
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+            /tmp/.env.backend \
+            ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/.env.backend
           scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
             ${{ github.workspace }}/docker-compose.prod.yml \
             ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/
+          rm /tmp/.env.backend
 
       # 10. Blue-Green 배포 스크립트 실행
       - name: Blue-Green Deploy

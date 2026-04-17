@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+export PATH="$PATH:/home/ubuntu/bin"
+
 # ── 설정 ────────────────────────────────────────────────────────────
 LB_ID="ocid1.loadbalancer.oc1.ap-chuncheon-1.aaaaaaaaboowr4zz4smwzpjuwcimjkd7nbaxbtbinqdg6ohbem5c4hyx46pq"
 BACKEND_SET="bs_lb_2026-0401-1645"
@@ -84,9 +86,10 @@ oci lb backend update \
   --load-balancer-id "$LB_ID" \
   --backend-set-name "$BACKEND_SET" \
   --backend-name "$STANDBY_NAME" \
-  --port 8080 \
   --weight 1 \
   --offline false \
+  --backup false \
+  --drain false \
   --profile "$OCI_PROFILE" \
   --wait-for-state SUCCEEDED
 
@@ -94,9 +97,10 @@ oci lb backend update \
   --load-balancer-id "$LB_ID" \
   --backend-set-name "$BACKEND_SET" \
   --backend-name "$ACTIVE_NAME" \
-  --port 8080 \
   --weight 1 \
   --offline true \
+  --backup false \
+  --drain false \
   --profile "$OCI_PROFILE" \
   --wait-for-state SUCCEEDED
 
