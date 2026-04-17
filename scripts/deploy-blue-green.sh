@@ -86,7 +86,6 @@ oci lb backend update \
   --load-balancer-id "$LB_ID" \
   --backend-set-name "$BACKEND_SET" \
   --backend-name "$STANDBY_NAME" \
-  --port 8080 \
   --weight 1 \
   --offline false \
   --profile "$OCI_PROFILE" \
@@ -96,7 +95,6 @@ oci lb backend update \
   --load-balancer-id "$LB_ID" \
   --backend-set-name "$BACKEND_SET" \
   --backend-name "$ACTIVE_NAME" \
-  --port 8080 \
   --weight 1 \
   --offline true \
   --profile "$OCI_PROFILE" \
