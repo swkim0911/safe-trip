@@ -20,6 +20,11 @@ spring:
         show_sql: true        # 쿼리 로그 출력
     defer-datasource-initialization: true
 
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/aggregate-schema.sql
+
   mvc:
     throw-exception-if-no-handler-found: true
   web:
