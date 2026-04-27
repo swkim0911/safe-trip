@@ -300,7 +300,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, watch } from 'vue';
+import { ref, onMounted, reactive, watch, nextTick } from 'vue';
 import { useMapStore } from '@/stores/map';
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import ReportDetailModal from './ReportDetailModal.vue'
@@ -548,6 +548,18 @@ const toggleSortOrder = () => {
 
 const sidebarRef = ref(null);
 
+const loadMoreIfSidebarCannotScroll = async (isLastPage, loadMore) => {
+  await nextTick();
+
+  const sidebarEl = sidebarRef.value;
+  if (!sidebarEl || isLastPage.value) return;
+
+  const hasScrollableContent = sidebarEl.scrollHeight > sidebarEl.clientHeight + 1;
+  if (!hasScrollableContent) {
+    await loadMore();
+  }
+};
+
 const formatDate = (date) => {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
@@ -670,6 +682,7 @@ const loadCountriesWithStatistics = async (mode = 'click') => {
     sidebarCountries.value = []; 
   }
 
+  let loadedPage = false;
   try {
 
     const response = await apiClient.get('/countries/statistics', {
@@ -686,10 +699,12 @@ const loadCountriesWithStatistics = async (mode = 'click') => {
     sidebarCountries.value.push(...content);
     isLastCountryPage.value = last;
     countryPage.value += 1;
+    loadedPage = true;
   } catch (e) {
     console.error("Failed to load countries sidebar info because of server error. Please try again later.", e);
   } finally {
     isLoadingCountry.value = false;
+    if (loadedPage) await loadMoreIfSidebarCannotScroll(isLastCountryPage, () => loadCountriesWithStatistics('scroll'));
   }
 }
 
@@ -698,6 +713,7 @@ const showStatesByCountry = async (countryId, mode = 'click') => {
 
   if (mode === 'click') {
     if (viewType.value !== 'state') listSort.value = 'scamCnt,DESC';
+    viewType.value = 'state';
     const res = await apiClient.get(`/countries/${countryId}/info`);
     const info = res.data.result;
     selectedCountry.id = countryId;
@@ -711,6 +727,7 @@ const showStatesByCountry = async (countryId, mode = 'click') => {
   }
 
   isLoadingState.value = true;
+  let loadedPage = false;
   try {
     const [statesRes] = await Promise.all([
       apiClient.get('/states/statistics', {
@@ -723,13 +740,14 @@ const showStatesByCountry = async (countryId, mode = 'click') => {
     sidebarStates.value.push(...content);
     isLastStatePage.value = last;
     statePage.value += 1;
+    loadedPage = true;
   } catch (e) {
     console.error('Failed to load states sidebar info:', e);
   } finally {
     isLoadingState.value = false;
+    if (loadedPage) await loadMoreIfSidebarCannotScroll(isLastStatePage, () => showStatesByCountry(countryId, 'scroll'));
   }
 
-  viewType.value = 'state';
 };
 
 
@@ -740,10 +758,10 @@ const showReportsByCountry = async (countryId, countryName) => {
   selectedState.name = '';
   selectedCity.id = null;
   selectedCity.name = '';
+  viewType.value = 'report';
   
   // 국가의 모든 리포트 로드
   await loadReportsByCountry(countryId, 'click');
-  viewType.value = 'report';
 };
 
 const showReportsByState = async (stateId, stateName) => {
@@ -751,10 +769,10 @@ const showReportsByState = async (stateId, stateName) => {
   selectedState.name = stateName;
   selectedCity.id = null;
   selectedCity.name = '';
+  viewType.value = 'report';
   
   // State의 모든 리포트 로드
   await loadReportsByState(stateId, 'click');
-  viewType.value = 'report';
 };
 
 /**
@@ -773,6 +791,7 @@ const loadReportsByState = async (stateId, mode = 'click') => {
     sidebarReports.value = [];
   }
 
+  let loadedPage = false;
   try {
     const response = await apiClient.get(`/states/${stateId}/reports`, {
       params: { page: reportPage.value, size, sort: `createdAt,${sortOrder.value}` }
@@ -783,10 +802,12 @@ const loadReportsByState = async (stateId, mode = 'click') => {
     sidebarReports.value.push(...content);
     isLastReportPage.value = last;
     reportPage.value += 1;
+    loadedPage = true;
   } catch (e) {
     console.error('Failed to load state reports:', e);
   } finally {
     isLoadingReport.value = false;
+    if (loadedPage) await loadMoreIfSidebarCannotScroll(isLastReportPage, () => loadReportsByState(stateId, 'scroll'));
   }
 };
 
@@ -806,6 +827,7 @@ const loadReportsByCountry = async (countryId, mode = 'click') => {
     sidebarReports.value = [];
   }
 
+  let loadedPage = false;
   try {
     const response = await apiClient.get(`/countries/${countryId}/reports`, {
       params: { page: reportPage.value, size, sort: `createdAt,${sortOrder.value}` }
@@ -816,10 +838,12 @@ const loadReportsByCountry = async (countryId, mode = 'click') => {
     sidebarReports.value.push(...content);
     isLastReportPage.value = last;
     reportPage.value += 1;
+    loadedPage = true;
   } catch (e) {
     console.error('Failed to load country reports:', e);
   } finally {
     isLoadingReport.value = false;
+    if (loadedPage) await loadMoreIfSidebarCannotScroll(isLastReportPage, () => loadReportsByCountry(countryId, 'scroll'));
   }
 };
 
@@ -835,6 +859,7 @@ const showCitiesByState = async (stateId, mode = 'click') => {
 
   if (mode === 'click') {
     if (viewType.value !== 'city') listSort.value = 'scamCnt,DESC';
+    viewType.value = 'city';
     const res = await apiClient.get(`/states/${stateId}/info`);
     const info = res.data.result;
     selectedState.id = stateId;
@@ -846,6 +871,7 @@ const showCitiesByState = async (stateId, mode = 'click') => {
   }
 
   isLoadingCity.value = true;
+  let loadedPage = false;
   try {
     const response = await apiClient.get('/cities/statistics', {
       params: { stateId, page: cityPage.value, size, sort: listSort.value }
@@ -856,10 +882,12 @@ const showCitiesByState = async (stateId, mode = 'click') => {
     isLastCityPage.value = last;
     cityPage.value += 1;
     viewType.value = 'city';
+    loadedPage = true;
   } catch (e) {
     console.error('Failed to load cities sidebar info:', e);
   } finally {
     isLoadingCity.value = false;
+    if (loadedPage) await loadMoreIfSidebarCannotScroll(isLastCityPage, () => showCitiesByState(stateId, 'scroll'));
   }
 }
 
@@ -883,6 +911,7 @@ const showReportsByCity = async (cityId, cityName, mode = 'click') => {
     sidebarReports.value = []; 
   }
 
+  let loadedPage = false;
   try {
     const response = await apiClient.get(`/cities/${cityId}/reports`, {
       params: { page: reportPage.value, size, sort: `createdAt,${sortOrder.value}` }
@@ -894,10 +923,12 @@ const showReportsByCity = async (cityId, cityName, mode = 'click') => {
     reportPage.value += 1;
 
     viewType.value = 'report';
+    loadedPage = true;
   } catch (e) {
     console.error('Failed to load reports sidebar info because of server error. Please try again later.', e);
   } finally {
     isLoadingReport.value = false;
+    if (loadedPage) await loadMoreIfSidebarCannotScroll(isLastReportPage, () => showReportsByCity(cityId, cityName, 'scroll'));
   }
 }
 
@@ -1070,6 +1101,8 @@ $sidebar-width: 560px;
 }
 
 .sidebar-body {
+  flex: 1;
+  min-height: 0;
   padding-left: 4px;
   padding-right: 8px;
   overflow-y: auto;
