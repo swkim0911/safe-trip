@@ -114,51 +114,67 @@ public class ReportJdbcRepository {
     """;
 
     private static final String findCountryStatisticsSQL = """
-        SELECT c.id, c.name, c.lat, c.lng, c.iso2,
-               COALESCE(es.scam_cnt, 0) + COALESCE(ucs.scam_cnt, 0) AS scam_cnt
-        FROM countries c
-        LEFT JOIN ext_country_stats es ON es.country_id = c.id
-        LEFT JOIN user_country_stats ucs ON ucs.country_id = c.id
-        WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
+        SELECT id, name, lat, lng, iso2, scam_cnt
+        FROM (
+            SELECT c.id, c.name, c.lat, c.lng, c.iso2,
+                   COALESCE(es.scam_cnt, 0) + COALESCE(ucs.scam_cnt, 0) AS scam_cnt
+            FROM countries c
+            LEFT JOIN ext_country_stats es ON es.country_id = c.id
+            LEFT JOIN user_country_stats ucs ON ucs.country_id = c.id
+            WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
+        ) t
+        WHERE t.scam_cnt > 0
     """;
 
     private static final String findStateStatisticsByCountrySQL = """
-        SELECT s.id, s.name, s.lat, s.lng,
-               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
-        FROM states s
-        LEFT JOIN ext_state_stats es ON es.state_id = s.id
-        LEFT JOIN (
-            SELECT state_id, COUNT(*) AS scam_cnt
-            FROM user_report WHERE country_id = :countryId AND deleted_at IS NULL AND state_id IS NOT NULL
-            GROUP BY state_id
-        ) ur ON ur.state_id = s.id
-        WHERE s.country_id = :countryId AND s.lat IS NOT NULL AND s.lng IS NOT NULL
+        SELECT id, name, lat, lng, scam_cnt
+        FROM (
+            SELECT s.id, s.name, s.lat, s.lng,
+                   COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
+            FROM states s
+            LEFT JOIN ext_state_stats es ON es.state_id = s.id
+            LEFT JOIN (
+                SELECT state_id, COUNT(*) AS scam_cnt
+                FROM user_report WHERE country_id = :countryId AND deleted_at IS NULL AND state_id IS NOT NULL
+                GROUP BY state_id
+            ) ur ON ur.state_id = s.id
+            WHERE s.country_id = :countryId AND s.lat IS NOT NULL AND s.lng IS NOT NULL
+        ) t
+        WHERE t.scam_cnt > 0
     """;
 
     private static final String findStateStatisticsSQL = """
-        SELECT s.id, s.name, s.lat, s.lng,
-               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
-        FROM states s
-        LEFT JOIN ext_state_stats es ON es.state_id = s.id
-        LEFT JOIN (
-            SELECT state_id, COUNT(*) AS scam_cnt
-            FROM user_report WHERE deleted_at IS NULL AND state_id IS NOT NULL
-            GROUP BY state_id
-        ) ur ON ur.state_id = s.id
-        WHERE s.lat IS NOT NULL AND s.lng IS NOT NULL
+        SELECT id, name, lat, lng, scam_cnt
+        FROM (
+            SELECT s.id, s.name, s.lat, s.lng,
+                   COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
+            FROM states s
+            LEFT JOIN ext_state_stats es ON es.state_id = s.id
+            LEFT JOIN (
+                SELECT state_id, COUNT(*) AS scam_cnt
+                FROM user_report WHERE deleted_at IS NULL AND state_id IS NOT NULL
+                GROUP BY state_id
+            ) ur ON ur.state_id = s.id
+            WHERE s.lat IS NOT NULL AND s.lng IS NOT NULL
+        ) t
+        WHERE t.scam_cnt > 0
     """;
 
     private static final String findCityStatisticsSQL = """
-        SELECT c.id, c.name, c.lat, c.lng,
-               COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
-        FROM cities c
-        LEFT JOIN ext_city_stats es ON es.city_id = c.id
-        LEFT JOIN (
-            SELECT city_id, COUNT(*) AS scam_cnt
-            FROM user_report WHERE deleted_at IS NULL AND city_id IS NOT NULL
-            GROUP BY city_id
-        ) ur ON ur.city_id = c.id
-        WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
+        SELECT id, name, lat, lng, scam_cnt
+        FROM (
+            SELECT c.id, c.name, c.lat, c.lng,
+                   COALESCE(es.scam_cnt, 0) + COALESCE(ur.scam_cnt, 0) AS scam_cnt
+            FROM cities c
+            LEFT JOIN ext_city_stats es ON es.city_id = c.id
+            LEFT JOIN (
+                SELECT city_id, COUNT(*) AS scam_cnt
+                FROM user_report WHERE deleted_at IS NULL AND city_id IS NOT NULL
+                GROUP BY city_id
+            ) ur ON ur.city_id = c.id
+            WHERE c.lat IS NOT NULL AND c.lng IS NOT NULL
+        ) t
+        WHERE t.scam_cnt > 0
     """;
 
     public List<SearchResultItem> search(String keyword) {
