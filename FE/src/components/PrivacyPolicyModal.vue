@@ -17,6 +17,7 @@
           <p><strong>Usage data:</strong> We use Google Analytics to collect anonymous data about how visitors interact with SafeTrip, including pages visited, time on site, browser type, and approximate geographic region (country/city level). This data does not identify you personally.</p>
 
           <h6 class="section-title">2. How We Use Your Information</h6>
+          <p><strong>We do not sell, rent, or share your personal information with third parties for their marketing purposes.</strong></p>
           <ul>
             <li>To provide and operate the SafeTrip service</li>
             <li>To allow you to submit and manage your scam reports</li>
