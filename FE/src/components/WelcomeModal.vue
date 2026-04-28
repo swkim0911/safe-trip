@@ -27,6 +27,13 @@
           </div>
 
           <button class="btn btn-primary w-100 fw-bold" @click="close">Start Exploring</button>
+
+          <p class="text-center mt-3 mb-0" style="font-size: 12px; color: #aaa;">
+            By using SafeTrip, you agree to our
+            <a href="#" class="policy-link" @click.prevent="openModal('termsOfServiceModal')">Terms of Service</a>
+            and
+            <a href="#" class="policy-link" @click.prevent="openModal('privacyPolicyModal')">Privacy Policy</a>.
+          </p>
         </div>
       </div>
     </div>
@@ -36,6 +43,11 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { Modal } from 'bootstrap';
+
+const openModal = (id) => {
+  const el = document.getElementById(id);
+  if (el) Modal.getOrCreateInstance(el).show();
+};
 
 const modalRef = ref(null);
 let modal = null;
@@ -74,5 +86,11 @@ onMounted(() => {
   &:hover {
     text-decoration: underline;
   }
+}
+
+.policy-link {
+  color: #aaa;
+  text-decoration: underline;
+  &:hover { color: #666; }
 }
 </style>

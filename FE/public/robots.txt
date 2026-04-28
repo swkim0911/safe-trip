@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /v1/
+
+Sitemap: https://www.safetrip.world/sitemap.xml
