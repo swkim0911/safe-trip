@@ -52,6 +52,17 @@ public class ImageService {
         return imageList;
     }
 
+    public void deleteImagesFromOci(List<Image> images) {
+        images.forEach(image -> {
+            String key = basePath + image.getStoredName();
+            try {
+                s3Client.deleteObject(builder -> builder.bucket(bucketName).key(key).build());
+            } catch (Exception e) {
+                log.error("OCI delete failed: file={}, error={}", image.getStoredName(), e.getMessage());
+            }
+        });
+    }
+
     public Image saveImage(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
         Image image = Image.builder()
