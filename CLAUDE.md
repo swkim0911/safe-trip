@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Language
+
+SafeTrip is an English-language service. All UI text, components, and user-facing content must be written in English.
+
 ## Project Overview
 
 **Safe-Trip** is a travel scam detection and reporting platform. It collects Reddit scam discussions via a Python ETL pipeline, processes them with OpenAI, and serves the data through a Spring Boot API consumed by a Vue 3 frontend.
