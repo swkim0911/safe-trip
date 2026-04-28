@@ -18,12 +18,16 @@ public class CacheWarmupRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        log.info("캐시 warm-up 시작");
-        reportService.getCountryStatistics();
-        reportService.getStateStatistics();
-        reportService.getCityStatistics();
-        reportService.getScamActionStats();
-        reportService.getScamContextStats();
-        log.info("캐시 warm-up 완료");
+        try {
+            log.info("캐시 warm-up 시작");
+            reportService.getCountryStatistics();
+            reportService.getStateStatistics();
+            reportService.getCityStatistics();
+            reportService.getScamActionStats();
+            reportService.getScamContextStats();
+            log.info("캐시 warm-up 완료");
+        } catch (Exception e) {
+            log.warn("캐시 warm-up 실패 - 서버는 정상 기동됩니다: {}", e.getMessage());
+        }
     }
 }
