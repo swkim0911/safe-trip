@@ -1,12 +1,14 @@
 package com.swkim.safetrip.repository;
 
 import com.swkim.safetrip.entity.Comment;
+import com.swkim.safetrip.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -43,4 +45,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Modifying
     @Query("UPDATE Comment c SET c.likeCnt = c.likeCnt - 1 WHERE c.id = :id AND c.likeCnt > 0")
     void decrementLikeCnt(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE Comment c SET c.user = null, c.isDeleted = true, c.deletedAt = :now WHERE c.user = :user AND c.isDeleted = false")
+    void anonymizeAndSoftDeleteByUser(@Param("user") User user, @Param("now") LocalDateTime now);
 }

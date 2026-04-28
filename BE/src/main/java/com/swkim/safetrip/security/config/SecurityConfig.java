@@ -2,14 +2,15 @@ package com.swkim.safetrip.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swkim.safetrip.global.exception.handler.CustomAuthenticationEntryPoint;
+import com.swkim.safetrip.global.filter.PostRateLimitFilter;
 import com.swkim.safetrip.security.jwt.JwtProvider;
 import com.swkim.safetrip.security.jwt.filter.JwtAuthenticationProcessingFilter;
 import com.swkim.safetrip.security.ProtectedEndpoint;
 import com.swkim.safetrip.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final UserService userService;
     private final JwtProvider jwtProvider;
     private final ObjectMapper objectMapper;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -69,6 +71,7 @@ public class SecurityConfig {
                 }).exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint()));
 
+        http.addFilterBefore(new PostRateLimitFilter(redisTemplate, objectMapper), LogoutFilter.class);
         http.addFilterAfter(jwtAuthenticationProcessingFilter(), LogoutFilter.class); // LogoutFilter ➔ JwtAuthenticationProcessingFilter
 
         return http.build();

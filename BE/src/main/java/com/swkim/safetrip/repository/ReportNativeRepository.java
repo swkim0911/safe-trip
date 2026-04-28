@@ -25,7 +25,7 @@ public class ReportNativeRepository {
     private final EntityManager em;
 
     public Slice<RegionScamStatisticsItem> findCountryStatisticsSlice(Pageable pageable) {
-        String orderBy = getOrderBy(pageable);
+        String orderBy = getRegionOrderBy(pageable);
 
         String sql = String.format("""
             SELECT c.id, c.name, c.lat, c.lng, c.iso2,
@@ -59,7 +59,7 @@ public class ReportNativeRepository {
     }
 
     public Slice<RegionScamStatisticsItem> findStateStatisticsSliceByCountryId(Long countryId, Pageable pageable){
-        String orderBy = getOrderBy(pageable);
+        String orderBy = getRegionOrderBy(pageable);
 
         String sql = String.format("""
             SELECT s.id, s.name, s.lat, s.lng,
@@ -97,7 +97,7 @@ public class ReportNativeRepository {
     }
 
     public Slice<RegionScamStatisticsItem> findCityStatisticsSliceByStateId(Long stateId, Pageable pageable) {
-        String orderBy = getOrderBy(pageable);
+        String orderBy = getRegionOrderBy(pageable);
 
         String sql = String.format("""
             SELECT c.id, c.name, c.lat, c.lng, COUNT(*) AS scam_cnt
@@ -134,7 +134,7 @@ public class ReportNativeRepository {
     }
 
     public Slice<ReportSummaryItem> findReportSummarySliceByCountryId(Long countryId, Pageable pageable){
-        String orderBy = getOrderBy(pageable);
+        String orderBy = getReportOrderBy(pageable);
 
         String sql = String.format("""
                 SELECT r.id, r.source, r.title, sa.name as scam_action_name, sc.name as scam_context_name, r.created_at
@@ -169,7 +169,7 @@ public class ReportNativeRepository {
     }
 
     public Slice<ReportSummaryItem> findReportSummarySliceByStateId(Long stateId, Pageable pageable){
-        String orderBy = getOrderBy(pageable);
+        String orderBy = getReportOrderBy(pageable);
 
         String sql = String.format("""
                 SELECT r.id, r.source, r.title, sa.name as scam_action_name, sc.name as scam_context_name, r.created_at
@@ -204,7 +204,7 @@ public class ReportNativeRepository {
     }
 
     public Slice<ReportSummaryItem> findReportSummarySliceByCityId(Long cityId, Pageable pageable){
-        String orderBy = getOrderBy(pageable);
+        String orderBy = getReportOrderBy(pageable);
 
         String sql = String.format("""
                 SELECT r.id, r.source, r.title, sa.name as scam_action_name, sc.name as scam_context_name, r.created_at
@@ -284,10 +284,17 @@ public class ReportNativeRepository {
         return Source.valueOf(((String) (source)).toUpperCase());
     }
 
-    private String getOrderBy(Pageable pageable) {
+    private String getRegionOrderBy(Pageable pageable) {
+        return getOrderBy(pageable, "scam_cnt DESC", "id ASC");
+    }
+
+    private String getReportOrderBy(Pageable pageable) {
+        return getOrderBy(pageable, "created_at DESC", "source ASC, id ASC");
+    }
+
+    private String getOrderBy(Pageable pageable, String defaultOrderBy, String tieBreaker) {
         Sort sort = pageable.getSort();
 
-        // 안전한 매핑
         Map<String, String> SORT_MAPPING = Map.of(
                 "countryName", "c.name",
                 "stateName", "s.name",
@@ -306,14 +313,10 @@ public class ReportNativeRepository {
                 .collect(Collectors.joining(", "));
 
         if (orderBy.isBlank()) {
-            orderBy = "r.created_at DESC"; // 기본값
+            orderBy = defaultOrderBy;
         }
-        
-        // 정렬 안정성을 위해 고유 ID 추가 (페이징 중복 방지)
-        if (!orderBy.contains("id")) {
-            orderBy += ", id ASC";
-        }
-        
+
+        orderBy += ", " + tieBreaker;
         return orderBy;
     }
 }

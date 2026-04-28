@@ -58,6 +58,38 @@
             <div v-if="nicknameMessage" class="mt-2 small text-danger">
               {{ nicknameMessage }}
             </div>
+
+            <hr class="my-4" />
+
+            <div class="danger-zone">
+              <h6 class="fw-bold text-danger mb-1">Delete Account</h6>
+              <p class="text-muted small mb-3">
+                This will permanently delete your account, all your reports, and your images.
+                Your comments will be anonymized. This action cannot be undone.
+              </p>
+
+              <div v-if="!showDeleteConfirm">
+                <button class="btn btn-outline-danger btn-sm" @click="showDeleteConfirm = true">
+                  Delete my account
+                </button>
+              </div>
+
+              <div v-else class="delete-confirm">
+                <p class="text-danger small fw-bold mb-2">Are you sure? This cannot be undone.</p>
+                <div class="d-flex gap-2">
+                  <button
+                    class="btn btn-danger btn-sm"
+                    :disabled="isDeletingAccount"
+                    @click="deleteAccount"
+                  >
+                    {{ isDeletingAccount ? 'Deleting...' : 'Yes, delete my account' }}
+                  </button>
+                  <button class="btn btn-secondary btn-sm" @click="showDeleteConfirm = false">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- My Feedback 탭 -->
@@ -149,6 +181,24 @@ const nickname = ref(authStore.user?.nickname || '');
 const nicknameError = ref('');
 const nicknameMessage = ref('');
 const isSavingNickname = ref(false);
+
+// Delete Account
+const showDeleteConfirm = ref(false);
+const isDeletingAccount = ref(false);
+
+const deleteAccount = async () => {
+  isDeletingAccount.value = true;
+  try {
+    await apiClient.delete('/users/me');
+    authStore.clearAccessToken();
+    authStore.clearUser();
+    window.location.reload();
+  } catch (e) {
+    console.error('Failed to delete account', e);
+    toast.show('Failed to delete account. Please try again.');
+    isDeletingAccount.value = false;
+  }
+};
 
 const saveNickname = async () => {
   nicknameError.value = '';
@@ -297,6 +347,7 @@ const resetState = () => {
   nickname.value = authStore.user?.nickname || '';
   nicknameError.value = '';
   nicknameMessage.value = '';
+  showDeleteConfirm.value = false;
   reports.value = [];
   feedbacks.value = [];
   expandedFeedbackIds.value = new Set();
@@ -410,5 +461,12 @@ defineExpose({ refreshReports, openOnTab });
 .status-label {
   color: #6c757d;
   font-weight: 500;
+}
+
+.danger-zone {
+  border: 1px solid #f5c2c7;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff8f8;
 }
 </style>

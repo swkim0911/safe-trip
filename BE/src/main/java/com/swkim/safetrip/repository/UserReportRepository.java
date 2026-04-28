@@ -1,5 +1,6 @@
 package com.swkim.safetrip.repository;
 
+import com.swkim.safetrip.entity.User;
 import com.swkim.safetrip.entity.UserReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -36,4 +37,7 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long>{
     order by ur.createdAt desc
     """)
     List<UserReport> findMyReports(@Param("email") String email);
+
+    @Query("select ur from UserReport ur left join fetch ur.images where ur.user = :user")
+    List<UserReport> findAllByUserWithImages(@Param("user") User user);
 }

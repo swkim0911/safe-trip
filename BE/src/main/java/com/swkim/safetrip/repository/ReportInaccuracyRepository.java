@@ -18,4 +18,6 @@ public interface ReportInaccuracyRepository extends JpaRepository<ReportInaccura
 
     @Query("select ri from ReportInaccuracy ri join fetch ri.externalReport where ri.user = :user order by ri.createdAt desc")
     List<ReportInaccuracy> findAllByUser(User user);
+
+    void deleteAllByUser(User user);
 }

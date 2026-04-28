@@ -225,4 +225,8 @@ logs/
 .env.crawler
 data/prompt_evaluation/
 .envrc
+
+# docs/ 로컬 메모 (architecture.md 제외)
+docs/*
+!docs/architecture.md
 # End of https://www.toptal.com/developers/gitignore/api/macos,python,venv

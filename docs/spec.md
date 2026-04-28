@@ -1,12 +1,8 @@
 # Safe Trip 기획서
 
----
-
 ## 1. 서비스 설명
 
 여행지별 실제 사기 경험을 바탕으로, 그 지역에서 어떤 사기가 얼마나 발생하는지 한눈에 볼 수 있는 서비스입니다.
-
----
 
 ## 2. 문제 정의
 
@@ -16,13 +12,9 @@
 
 Safe Trip은 실제 여행자들의 경험을 수집하고 집계해서, 목적지의 사기 현황을 바로 볼 수 있게 합니다.
 
----
-
 ## 3. 타겟 사용자
 
 여행을 떠나는 모든 사람들, 그리고 자신의 경험을 공유하고 싶은 사람.
-
----
 
 ## 4. 해결 방식
 
@@ -40,7 +32,7 @@ Reddit의 여행 관련 커뮤니티(ex: r/travel, r/scams, r/solotravel, r/back
 도시나 국가별로 보고된 사기 건수를 집계하고, 전체 데이터 분포 기준으로 상위 20%는 HIGH, 중간 60%는 MEDIUM, 하위 20%는 LOW로 표시합니다. 예: "바르셀로나 🔴 HIGH"
 
 **트렌드**
-전체 데이터를 기준으로 어떤 사기 유형이 많이 발생하는지, 최근 들어 늘고 있는 유형은 무엇인지 통계로 보여줍니다.
+전체 데이터를 기준으로 어떤 사기 유형(Scam Action)과 상황(Scam Context)이 얼마나 발생하는지 비율로 보여줍니다.
 
 ---
 
@@ -100,4 +92,50 @@ Reddit의 여행 관련 커뮤니티(ex: r/travel, r/scams, r/solotravel, r/back
 
 ---
 
-*마지막 업데이트: 2026-03-17*
+## 10. 성능 최적화
+
+### 배경
+
+지도에서 전체 국가/주/도시 통계를 한 번에 조회하는 API가 `external_report` (100만 건+)를 매 요청마다 풀스캔해서 응답 시간이 P95 기준 30초에 달하는 문제가 있었다.
+
+### 집계 테이블
+
+`external_report`는 ETL이 적재한 뒤 변경되지 않는다. 이 특성을 이용해 5개의 집계 테이블을 별도로 만들어 미리 집계해두었다.
+
+| 테이블 | 내용 |
+|--------|------|
+| `ext_country_stats` | 국가별 external report 건수 |
+| `ext_state_stats` | 주별 external report 건수 |
+| `ext_city_stats` | 도시별 external report 건수 |
+| `ext_scam_action_stats` | 국가 × 사기유형별 건수 |
+| `ext_scam_context_stats` | 국가 × 사기상황별 건수 |
+
+조회 쿼리는 풀스캔 대신 이 집계 테이블을 JOIN해서 `external_report` 기여분을 O(1)로 읽는다.
+
+ext_* 테이블은 매일 ETL cron이 `external_report`에 새 데이터를 적재한 직후 `REPLACE INTO`로 전체 재집계된다.
+
+테이블 생성은 서버 시작 시 `aggregate-schema.sql`이 자동 실행된다 (`CREATE TABLE IF NOT EXISTS`라 이미 존재하면 건너뜀). 초기 데이터 적재(`aggregate-data.sql`)는 dev에서는 `application-dev.yml`에 등록되어 서버 시작 시 자동 실행되고, prod(`application-prod.yml`)에는 등록되어 있지 않아 자동 실행되지 않는다. 필요할 때 수동으로 실행한다.
+
+`user_report`는 수시로 등록/수정/삭제되므로 별도로 `user_country_stats` 테이블을 두었다. 리포트 등록/삭제 시 `+1/-1`로 실시간 갱신하고, 매일 새벽 3시(UTC) cron(`StatsBatchService`)이 실제 COUNT로 정합성을 재보정한다.
+
+**최종 통계 = ext 집계 테이블 + user 집계 테이블** 을 JOIN해 합산한다.
+
+### Redis 캐싱
+
+집계 테이블로도 쿼리 자체는 빨라졌지만, 전체 국가/주/도시를 한꺼번에 읽는 쿼리는 여전히 부하가 있다. 자주 바뀌지 않는 통계인 점을 이용해 5개 엔드포인트를 Redis에 캐싱한다 (TTL 1시간).
+
+| 캐시 키 | 엔드포인트 |
+|---------|-----------|
+| `map-countries` | 전체 국가 통계 (지도용) |
+| `map-states` | 전체 주 통계 (지도용) |
+| `map-cities` | 전체 도시 통계 (지도용) |
+| `scam-action-stats` | 전체 사기유형 통계 (트렌드) |
+| `scam-context-stats` | 전체 사기상황 통계 (트렌드) |
+
+- **Warm-up**: 서버 기동 시 `CacheWarmupRunner`가 5개 메서드를 미리 호출해 캐시를 채운다. 이렇게 하지 않으면 첫 요청이 cold start로 DB를 직접 타게 된다.
+- **Cache Evict**: 유저가 리포트를 등록/수정/삭제하면 5개 캐시를 전부 날린다. TTL 안에 새 데이터가 반영되도록 하기 위해서다.
+- **자연 만료**: ETL이 매일 새 데이터를 적재해도 1시간 TTL로 자동 만료되므로 별도 무효화는 불필요하다.
+
+---
+
+*마지막 업데이트: 2026-04-28*

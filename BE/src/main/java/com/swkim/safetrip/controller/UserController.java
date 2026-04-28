@@ -12,6 +12,7 @@ import com.swkim.safetrip.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
@@ -82,6 +83,15 @@ public class UserController {
     public ApiResult<List<MyReportItem>> getMyReports(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<MyReportItem> reports = userReportService.getMyReports(userDetails.getUsername());
         return ApiResult.of(HttpStatus.OK.value(), "My reports retrieved", reports);
+    }
+
+    @Operation(summary = "회원 탈퇴", description = "계정과 관련된 모든 데이터를 삭제합니다.")
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAccount(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletResponse response) {
+        userService.deleteAccount(userDetails.getUsername(), response);
     }
 
 }
