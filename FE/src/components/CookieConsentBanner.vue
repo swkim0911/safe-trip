@@ -45,6 +45,7 @@ const decline = () => {
   localStorage.setItem(CONSENT_KEY, 'declined');
   visible.value = false;
   hasChosen.value = true;
+  window['ga-disable-G-2D9DY6K13V'] = true;
 };
 
 onMounted(() => {
