@@ -16,8 +16,8 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
-        format_sql: true      # 쿼리 로그 포맷 (정렬)
-        show_sql: true        # 쿼리 로그 출력
+        format_sql: false
+        show_sql: false
     defer-datasource-initialization: true
 
   sql:
@@ -38,7 +38,7 @@ management:
         include: health
   endpoint:
     health:
-      show-details: always  # prod에서는 DB, Redis 상태까지 확인
+      show-details: never
 
 oci:
   storage:

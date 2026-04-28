@@ -31,10 +31,10 @@
           <p><strong>OCI Object Storage:</strong> Images you upload are stored on Oracle Cloud Infrastructure Object Storage.</p>
 
           <h6 class="section-title">4. Cookies</h6>
-          <p>We use a single functional cookie (<code>refreshToken</code>) to keep you logged in. This cookie is HttpOnly and Secure, and is not accessible by JavaScript. We also use Google Analytics cookies if you have given your consent. You can withdraw consent at any time by clearing your browser cookies and declining the consent banner on your next visit.</p>
+          <p>We use a single functional cookie (<code>refreshToken</code>) to keep you logged in. This cookie is HttpOnly and Secure, and is not accessible by JavaScript. We also use Google Analytics if you have given your consent. Your analytics consent preference is stored in your browser's local storage. You can withdraw consent at any time using the <strong>Cookie Settings</strong> button at the bottom of the page.</p>
 
           <h6 class="section-title">5. Data Retention</h6>
-          <p>Your account data is retained for as long as your account remains active. If you wish to delete your account and associated data, please contact us at <a href="mailto:safetripworld.contact@gmail.com">safetripworld.contact@gmail.com</a> and we will process your request. (A self-service deletion feature is coming soon.)</p>
+          <p>Your account data is retained for as long as your account remains active. You can delete your account at any time from <strong>My Page → Profile → Delete Account</strong>. This will permanently remove your account and all associated data.</p>
 
           <h6 class="section-title">6. Your Rights</h6>
           <p>Depending on your location, you may have the right to:</p>

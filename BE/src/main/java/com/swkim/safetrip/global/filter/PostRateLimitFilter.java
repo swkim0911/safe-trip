@@ -21,7 +21,7 @@ public class PostRateLimitFilter extends OncePerRequestFilter {
 
     private static final int MAX_REQUESTS = 20;
     private static final int WINDOW_SECONDS = 60;
-    private static final String KEY_PREFIX = "rate_limit:post:";
+    private static final String KEY_PREFIX = "rate_limit:mutate:";
 
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
@@ -30,7 +30,7 @@ public class PostRateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (!"POST".equalsIgnoreCase(request.getMethod()) || isExcluded(request.getRequestURI())) {
+        if (!isMutatingMethod(request.getMethod()) || isExcluded(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -38,7 +38,13 @@ public class PostRateLimitFilter extends OncePerRequestFilter {
         String ip = resolveClientIp(request);
         String key = KEY_PREFIX + ip;
 
-        Long count = redisTemplate.opsForValue().increment(key);
+        var ops = redisTemplate.opsForValue();
+        if (ops == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        Long count = ops.increment(key);
         if (count != null && count == 1) {
             redisTemplate.expire(key, WINDOW_SECONDS, TimeUnit.SECONDS);
         }
@@ -56,9 +62,16 @@ public class PostRateLimitFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // 토큰 갱신은 자동으로 자주 발생하므로 제외
+    private boolean isMutatingMethod(String method) {
+        return "POST".equalsIgnoreCase(method)
+                || "PUT".equalsIgnoreCase(method)
+                || "PATCH".equalsIgnoreCase(method)
+                || "DELETE".equalsIgnoreCase(method);
+    }
+
+    // 토큰 갱신/로그아웃은 자동으로 자주 발생하므로 제외
     private boolean isExcluded(String uri) {
-        return uri.contains("/auth/refresh");
+        return uri.contains("/auth/refresh") || uri.contains("/auth/logout");
     }
 
     private String resolveClientIp(HttpServletRequest request) {

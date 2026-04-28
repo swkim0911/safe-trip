@@ -18,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.ActiveProfiles;
@@ -51,6 +52,9 @@ class AuthControllerTest {
 
     @MockBean
     private JwtProvider jwtProvider;
+
+    @MockBean
+    private RedisTemplate<String, String> redisTemplate;
 
     @Test
     void 로그인_요청_성공시_리프레시_토큰은_쿠키로_반환하고_액세스_토큰은_바디로_반환한다() throws Exception {
