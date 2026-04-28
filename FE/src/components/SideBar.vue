@@ -281,6 +281,7 @@
           </ul>
         </template>
       </div>
+
     </div>
 
     <!-- 토글 버튼 (사이드바 열기) -->
@@ -1108,6 +1109,7 @@ $sidebar-width: 560px;
   overflow-y: auto;
   overscroll-behavior: contain; /* 스크롤 범위를 벗어나면 움직이지 않게 */
 }
+
 
 /* 사이드바가 열렸을 때 토글 버튼 위치 조정 */
 .sidebar.open + .toggle-btn {

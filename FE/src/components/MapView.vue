@@ -1,6 +1,6 @@
 <template>
   <div class="mapview-container">
-    <div style="height: 100vh; width: 100%">
+    <div style="height: calc(100vh - 28px); width: 100%">
       <l-map :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="[center.lat, center.lng]" :min-zoom="3" :options="{zoomControl: false,  maxBoundsViscosity: 1.0}" :max-bounds="[[ -75, -1800 ], [ 85, 1800 ]]" worldCopyJump>
         <l-tile-layer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -99,6 +99,11 @@
     <ReportEditModal :report="editingReport" @updated="handleReportUpdated"/>
     <AdminModal ref="adminModalRef"/>
     <AppToast/>
+    <div class="map-footer">
+      Data sourced from Reddit via the official API. All content belongs to the respective authors.
+      &nbsp;·&nbsp; © 2026 SafeTrip &nbsp;·&nbsp;
+      <a href="mailto:safetripworld.contact@gmail.com">Contact</a>
+    </div>
   </div>
 </template>
 
@@ -273,6 +278,21 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+  .map-footer {
+    height: 28px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: #888;
+    background: #f8f9fa;
+    text-align: center;
+    border-top: 1px solid #e9ecef;
+    a {
+      color: #888;
+      text-decoration: none;
+      &:hover { color: #444; }
+    }
+  }
+
   .icon {
     font-size: 95%;
     margin-right: 1px;
