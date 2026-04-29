@@ -55,7 +55,7 @@
   <!-- 토글 버튼 -->
   <button class="toggle-btn" @click="isExpanded = !isExpanded">
     <font-awesome-icon :icon="['fas', isExpanded ? 'chevron-up' : 'chart-pie']" class="me-1" />
-    Scam Trends
+    Travel Insights
   </button>
 </template>
 

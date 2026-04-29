@@ -58,7 +58,7 @@
                 </p>
                 
                 <div class="mb-2">
-                  <button type="submit" class="btn btn-primary w-100 py-2 mt-2" @click="submitLoginForm">Log In</button>
+                  <button type="submit" class="btn btn-primary auth-submit-btn w-100 py-2 mt-2" @click="submitLoginForm">Log In</button>
                 </div>
               </form>
             </div>
@@ -78,7 +78,7 @@
                       placeholder="user@example.com"
                       required
                     />
-                    <button :disabled="!isValidEmail" type="button" class="btn btn-outline-secondary" @click="validateEmail">
+                    <button :disabled="!isValidEmail" type="button" class="btn btn-outline-secondary auth-check-btn" @click="validateEmail">
                       Check
                     </button>
                   </div>
@@ -135,7 +135,7 @@
                       placeholder="Enter your nickname"
                       required
                     />
-                    <button :disabled="!isValidNickname" type="button" class="btn btn-outline-secondary" @click="validateNickname">
+                    <button :disabled="!isValidNickname" type="button" class="btn btn-outline-secondary auth-check-btn" @click="validateNickname">
                       Check 
                     </button>
                   </div>
@@ -149,7 +149,7 @@
                   </div>
                 
                 </div>
-                <button :disabled="!isSignupFormValid() || isSignupSubmitting" type="submit" class="btn btn-primary w-100 py-2" @click="submitSignupForm">Sign Up</button>
+                <button :disabled="!isSignupFormValid() || isSignupSubmitting" type="submit" class="btn btn-primary auth-submit-btn w-100 py-2" @click="submitSignupForm">Sign Up</button>
               </form>
               <p class="text-center text-danger fw-bold" v-if="signupFailureMessage">{{ signupFailureMessage }}</p>
             </div>
@@ -522,6 +522,46 @@ watch(() => signupForm.nickname, () => {
 
   &:hover:not(.active) {
     color: #6c757d;
+  }
+}
+
+.auth-submit-btn {
+  background: var(--safetrip-primary);
+  border-color: var(--safetrip-primary);
+
+  &:hover,
+  &:focus {
+    background: var(--safetrip-primary-hover);
+    border-color: var(--safetrip-primary-hover);
+  }
+
+  &:active {
+    background: var(--safetrip-primary-active) !important;
+    border-color: var(--safetrip-primary-active) !important;
+  }
+
+  &:disabled {
+    background: #a7cfc8;
+    border-color: #a7cfc8;
+    opacity: 1;
+  }
+}
+
+.auth-check-btn {
+  color: var(--safetrip-primary);
+  border-color: #b9d8d2;
+
+  &:hover,
+  &:focus {
+    color: #fff;
+    background: var(--safetrip-primary);
+    border-color: var(--safetrip-primary);
+  }
+
+  &:disabled {
+    color: #9aa8a6;
+    background: #f7f5ef;
+    border-color: var(--safetrip-border);
   }
 }
 

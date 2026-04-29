@@ -31,10 +31,10 @@
         <l-control-zoom position="bottomright"></l-control-zoom>
         <l-control position="bottomleft">
           <div class="map-legend">
-            <div class="legend-title">Scam Activity</div>
-            <div class="legend-item"><span class="dot high"></span> HIGH</div>
-            <div class="legend-item"><span class="dot medium"></span> MEDIUM</div>
-            <div class="legend-item"><span class="dot low"></span> LOW</div>
+            <div class="legend-title">Report Activity</div>
+            <div class="legend-item"><span class="dot high"></span> Many reports</div>
+            <div class="legend-item"><span class="dot medium"></span> Some reports</div>
+            <div class="legend-item"><span class="dot low"></span> Few reports</div>
           </div>
         </l-control>
       </l-map>
@@ -47,7 +47,7 @@
           @click="openAuthModal"
         >
           <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
-          LOGIN
+          Log in
         </button>
       </div>
       <template v-else>
