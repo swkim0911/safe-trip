@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class AuthIntegrationTest {
 
-    @MockBean
+    @MockBean(name = "redisTemplate")
     private RedisTemplate<String, String> redisTemplate;
 
     @Autowired
