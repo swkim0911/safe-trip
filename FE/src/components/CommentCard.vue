@@ -1,5 +1,5 @@
 <template>
-  <div class="comment-card p-2 rounded" :class="{ 'bg-light': !isReply }">
+  <div class="comment-card" :class="{ reply: isReply }">
     <!-- 삭제된 댓글 -->
     <div v-if="comment.isDeleted" class="text-muted small fst-italic">
       This comment has been deleted.
@@ -17,13 +17,11 @@
         <div v-if="isOwner" class="d-flex gap-1 ms-2">
           <button
             v-if="!isEditing"
-            class="btn btn-sm btn-link text-muted p-0"
-            style="font-size: 0.75rem;"
+            class="comment-action-btn"
             @click="startEdit"
           >Edit</button>
           <button
-            class="btn btn-sm btn-link text-danger p-0"
-            style="font-size: 0.75rem;"
+            class="comment-action-btn danger"
             @click="confirmDelete"
           >Delete</button>
         </div>
@@ -42,7 +40,7 @@
           <div class="d-flex gap-2">
             <button class="btn btn-sm btn-secondary" @click="cancelEdit">Cancel</button>
             <button
-              class="btn btn-sm btn-primary"
+              class="btn btn-sm comment-save-btn"
               :disabled="!editContent.trim()"
               @click="saveEdit"
             >Save</button>
@@ -58,17 +56,16 @@
       <!-- 액션 버튼 -->
       <div v-if="!isEditing" class="d-flex align-items-center gap-3 mt-1">
         <button
-          class="btn btn-sm btn-link p-0 d-flex align-items-center gap-1"
-          :class="comment.likedByMe ? 'text-danger' : 'text-muted'"
-          style="font-size: 0.75rem;"
+          class="comment-action-btn"
+          :class="{ liked: comment.likedByMe }"
           @click="emit('like', comment.id)"
         >
-          👍 {{ comment.likeCnt }}
+          <font-awesome-icon :icon="['fas', 'thumbs-up']" />
+          {{ comment.likedByMe ? 'Liked' : 'Like' }} {{ comment.likeCnt }}
         </button>
         <button
           v-if="!isReply"
-          class="btn btn-sm btn-link text-muted p-0"
-          style="font-size: 0.75rem;"
+          class="comment-action-btn"
           @click="emit('reply', comment.id)"
         >Reply</button>
       </div>
@@ -133,3 +130,55 @@ function formatDate(dateStr) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 </script>
+
+<style scoped>
+.comment-card {
+  padding: 12px 14px;
+  border: 1px solid var(--safetrip-border);
+  border-radius: 10px;
+  background: #fffdf8;
+}
+
+.comment-card.reply {
+  background: #fbfaf5;
+}
+
+.comment-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--safetrip-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.comment-action-btn:hover,
+.comment-action-btn:focus {
+  color: var(--safetrip-primary);
+}
+
+.comment-action-btn.danger:hover,
+.comment-action-btn.danger:focus {
+  color: #b6523b;
+}
+
+.comment-action-btn.liked {
+  color: #b6523b;
+}
+
+.comment-save-btn {
+  color: #fff;
+  background: var(--safetrip-primary);
+  border-color: var(--safetrip-primary);
+}
+
+.comment-save-btn:hover,
+.comment-save-btn:focus {
+  color: #fff;
+  background: var(--safetrip-primary-hover);
+  border-color: var(--safetrip-primary-hover);
+}
+</style>
