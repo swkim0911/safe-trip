@@ -351,9 +351,9 @@ onMounted(() => {
 .report-title {
   margin: 0 0 16px;
   color: var(--safetrip-text);
-  font-size: 1.55rem;
-  font-weight: 800;
-  line-height: 1.22;
+  font-size: 1.38rem;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .report-tags {

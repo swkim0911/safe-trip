@@ -18,11 +18,25 @@
   --safetrip-activity-many: #D97757;
   --safetrip-activity-some: #E9B872;
   --safetrip-activity-few: #66AFA3;
+  --safetrip-font-family: "Nunito Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
+  --bs-body-font-family: var(--safetrip-font-family);
   --bs-primary: var(--safetrip-primary);
   --bs-primary-rgb: 42, 157, 143;
   --bs-link-color: var(--safetrip-primary);
   --bs-link-color-rgb: 42, 157, 143;
+}
+
+body {
+  font-family: var(--safetrip-font-family);
+  color: var(--safetrip-text);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 .btn-primary {
