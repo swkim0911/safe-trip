@@ -10,7 +10,7 @@
               <circle cx="30" cy="30" r="24" fill="none" stroke="#e9ecef" stroke-width="5"/>
               <circle
                 cx="30" cy="30" r="24"
-                fill="none" stroke="#E76F51" stroke-width="5"
+                fill="none" stroke="#D97757" stroke-width="5"
                 stroke-linecap="round"
                 :stroke-dasharray="circumference"
                 :stroke-dashoffset="getDashOffset(item.percentage)"
@@ -35,7 +35,7 @@
               <circle cx="30" cy="30" r="24" fill="none" stroke="#e9ecef" stroke-width="5"/>
               <circle
                 cx="30" cy="30" r="24"
-                fill="none" stroke="#2F80ED" stroke-width="5"
+                fill="none" stroke="#2A9D8F" stroke-width="5"
                 stroke-linecap="round"
                 :stroke-dasharray="circumference"
                 :stroke-dashoffset="getDashOffset(item.percentage)"
@@ -172,12 +172,12 @@ onMounted(async () => {
   font-size: 14px;
   cursor: pointer;
   border-radius: 0 0 10px 10px;
-  box-shadow: 0 3px 12px rgba(47, 128, 237, 0.28);
+  box-shadow: 0 3px 12px rgba(42, 157, 143, 0.26);
   transition: background 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
     background: var(--safetrip-primary-hover);
-    box-shadow: 0 4px 18px rgba(47, 128, 237, 0.36);
+    box-shadow: 0 4px 18px rgba(42, 157, 143, 0.34);
   }
 }
 </style>

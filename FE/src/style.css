@@ -4,25 +4,25 @@
 }
 
 :root {
-  --safetrip-primary: #2F80ED;
-  --safetrip-primary-hover: #256FD1;
-  --safetrip-primary-active: #1E5FB8;
-  --safetrip-primary-soft: #EAF4FF;
-  --safetrip-accent: #FF8A65;
+  --safetrip-primary: #2A9D8F;
+  --safetrip-primary-hover: #23867A;
+  --safetrip-primary-active: #1C6F66;
+  --safetrip-primary-soft: #E8F7F4;
+  --safetrip-accent: #E76F51;
   --safetrip-accent-soft: #FFF1EC;
   --safetrip-surface: #FFFFFF;
-  --safetrip-page: #F7FAFC;
-  --safetrip-border: #E2E8F0;
-  --safetrip-text: #1F2937;
-  --safetrip-muted: #64748B;
-  --safetrip-activity-many: #E76F51;
-  --safetrip-activity-some: #F4A261;
-  --safetrip-activity-few: #2A9D8F;
+  --safetrip-page: #FAF8F3;
+  --safetrip-border: #E8E1D8;
+  --safetrip-text: #24313A;
+  --safetrip-muted: #6F7C80;
+  --safetrip-activity-many: #D97757;
+  --safetrip-activity-some: #E9B872;
+  --safetrip-activity-few: #66AFA3;
 
   --bs-primary: var(--safetrip-primary);
-  --bs-primary-rgb: 47, 128, 237;
+  --bs-primary-rgb: 42, 157, 143;
   --bs-link-color: var(--safetrip-primary);
-  --bs-link-color-rgb: 47, 128, 237;
+  --bs-link-color-rgb: 42, 157, 143;
 }
 
 .btn-primary {

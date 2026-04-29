@@ -3,10 +3,10 @@
     <div style="height: calc(100vh - 28px); width: 100%">
       <l-map :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="[center.lat, center.lng]" :min-zoom="3" :options="{zoomControl: false,  maxBoundsViscosity: 1.0}" :max-bounds="[[ -75, -1800 ], [ 85, 1800 ]]" worldCopyJump>
         <l-tile-layer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           layer-type="base"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-          name="CartoDB Positron"
+          name="CartoDB Voyager"
         ></l-tile-layer>
         <l-circle-marker
           v-for="marker in markers"
@@ -214,10 +214,10 @@ const getRadius = (scamCnt) => {
 }
 
 const getColor = (riskLevel) => {
-  if (riskLevel === 'HIGH') return '#E76F51'
-  if (riskLevel === 'MEDIUM') return '#F4A261'
-  if (riskLevel === 'LOW') return '#2A9D8F'
-  return '#94A3B8'
+  if (riskLevel === 'HIGH') return '#D97757'
+  if (riskLevel === 'MEDIUM') return '#E9B872'
+  if (riskLevel === 'LOW') return '#66AFA3'
+  return '#A8A29E'
 }
 
 const loadMapSummary = async () => {
@@ -297,6 +297,8 @@ onMounted(() => {
   }
 
   .login-btn, .report-btn, .dropdown-btn {
+    background: var(--safetrip-primary);
+    border-color: var(--safetrip-primary);
     border: none;
     padding: 8px 16px;
     border-radius: 999px;
@@ -306,11 +308,15 @@ onMounted(() => {
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 
     &:hover {
+      background: var(--safetrip-primary-hover);
+      border-color: var(--safetrip-primary-hover);
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(47, 128, 237, 0.28) !important;
+      box-shadow: 0 6px 16px rgba(42, 157, 143, 0.24) !important;
     }
 
     &:active {
+      background: var(--safetrip-primary-active);
+      border-color: var(--safetrip-primary-active);
       transform: translateY(0);
     }
   }

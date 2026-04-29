@@ -104,7 +104,7 @@
                 <div v-for="item in countryActionStats" :key="item.name" class="ring-item">
                   <svg width="56" height="56" viewBox="0 0 56 56">
                     <circle cx="28" cy="28" r="22" fill="none" stroke="#e9ecef" stroke-width="4"/>
-                    <circle cx="28" cy="28" r="22" fill="none" stroke="#E76F51" stroke-width="4"
+                    <circle cx="28" cy="28" r="22" fill="none" stroke="#D97757" stroke-width="4"
                       stroke-linecap="round"
                       :stroke-dasharray="statCircumference"
                       :stroke-dashoffset="getStatDashOffset(item.percentage)"
@@ -124,7 +124,7 @@
                 <div v-for="item in countryContextStats" :key="item.name" class="ring-item">
                   <svg width="56" height="56" viewBox="0 0 56 56">
                     <circle cx="28" cy="28" r="22" fill="none" stroke="#e9ecef" stroke-width="4"/>
-                    <circle cx="28" cy="28" r="22" fill="none" stroke="#2F80ED" stroke-width="4"
+                    <circle cx="28" cy="28" r="22" fill="none" stroke="#2A9D8F" stroke-width="4"
                       stroke-linecap="round"
                       :stroke-dasharray="statCircumference"
                       :stroke-dashoffset="getStatDashOffset(item.percentage)"
@@ -1018,7 +1018,7 @@ $sidebar-width: 560px;
   left: -$sidebar-width; /* 기본적으로 숨김 */
   width: $sidebar-width;
   height: 100vh;
-  background-color: #fbfcf8;
+  background-color: var(--safetrip-page);
   box-shadow: 4px 0 28px rgba(15, 23, 42, 0.1);
   transition: left 0.3s ease;
   padding: 20px;
@@ -1104,7 +1104,7 @@ $sidebar-width: 560px;
 
   &:focus {
     border-color: var(--safetrip-primary);
-    box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.12);
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.14);
   }
 }
 
@@ -1137,7 +1137,7 @@ $sidebar-width: 560px;
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
-    background: #f9fbfb;
+    background: #fffdf8;
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
   }
@@ -1191,8 +1191,8 @@ $sidebar-width: 560px;
   position: relative;
   overflow: hidden;
   border-radius: 12px !important;
-  background: linear-gradient(135deg, var(--safetrip-primary), #55B7E8);
-  box-shadow: 0 8px 18px rgba(47, 128, 237, 0.2);
+  background: linear-gradient(135deg, var(--safetrip-primary), var(--safetrip-accent));
+  box-shadow: 0 8px 18px rgba(42, 157, 143, 0.2);
   transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 
   &::before {
@@ -1208,8 +1208,8 @@ $sidebar-width: 560px;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 26px rgba(47, 128, 237, 0.26);
-    background: linear-gradient(135deg, var(--safetrip-primary-hover), var(--safetrip-primary));
+    box-shadow: 0 12px 26px rgba(42, 157, 143, 0.28);
+    background: linear-gradient(135deg, var(--safetrip-primary-hover), #d8664b);
   }
 
   &:hover::before {
@@ -1218,7 +1218,7 @@ $sidebar-width: 560px;
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 6px 14px rgba(47, 128, 237, 0.3);
+    box-shadow: 0 6px 14px rgba(42, 157, 143, 0.28);
   }
 }
 
@@ -1245,9 +1245,9 @@ $sidebar-width: 560px;
 }
 
 .source-user {
-  color: #1e5fb8;
+  color: #1f7f74;
   background: var(--safetrip-primary-soft);
-  border-color: #c9e2ff;
+  border-color: #b9e4dc;
 }
 
 .source-collected {
@@ -1257,7 +1257,7 @@ $sidebar-width: 560px;
 }
 
 .country-stats {
-  background: #f7faf7;
+  background: #fffdf8;
   border-radius: 10px;
   padding: 14px;
 }
@@ -1330,12 +1330,12 @@ $sidebar-width: 560px;
   font-size: 15px;
   cursor: pointer;
   border-radius: 0 10px 10px 0;
-  box-shadow: 3px 0 12px rgba(47, 128, 237, 0.28);
+  box-shadow: 3px 0 12px rgba(42, 157, 143, 0.26);
   transition: left 0.3s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 
   &:hover {
     background-color: var(--safetrip-primary-hover);
-    box-shadow: 4px 0 18px rgba(47, 128, 237, 0.36);
+    box-shadow: 4px 0 18px rgba(42, 157, 143, 0.34);
     transform: translateY(-50%) translateX(2px);
   }
 
