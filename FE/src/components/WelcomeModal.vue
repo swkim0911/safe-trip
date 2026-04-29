@@ -81,7 +81,7 @@ onMounted(() => {
 }
 
 .feedback-link {
-  color: #3B82F6;
+  color: var(--safetrip-primary);
   text-decoration: none;
   &:hover {
     text-decoration: underline;

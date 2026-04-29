@@ -189,8 +189,6 @@ watch(zoom, (newZoom, oldZoom) => {
   const prevGroup = getGroupByZoom(oldZoom);
   const currGroup = getGroupByZoom(newZoom);
 
-  console.log(zoom.value);
-
   if (prevGroup !== currGroup) {
     loadMapSummary();
   }
@@ -216,10 +214,10 @@ const getRadius = (scamCnt) => {
 }
 
 const getColor = (riskLevel) => {
-  if (riskLevel === 'HIGH') return '#e74c3c'
-  if (riskLevel === 'MEDIUM') return '#f39c12'
-  if (riskLevel === 'LOW') return '#2ecc71'
-  return '#95a5a6'
+  if (riskLevel === 'HIGH') return '#E76F51'
+  if (riskLevel === 'MEDIUM') return '#F4A261'
+  if (riskLevel === 'LOW') return '#2A9D8F'
+  return '#94A3B8'
 }
 
 const loadMapSummary = async () => {
@@ -309,7 +307,7 @@ onMounted(() => {
 
     &:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35) !important;
+      box-shadow: 0 6px 16px rgba(47, 128, 237, 0.28) !important;
     }
 
     &:active {
@@ -358,10 +356,11 @@ onMounted(() => {
 }
 
 .map-legend {
-  background: white;
+  background: rgba(255, 255, 255, 0.94);
   padding: 8px 12px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border: 1px solid var(--safetrip-border);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -371,7 +370,7 @@ onMounted(() => {
   margin-bottom: 4px;
   font-size: 11px;
   text-transform: uppercase;
-  color: #555;
+  color: var(--safetrip-muted);
 }
 
 .legend-item {
@@ -386,9 +385,9 @@ onMounted(() => {
   height: 10px;
   border-radius: 50%;
 
-  &.high   { background-color: #e74c3c; }
-  &.medium { background-color: #f39c12; }
-  &.low    { background-color: #2ecc71; }
+  &.high   { background-color: var(--safetrip-activity-many); }
+  &.medium { background-color: var(--safetrip-activity-some); }
+  &.low    { background-color: var(--safetrip-activity-few); }
 }
 
 .risk-badge {
@@ -398,8 +397,8 @@ onMounted(() => {
   border-radius: 4px;
   color: white;
 
-  &.high   { background-color: #e74c3c; }
-  &.medium { background-color: #f39c12; }
-  &.low    { background-color: #2ecc71; }
+  &.high   { background-color: var(--safetrip-activity-many); }
+  &.medium { background-color: var(--safetrip-activity-some); }
+  &.low    { background-color: var(--safetrip-activity-few); }
 }
 </style>

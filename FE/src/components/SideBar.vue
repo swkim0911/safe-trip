@@ -104,7 +104,7 @@
                 <div v-for="item in countryActionStats" :key="item.name" class="ring-item">
                   <svg width="56" height="56" viewBox="0 0 56 56">
                     <circle cx="28" cy="28" r="22" fill="none" stroke="#e9ecef" stroke-width="4"/>
-                    <circle cx="28" cy="28" r="22" fill="none" stroke="#e74c3c" stroke-width="4"
+                    <circle cx="28" cy="28" r="22" fill="none" stroke="#E76F51" stroke-width="4"
                       stroke-linecap="round"
                       :stroke-dasharray="statCircumference"
                       :stroke-dashoffset="getStatDashOffset(item.percentage)"
@@ -124,7 +124,7 @@
                 <div v-for="item in countryContextStats" :key="item.name" class="ring-item">
                   <svg width="56" height="56" viewBox="0 0 56 56">
                     <circle cx="28" cy="28" r="22" fill="none" stroke="#e9ecef" stroke-width="4"/>
-                    <circle cx="28" cy="28" r="22" fill="none" stroke="#3B82F6" stroke-width="4"
+                    <circle cx="28" cy="28" r="22" fill="none" stroke="#2F80ED" stroke-width="4"
                       stroke-linecap="round"
                       :stroke-dasharray="statCircumference"
                       :stroke-dashoffset="getStatDashOffset(item.percentage)"
@@ -1018,8 +1018,8 @@ $sidebar-width: 560px;
   left: -$sidebar-width; /* 기본적으로 숨김 */
   width: $sidebar-width;
   height: 100vh;
-  background-color: #ffffff;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
+  background-color: #fbfcf8;
+  box-shadow: 4px 0 28px rgba(15, 23, 42, 0.1);
   transition: left 0.3s ease;
   padding: 20px;
   flex-direction: column;
@@ -1041,7 +1041,7 @@ $sidebar-width: 560px;
   left: 24px;
   top: 39%;
   transform: translateY(-50%);
-  color: #3B82F6;
+  color: var(--safetrip-primary);
   z-index: 10;
   font-size: 1rem;
 }
@@ -1071,20 +1071,20 @@ $sidebar-width: 560px;
   transition: background 0.15s ease;
 
   &:hover {
-    background: #f1f5fe;
+    background: var(--safetrip-primary-soft);
   }
 }
 
 .result-name {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--safetrip-text);
 }
 
 .result-type {
   font-size: 11px;
   color: #888;
-  background: #f1f3f5;
+  background: #eef6f6;
   padding: 2px 8px;
   border-radius: 20px;
 }
@@ -1103,8 +1103,8 @@ $sidebar-width: 560px;
   }
 
   &:focus {
-    border-color: #3B82F6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--safetrip-primary);
+    box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.12);
   }
 }
 
@@ -1126,20 +1126,20 @@ $sidebar-width: 560px;
 .list-group-item {
   position: relative;
   background: #ffffff;
-  color: black;
+  color: var(--safetrip-text);
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 8px;
   margin-top: 8px;
-  border: 1px solid #e9ecef;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--safetrip-border);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
   cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
-    background: #f8f9fa;
+    background: #f9fbfb;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
   }
 
   &:active {
@@ -1191,8 +1191,8 @@ $sidebar-width: 560px;
   position: relative;
   overflow: hidden;
   border-radius: 12px !important;
-  background: linear-gradient(135deg, #3B82F6, #60A5FA);
-  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.2);
+  background: linear-gradient(135deg, var(--safetrip-primary), #55B7E8);
+  box-shadow: 0 8px 18px rgba(47, 128, 237, 0.2);
   transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 
   &::before {
@@ -1208,8 +1208,8 @@ $sidebar-width: 560px;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 26px rgba(59, 130, 246, 0.3);
-    background: linear-gradient(135deg, #2563EB, #3B82F6);
+    box-shadow: 0 12px 26px rgba(47, 128, 237, 0.26);
+    background: linear-gradient(135deg, var(--safetrip-primary-hover), var(--safetrip-primary));
   }
 
   &:hover::before {
@@ -1218,7 +1218,7 @@ $sidebar-width: 560px;
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
+    box-shadow: 0 6px 14px rgba(47, 128, 237, 0.3);
   }
 }
 
@@ -1229,9 +1229,9 @@ $sidebar-width: 560px;
   border-radius: 4px;
   color: white;
 
-  &.high   { background-color: #e74c3c; }
-  &.medium { background-color: #f39c12; }
-  &.low    { background-color: #2ecc71; }
+  &.high   { background-color: var(--safetrip-activity-many); }
+  &.medium { background-color: var(--safetrip-activity-some); }
+  &.low    { background-color: var(--safetrip-activity-few); }
 }
 
 .report-source-badge {
@@ -1245,19 +1245,19 @@ $sidebar-width: 560px;
 }
 
 .source-user {
-  color: #1d4ed8;
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  color: #1e5fb8;
+  background: var(--safetrip-primary-soft);
+  border-color: #c9e2ff;
 }
 
 .source-collected {
   color: #475569;
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: #f8fbfb;
+  border-color: #d6e3e4;
 }
 
 .country-stats {
-  background: #f8f9fa;
+  background: #f7faf7;
   border-radius: 10px;
   padding: 14px;
 }
@@ -1323,24 +1323,24 @@ $sidebar-width: 560px;
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  background-color: #3B82F6;
+  background-color: var(--safetrip-primary);
   color: white;
   border: none;
   padding: 14px 10px;
   font-size: 15px;
   cursor: pointer;
   border-radius: 0 10px 10px 0;
-  box-shadow: 3px 0 12px rgba(59, 130, 246, 0.35);
+  box-shadow: 3px 0 12px rgba(47, 128, 237, 0.28);
   transition: left 0.3s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    background-color: #2563EB;
-    box-shadow: 4px 0 18px rgba(59, 130, 246, 0.5);
+    background-color: var(--safetrip-primary-hover);
+    box-shadow: 4px 0 18px rgba(47, 128, 237, 0.36);
     transform: translateY(-50%) translateX(2px);
   }
 
   &:active {
-    background-color: #1D4ED8;
+    background-color: var(--safetrip-primary-active);
     transform: translateY(-50%) translateX(0);
   }
 }

@@ -506,7 +506,7 @@ watch(() => signupForm.nickname, () => {
   transition: color 0.2s;
 
   &.active {
-    color: #3B82F6;
+    color: var(--safetrip-primary);
 
     &::after {
       content: '';
@@ -515,7 +515,7 @@ watch(() => signupForm.nickname, () => {
       left: 0;
       right: 0;
       height: 2px;
-      background: #3B82F6;
+      background: var(--safetrip-primary);
       border-radius: 2px 2px 0 0;
     }
   }

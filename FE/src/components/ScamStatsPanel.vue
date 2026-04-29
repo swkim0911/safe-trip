@@ -10,7 +10,7 @@
               <circle cx="30" cy="30" r="24" fill="none" stroke="#e9ecef" stroke-width="5"/>
               <circle
                 cx="30" cy="30" r="24"
-                fill="none" stroke="#e74c3c" stroke-width="5"
+                fill="none" stroke="#E76F51" stroke-width="5"
                 stroke-linecap="round"
                 :stroke-dasharray="circumference"
                 :stroke-dashoffset="getDashOffset(item.percentage)"
@@ -35,7 +35,7 @@
               <circle cx="30" cy="30" r="24" fill="none" stroke="#e9ecef" stroke-width="5"/>
               <circle
                 cx="30" cy="30" r="24"
-                fill="none" stroke="#3B82F6" stroke-width="5"
+                fill="none" stroke="#2F80ED" stroke-width="5"
                 stroke-linecap="round"
                 :stroke-dasharray="circumference"
                 :stroke-dashoffset="getDashOffset(item.percentage)"
@@ -100,8 +100,9 @@ onMounted(async () => {
   left: 0;
   width: 100%;
   z-index: 998;
-  background: white;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--safetrip-border);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .panel-body {
@@ -164,19 +165,19 @@ onMounted(async () => {
   left: 50%;
   transform: translateX(-50%);
   z-index: 999;
-  background: #3B82F6;
+  background: var(--safetrip-primary);
   color: white;
   border: none;
   padding: 8px 16px;
   font-size: 14px;
   cursor: pointer;
   border-radius: 0 0 10px 10px;
-  box-shadow: 0 3px 12px rgba(59, 130, 246, 0.35);
+  box-shadow: 0 3px 12px rgba(47, 128, 237, 0.28);
   transition: background 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    background: #2563EB;
-    box-shadow: 0 4px 18px rgba(59, 130, 246, 0.5);
+    background: var(--safetrip-primary-hover);
+    box-shadow: 0 4px 18px rgba(47, 128, 237, 0.36);
   }
 }
 </style>
