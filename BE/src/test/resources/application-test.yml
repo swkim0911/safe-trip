@@ -22,6 +22,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+      repositories:
+        enabled: false
   # WebMvc 설정 (없는 URL 예외 잡으려면 필요)
   mvc:
     throw-exception-if-no-handler-found: true
