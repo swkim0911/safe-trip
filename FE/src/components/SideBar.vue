@@ -260,8 +260,15 @@
               :key="report.reportId"
               @click="openReportDetailModal(report.source, report.reportId)"
             >
-              <span class="badge bg-primary position-absolute top-0 end-0 translate-middle-y me-2">
-                {{ report.source === 'SAFETRIP' ? '✍️ SafeTrip' : '🤖 AI Bot' }}
+              <span
+                class="badge report-source-badge position-absolute top-0 end-0 translate-middle-y me-2"
+                :class="report.source === 'SAFETRIP' ? 'source-user' : 'source-collected'"
+              >
+                <font-awesome-icon
+                  :icon="report.source === 'SAFETRIP' ? ['fas', 'user-shield'] : ['fas', 'database']"
+                  class="me-1"
+                />
+                {{ report.source === 'SAFETRIP' ? 'User Report' : 'AI-Assisted Report' }}
               </span>
 
               <div class="fw-bold mb-1 mt-3 d-flex align-items-start">
@@ -1225,6 +1232,28 @@ $sidebar-width: 560px;
   &.high   { background-color: #e74c3c; }
   &.medium { background-color: #f39c12; }
   &.low    { background-color: #2ecc71; }
+}
+
+.report-source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid transparent;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.source-user {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.source-collected {
+  color: #475569;
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .country-stats {

@@ -3,11 +3,14 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">⚠️ Report Inaccuracy</h5>
+          <h5 class="modal-title d-flex align-items-center gap-2">
+            <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
+            Report Inaccuracy
+          </h5>
           <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p class="text-muted small mb-3">AI Bot이 수집한 리포트에 오류가 있다면 신고해주세요.</p>
+          <p class="text-muted small mb-3">Let us know if an AI-assisted report contains incorrect information.</p>
 
           <div class="mb-3">
             <label class="form-label fw-bold">Reason <span class="text-danger">*</span></label>

@@ -19,15 +19,17 @@
               <div class="d-flex justify-content-end mb-1">
                 <span
                   v-if="report.source === 'SAFETRIP'"
-                  class="badge rounded-pill border border-primary text-primary fs-6 px-2 py-1"
+                  class="badge rounded-pill border border-primary text-primary fs-6 px-2 py-1 d-inline-flex align-items-center gap-1"
                 >
-                  👤 User Report
+                  <font-awesome-icon :icon="['fas', 'user-shield']" />
+                  User Report
                 </span>
                 <span
                   v-else
-                  class="badge rounded-pill bg-light text-dark border fs-6 px-2 py-1"
+                  class="badge rounded-pill bg-light text-dark border fs-6 px-2 py-1 d-inline-flex align-items-center gap-1"
                 >
-                  🤖 Collected by AI Bot
+                  <font-awesome-icon :icon="['fas', 'database']" />
+                  AI-Assisted Report
                 </span>
               </div>
               <div>
@@ -40,20 +42,25 @@
               </div>
               <div v-if="report.sourceUrl">
                 <a :href="report.sourceUrl" target="_blank" class="small text-primary text-decoration-none">
-                  🔗 Original
+                  <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" class="me-1" />
+                  Original Source
                 </a>
               </div>
 
               <!-- Report Inaccuracy 영역 -->
               <div v-if="report.source !== 'SAFETRIP'" class="mt-2">
-                <span v-if="alreadySubmitted" class="text-muted small">✅ Feedback submitted</span>
+                <span v-if="alreadySubmitted" class="text-muted small d-inline-flex align-items-center gap-1">
+                  <font-awesome-icon :icon="['fas', 'circle-check']" />
+                  Feedback submitted
+                </span>
                 <button
                   v-else-if="!showInaccuracyForm"
                   type="button"
                   class="btn btn-sm btn-outline-warning"
                   @click="handleInaccuracyClick"
                 >
-                  ⚠️ Report Inaccuracy
+                  <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />
+                  Report Inaccuracy
                 </button>
               </div>
             </div>
@@ -61,7 +68,10 @@
 
           <!-- 인라인 신고 폼 -->
           <div v-if="showInaccuracyForm" class="border rounded p-3 mb-3 bg-light">
-            <p class="fw-bold small mb-2">⚠️ Report Inaccuracy</p>
+            <p class="fw-bold small mb-2 d-flex align-items-center gap-1">
+              <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
+              Report Inaccuracy
+            </p>
             <div class="mb-2">
               <select v-model="inaccuracyReason" class="form-select form-select-sm">
                 <option value="" disabled>Select a reason</option>
