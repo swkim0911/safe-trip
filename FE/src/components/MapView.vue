@@ -32,9 +32,9 @@
         <l-control position="bottomleft">
           <div class="map-legend">
             <div class="legend-title">Report Activity</div>
-            <div class="legend-item"><span class="dot high"></span> Many reports</div>
-            <div class="legend-item"><span class="dot medium"></span> Some reports</div>
-            <div class="legend-item"><span class="dot low"></span> Few reports</div>
+            <div class="legend-item"><span class="dot high"></span> Hotspot</div>
+            <div class="legend-item"><span class="dot medium"></span> Moderate</div>
+            <div class="legend-item"><span class="dot low"></span> Quiet</div>
           </div>
         </l-control>
       </l-map>

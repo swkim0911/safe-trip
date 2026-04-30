@@ -60,9 +60,9 @@
               </div>
               <div class="d-flex align-items-center gap-1">
                 <span v-if="country.riskLevel" class="badge risk-badge" :class="country.riskLevel.toLowerCase()">
-                  {{ country.riskLevel }}
+                  {{ getActivityLabel(country.riskLevel) }}
                 </span>
-                <span class="badge text-bg-primary rounded-pill">{{ country.scamCnt }}</span>
+                <span class="count-badge">{{ country.scamCnt }}</span>
               </div>
             </li>
           </ul>
@@ -81,16 +81,15 @@
 
           <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
           <div class="mb-3">
-            <button 
-              class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3 report-cta"
+            <button
+              class="report-cta"
               @click="showReportsByCountry(selectedCountry.id, selectedCountry.name)"
-              style="border-radius: 8px;"
             >
               <span class="d-flex align-items-center">
                 <font-awesome-icon :icon="['fas', 'file-alt']" class="me-2" />
-                See all reports
+                View reports
               </span>
-              <span class="badge bg-light text-dark">
+              <span class="cta-count">
                 {{ selectedCountry.scamCnt }} reports
               </span>
             </button>
@@ -163,9 +162,9 @@
                 </div>
                 <div class="d-flex align-items-center gap-1">
                   <span v-if="state.riskLevel" class="badge risk-badge" :class="state.riskLevel.toLowerCase()">
-                    {{ state.riskLevel }}
+                    {{ getActivityLabel(state.riskLevel) }}
                   </span>
-                  <span class="badge text-bg-primary rounded-pill">{{ state.scamCnt }}</span>
+                  <span class="count-badge">{{ state.scamCnt }}</span>
                 </div>
               </li>
             </ul>
@@ -186,16 +185,15 @@
 
           <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
           <div class="mb-3">
-            <button 
-              class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3 report-cta"
+            <button
+              class="report-cta"
               @click="showReportsByState(selectedState.id, selectedState.name)"
-              style="border-radius: 8px;"
             >
               <span class="d-flex align-items-center">
                 <font-awesome-icon :icon="['fas', 'file-alt']" class="me-2" />
-                See all reports in {{ selectedState.name }}
+                View {{ selectedState.name }} reports
               </span>
-              <span class="badge bg-light text-dark">
+              <span class="cta-count">
                 {{ selectedState.scamCnt || 0 }} reports
               </span>
             </button>
@@ -222,7 +220,7 @@
                   {{ city.name }}
                 </div>
               </div>
-              <span class="badge text-bg-primary rounded-pill">{{ city.scamCnt }}</span>
+              <span class="count-badge">{{ city.scamCnt }}</span>
             </li>
           </ul>
         </template>
@@ -261,28 +259,27 @@
               @click="openReportDetailModal(report.source, report.reportId)"
             >
               <span
-                class="badge report-source-badge position-absolute top-0 end-0 translate-middle-y me-2"
+                class="report-source-badge"
                 :class="report.source === 'SAFETRIP' ? 'source-user' : 'source-collected'"
               >
                 <font-awesome-icon
                   :icon="report.source === 'SAFETRIP' ? ['fas', 'user-shield'] : ['fas', 'database']"
                   class="me-1"
                 />
-                {{ report.source === 'SAFETRIP' ? 'User Report' : 'AI-Assisted Report' }}
+                {{ report.source === 'SAFETRIP' ? 'User Report' : 'AI-Assisted' }}
               </span>
 
-              <div class="fw-bold mb-1 mt-3 d-flex align-items-start">
-                <font-awesome-icon :icon="['fas', 'shield-alt']" class="me-2 text-danger mt-1 flex-shrink-0" />
+              <div class="report-card-title">
                 <span>{{ report.title }}</span>
               </div>
 
-              <div class="mb-1">
-                <span class="badge text-bg-danger me-1">{{ report.scamAction }}</span>
-                <span class="badge text-bg-warning">{{ report.scamContext }}</span>
+              <div class="report-card-tags">
+                <span class="report-chip action-chip">{{ report.scamAction }}</span>
+                <span class="report-chip context-chip">{{ report.scamContext }}</span>
               </div>
 
-              <div class="text-end">
-                <small class="text-muted">{{ formatDate(report.posted_at) }}</small>
+              <div class="report-card-date">
+                {{ formatDate(report.posted_at) }}
               </div>
             </li>
           </ul>
@@ -498,6 +495,13 @@ const toStatPercentageItems = (stats) => {
 };
 
 const getStatDashOffset = (percentage) => statCircumference * (1 - percentage / 100);
+
+const getActivityLabel = (riskLevel) => {
+  if (riskLevel === 'HIGH') return 'Hotspot';
+  if (riskLevel === 'MEDIUM') return 'Moderate';
+  if (riskLevel === 'LOW') return 'Quiet';
+  return riskLevel || '';
+};
 
 const loadCountryStats = async (countryId) => {
   const [actionRes, contextRes] = await Promise.all([
@@ -1127,8 +1131,8 @@ $sidebar-width: 560px;
   position: relative;
   background: #ffffff;
   color: var(--safetrip-text);
-  border-radius: 10px;
-  padding: 14px;
+  border-radius: 12px;
+  padding: 14px 15px;
   margin-bottom: 8px;
   margin-top: 8px;
   border: 1px solid var(--safetrip-border);
@@ -1143,9 +1147,9 @@ $sidebar-width: 560px;
   }
 
   &:active {
-    background: #f1f3f5;
+    background: #faf6ee;
     transform: translateY(0);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
   }
 }
 
@@ -1188,50 +1192,69 @@ $sidebar-width: 560px;
 }
 
 .report-cta {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   position: relative;
   overflow: hidden;
-  border-radius: 12px !important;
-  background: linear-gradient(135deg, var(--safetrip-primary), var(--safetrip-accent));
-  box-shadow: 0 8px 18px rgba(42, 157, 143, 0.2);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 20% -20% auto auto;
-    width: 160px;
-    height: 160px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.45), transparent 70%);
-    opacity: 0.6;
-    transition: opacity 0.25s ease;
-  }
+  border: 1px solid #b9e4dc;
+  border-radius: 12px;
+  background: #fffdf8;
+  color: var(--safetrip-primary);
+  padding: 14px 15px;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(36, 49, 58, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 26px rgba(42, 157, 143, 0.28);
-    background: linear-gradient(135deg, var(--safetrip-primary-hover), #d8664b);
-  }
-
-  &:hover::before {
-    opacity: 0.9;
+    transform: translateY(-2px);
+    border-color: var(--safetrip-primary);
+    background: var(--safetrip-primary-soft);
+    box-shadow: 0 10px 22px rgba(36, 49, 58, 0.09);
   }
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 6px 14px rgba(42, 157, 143, 0.28);
+    box-shadow: 0 4px 12px rgba(36, 49, 58, 0.07);
   }
+}
+
+.cta-count {
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--safetrip-primary);
+  color: #fff;
+  padding: 4px 9px;
+  font-size: 0.75rem;
+  font-weight: 800;
 }
 
 .risk-badge {
   font-size: 11px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
   color: white;
 
   &.high   { background-color: var(--safetrip-activity-many); }
   &.medium { background-color: var(--safetrip-activity-some); }
   &.low    { background-color: var(--safetrip-activity-few); }
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: var(--safetrip-primary);
+  background: var(--safetrip-primary-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .report-source-badge {
@@ -1254,6 +1277,48 @@ $sidebar-width: 560px;
   color: #475569;
   background: #f8fbfb;
   border-color: #d6e3e4;
+}
+
+.report-card-title {
+  margin: 6px 0 10px;
+  color: var(--safetrip-text);
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.report-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.report-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.action-chip {
+  color: #8f432f;
+  background: #fff1ec;
+  border: 1px solid #f3c6b8;
+}
+
+.context-chip {
+  color: #73511f;
+  background: #fff7df;
+  border: 1px solid #ecd39a;
+}
+
+.report-card-date {
+  color: var(--safetrip-muted);
+  font-size: 0.78rem;
+  text-align: right;
 }
 
 .country-stats {
