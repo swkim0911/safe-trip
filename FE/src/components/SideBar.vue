@@ -622,7 +622,7 @@ function mapUserReportDetail(result, reportId) {
     title: result.title,
     content: result.description,
     postedAt: formatDate(result.createdAt),
-    imageUrls: result.urls || [],
+    imageUrls: result.urls || result.URLs || result.imageUrls || [],
   })
 }
 
@@ -641,6 +641,7 @@ function mapExternalReportDetail(result, reportId) {
     title: result.title,
     content: result.summary,
     postedAt: formatDate(result.postedAt),
+    imageUrls: [],
   })
 }
 

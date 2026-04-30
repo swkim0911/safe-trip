@@ -105,20 +105,19 @@
             <p class="report-copy">{{ report.content }}</p>
           </section>
 
-          <!-- 이미지 표시 (User Report만) -->
-          <section v-if="report.source === 'SAFETRIP' && report.imageUrls && report.imageUrls.length > 0" class="report-section">
+          <!-- 이미지 표시 -->
+          <section v-if="normalizedImageUrls.length > 0" class="report-section">
             <div class="section-label">Photos</div>
-            <div class="row g-2 mt-1">
+            <div class="report-photo-grid">
               <div
-                v-for="(url, index) in report.imageUrls"
+                v-for="(url, index) in normalizedImageUrls"
                 :key="index"
-                class="col-md-6"
+                class="report-photo-frame"
               >
                 <img
                   :src="url"
                   :alt="`Scam evidence ${index + 1}`"
-                  class="w-100"
-                  style="cursor: pointer; object-fit: cover; height: 200px; border-radius: 4px;"
+                  class="report-photo"
                   @click="openImageModal(url)"
                 />
               </div>
@@ -190,6 +189,11 @@ const props = defineProps({
     type: Object,
     required: true
   }
+});
+
+const normalizedImageUrls = computed(() => {
+  if (!Array.isArray(props.report.imageUrls)) return [];
+  return props.report.imageUrls.filter(Boolean);
 });
 
 const sourceLinkLabel = computed(() =>
@@ -492,6 +496,33 @@ onMounted(() => {
   line-height: 1.75;
   overflow-wrap: break-word;
   white-space: pre-wrap;
+}
+
+.report-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, max-content));
+  gap: 12px;
+}
+
+.report-photo-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 520px);
+  min-height: 220px;
+  padding: 10px;
+  border: 1px solid var(--safetrip-border);
+  border-radius: 10px;
+  background: #fffdf8;
+}
+
+.report-photo {
+  display: block;
+  max-width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .location-section {

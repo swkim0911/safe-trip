@@ -39,11 +39,11 @@
         </l-control>
       </l-map>
     </div>  
-    <div class="position-fixed top-0 end-0 mt-4 me-4 d-flex gap-2" style="z-index: 1000;">
+    <div class="top-actions position-fixed top-0 end-0 mt-4 me-4 d-flex gap-2" style="z-index: 1000;">
       <div v-if="!isLoggedIn">
         <button
           type="button"
-          class="btn btn-primary shadow-sm login-btn"
+          class="btn top-action-btn login-btn"
           @click="openAuthModal"
         >
           <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
@@ -53,7 +53,7 @@
       <template v-else>
         <button
           type="button"
-          class="btn btn-primary shadow-sm report-btn"
+          class="btn top-action-btn report-btn"
           @click="openReportFormModal"
         >
           <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
@@ -61,7 +61,7 @@
         </button>
         <div class="dropdown">
           <button
-            class="btn btn-primary dropdown-toggle shadow-sm dropdown-btn"
+            class="btn top-action-btn dropdown-toggle dropdown-btn"
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
@@ -69,23 +69,23 @@
             <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
             {{ nickname }}
           </button>
-          <ul class="dropdown-menu dropdown-menu-end">
+          <ul class="dropdown-menu dropdown-menu-end account-menu">
             <li>
               <button class="dropdown-item" @click="openMyPageModal">
-                <font-awesome-icon :icon="['fas', 'user-gear']" class="icon"/>
+                <font-awesome-icon :icon="['fas', 'user-gear']" class="menu-icon"/>
                 My Page
               </button>
             </li>
             <li v-if="isAdmin">
               <button class="dropdown-item" @click="openAdminModal">
-                <font-awesome-icon :icon="['fas', 'shield-halved']" class="icon"/>
+                <font-awesome-icon :icon="['fas', 'shield-halved']" class="menu-icon"/>
                 Admin
               </button>
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
               <button class="dropdown-item" @click="logout">
-                <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="icon"/>
+                <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="menu-icon"/>
                 Logout
               </button>
             </li>
@@ -296,50 +296,89 @@ onMounted(() => {
     margin-right: 1px;
   }
 
-  .login-btn, .report-btn, .dropdown-btn {
+  .top-actions {
+    align-items: center;
+  }
+
+  .top-action-btn {
     background: var(--safetrip-primary);
     border-color: var(--safetrip-primary);
     border: none;
-    padding: 8px 16px;
+    padding: 9px 17px;
     border-radius: 999px;
-    font-size: 15px;
-    font-weight: 500;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 800;
     letter-spacing: 0.01em;
+    box-shadow: 0 8px 22px rgba(42, 157, 143, 0.24);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 
     &:hover {
+      color: #fff;
       background: var(--safetrip-primary-hover);
       border-color: var(--safetrip-primary-hover);
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(42, 157, 143, 0.24) !important;
+      box-shadow: 0 10px 26px rgba(42, 157, 143, 0.3) !important;
     }
 
     &:active {
+      color: #fff;
       background: var(--safetrip-primary-active);
       border-color: var(--safetrip-primary-active);
       transform: translateY(0);
     }
   }
 
-  .dropdown-menu {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  .report-btn {
+    background: #fffdf8;
+    color: var(--safetrip-primary);
+    border: 1px solid #b9e4dc;
+
+    &:hover,
+    &:active {
+      color: #fff;
+    }
+  }
+
+  .dropdown-menu.account-menu {
+    min-width: 190px;
+    border: 1px solid var(--safetrip-border);
+    border-radius: 14px;
+    background: #fffdf8;
+    box-shadow: 0 16px 34px rgba(36, 49, 58, 0.14);
     overflow: hidden;
-    padding: 4px;
+    padding: 8px;
   }
 
   .dropdown-item {
-    padding: 10px 16px;
-    font-size: 15px;
-    font-weight: 500;
-    border-radius: 8px;
-    transition: background-color 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: var(--safetrip-text);
+    font-size: 0.95rem;
+    font-weight: 800;
+    border-radius: 10px;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 
 .dropdown-item:hover {
-  background-color: #f1f3f5;
-  color: #000;
+  background-color: var(--safetrip-primary-soft);
+  color: var(--safetrip-primary);
+}
+
+.menu-icon {
+  width: 18px;
+  color: var(--safetrip-muted);
+}
+
+.dropdown-item:hover .menu-icon {
+  color: var(--safetrip-primary);
+}
+
+.dropdown-divider {
+  border-top-color: var(--safetrip-border);
+  margin: 6px 0;
 }
 
 .tooltip-card {

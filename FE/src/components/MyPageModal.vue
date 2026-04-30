@@ -9,14 +9,14 @@
     aria-hidden="true"
   >
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
+      <div class="modal-content mypage-modal">
+        <div class="modal-header mypage-header">
           <h5 class="modal-title">My Page</h5>
           <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
         </div>
 
         <!-- 탭 -->
-        <div class="tab-nav border-bottom px-3">
+        <div class="tab-nav">
           <button
             class="tab-btn"
             :class="{ active: tab === 'profile' }"
@@ -34,7 +34,7 @@
           >My Feedback</button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body mypage-body">
 
           <!-- Profile 탭 -->
           <div v-if="tab === 'profile'" class="px-2">
@@ -51,7 +51,7 @@
                 />
                 <div v-if="nicknameError" class="text-danger small mt-1">{{ nicknameError }}</div>
               </div>
-              <button class="btn btn-primary" :disabled="isSavingNickname" @click="saveNickname">
+              <button class="btn mypage-primary-btn" :disabled="isSavingNickname" @click="saveNickname">
                 Save
               </button>
             </div>
@@ -69,7 +69,7 @@
               </p>
 
               <div v-if="!showDeleteConfirm">
-                <button class="btn btn-outline-danger btn-sm" @click="showDeleteConfirm = true">
+                <button class="btn mypage-danger-outline-btn btn-sm" @click="showDeleteConfirm = true">
                   Delete my account
                 </button>
               </div>
@@ -78,13 +78,13 @@
                 <p class="text-danger small fw-bold mb-2">Are you sure? This cannot be undone.</p>
                 <div class="d-flex gap-2">
                   <button
-                    class="btn btn-danger btn-sm"
+                    class="btn mypage-danger-btn btn-sm"
                     :disabled="isDeletingAccount"
                     @click="deleteAccount"
                   >
                     {{ isDeletingAccount ? 'Deleting...' : 'Yes, delete my account' }}
                   </button>
-                  <button class="btn btn-secondary btn-sm" @click="showDeleteConfirm = false">
+                  <button class="btn mypage-secondary-btn btn-sm" @click="showDeleteConfirm = false">
                     Cancel
                   </button>
                 </div>
@@ -103,7 +103,7 @@
                 <div class="report-title feedback-title" @click="openFeedbackReport(item)">{{ item.externalReportTitle }}</div>
                 <hr class="my-2" />
                 <div class="d-flex align-items-center justify-content-between">
-                  <span class="badge bg-warning text-dark small">{{ formatReason(item.reason) }}</span>
+                  <span class="soft-chip warning-chip">{{ formatReason(item.reason) }}</span>
                   <span class="text-muted small">{{ formatDate(item.createdAt) }}</span>
                 </div>
                 <div v-if="item.description" class="text-muted small mt-1">
@@ -114,7 +114,7 @@
                 </div>
                 <div :class="item.status === 'RESOLVED' ? 'status-bar resolved' : 'status-bar pending'">
                   <span class="status-label">Feedback Status</span>
-                  <span :class="item.status === 'RESOLVED' ? 'badge bg-success' : 'badge bg-secondary'" class="small">
+                  <span :class="item.status === 'RESOLVED' ? 'soft-chip resolved-chip' : 'soft-chip pending-chip'">
                     {{ item.status === 'RESOLVED' ? 'Resolved' : 'Under Review' }}
                   </span>
                 </div>
@@ -135,8 +135,9 @@
                   <div class="d-flex align-items-center justify-content-between mt-1">
                     <span class="text-muted small">{{ formatDate(report.createdAt) }}</span>
                     <div class="report-actions">
-                      <button class="btn btn-sm btn-outline-primary" @click="editReport(report)">Edit</button>
-                      <button class="btn btn-sm btn-outline-danger ms-2" @click="confirmDeleteId = report.id">Delete</button>
+                      <button class="btn report-action-btn primary" @click="openUserReport(report.id)">View</button>
+                      <button class="btn report-action-btn" @click="editReport(report)">Edit</button>
+                      <button class="btn report-action-btn danger" @click="confirmDeleteId = report.id">Delete</button>
                     </div>
                   </div>
                 </div>
@@ -145,8 +146,8 @@
                 <div v-else class="delete-confirm">
                   <span class="text-danger small fw-bold">Delete this report?</span>
                   <div class="mt-2 d-flex gap-2">
-                    <button class="btn btn-sm btn-danger" :disabled="isDeletingId === report.id" @click="deleteReport(report.id)">Yes, delete</button>
-                    <button class="btn btn-sm btn-secondary" @click="confirmDeleteId = null">Cancel</button>
+                    <button class="btn mypage-danger-btn btn-sm" :disabled="isDeletingId === report.id" @click="deleteReport(report.id)">Yes, delete</button>
+                    <button class="btn mypage-secondary-btn btn-sm" @click="confirmDeleteId = null">Cancel</button>
                   </div>
                 </div>
               </li>
@@ -335,6 +336,11 @@ const editReport = (report) => {
   emit('edit-report', report);
 };
 
+const openUserReport = (reportId) => {
+  hide();
+  mapStore.requestOpenUserReportFromEdit(reportId);
+};
+
 const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 };
@@ -372,30 +378,65 @@ defineExpose({ refreshReports, openOnTab });
 </script>
 
 <style scoped lang="scss">
+.mypage-modal {
+  overflow: hidden;
+  border: 1px solid var(--safetrip-border);
+  border-radius: 14px;
+  background: var(--safetrip-page);
+}
+
+.mypage-header {
+  background: #fffdf8;
+  border-bottom: 1px solid var(--safetrip-border);
+  padding: 20px 24px;
+}
+
+.mypage-body {
+  padding: 22px 24px 24px;
+}
+
 .tab-nav {
   display: flex;
   gap: 0;
+  background: #fffdf8;
+  border-bottom: 1px solid var(--safetrip-border);
+  padding: 0 18px;
 }
 
 .tab-btn {
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 10px 18px;
+  padding: 12px 18px;
   font-size: 0.9rem;
-  color: #6c757d;
+  color: var(--safetrip-muted);
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
 
   &.active {
-    color: #0d6efd;
-    border-bottom-color: #0d6efd;
-    font-weight: 600;
+    color: var(--safetrip-primary);
+    border-bottom-color: var(--safetrip-primary);
+    font-weight: 800;
   }
 
   &:hover:not(.active) {
-    color: #343a40;
+    color: var(--safetrip-text);
   }
+}
+
+.form-control {
+  border-color: var(--safetrip-border);
+  background: #fffdf8;
+  color: var(--safetrip-text);
+
+  &:focus {
+    border-color: var(--safetrip-primary);
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.12);
+  }
+}
+
+.text-danger {
+  color: #b6523b !important;
 }
 
 .report-list {
@@ -405,18 +446,22 @@ defineExpose({ refreshReports, openOnTab });
 }
 
 .report-item {
-  padding: 12px 4px;
-  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 10px;
+  padding: 14px 15px;
+  border: 1px solid var(--safetrip-border);
+  border-radius: 12px;
+  background: var(--safetrip-surface);
+  box-shadow: 0 8px 24px rgba(36, 49, 58, 0.05);
 
   &:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
   }
 }
 
 .report-title {
-  font-weight: 500;
+  font-weight: 700;
   margin-bottom: 8px;
-  color: #212529;
+  color: var(--safetrip-text);
 }
 
 .feedback-title {
@@ -424,20 +469,61 @@ defineExpose({ refreshReports, openOnTab });
   margin-bottom: 0;
 
   &:hover {
-    color: #0d6efd;
+    color: var(--safetrip-primary);
     text-decoration: underline;
   }
 }
 
 .report-actions {
   display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.report-action-btn {
+  border: 1px solid var(--safetrip-border);
+  border-radius: 999px;
+  background: #fffdf8;
+  color: var(--safetrip-muted);
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+
+  &:hover,
+  &:focus {
+    color: var(--safetrip-text);
+    background: #f7f1e8;
+    border-color: #d8cec2;
+  }
+
+  &.primary {
+    color: var(--safetrip-primary);
+    border-color: #b9e4dc;
+
+    &:hover,
+    &:focus {
+      background: var(--safetrip-primary-soft);
+      border-color: var(--safetrip-primary);
+    }
+  }
+
+  &.danger {
+    color: #b6523b;
+    border-color: #f3c6b8;
+
+    &:hover,
+    &:focus {
+      background: #fff1ec;
+      border-color: #d97757;
+    }
+  }
 }
 
 .delete-confirm {
-  padding: 8px;
-  background: #fff5f5;
-  border-radius: 6px;
-  border: 1px solid #ffcccc;
+  padding: 12px;
+  background: #fff1ec;
+  border-radius: 10px;
+  border: 1px solid #f3c6b8;
 }
 
 .status-bar {
@@ -445,28 +531,116 @@ defineExpose({ refreshReports, openOnTab });
   align-items: center;
   justify-content: space-between;
   margin-top: 8px;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
   font-size: 0.75rem;
 
   &.resolved {
-    background: #f0faf4;
+    background: var(--safetrip-primary-soft);
   }
 
   &.pending {
-    background: #f5f5f5;
+    background: #f7f1e8;
   }
 }
 
 .status-label {
-  color: #6c757d;
-  font-weight: 500;
+  color: var(--safetrip-muted);
+  font-weight: 700;
+}
+
+.soft-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.warning-chip {
+  color: #73511f;
+  background: #fff7df;
+  border: 1px solid #ecd39a;
+}
+
+.resolved-chip {
+  color: #1f7f74;
+  background: var(--safetrip-primary-soft);
+  border: 1px solid #b9e4dc;
+}
+
+.pending-chip {
+  color: var(--safetrip-muted);
+  background: #fffdf8;
+  border: 1px solid var(--safetrip-border);
 }
 
 .danger-zone {
-  border: 1px solid #f5c2c7;
-  border-radius: 8px;
+  border: 1px solid #f3c6b8;
+  border-radius: 12px;
   padding: 16px;
-  background: #fff8f8;
+  background: #fff1ec;
+}
+
+.mypage-primary-btn {
+  color: #fff;
+  background: var(--safetrip-primary);
+  border-color: var(--safetrip-primary);
+
+  &:hover,
+  &:focus {
+    color: #fff;
+    background: var(--safetrip-primary-hover);
+    border-color: var(--safetrip-primary-hover);
+  }
+
+  &:disabled {
+    background: #a7cfc8;
+    border-color: #a7cfc8;
+    opacity: 1;
+  }
+}
+
+.mypage-secondary-btn {
+  color: var(--safetrip-muted);
+  background: #fffdf8;
+  border-color: var(--safetrip-border);
+
+  &:hover,
+  &:focus {
+    color: var(--safetrip-text);
+    background: #f7f1e8;
+    border-color: #d8cec2;
+  }
+}
+
+.mypage-danger-outline-btn,
+.mypage-danger-btn {
+  color: #b6523b;
+  border-color: #f3c6b8;
+}
+
+.mypage-danger-outline-btn {
+  background: #fffdf8;
+
+  &:hover,
+  &:focus {
+    color: #944330;
+    background: #fff1ec;
+    border-color: #d97757;
+  }
+}
+
+.mypage-danger-btn {
+  color: #fff;
+  background: #b6523b;
+
+  &:hover,
+  &:focus {
+    color: #fff;
+    background: #944330;
+    border-color: #944330;
+  }
 }
 </style>
