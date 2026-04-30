@@ -12,8 +12,8 @@
       <div class="modal-content report-form-modal">
         <div class="modal-header report-form-header">
           <div>
-            <div class="form-kicker">Traveler report</div>
-            <h5 class="modal-title">Edit report</h5>
+            <div class="form-kicker">Traveler note</div>
+            <h5 class="modal-title">Update your story</h5>
           </div>
           <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
         </div>
@@ -75,9 +75,9 @@ const submitForm = async () => {
 
     emit('updated', props.report.id);
     hide();
-    toast.show('Report updated successfully.');
+    toast.show('Your travel note has been updated.');
   } catch (e) {
-    submitMessage.value = 'Failed to update. Please try again.';
+    submitMessage.value = 'Could not update your story. Please try again.';
   } finally {
     isSubmitting.value = false;
   }

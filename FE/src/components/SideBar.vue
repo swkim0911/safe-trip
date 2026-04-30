@@ -87,7 +87,7 @@
             >
               <span class="d-flex align-items-center">
                 <font-awesome-icon :icon="['fas', 'file-alt']" class="me-2" />
-                View reports
+                View travel notes
               </span>
               <span class="cta-count">
                 {{ selectedCountry.scamCnt }} reports
@@ -98,7 +98,7 @@
           <!-- 국가별 통계 -->
           <div v-if="countryActionStats.length || countryContextStats.length" class="country-stats mb-3">
             <div v-if="countryActionStats.length" class="stats-section">
-              <div class="stats-section-title">Scam Action</div>
+              <div class="stats-section-title">Issue Type</div>
               <div class="rings-row">
                 <div v-for="item in countryActionStats" :key="item.name" class="ring-item">
                   <svg width="56" height="56" viewBox="0 0 56 56">
@@ -118,7 +118,7 @@
               </div>
             </div>
             <div v-if="countryContextStats.length" class="stats-section mt-3">
-              <div class="stats-section-title">Scam Context</div>
+              <div class="stats-section-title">Travel Situation</div>
               <div class="rings-row">
                 <div v-for="item in countryContextStats" :key="item.name" class="ring-item">
                   <svg width="56" height="56" viewBox="0 0 56 56">
@@ -232,9 +232,9 @@
             </button>
 
             <h6 class="fw-bold mb-0 flex-grow-1 text-center">
-              <span v-if="selectedCity.id">Reports from {{ selectedCity.name }}</span>
-              <span v-else-if="selectedState.id">Reports from {{ selectedState.name }}</span>
-              <span v-else>Reports from {{ selectedCountry.name }}</span>
+              <span v-if="selectedCity.id">Travel notes from {{ selectedCity.name }}</span>
+              <span v-else-if="selectedState.id">Travel notes from {{ selectedState.name }}</span>
+              <span v-else>Travel notes from {{ selectedCountry.name }}</span>
             </h6>
 
             <button class="sort-btn d-flex align-items-center gap-1 flex-shrink-0" @click="toggleSortOrder">
@@ -249,7 +249,7 @@
           </div>
           <div v-else-if="!isLoadingReport && sidebarReports.length === 0" class="empty-state">
             <font-awesome-icon :icon="['fas', 'file-circle-xmark']" class="empty-icon" />
-            <p>No reports found.</p>
+            <p>No travel notes here yet.</p>
           </div>
           <ul class="list-group">
             <li
@@ -266,7 +266,7 @@
                   :icon="report.source === 'SAFETRIP' ? ['fas', 'user-shield'] : ['fas', 'database']"
                   class="me-1"
                 />
-                {{ report.source === 'SAFETRIP' ? 'User Report' : 'AI-Assisted' }}
+                {{ report.source === 'SAFETRIP' ? 'Traveler note' : 'AI-Assisted' }}
               </span>
 
               <div class="report-card-title">

@@ -5,7 +5,7 @@
         <div class="modal-header admin-header">
           <div>
             <div class="admin-kicker">Admin review</div>
-            <h5 class="modal-title">Report Feedback</h5>
+            <h5 class="modal-title">Traveler Feedback</h5>
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -14,15 +14,15 @@
             <div class="spinner-border admin-spinner" role="status"></div>
           </div>
           <div v-else-if="reports.length === 0" class="admin-empty-state">
-            No feedback to review.
+            All caught up. No feedback to review.
           </div>
           <div v-else class="admin-table-wrap">
             <table class="admin-table">
               <thead>
                 <tr>
-                  <th>Report</th>
+                  <th>Travel note</th>
                   <th>Reason</th>
-                  <th>Description</th>
+                  <th>Details</th>
                   <th>Status</th>
                   <th>Reporter</th>
                   <th>Submitted</th>
@@ -66,16 +66,16 @@
         <div class="modal-header admin-header">
           <div>
             <div class="admin-kicker">Feedback review</div>
-            <h6 class="modal-title">Feedback Detail</h6>
+            <h6 class="modal-title">Feedback Review</h6>
           </div>
           <button type="button" class="btn-close" @click="closeDetail" aria-label="Close"></button>
         </div>
         <div class="modal-body admin-body">
           <!-- Report Info -->
           <div class="detail-section">
-            <div class="detail-section-title">Report Info</div>
+            <div class="detail-section-title">Related Report</div>
             <div class="mb-2">
-              <div class="detail-label">Report</div>
+              <div class="detail-label">Travel note</div>
               <div class="detail-copy strong">{{ selectedItem.externalReportTitle }}</div>
               <div class="detail-meta-line">External report #{{ selectedItem.externalReportId }}</div>
             </div>
@@ -84,7 +84,7 @@
               <span class="reason-chip">{{ formatReason(selectedItem.reason) }}</span>
             </div>
             <div>
-              <div class="detail-label">Description</div>
+              <div class="detail-label">Details</div>
               <div class="detail-copy">
                 {{ selectedItem.description || '—' }}
               </div>
@@ -93,7 +93,7 @@
 
           <!-- Submission Info -->
           <div class="detail-section">
-            <div class="detail-section-title">Submission Info</div>
+            <div class="detail-section-title">Submitted By</div>
             <div class="mb-2">
               <div class="detail-label">Reporter</div>
               <div class="detail-copy strong">{{ selectedItem.reporterNickname }}</div>

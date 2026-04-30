@@ -12,8 +12,8 @@
           <p class="mb-3">Explore real travel scam stories and local patterns before your trip, so you can plan with a little more confidence.</p>
 
           <ul class="info-list mb-3">
-            <li>Browse reports from Reddit travel communities and SafeTrip travelers.</li>
-            <li>Use each report as a helpful reference, and flag anything that looks inaccurate.</li>
+            <li>Browse travel notes from Reddit communities and SafeTrip travelers.</li>
+            <li>Use each note as a helpful reference, and flag anything that looks inaccurate.</li>
           </ul>
 
           <p class="mb-3 small text-muted">

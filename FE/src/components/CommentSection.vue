@@ -10,7 +10,7 @@
 
     <div v-else-if="comments.length === 0" class="comment-empty-state">
       <div class="empty-title">No comments yet</div>
-      <div class="empty-copy">Share a helpful note or ask a question about this report.</div>
+      <div class="empty-copy">Share a helpful note or ask a question about this story.</div>
     </div>
 
     <div v-else class="comment-list">

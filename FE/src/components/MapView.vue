@@ -22,7 +22,7 @@
             <div class="tooltip-card">
               <div class="tooltip-name">{{ marker.name }}</div>
               <div class="tooltip-bottom">
-                <strong>{{ marker.scamCnt }}</strong> reports
+                <strong>{{ marker.scamCnt }}</strong> notes
                 <span class="risk-badge" :class="marker.riskLevel?.toLowerCase()">{{ marker.riskLevel }}</span>
               </div>
             </div>
@@ -31,7 +31,7 @@
         <l-control-zoom position="bottomright"></l-control-zoom>
         <l-control position="bottomleft">
           <div class="map-legend">
-            <div class="legend-title">Report Activity</div>
+            <div class="legend-title">Travel Note Activity</div>
             <div class="legend-item"><span class="dot high"></span> Hotspot</div>
             <div class="legend-item"><span class="dot medium"></span> Moderate</div>
             <div class="legend-item"><span class="dot low"></span> Quiet</div>
@@ -57,7 +57,7 @@
           @click="openReportFormModal"
         >
           <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
-          Report
+          Share
         </button>
         <div class="dropdown">
           <button
@@ -73,7 +73,7 @@
             <li>
               <button class="dropdown-item" @click="openMyPageModal">
                 <font-awesome-icon :icon="['fas', 'user-gear']" class="menu-icon"/>
-                My Page
+                Account
               </button>
             </li>
             <li v-if="isAdmin">

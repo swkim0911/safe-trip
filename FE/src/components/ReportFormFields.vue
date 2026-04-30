@@ -4,7 +4,7 @@
     <section class="form-section">
       <label class="form-section-label">
         <font-awesome-icon :icon="['fas', 'message']" class="modal-icon" />
-        Title
+        Short title
       </label>
       <input
         type="text"
@@ -23,25 +23,25 @@
     <section class="form-section">
       <div class="form-section-label">
         <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="modal-icon" />
-        Report details
+        What happened
       </div>
       <div class="row">
         <div class="col-md-6">
           <label class="field-label">
-            Scam Action
+            Issue type
           </label>
           <select v-model="form.scamActionId" :class="['form-select', { 'is-invalid': errors.scamActionId }]">
-            <option disabled value="">Select an Action</option>
+            <option disabled value="">Choose a type</option>
             <option v-for="a in scamActions" :key="a.id" :value="a.id">{{ a.name }}</option>
           </select>
           <div v-if="errors.scamActionId" class="text-danger small mt-1">{{ errors.scamActionId }}</div>
         </div>
         <div class="col-md-6">
           <label class="field-label">
-            Scam Context
+            Travel situation
           </label>
           <select v-model="form.scamContextId" :class="['form-select', { 'is-invalid': errors.scamContextId }]">
-            <option disabled value="">Select a context</option>
+            <option disabled value="">Choose a situation</option>
             <option v-for="c in scamContexts" :key="c.id" :value="c.id">{{ c.name }}</option>
           </select>
           <div v-if="errors.scamContextId" class="text-danger small mt-1">{{ errors.scamContextId }}</div>
@@ -121,7 +121,7 @@
     <section class="form-section">
       <label class="form-section-label">
         <font-awesome-icon :icon="['fas', 'camera']" class="modal-icon" />
-        Upload Image (Optional)
+        Add a photo (optional)
       </label>
 
       <!-- 기존 이미지 (새 파일 선택 전까지 표시) -->
@@ -130,11 +130,11 @@
           <img :src="existingImageUrl" alt="Current image" class="image-preview" />
           <button type="button" class="btn-remove-image" @click="markExistingImageForRemoval">×</button>
         </div>
-        <div class="image-help-text">Current image · Upload a new file to replace, or remove it.</div>
+        <div class="image-help-text">Current photo · Add a new one to replace it, or remove it.</div>
       </div>
 
       <div v-if="existingImageUrl && removeExistingImage && !imagePreviewUrl" class="image-removal-panel mb-3">
-        <span>Current image will be removed.</span>
+        <span>Current photo will be removed.</span>
         <button type="button" class="btn-restore-image" @click="restoreExistingImage">Undo</button>
       </div>
 
@@ -161,14 +161,14 @@
     <section class="form-section">
       <label class="form-section-label">
         <font-awesome-icon :icon="['fas', 'message']" class="modal-icon" />
-        Description
+        Your note
       </label>
       <textarea
         v-model="form.description"
         :class="['form-control', { 'is-invalid': errors.description }]"
         maxlength="500"
         rows="4"
-        placeholder="Please describe the scam in detail"
+        placeholder="Share what happened in a few helpful details"
       ></textarea>
       <div class="d-flex justify-content-between mt-1">
         <div v-if="errors.description" class="text-danger small">{{ errors.description }}</div>
@@ -347,15 +347,15 @@ const restoreExistingImage = () => {
 
 const validate = () => {
   let valid = true;
-  errors.title = form.title.trim() ? '' : 'Please enter a title.';
+  errors.title = form.title.trim() ? '' : 'Please add a short title.';
   if (errors.title) valid = false;
-  errors.scamActionId = form.scamActionId ? '' : 'Please select a scam action.';
+  errors.scamActionId = form.scamActionId ? '' : 'Please choose an issue type.';
   if (errors.scamActionId) valid = false;
-  errors.scamContextId = form.scamContextId ? '' : 'Please select a scam context.';
+  errors.scamContextId = form.scamContextId ? '' : 'Please choose a travel situation.';
   if (errors.scamContextId) valid = false;
   errors.countryId = form.countryId ? '' : 'Please select a country.';
   if (errors.countryId) valid = false;
-  errors.description = form.description.trim() ? '' : 'Please provide a description.';
+  errors.description = form.description.trim() ? '' : 'Please add a few details.';
   if (errors.description) valid = false;
   return valid;
 };

@@ -4,7 +4,7 @@
       <div class="modal-content report-modal">
         <div class="modal-header report-modal-header">
           <div>
-            <h5 class="modal-title report-modal-title" id="staticBackdropLabel">Travel Report</h5>
+            <h5 class="modal-title report-modal-title" id="staticBackdropLabel">Travel Note</h5>
           </div>
           <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
         </div>
@@ -22,7 +22,7 @@
                     class="source-badge source-user"
                   >
                     <font-awesome-icon :icon="['fas', 'user-shield']" />
-                    User Report
+                    Traveler note
                   </span>
                   <span
                     v-else
@@ -45,7 +45,7 @@
                     @click="handleInaccuracyClick"
                   >
                     <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
-                    Correction
+                    Suggest edit
                   </button>
                   <span v-else-if="report.source !== 'SAFETRIP' && alreadySubmitted" class="feedback-icon">
                     <font-awesome-icon :icon="['fas', 'circle-check']" />
@@ -64,11 +64,11 @@
           <div v-if="showInaccuracyForm" class="correction-panel">
             <p class="correction-title">
               <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
-              Suggest a correction
+              Suggest a quick fix
             </p>
             <div class="mb-2">
               <select v-model="inaccuracyReason" class="form-select form-select-sm">
-                <option value="" disabled>Select a reason</option>
+                <option value="" disabled>Choose a reason</option>
                 <option value="WRONG_LOCATION">Wrong Location</option>
                 <option value="WRONG_SCAM_TYPE">Wrong Scam Type</option>
                 <option value="NOT_A_SCAM">Not a Scam</option>
@@ -81,7 +81,7 @@
                 v-model="inaccuracyDescription"
                 class="form-control form-control-sm"
                 rows="2"
-                placeholder="Describe the inaccuracy... (optional)"
+                placeholder="Tell us what looks off... (optional)"
                 maxlength="500"
               ></textarea>
               <div class="text-end text-muted" style="font-size: 0.75rem;">{{ inaccuracyDescription.length }} / 500</div>
@@ -95,13 +95,13 @@
                 @click="submitInaccuracy"
               >
                 <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-1"></span>
-                Submit
+                Send
               </button>
             </div>
           </div>
 
           <section class="report-section">
-            <div class="section-label">{{ report.source === 'SAFETRIP' ? 'Traveler Note' : 'Summary' }}</div>
+            <div class="section-label">{{ report.source === 'SAFETRIP' ? 'Traveler Story' : 'Summary' }}</div>
             <p class="report-copy">{{ report.content }}</p>
           </section>
 
@@ -116,7 +116,7 @@
               >
                 <img
                   :src="url"
-                  :alt="`Scam evidence ${index + 1}`"
+                  :alt="`Travel note photo ${index + 1}`"
                   class="report-photo"
                   @click="openImageModal(url)"
                 />
@@ -222,7 +222,7 @@ const cancelInaccuracy = () => {
 
 const handleInaccuracyClick = () => {
   if (!authStore.accessToken) {
-    toast.show('Login is required to report inaccuracies.');
+  toast.show('Please log in to suggest an edit.');
     mapStore.requestReopenReportDetail();
     hide();
     openAuthModal();
@@ -249,7 +249,7 @@ const submitInaccuracy = async () => {
 };
 
 const handleRequestLogin = () => {
-  toast.show('Login is required to write a comment.');
+  toast.show('Please log in to join the conversation.');
   mapStore.requestReopenReportDetail();
   hide();
   openAuthModal();

@@ -13,7 +13,7 @@
       <div class="modal-content report-form-modal">
         <div class="modal-header report-form-header">
           <div>
-            <div class="form-kicker">Traveler report</div>
+            <div class="form-kicker">Traveler note</div>
             <h5 class="modal-title" id="staticBackdropLabel">Share your story</h5>
           </div>
           <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
@@ -26,9 +26,9 @@
             <div v-if="submitMessage" class="form-message">
               {{ submitMessage }}
             </div>
-            <button type="button" class="btn form-secondary-btn" @click="hide">Close</button>
+            <button type="button" class="btn form-secondary-btn" @click="hide">Not now</button>
             <button :disabled="isSubmitting" type="button" class="btn form-primary-btn" @click="submitForm">
-              Send
+              Share
             </button>
           </div>
         </div>
@@ -76,12 +76,12 @@ const setupModalEventListener = () => {
 const submitForm = async () => {
   if (isSubmitting.value) return;
   if (!isLoggedIn()) {
-    submitMessage.value = 'Please login.';
+    submitMessage.value = 'Please log in to share your story.';
     return;
   }
 
   if (!formRef.value.validate()) {
-    submitMessage.value = 'Invalid input. Please check your entries.';
+    submitMessage.value = 'Please check the highlighted fields.';
     return;
   }
 
@@ -99,11 +99,11 @@ const submitForm = async () => {
     });
 
     hide();
-    toast.show('Your report has been successfully submitted.');
+    toast.show('Thanks for sharing your travel note.');
     mapStore.requestOpenUserReport(res.data.result);
   } catch (error) {
     console.error(error);
-    submitMessage.value = 'Submission failed. Please try again.';
+    submitMessage.value = 'Could not share your story. Please try again.';
   } finally {
     isSubmitting.value = false;
   }

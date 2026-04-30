@@ -3,7 +3,7 @@
   <div v-if="isExpanded" class="stats-panel">
     <div class="panel-body">
       <div class="stats-section">
-        <div class="section-title">Scam Action</div>
+        <div class="section-title">Issue Type</div>
         <div class="rings-row">
           <div v-for="item in actionItems" :key="item.name" class="ring-item">
             <svg width="60" height="60" viewBox="0 0 60 60">
@@ -28,7 +28,7 @@
       <div class="section-divider" />
 
       <div class="stats-section">
-        <div class="section-title">Scam Context</div>
+        <div class="section-title">Travel Situation</div>
         <div class="rings-row">
           <div v-for="item in contextItems" :key="item.name" class="ring-item">
             <svg width="60" height="60" viewBox="0 0 60 60">

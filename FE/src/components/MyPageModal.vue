@@ -11,7 +11,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
       <div class="modal-content mypage-modal">
         <div class="modal-header mypage-header">
-          <h5 class="modal-title">My Page</h5>
+          <h5 class="modal-title">Account</h5>
           <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
         </div>
 
@@ -26,7 +26,7 @@
             class="tab-btn"
             :class="{ active: tab === 'reports' }"
             @click="switchToReports"
-          >My Reports</button>
+          >My Stories</button>
           <button
             class="tab-btn"
             :class="{ active: tab === 'feedback' }"
@@ -38,7 +38,7 @@
 
           <!-- Profile 탭 -->
           <div v-if="tab === 'profile'" class="px-2">
-            <h6 class="fw-bold mb-3">Change Nickname</h6>
+            <h6 class="fw-bold mb-3">Display name</h6>
             <div class="d-flex gap-2 align-items-start">
               <div class="flex-grow-1">
                 <input
@@ -46,7 +46,7 @@
                   class="form-control"
                   :class="{ 'is-invalid': nicknameError }"
                   v-model="nickname"
-                  placeholder="New nickname"
+                  placeholder="New display name"
                   maxlength="15"
                 />
                 <div v-if="nicknameError" class="text-danger small mt-1">{{ nicknameError }}</div>
@@ -62,9 +62,9 @@
             <hr class="my-4" />
 
             <div class="danger-zone">
-              <h6 class="fw-bold text-danger mb-1">Delete Account</h6>
+              <h6 class="fw-bold text-danger mb-1">Delete account</h6>
               <p class="text-muted small mb-3">
-                This will permanently delete your account, all your reports, and your images.
+                This will permanently delete your account, your travel notes, and your images.
                 Your comments will be anonymized. This action cannot be undone.
               </p>
 
@@ -96,7 +96,7 @@
           <div v-else-if="tab === 'feedback'">
             <div v-if="isLoadingFeedback" class="text-center py-4 text-muted">Loading...</div>
             <div v-else-if="feedbacks.length === 0" class="text-center py-4 text-muted">
-              No feedback submitted yet.
+              No feedback sent yet.
             </div>
             <ul v-else class="report-list">
               <li v-for="item in feedbacks" :key="item.id" class="report-item">
@@ -113,9 +113,9 @@
                   </button>
                 </div>
                 <div :class="item.status === 'RESOLVED' ? 'status-bar resolved' : 'status-bar pending'">
-                  <span class="status-label">Feedback Status</span>
+                  <span class="status-label">Feedback status</span>
                   <span :class="item.status === 'RESOLVED' ? 'soft-chip resolved-chip' : 'soft-chip pending-chip'">
-                    {{ item.status === 'RESOLVED' ? 'Resolved' : 'Under Review' }}
+                    {{ item.status === 'RESOLVED' ? 'Resolved' : 'Under review' }}
                   </span>
                 </div>
               </li>
@@ -126,7 +126,7 @@
           <div v-else>
             <div v-if="isLoadingReports" class="text-center py-4 text-muted">Loading...</div>
             <div v-else-if="reports.length === 0" class="text-center py-4 text-muted">
-              No reports yet.
+              No stories shared yet.
             </div>
             <ul v-else class="report-list">
               <li v-for="report in reports" :key="report.id" class="report-item">
@@ -135,7 +135,7 @@
                   <div class="d-flex align-items-center justify-content-between mt-1">
                     <span class="text-muted small">{{ formatDate(report.createdAt) }}</span>
                     <div class="report-actions">
-                      <button class="btn report-action-btn primary" @click="openUserReport(report.id)">View</button>
+                      <button class="btn report-action-btn primary" @click="openUserReport(report.id)">Open</button>
                       <button class="btn report-action-btn" @click="editReport(report)">Edit</button>
                       <button class="btn report-action-btn danger" @click="confirmDeleteId = report.id">Delete</button>
                     </div>
@@ -144,9 +144,9 @@
 
                 <!-- 인라인 삭제 확인 -->
                 <div v-else class="delete-confirm">
-                  <span class="text-danger small fw-bold">Delete this report?</span>
+                  <span class="text-danger small fw-bold">Delete this story?</span>
                   <div class="mt-2 d-flex gap-2">
-                    <button class="btn mypage-danger-btn btn-sm" :disabled="isDeletingId === report.id" @click="deleteReport(report.id)">Yes, delete</button>
+                    <button class="btn mypage-danger-btn btn-sm" :disabled="isDeletingId === report.id" @click="deleteReport(report.id)">Yes, delete it</button>
                     <button class="btn mypage-secondary-btn btn-sm" @click="confirmDeleteId = null">Cancel</button>
                   </div>
                 </div>
@@ -283,7 +283,7 @@ const openFeedbackReport = async (item) => {
     mapStore.requestOpenExternalReport(item.externalReportId);
   } catch (e) {
     if (e.response?.status === 404) {
-      toast.show('This report is no longer available.');
+      toast.show('This story is no longer available.');
     }
   }
 };
@@ -323,7 +323,7 @@ const deleteReport = async (id) => {
     await apiClient.delete(`/user-reports/${id}`);
     reports.value = reports.value.filter(r => r.id !== id);
     confirmDeleteId.value = null;
-    toast.show('Report deleted.');
+    toast.show('Your story has been deleted.');
   } catch (e) {
     console.error('Failed to delete report', e);
   } finally {
