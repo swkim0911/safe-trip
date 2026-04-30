@@ -510,10 +510,6 @@ onMounted(() => {
   justify-content: center;
   width: min(100%, 520px);
   min-height: 220px;
-  padding: 10px;
-  border: 1px solid var(--safetrip-border);
-  border-radius: 10px;
-  background: #fffdf8;
 }
 
 .report-photo {
