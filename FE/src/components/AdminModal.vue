@@ -77,6 +77,7 @@
             <div class="mb-2">
               <div class="detail-label">Report</div>
               <div class="detail-copy strong">{{ selectedItem.externalReportTitle }}</div>
+              <div class="detail-meta-line">External report #{{ selectedItem.externalReportId }}</div>
             </div>
             <div class="mb-2">
               <div class="detail-label">Reason</div>
@@ -118,6 +119,13 @@
         </div>
         <div class="modal-footer admin-footer">
           <button
+            type="button"
+            class="btn admin-secondary-btn btn-sm"
+            @click="openExternalReport"
+          >
+            Open report
+          </button>
+          <button
             v-if="selectedItem.status === 'PENDING'"
             class="btn admin-primary-btn btn-sm"
             :disabled="isResolving"
@@ -136,11 +144,13 @@
 import { ref, nextTick } from 'vue';
 import { Modal } from 'bootstrap';
 import apiClient from '@/api/apiClient';
+import { useMapStore } from '@/stores/map';
 
 const reports = ref([]);
 const isLoading = ref(false);
 const selectedItem = ref(null);
 const isResolving = ref(false);
+const mapStore = useMapStore();
 
 const load = async () => {
   isLoading.value = true;
@@ -164,6 +174,12 @@ const openDetail = async (item) => {
 const closeDetail = () => {
   Modal.getOrCreateInstance(document.getElementById('adminDetailModal')).hide();
   Modal.getOrCreateInstance(document.getElementById('adminModal')).show();
+};
+
+const openExternalReport = () => {
+  if (!selectedItem.value?.externalReportId) return;
+  Modal.getOrCreateInstance(document.getElementById('adminDetailModal')).hide();
+  mapStore.requestOpenExternalReportFromAdmin(selectedItem.value.externalReportId);
 };
 
 const resolveItem = async (item) => {
@@ -416,6 +432,13 @@ defineExpose({ load });
     color: var(--safetrip-text);
     font-weight: 750;
   }
+}
+
+.detail-meta-line {
+  margin-top: 5px;
+  color: var(--safetrip-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .admin-footer {
