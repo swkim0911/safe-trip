@@ -5,7 +5,6 @@
       <span class="comment-count">{{ comments.length }}</span>
     </div>
 
-    <!-- 댓글 목록 -->
     <div v-if="isLoading" class="comment-empty-state">Loading comments...</div>
 
     <div v-else-if="comments.length === 0" class="comment-empty-state">
@@ -15,7 +14,6 @@
 
     <div v-else class="comment-list">
       <div v-for="comment in comments" :key="comment.id" class="comment-item mb-3">
-        <!-- 최상위 댓글 -->
         <CommentCard
           :comment="comment"
           :current-user-nickname="authStore.user?.nickname"
@@ -25,7 +23,7 @@
           @like="handleLike"
         />
 
-        <!-- 대댓글 -->
+        <!-- nested replies -->
         <div v-if="comment.replies && comment.replies.length > 0" class="replies ms-4 mt-2">
           <div v-for="reply in comment.replies" :key="reply.id" class="mb-2">
             <CommentCard
@@ -39,7 +37,7 @@
           </div>
         </div>
 
-        <!-- 인라인 답글 입력창 -->
+        <!-- inline reply input -->
         <div v-if="replyTargetId === comment.id" class="ms-4 mt-2">
           <textarea
             v-model="replyContent"
@@ -67,7 +65,6 @@
       </div>
     </div>
 
-    <!-- 댓글 입력창 -->
     <div class="mt-3">
       <div v-if="authStore.accessToken">
         <textarea
@@ -120,12 +117,12 @@ const replyTargetId = ref(null)
 const replyContent = ref('')
 const isSubmitting = ref(false)
 
-// reportId 변경 시 재조회 (글 전환)
+// refetch when switching to a different report
 watch(() => props.reportId, (id) => {
   if (id) fetchComments(props.reportType, id)
 }, { immediate: true })
 
-// 로그인/로그아웃 시 재조회 (likedByMe 갱신)
+// refetch on login/logout to refresh likedByMe state
 watch(() => authStore.accessToken, () => {
   if (props.reportId) fetchComments(props.reportType, props.reportId)
 })

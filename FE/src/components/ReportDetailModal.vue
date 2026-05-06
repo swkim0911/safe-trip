@@ -60,7 +60,7 @@
             </div>
           </section>
 
-          <!-- 인라인 신고 폼 -->
+          <!-- inline inaccuracy report form -->
           <div v-if="showInaccuracyForm" class="correction-panel">
             <p class="correction-title">
               <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
@@ -105,7 +105,6 @@
             <p class="report-copy">{{ report.content }}</p>
           </section>
 
-          <!-- 이미지 표시 -->
           <section v-if="normalizedImageUrls.length > 0" class="report-section">
             <div class="section-label">Photos</div>
             <div class="report-photo-grid">
@@ -134,7 +133,6 @@
             </div>
           </section>
 
-          <!-- 댓글 -->
           <section class="report-section comments-section">
             <CommentSection
               :report-id="report.reportId"
@@ -147,7 +145,7 @@
     </div>
   </div>
 
-  <!-- 이미지 확대 모달 -->
+  <!-- enlarged image modal -->
   <div
     v-if="selectedImage"
     class="image-modal-overlay"

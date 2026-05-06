@@ -124,7 +124,7 @@
         Add a photo (optional)
       </label>
 
-      <!-- 기존 이미지 (새 파일 선택 전까지 표시) -->
+      <!-- existing image, shown until a new file is selected -->
       <div v-if="existingImageUrl && !removeExistingImage && !imagePreviewUrl" class="current-image-panel">
         <div class="image-preview-frame">
           <img :src="existingImageUrl" alt="Current image" class="image-preview" />

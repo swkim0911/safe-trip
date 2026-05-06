@@ -1,7 +1,6 @@
 <template>
   <div class="sidebar-container">
     <div :class="['sidebar', {'open': isOpen}]">
-      <!-- 검색창 -->
       <div class="sidebar-header form-group position-relative">
         <font-awesome-icon
           :icon="['fas', 'search']"
@@ -79,7 +78,7 @@
             </select>
           </div>
 
-          <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
+          <!-- top: view all reports for this country -->
           <div class="mb-3">
             <button
               class="report-cta"
@@ -95,7 +94,7 @@
             </button>
           </div>
 
-          <!-- 국가별 통계 -->
+          <!-- per-country statistics -->
           <div v-if="countryActionStats.length || countryContextStats.length" class="country-stats mb-3">
             <div v-if="countryActionStats.length" class="stats-section">
               <div class="stats-section-title">Issue Type</div>
@@ -139,7 +138,7 @@
             </div>
           </div>
 
-          <!-- 하단: State 목록 -->
+          <!-- bottom: state list -->
           <div>
             <div v-if="isLoadingState && sidebarStates.length === 0" class="loading-spinner">
               <div class="spinner-border text-primary" role="status">
@@ -183,7 +182,7 @@
             </select>
           </div>
 
-          <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
+          <!-- top: view all reports for this state -->
           <div class="mb-3">
             <button
               class="report-cta"
@@ -288,7 +287,7 @@
 
     </div>
 
-    <!-- 토글 버튼 (사이드바 열기) -->
+    <!-- sidebar open/close toggle button -->
     <button @click="toggleSidebar" class="toggle-btn">
       <font-awesome-icon 
         v-if="!isOpen" 
@@ -441,7 +440,7 @@ const selectSearchResult = async (result) => {
   searchResults.value = [];
 };
 
-const viewType = ref('country') // 'country' 또는 'state' 또는 'city' 또는 'report'
+const viewType = ref('country') // 'country' | 'state' | 'city' | 'report'
 
 const sidebarCountries = ref([]);
 const sidebarStates = ref([]);
@@ -577,9 +576,9 @@ const formatDate = (date) => {
 }
 
 /**
- * ISO2 코드를 플래그 이모티콘으로 변환합니다.
- * @param {string} iso2 - ISO2 국가 코드 (예: "US", "KR", "JP")
- * @returns {string} 플래그 이모티콘 (예: "🇺🇸", "🇰🇷", "🇯🇵")
+ * Convert an ISO2 country code into a flag emoji.
+ * @param {string} iso2 - ISO2 country code (e.g. "US", "KR", "JP")
+ * @returns {string} flag emoji (e.g. "🇺🇸", "🇰🇷", "🇯🇵")
  */
 const getCountryFlag = (iso2) => {
   if (!iso2 || typeof iso2 !== 'string' || iso2.length !== 2) {
@@ -646,8 +645,8 @@ function mapExternalReportDetail(result, reportId) {
 }
 
 /**
- * 사용자 리포트 상세 정보를 조회합니다.
- * @param {number} reportId - 조회할 리포트 ID
+ * Load detailed information for a user-submitted report.
+ * @param {number} reportId - report ID to fetch
  */
 const loadUserReportDetailInfo = async (reportId) => {
   try {
@@ -657,13 +656,13 @@ const loadUserReportDetailInfo = async (reportId) => {
     mapUserReportDetail(result, reportId);
 
   } catch (e) {
-    console.error('API 요청 실패:', e);
+    console.error('API request failed:', e);
   }
 }
 
 /**
- * 외부 리포트 상세 정보를 조회합니다.
- * @param {number} reportId - 조회할 리포트 ID
+ * Load detailed information for an externally collected report.
+ * @param {number} reportId - report ID to fetch
  */
 const loadExternalReportDetailInfo = async (reportId) => {
   try {
@@ -672,16 +671,16 @@ const loadExternalReportDetailInfo = async (reportId) => {
     mapExternalReportDetail(result, reportId);
 
   } catch (e) {
-    console.error('API 요청 실패:', e);
+    console.error('API request failed:', e);
   }
 }
 
 
 
 /**
- * 통계 정보를 포함한 국가 목록을 조회합니다 (페이지네이션).
- * 스캠 리포트 개수 기준으로 내림차순 정렬하여 반환합니다.
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ * Load the country list with aggregated statistics (paginated).
+ * Returned in descending order of scam report count.
+ * @param {string} mode - 'click' (refresh from page 0) or 'scroll' (append next page)
  */
 const loadCountriesWithStatistics = async (mode = 'click') => {
 
@@ -773,7 +772,6 @@ const showReportsByCountry = async (countryId, countryName) => {
   selectedCity.name = '';
   viewType.value = 'report';
   
-  // 국가의 모든 리포트 로드
   await loadReportsByCountry(countryId, 'click');
 };
 
@@ -784,14 +782,13 @@ const showReportsByState = async (stateId, stateName) => {
   selectedCity.name = '';
   viewType.value = 'report';
   
-  // State의 모든 리포트 로드
   await loadReportsByState(stateId, 'click');
 };
 
 /**
- * 특정 주(State)의 모든 스캠 리포트 목록을 조회합니다 (페이지네이션).
- * @param {number} stateId - 조회할 주(State) ID
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ * Load all scam reports belonging to a state (paginated).
+ * @param {number} stateId - state ID to query
+ * @param {string} mode - 'click' (refresh from page 0) or 'scroll' (append next page)
  */
 const loadReportsByState = async (stateId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingReport.value || isLastReportPage.value)) return;
@@ -825,9 +822,9 @@ const loadReportsByState = async (stateId, mode = 'click') => {
 };
 
 /**
- * 특정 국가의 모든 스캠 리포트 목록을 조회합니다 (페이지네이션).
- * @param {number} countryId - 조회할 국가 ID
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ * Load all scam reports belonging to a country (paginated).
+ * @param {number} countryId - country ID to query
+ * @param {string} mode - 'click' (refresh from page 0) or 'scroll' (append next page)
  */
 const loadReportsByCountry = async (countryId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingReport.value || isLastReportPage.value)) return;
@@ -861,11 +858,10 @@ const loadReportsByCountry = async (countryId, mode = 'click') => {
 };
 
 /**
- * 특정 주(State)의 도시(City) 목록을 보여줍니다 (페이지네이션 지원).
- * 스캠 리포트 개수 기준으로 내림차순 정렬하여 반환합니다.
- * @param {number} stateId - 조회할 주(State) ID
- * @param {string} stateName - 주(State) 이름
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ * Show the city list for a given state (paginated).
+ * Returned in descending order of scam report count.
+ * @param {number} stateId - state ID to query
+ * @param {string} mode - 'click' (refresh from page 0) or 'scroll' (append next page)
  */
 const showCitiesByState = async (stateId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
@@ -905,10 +901,10 @@ const showCitiesByState = async (stateId, mode = 'click') => {
 }
 
 /**
- * 특정 도시(City)의 스캠 리포트 목록을 보여줍니다 (페이지네이션 지원).
- * @param {number} cityId - 조회할 도시(City) ID
- * @param {string} cityName - 도시(City) 이름
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ * Show the scam reports for a given city (paginated).
+ * @param {number} cityId - city ID to query
+ * @param {string} cityName - city name (for display)
+ * @param {string} mode - 'click' (refresh from page 0) or 'scroll' (append next page)
  */
 const showReportsByCity = async (cityId, cityName, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingReport.value || isLastReportPage.value)) return;
@@ -956,13 +952,10 @@ const goToParentView = (type) => {
 const backFromReport = () => {
   sortOrder.value = 'DESC';
   if (selectedCity.id) {
-    // 도시에서 온 경우
     viewType.value = 'city';
   } else if (selectedState.id) {
-    // State에서 온 경우 - state로 돌아감
     viewType.value = 'city';
   } else if (selectedCountry.id) {
-    // 국가에서 온 경우
     viewType.value = 'state';
   }
 }
@@ -971,7 +964,6 @@ const toggleSidebar = () => {
   isOpen.value = !isOpen.value;
 };
 
-// 스크롤 감지
 const onSidebarScroll = () => {
   const sidebarEl = sidebarRef.value;
   if (!sidebarEl) return;
@@ -1007,7 +999,6 @@ onMounted(() => {
 
 $sidebar-width: 560px;
 
-/* 사이드바 컨테이너 */
 .sidebar-container {
   position: fixed;
   display: flex;
@@ -1015,12 +1006,11 @@ $sidebar-width: 560px;
   z-index: 1001;
 }
 
-/* 사이드바 */
 .sidebar {
   position: fixed;
   display: flex;
   top: 0;
-  left: -$sidebar-width; /* 기본적으로 숨김 */
+  left: -$sidebar-width; /* hidden by default, slides in when .open is added */
   width: $sidebar-width;
   height: 100vh;
   background-color: var(--safetrip-page);
@@ -1030,7 +1020,6 @@ $sidebar-width: 560px;
   flex-direction: column;
 }
 
-/* 사이드바가 열릴 때 */
 .sidebar.open {
   left: 0;
 }
@@ -1119,11 +1108,11 @@ $sidebar-width: 560px;
   padding-left: 4px;
   padding-right: 8px;
   overflow-y: auto;
-  overscroll-behavior: contain; /* 스크롤 범위를 벗어나면 움직이지 않게 */
+  overscroll-behavior: contain; /* prevent the page from scrolling when the sidebar reaches its bounds */
 }
 
 
-/* 사이드바가 열렸을 때 토글 버튼 위치 조정 */
+/* shift the toggle button to the sidebar's right edge when open */
 .sidebar.open + .toggle-btn {
   left: $sidebar-width;
 }
@@ -1383,7 +1372,7 @@ $sidebar-width: 560px;
   }
 }
 
-/* 토글 버튼 (사이드바 여닫기 버튼) */
+/* sidebar open/close toggle button */
 .toggle-btn {
   position: fixed;
   top: 50%;

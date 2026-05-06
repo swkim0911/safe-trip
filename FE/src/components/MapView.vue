@@ -156,7 +156,7 @@ watch(() => mapStore.pendingReturnToMyPageTab, (tab) => {
   openMyPageModal();
   mapStore.clearPendingReturnToMyPage();
 });
-const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
+const isLoggedIn = computed(() => !!authStore.accessToken);
 const isAdmin = computed(() => authStore.user?.role === 'ADMIN');
 const nickname = computed(() => authStore.user?.nickname || 'user');
 
@@ -166,7 +166,7 @@ const center = ref({ "lat": 42.8333, "lng": 12.8333 });
 
 const markers = ref([]);
 
-// maxCnt / minCnt를 computed로 미리 구해두기 (반경 계산에만 사용)
+// precompute maxCnt / minCnt for marker radius scaling
 const maxCnt = computed(() => Math.max(...markers.value.map(m => m.scamCnt)))
 const minCnt = computed(() => Math.min(...markers.value.map(m => m.scamCnt)))
 
@@ -236,7 +236,7 @@ const loadMapSummary = async () => {
 
 const logout = async () => {
   try {
-    await apiClient.post('/auth/logout', {}, { withCredentials: true }); // 쿠키로 refresh token 전달
+    await apiClient.post('/auth/logout', {}, { withCredentials: true }); // refresh token is sent via cookie
 
     authStore.clearAccessToken();
     authStore.clearUser();
@@ -261,11 +261,11 @@ const restoreSession = async () => {
         } catch (err) {
           console.error("restoreSession failed:", err);
         } finally {
-          refreshPromise = null; // 끝나면 초기화
+          refreshPromise = null; // reset once done so future calls can retry
         }
       })();
     }
-    return refreshPromise; // 다른 호출은 같은 Promise 반환
+    return refreshPromise; // concurrent callers share the same in-flight promise
   }
 };
 

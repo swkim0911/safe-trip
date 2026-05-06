@@ -6,7 +6,6 @@
             <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <!-- 탭 -->
             <div class="auth-tabs">
               <button
                 class="auth-tab"
@@ -455,7 +454,7 @@ const setupModalEventListener = () => {
     });
 
     modal.addEventListener('hidden.bs.modal', () => {
-      resetForm(); // 모달이 닫힐 때 form에 입력된 값들 모두 지움.
+      resetForm();
     });
   }
 }
@@ -474,12 +473,12 @@ watch(mode, (newMode) => {
     }
 });
 
-// 회원가입란에 email이 변경되면 다시 검증이 필요하다고 판단
+// re-validate when signup email changes
 watch(() => signupForm.email, () => {
   isEmailAvailable.value = null;
 });
 
-// 회원가입란에 nickname이 변경되면 다시 검증이 필요하다고 판단
+// re-validate when signup nickname changes
 watch(() => signupForm.nickname, () => {
   isNicknameAvailable.value = null;
 });

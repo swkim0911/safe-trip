@@ -59,7 +59,7 @@
     </div>
   </div>
 
-  <!-- 상세 모달 -->
+  <!-- detail modal -->
   <div class="modal fade" id="adminDetailModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content admin-modal" v-if="selectedItem">

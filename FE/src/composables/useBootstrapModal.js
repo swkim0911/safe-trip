@@ -3,8 +3,8 @@ import { ref, onMounted, onBeforeUnmount, unref } from 'vue';
 import { Modal } from 'bootstrap';
 
 /**
- * target: 1) ref(HTMLElement)  2) 문자열 selector('#authFormModal' / 'authFormModal')
- * options: Modal 옵션 (backdrop, keyboard 등)
+ * target: 1) ref(HTMLElement)  2) string selector ('#authFormModal' / 'authFormModal')
+ * options: Bootstrap Modal options (backdrop, keyboard, etc.)
  */
 export function useBootstrapModal(target, options = { backdrop: 'static', keyboard: false }) {
   const instance = ref(null);

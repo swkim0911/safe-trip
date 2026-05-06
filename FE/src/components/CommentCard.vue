@@ -1,11 +1,9 @@
 <template>
   <div class="comment-card" :class="{ reply: isReply }">
-    <!-- 삭제된 댓글 -->
     <div v-if="comment.isDeleted" class="text-muted small fst-italic">
       This comment has been deleted.
     </div>
 
-    <!-- 일반 댓글 -->
     <template v-else>
       <div class="d-flex justify-content-between align-items-start">
         <div class="flex-grow-1">
@@ -13,7 +11,7 @@
           <span class="text-muted small ms-2">{{ formattedDate }}</span>
         </div>
 
-        <!-- 수정/삭제 (본인 댓글만) -->
+        <!-- edit/delete actions, only shown to the owner -->
         <div v-if="isOwner" class="d-flex gap-1 ms-2">
           <button
             v-if="!isEditing"
@@ -27,7 +25,6 @@
         </div>
       </div>
 
-      <!-- 수정 모드 -->
       <div v-if="isEditing" class="mt-1">
         <textarea
           v-model="editContent"
@@ -48,12 +45,10 @@
         </div>
       </div>
 
-      <!-- 내용 -->
       <p v-else class="mb-1 small mt-1" style="white-space: pre-wrap; word-break: break-word;">
         {{ comment.content }}
       </p>
 
-      <!-- 액션 버튼 -->
       <div v-if="!isEditing" class="d-flex align-items-center gap-3 mt-1">
         <button
           class="comment-action-btn"

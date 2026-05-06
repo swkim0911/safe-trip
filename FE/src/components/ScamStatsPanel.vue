@@ -1,5 +1,4 @@
 <template>
-  <!-- 패널 본체 -->
   <div v-if="isExpanded" class="stats-panel">
     <div class="panel-body">
       <div class="stats-section">
@@ -52,7 +51,6 @@
     </div>
   </div>
 
-  <!-- 토글 버튼 -->
   <button class="toggle-btn" @click="isExpanded = !isExpanded">
     <font-awesome-icon :icon="['fas', isExpanded ? 'chevron-up' : 'chart-pie']" class="me-1" />
     Travel Insights

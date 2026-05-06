@@ -15,7 +15,6 @@
           <button type="button" class="btn-close" @click="hide" aria-label="Close"></button>
         </div>
 
-        <!-- 탭 -->
         <div class="tab-nav">
           <button
             class="tab-btn"
@@ -36,7 +35,7 @@
 
         <div class="modal-body mypage-body">
 
-          <!-- Profile 탭 -->
+          <!-- Profile tab -->
           <div v-if="tab === 'profile'" class="px-2">
             <h6 class="fw-bold mb-3">Display name</h6>
             <div class="d-flex gap-2 align-items-start">
@@ -92,7 +91,7 @@
             </div>
           </div>
 
-          <!-- My Feedback 탭 -->
+          <!-- My Feedback tab -->
           <div v-else-if="tab === 'feedback'">
             <div v-if="isLoadingFeedback" class="text-center py-4 text-muted">Loading...</div>
             <div v-else-if="feedbacks.length === 0" class="text-center py-4 text-muted">
@@ -122,7 +121,7 @@
             </ul>
           </div>
 
-          <!-- My Reports 탭 -->
+          <!-- My Reports tab -->
           <div v-else>
             <div v-if="isLoadingReports" class="text-center py-4 text-muted">Loading...</div>
             <div v-else-if="reports.length === 0" class="text-center py-4 text-muted">
@@ -142,7 +141,7 @@
                   </div>
                 </div>
 
-                <!-- 인라인 삭제 확인 -->
+                <!-- inline delete confirmation -->
                 <div v-else class="delete-confirm">
                   <span class="text-danger small fw-bold">Delete this story?</span>
                   <div class="mt-2 d-flex gap-2">

@@ -11,7 +11,6 @@ import { createPinia } from 'pinia';
 
 const pinia = createPinia();
 
-// 사용할 아이콘
 import { faUserLarge, faUserGear, faUserShield, faBullhorn, faPen, faCamera, faChevronLeft, faChevronRight, faArrowRightFromBracket, faArrowUpRightFromSquare, faCircleCheck, faDatabase, faMessage, faThumbsUp, faTriangleExclamation, faMapLocationDot, faSearch, faGlobe, faFileAlt, faMapMarkerAlt, faLocationDot, faShieldAlt, faShieldHalved } from '@fortawesome/free-solid-svg-icons'
 import {} from '@fortawesome/free-regular-svg-icons'
 
