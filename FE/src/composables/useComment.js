@@ -51,7 +51,7 @@ export function useComment() {
     try {
       await commentApi.toggleLike(commentId)
     } catch (e) {
-      toggle(comments.value) // 실패 시 되돌리기
+      toggle(comments.value) // rollback on failure
       throw e
     }
   }

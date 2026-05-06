@@ -22,5 +22,7 @@ public record UserReportUpdateRequest(
         Long cityId,
 
         @NotBlank(message = "Description must not be blank")
-        String description
+        String description,
+
+        Boolean removeImage
 ) {}

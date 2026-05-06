@@ -1,16 +1,15 @@
 <template>
-  <!-- 패널 본체 -->
   <div v-if="isExpanded" class="stats-panel">
     <div class="panel-body">
       <div class="stats-section">
-        <div class="section-title">Scam Action</div>
+        <div class="section-title">Issue Type</div>
         <div class="rings-row">
           <div v-for="item in actionItems" :key="item.name" class="ring-item">
             <svg width="60" height="60" viewBox="0 0 60 60">
               <circle cx="30" cy="30" r="24" fill="none" stroke="#e9ecef" stroke-width="5"/>
               <circle
                 cx="30" cy="30" r="24"
-                fill="none" stroke="#e74c3c" stroke-width="5"
+                fill="none" stroke="#D97757" stroke-width="5"
                 stroke-linecap="round"
                 :stroke-dasharray="circumference"
                 :stroke-dashoffset="getDashOffset(item.percentage)"
@@ -28,14 +27,14 @@
       <div class="section-divider" />
 
       <div class="stats-section">
-        <div class="section-title">Scam Context</div>
+        <div class="section-title">Travel Situation</div>
         <div class="rings-row">
           <div v-for="item in contextItems" :key="item.name" class="ring-item">
             <svg width="60" height="60" viewBox="0 0 60 60">
               <circle cx="30" cy="30" r="24" fill="none" stroke="#e9ecef" stroke-width="5"/>
               <circle
                 cx="30" cy="30" r="24"
-                fill="none" stroke="#3B82F6" stroke-width="5"
+                fill="none" stroke="#2A9D8F" stroke-width="5"
                 stroke-linecap="round"
                 :stroke-dasharray="circumference"
                 :stroke-dashoffset="getDashOffset(item.percentage)"
@@ -52,10 +51,9 @@
     </div>
   </div>
 
-  <!-- 토글 버튼 -->
   <button class="toggle-btn" @click="isExpanded = !isExpanded">
     <font-awesome-icon :icon="['fas', isExpanded ? 'chevron-up' : 'chart-pie']" class="me-1" />
-    Scam Trends
+    Travel Insights
   </button>
 </template>
 
@@ -100,8 +98,9 @@ onMounted(async () => {
   left: 0;
   width: 100%;
   z-index: 998;
-  background: white;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--safetrip-border);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .panel-body {
@@ -164,19 +163,19 @@ onMounted(async () => {
   left: 50%;
   transform: translateX(-50%);
   z-index: 999;
-  background: #3B82F6;
+  background: var(--safetrip-primary);
   color: white;
   border: none;
   padding: 8px 16px;
   font-size: 14px;
   cursor: pointer;
   border-radius: 0 0 10px 10px;
-  box-shadow: 0 3px 12px rgba(59, 130, 246, 0.35);
+  box-shadow: 0 3px 12px rgba(42, 157, 143, 0.26);
   transition: background 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    background: #2563EB;
-    box-shadow: 0 4px 18px rgba(59, 130, 246, 0.5);
+    background: var(--safetrip-primary-hover);
+    box-shadow: 0 4px 18px rgba(42, 157, 143, 0.34);
   }
 }
 </style>

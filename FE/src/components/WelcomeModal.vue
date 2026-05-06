@@ -6,18 +6,18 @@
           <div class="text-center mb-3">
             <img src="/airplane.png" alt="SafeTrip" width="40" height="40" />
             <h4 class="fw-bold mt-2 mb-0">SafeTrip</h4>
-            <p class="text-muted small mt-1">Make Your Travel Safer</p>
+            <p class="text-muted small mt-1">Travel smarter, worry less</p>
           </div>
 
-          <p class="mb-3">Browse scam reports from real travelers around the world. Click on a country or city to explore scam types and actual cases.</p>
+          <p class="mb-3">Explore real travel scam stories and local patterns before your trip, so you can plan with a little more confidence.</p>
 
           <ul class="info-list mb-3">
-            <li>Data is collected from Reddit travel communities and user-submitted reports.</li>
-            <li>For reference only — accuracy is not guaranteed. You can flag inaccurate reports to help us improve.</li>
+            <li>Browse travel notes from Reddit communities and SafeTrip travelers.</li>
+            <li>Use each note as a helpful reference, and flag anything that looks inaccurate.</li>
           </ul>
 
           <p class="mb-3 small text-muted">
-            SafeTrip is in early stage and we'd love your feedback. →
+            Have an idea to make trip planning easier?
             <a href="mailto:safetripworld.contact@gmail.com" class="feedback-link">Send Feedback</a>
           </p>
 
@@ -26,7 +26,7 @@
             <label class="form-check-label small text-muted" for="dontShowAgain">Don't show again</label>
           </div>
 
-          <button class="btn btn-primary w-100 fw-bold" @click="close">Start Exploring</button>
+          <button class="btn btn-primary w-100 fw-bold" @click="close">Explore the Map</button>
 
           <p class="text-center mt-3 mb-0" style="font-size: 12px; color: #aaa;">
             By using SafeTrip, you agree to our
@@ -81,7 +81,7 @@ onMounted(() => {
 }
 
 .feedback-link {
-  color: #3B82F6;
+  color: var(--safetrip-primary);
   text-decoration: none;
   &:hover {
     text-decoration: underline;

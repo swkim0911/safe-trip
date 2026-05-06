@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    accessToken: null, // in-memory 저장
+    accessToken: null, // kept in-memory only (not persisted to storage)
     user: null,
   }),
   actions: {
