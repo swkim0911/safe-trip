@@ -3,10 +3,10 @@
     <div style="height: calc(100vh - 28px); width: 100%">
       <l-map :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="[center.lat, center.lng]" :min-zoom="3" :options="{zoomControl: false,  maxBoundsViscosity: 1.0}" :max-bounds="[[ -75, -1800 ], [ 85, 1800 ]]" worldCopyJump>
         <l-tile-layer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           layer-type="base"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-          name="CartoDB Positron"
+          name="CartoDB Voyager"
         ></l-tile-layer>
         <l-circle-marker
           v-for="marker in markers"
@@ -22,7 +22,7 @@
             <div class="tooltip-card">
               <div class="tooltip-name">{{ marker.name }}</div>
               <div class="tooltip-bottom">
-                <strong>{{ marker.scamCnt }}</strong> reports
+                <strong>{{ marker.scamCnt }}</strong> notes
                 <span class="risk-badge" :class="marker.riskLevel?.toLowerCase()">{{ marker.riskLevel }}</span>
               </div>
             </div>
@@ -31,37 +31,37 @@
         <l-control-zoom position="bottomright"></l-control-zoom>
         <l-control position="bottomleft">
           <div class="map-legend">
-            <div class="legend-title">Scam Activity</div>
-            <div class="legend-item"><span class="dot high"></span> HIGH</div>
-            <div class="legend-item"><span class="dot medium"></span> MEDIUM</div>
-            <div class="legend-item"><span class="dot low"></span> LOW</div>
+            <div class="legend-title">Travel Note Activity</div>
+            <div class="legend-item"><span class="dot high"></span> Hotspot</div>
+            <div class="legend-item"><span class="dot medium"></span> Moderate</div>
+            <div class="legend-item"><span class="dot low"></span> Quiet</div>
           </div>
         </l-control>
       </l-map>
     </div>  
-    <div class="position-fixed top-0 end-0 mt-4 me-4 d-flex gap-2" style="z-index: 1000;">
+    <div class="top-actions position-fixed top-0 end-0 mt-4 me-4 d-flex gap-2" style="z-index: 1000;">
       <div v-if="!isLoggedIn">
         <button
           type="button"
-          class="btn btn-primary shadow-sm login-btn"
+          class="btn top-action-btn login-btn"
           @click="openAuthModal"
         >
           <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
-          LOGIN
+          Log in
         </button>
       </div>
       <template v-else>
         <button
           type="button"
-          class="btn btn-primary shadow-sm report-btn"
+          class="btn top-action-btn report-btn"
           @click="openReportFormModal"
         >
           <font-awesome-icon :icon="['fas', 'pen']" class="icon" />
-          Report
+          Share
         </button>
         <div class="dropdown">
           <button
-            class="btn btn-primary dropdown-toggle shadow-sm dropdown-btn"
+            class="btn top-action-btn dropdown-toggle dropdown-btn"
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
@@ -69,23 +69,23 @@
             <font-awesome-icon :icon="['fas', 'user-large']" class="icon" />
             {{ nickname }}
           </button>
-          <ul class="dropdown-menu dropdown-menu-end">
+          <ul class="dropdown-menu dropdown-menu-end account-menu">
             <li>
               <button class="dropdown-item" @click="openMyPageModal">
-                <font-awesome-icon :icon="['fas', 'user-gear']" class="icon"/>
-                My Page
+                <font-awesome-icon :icon="['fas', 'user-gear']" class="menu-icon"/>
+                Account
               </button>
             </li>
             <li v-if="isAdmin">
               <button class="dropdown-item" @click="openAdminModal">
-                <font-awesome-icon :icon="['fas', 'shield-halved']" class="icon"/>
+                <font-awesome-icon :icon="['fas', 'shield-halved']" class="menu-icon"/>
                 Admin
               </button>
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
               <button class="dropdown-item" @click="logout">
-                <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="icon"/>
+                <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" class="menu-icon"/>
                 Logout
               </button>
             </li>
@@ -156,7 +156,7 @@ watch(() => mapStore.pendingReturnToMyPageTab, (tab) => {
   openMyPageModal();
   mapStore.clearPendingReturnToMyPage();
 });
-const isLoggedIn = computed(() => !!authStore.accessToken); // 로그인 여부
+const isLoggedIn = computed(() => !!authStore.accessToken);
 const isAdmin = computed(() => authStore.user?.role === 'ADMIN');
 const nickname = computed(() => authStore.user?.nickname || 'user');
 
@@ -166,7 +166,7 @@ const center = ref({ "lat": 42.8333, "lng": 12.8333 });
 
 const markers = ref([]);
 
-// maxCnt / minCnt를 computed로 미리 구해두기 (반경 계산에만 사용)
+// precompute maxCnt / minCnt for marker radius scaling
 const maxCnt = computed(() => Math.max(...markers.value.map(m => m.scamCnt)))
 const minCnt = computed(() => Math.min(...markers.value.map(m => m.scamCnt)))
 
@@ -188,8 +188,6 @@ watch(() => mapStore.flyToTarget, (target) => {
 watch(zoom, (newZoom, oldZoom) => {
   const prevGroup = getGroupByZoom(oldZoom);
   const currGroup = getGroupByZoom(newZoom);
-
-  console.log(zoom.value);
 
   if (prevGroup !== currGroup) {
     loadMapSummary();
@@ -216,10 +214,10 @@ const getRadius = (scamCnt) => {
 }
 
 const getColor = (riskLevel) => {
-  if (riskLevel === 'HIGH') return '#e74c3c'
-  if (riskLevel === 'MEDIUM') return '#f39c12'
-  if (riskLevel === 'LOW') return '#2ecc71'
-  return '#95a5a6'
+  if (riskLevel === 'HIGH') return '#D97757'
+  if (riskLevel === 'MEDIUM') return '#E9B872'
+  if (riskLevel === 'LOW') return '#66AFA3'
+  return '#A8A29E'
 }
 
 const loadMapSummary = async () => {
@@ -238,7 +236,7 @@ const loadMapSummary = async () => {
 
 const logout = async () => {
   try {
-    await apiClient.post('/auth/logout', {}, { withCredentials: true }); // 쿠키로 refresh token 전달
+    await apiClient.post('/auth/logout', {}, { withCredentials: true }); // refresh token is sent via cookie
 
     authStore.clearAccessToken();
     authStore.clearUser();
@@ -263,11 +261,11 @@ const restoreSession = async () => {
         } catch (err) {
           console.error("restoreSession failed:", err);
         } finally {
-          refreshPromise = null; // 끝나면 초기화
+          refreshPromise = null; // reset once done so future calls can retry
         }
       })();
     }
-    return refreshPromise; // 다른 호출은 같은 Promise 반환
+    return refreshPromise; // concurrent callers share the same in-flight promise
   }
 };
 
@@ -298,44 +296,89 @@ onMounted(() => {
     margin-right: 1px;
   }
 
-  .login-btn, .report-btn, .dropdown-btn {
+  .top-actions {
+    align-items: center;
+  }
+
+  .top-action-btn {
+    background: var(--safetrip-primary);
+    border-color: var(--safetrip-primary);
     border: none;
-    padding: 8px 16px;
+    padding: 9px 17px;
     border-radius: 999px;
-    font-size: 15px;
-    font-weight: 500;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 800;
     letter-spacing: 0.01em;
+    box-shadow: 0 8px 22px rgba(42, 157, 143, 0.24);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 
     &:hover {
+      color: #fff;
+      background: var(--safetrip-primary-hover);
+      border-color: var(--safetrip-primary-hover);
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35) !important;
+      box-shadow: 0 10px 26px rgba(42, 157, 143, 0.3) !important;
     }
 
     &:active {
+      color: #fff;
+      background: var(--safetrip-primary-active);
+      border-color: var(--safetrip-primary-active);
       transform: translateY(0);
     }
   }
 
-  .dropdown-menu {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  .report-btn {
+    background: #fffdf8;
+    color: var(--safetrip-primary);
+    border: 1px solid #b9e4dc;
+
+    &:hover,
+    &:active {
+      color: #fff;
+    }
+  }
+
+  .dropdown-menu.account-menu {
+    min-width: 190px;
+    border: 1px solid var(--safetrip-border);
+    border-radius: 14px;
+    background: #fffdf8;
+    box-shadow: 0 16px 34px rgba(36, 49, 58, 0.14);
     overflow: hidden;
-    padding: 4px;
+    padding: 8px;
   }
 
   .dropdown-item {
-    padding: 10px 16px;
-    font-size: 15px;
-    font-weight: 500;
-    border-radius: 8px;
-    transition: background-color 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: var(--safetrip-text);
+    font-size: 0.95rem;
+    font-weight: 800;
+    border-radius: 10px;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 
 .dropdown-item:hover {
-  background-color: #f1f3f5;
-  color: #000;
+  background-color: var(--safetrip-primary-soft);
+  color: var(--safetrip-primary);
+}
+
+.menu-icon {
+  width: 18px;
+  color: var(--safetrip-muted);
+}
+
+.dropdown-item:hover .menu-icon {
+  color: var(--safetrip-primary);
+}
+
+.dropdown-divider {
+  border-top-color: var(--safetrip-border);
+  margin: 6px 0;
 }
 
 .tooltip-card {
@@ -358,10 +401,11 @@ onMounted(() => {
 }
 
 .map-legend {
-  background: white;
+  background: rgba(255, 255, 255, 0.94);
   padding: 8px 12px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border: 1px solid var(--safetrip-border);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -371,7 +415,7 @@ onMounted(() => {
   margin-bottom: 4px;
   font-size: 11px;
   text-transform: uppercase;
-  color: #555;
+  color: var(--safetrip-muted);
 }
 
 .legend-item {
@@ -386,9 +430,9 @@ onMounted(() => {
   height: 10px;
   border-radius: 50%;
 
-  &.high   { background-color: #e74c3c; }
-  &.medium { background-color: #f39c12; }
-  &.low    { background-color: #2ecc71; }
+  &.high   { background-color: var(--safetrip-activity-many); }
+  &.medium { background-color: var(--safetrip-activity-some); }
+  &.low    { background-color: var(--safetrip-activity-few); }
 }
 
 .risk-badge {
@@ -398,8 +442,8 @@ onMounted(() => {
   border-radius: 4px;
   color: white;
 
-  &.high   { background-color: #e74c3c; }
-  &.medium { background-color: #f39c12; }
-  &.low    { background-color: #2ecc71; }
+  &.high   { background-color: var(--safetrip-activity-many); }
+  &.medium { background-color: var(--safetrip-activity-some); }
+  &.low    { background-color: var(--safetrip-activity-few); }
 }
 </style>

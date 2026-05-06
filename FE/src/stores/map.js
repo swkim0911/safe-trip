@@ -24,6 +24,10 @@ export const useMapStore = defineStore('map', {
       this.pendingOpenExternalReportId = id;
       this.returnToMyPageTab = 'feedback';
     },
+    requestOpenExternalReportFromAdmin(id) {
+      this.pendingOpenExternalReportId = id;
+      this.returnToMyPageTab = null;
+    },
     clearOpenExternalReport() {
       this.pendingOpenExternalReportId = null;
     },

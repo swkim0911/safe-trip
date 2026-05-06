@@ -1,10 +1,10 @@
 <template>
-  <form @submit.prevent>
+  <form class="report-form-fields" @submit.prevent>
     <!-- Title -->
-    <div class="mb-3">
-      <label class="col-form-label fw-bold">
+    <section class="form-section">
+      <label class="form-section-label">
         <font-awesome-icon :icon="['fas', 'message']" class="modal-icon" />
-        Title
+        Short title
       </label>
       <input
         type="text"
@@ -17,37 +17,41 @@
         <div v-else></div>
         <small class="text-muted">{{ form.title.length }} / 100</small>
       </div>
-    </div>
+    </section>
 
     <!-- Scam Action / Context -->
-    <div class="row mb-3">
-      <div class="col-md-6">
-        <label class="col-form-label fw-bold">
-          <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="modal-icon" />
-          Scam Action
-        </label>
-        <select v-model="form.scamActionId" :class="['form-select', { 'is-invalid': errors.scamActionId }]">
-          <option disabled value="">Select an Action</option>
-          <option v-for="a in scamActions" :key="a.id" :value="a.id">{{ a.name }}</option>
-        </select>
-        <div v-if="errors.scamActionId" class="text-danger small mt-1">{{ errors.scamActionId }}</div>
+    <section class="form-section">
+      <div class="form-section-label">
+        <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="modal-icon" />
+        What happened
       </div>
-      <div class="col-md-6">
-        <label class="col-form-label fw-bold">
-          <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="modal-icon" />
-          Scam Context
-        </label>
-        <select v-model="form.scamContextId" :class="['form-select', { 'is-invalid': errors.scamContextId }]">
-          <option disabled value="">Select a context</option>
-          <option v-for="c in scamContexts" :key="c.id" :value="c.id">{{ c.name }}</option>
-        </select>
-        <div v-if="errors.scamContextId" class="text-danger small mt-1">{{ errors.scamContextId }}</div>
+      <div class="row">
+        <div class="col-md-6">
+          <label class="field-label">
+            Issue type
+          </label>
+          <select v-model="form.scamActionId" :class="['form-select', { 'is-invalid': errors.scamActionId }]">
+            <option disabled value="">Choose a type</option>
+            <option v-for="a in scamActions" :key="a.id" :value="a.id">{{ a.name }}</option>
+          </select>
+          <div v-if="errors.scamActionId" class="text-danger small mt-1">{{ errors.scamActionId }}</div>
+        </div>
+        <div class="col-md-6">
+          <label class="field-label">
+            Travel situation
+          </label>
+          <select v-model="form.scamContextId" :class="['form-select', { 'is-invalid': errors.scamContextId }]">
+            <option disabled value="">Choose a situation</option>
+            <option v-for="c in scamContexts" :key="c.id" :value="c.id">{{ c.name }}</option>
+          </select>
+          <div v-if="errors.scamContextId" class="text-danger small mt-1">{{ errors.scamContextId }}</div>
+        </div>
       </div>
-    </div>
+    </section>
 
     <!-- Location -->
-    <div class="mb-3">
-      <label class="col-form-label fw-bold">
+    <section class="form-section">
+      <label class="form-section-label">
         <font-awesome-icon :icon="['fas', 'map-location-dot']" class="modal-icon" />
         Location
       </label>
@@ -111,21 +115,27 @@
           </ul>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Image Upload -->
-    <div class="mb-3">
-      <label class="form-label fw-bold">
+    <section class="form-section">
+      <label class="form-section-label">
         <font-awesome-icon :icon="['fas', 'camera']" class="modal-icon" />
-        Upload Image (Optional)
+        Add a photo (optional)
       </label>
 
-      <!-- 기존 이미지 (새 파일 선택 전까지 표시) -->
-      <div v-if="existingImageUrl && !imagePreviewUrl" class="mb-2">
-        <div class="position-relative d-inline-block">
+      <!-- existing image, shown until a new file is selected -->
+      <div v-if="existingImageUrl && !removeExistingImage && !imagePreviewUrl" class="current-image-panel">
+        <div class="image-preview-frame">
           <img :src="existingImageUrl" alt="Current image" class="image-preview" />
+          <button type="button" class="btn-remove-image" @click="markExistingImageForRemoval">×</button>
         </div>
-        <div class="text-muted small mt-1">Current image · Upload a new file to replace</div>
+        <div class="image-help-text">Current photo · Add a new one to replace it, or remove it.</div>
+      </div>
+
+      <div v-if="existingImageUrl && removeExistingImage && !imagePreviewUrl" class="image-removal-panel mb-3">
+        <span>Current photo will be removed.</span>
+        <button type="button" class="btn-restore-image" @click="restoreExistingImage">Undo</button>
       </div>
 
       <input
@@ -137,7 +147,7 @@
       />
       <div v-if="errors.imageFile" class="text-danger small mt-1">{{ errors.imageFile }}</div>
       <div v-if="imagePreviewUrl" class="mt-2">
-        <div class="position-relative d-inline-block">
+        <div class="image-preview-frame">
           <img :src="imagePreviewUrl" alt="Preview" class="image-preview" />
           <button type="button" class="btn-remove-image" @click="removeImage">✕</button>
         </div>
@@ -145,27 +155,27 @@
           {{ imageFile?.name }} · {{ (imageFile?.size / 1024).toFixed(1) }} KB
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Description -->
-    <div class="mb-3">
-      <label class="col-form-label fw-bold">
+    <section class="form-section">
+      <label class="form-section-label">
         <font-awesome-icon :icon="['fas', 'message']" class="modal-icon" />
-        Description
+        Your note
       </label>
       <textarea
         v-model="form.description"
         :class="['form-control', { 'is-invalid': errors.description }]"
         maxlength="500"
         rows="4"
-        placeholder="Please describe the scam in detail"
+        placeholder="Share what happened in a few helpful details"
       ></textarea>
       <div class="d-flex justify-content-between mt-1">
         <div v-if="errors.description" class="text-danger small">{{ errors.description }}</div>
         <div v-else></div>
         <small class="text-muted">{{ form.description.length }} / 500</small>
       </div>
-    </div>
+    </section>
   </form>
 </template>
 
@@ -204,6 +214,7 @@ const fileInput = ref(null);
 const imageFile = ref(null);
 const imagePreviewUrl = ref(null);
 const existingImageUrl = ref(null);
+const removeExistingImage = ref(false);
 
 const form = reactive({
   title: '',
@@ -312,6 +323,7 @@ const handleFileChange = (event) => {
     return;
   }
   imageFile.value = file;
+  removeExistingImage.value = false;
   errors.imageFile = '';
   if (imagePreviewUrl.value) URL.revokeObjectURL(imagePreviewUrl.value);
   imagePreviewUrl.value = URL.createObjectURL(file);
@@ -324,17 +336,26 @@ const removeImage = () => {
   if (fileInput.value) fileInput.value.value = '';
 };
 
+const markExistingImageForRemoval = () => {
+  removeExistingImage.value = true;
+  removeImage();
+};
+
+const restoreExistingImage = () => {
+  removeExistingImage.value = false;
+};
+
 const validate = () => {
   let valid = true;
-  errors.title = form.title.trim() ? '' : 'Please enter a title.';
+  errors.title = form.title.trim() ? '' : 'Please add a short title.';
   if (errors.title) valid = false;
-  errors.scamActionId = form.scamActionId ? '' : 'Please select a scam action.';
+  errors.scamActionId = form.scamActionId ? '' : 'Please choose an issue type.';
   if (errors.scamActionId) valid = false;
-  errors.scamContextId = form.scamContextId ? '' : 'Please select a scam context.';
+  errors.scamContextId = form.scamContextId ? '' : 'Please choose a travel situation.';
   if (errors.scamContextId) valid = false;
   errors.countryId = form.countryId ? '' : 'Please select a country.';
   if (errors.countryId) valid = false;
-  errors.description = form.description.trim() ? '' : 'Please provide a description.';
+  errors.description = form.description.trim() ? '' : 'Please add a few details.';
   if (errors.description) valid = false;
   return valid;
 };
@@ -350,6 +371,7 @@ const getFormData = () => ({
 });
 
 const getImageFile = () => imageFile.value;
+const getRemoveImage = () => removeExistingImage.value;
 
 const reset = () => {
   form.title = '';
@@ -366,6 +388,7 @@ const reset = () => {
   cities.value = [];
   Object.keys(errors).forEach(k => (errors[k] = ''));
   existingImageUrl.value = null;
+  removeExistingImage.value = false;
   removeImage();
 };
 
@@ -402,27 +425,128 @@ watch(() => props.initialData, async (data) => {
   }
 
   existingImageUrl.value = data.imageUrl ?? null;
+  removeExistingImage.value = false;
   removeImage();
 });
 
 onMounted(loadCountries);
 
-defineExpose({ validate, getFormData, getImageFile, reset });
+defineExpose({ validate, getFormData, getImageFile, getRemoveImage, reset });
 </script>
 
 <style scoped lang="scss">
+.report-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-section {
+  padding: 18px 20px;
+  border: 1px solid var(--safetrip-border);
+  border-radius: 12px;
+  background: var(--safetrip-surface);
+  box-shadow: 0 8px 24px rgba(36, 49, 58, 0.05);
+}
+
+.form-section-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+  color: var(--safetrip-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.field-label {
+  margin-bottom: 6px;
+  color: var(--safetrip-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .modal-icon {
   font-size: 95%;
+  color: var(--safetrip-primary);
+}
+
+.form-control,
+.form-select {
+  border-color: var(--safetrip-border);
+  background-color: #fffdf8;
+  color: var(--safetrip-text);
+
+  &:focus {
+    border-color: var(--safetrip-primary);
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.12);
+  }
+}
+
+.form-control::placeholder {
+  color: #a8a29e;
+}
+
+.text-danger {
+  color: #b6523b !important;
 }
 
 .image-preview {
   display: block;
   max-width: 100%;
-  max-height: 200px;
+  max-height: 260px;
   object-fit: contain;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  background: #f8f9fa;
+  border-radius: 9px;
+}
+
+.current-image-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.image-preview-frame {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid var(--safetrip-border);
+  border-radius: 12px;
+  background: #fffdf8;
+}
+
+.image-help-text {
+  margin-top: 6px;
+  color: var(--safetrip-muted);
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.image-removal-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 420px;
+  padding: 10px 12px;
+  border: 1px solid #e8c7b7;
+  border-radius: 10px;
+  background: #fff5ee;
+  color: #9b5139;
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.btn-restore-image {
+  border: 0;
+  background: transparent;
+  color: var(--safetrip-primary);
+  font-weight: 850;
+  white-space: nowrap;
 }
 
 .btn-remove-image {
@@ -432,7 +556,7 @@ defineExpose({ validate, getFormData, getImageFile, reset });
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #dc3545;
+  background: #b6523b;
   color: white;
   border: none;
   font-size: 11px;
@@ -442,7 +566,7 @@ defineExpose({ validate, getFormData, getImageFile, reset });
   justify-content: center;
 
   &:hover {
-    background: #bb2d3b;
+    background: #944330;
   }
 }
 
@@ -454,8 +578,8 @@ defineExpose({ validate, getFormData, getImageFile, reset });
   z-index: 1060;
   max-height: 200px;
   overflow-y: auto;
-  background: white;
-  border: 1px solid #dee2e6;
+  background: #fffdf8;
+  border: 1px solid var(--safetrip-border);
   border-top: none;
   border-radius: 0 0 4px 4px;
   list-style: none;
@@ -467,7 +591,7 @@ defineExpose({ validate, getFormData, getImageFile, reset });
     cursor: pointer;
 
     &:hover {
-      background-color: #f0f4ff;
+      background-color: var(--safetrip-primary-soft);
     }
   }
 }

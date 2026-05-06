@@ -1,7 +1,6 @@
 <template>
   <div class="sidebar-container">
     <div :class="['sidebar', {'open': isOpen}]">
-      <!-- 검색창 -->
       <div class="sidebar-header form-group position-relative">
         <font-awesome-icon
           :icon="['fas', 'search']"
@@ -60,9 +59,9 @@
               </div>
               <div class="d-flex align-items-center gap-1">
                 <span v-if="country.riskLevel" class="badge risk-badge" :class="country.riskLevel.toLowerCase()">
-                  {{ country.riskLevel }}
+                  {{ getActivityLabel(country.riskLevel) }}
                 </span>
-                <span class="badge text-bg-primary rounded-pill">{{ country.scamCnt }}</span>
+                <span class="count-badge">{{ country.scamCnt }}</span>
               </div>
             </li>
           </ul>
@@ -79,32 +78,31 @@
             </select>
           </div>
 
-          <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
+          <!-- top: view all reports for this country -->
           <div class="mb-3">
-            <button 
-              class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3 report-cta"
+            <button
+              class="report-cta"
               @click="showReportsByCountry(selectedCountry.id, selectedCountry.name)"
-              style="border-radius: 8px;"
             >
               <span class="d-flex align-items-center">
                 <font-awesome-icon :icon="['fas', 'file-alt']" class="me-2" />
-                See all reports
+                View travel notes
               </span>
-              <span class="badge bg-light text-dark">
+              <span class="cta-count">
                 {{ selectedCountry.scamCnt }} reports
               </span>
             </button>
           </div>
 
-          <!-- 국가별 통계 -->
+          <!-- per-country statistics -->
           <div v-if="countryActionStats.length || countryContextStats.length" class="country-stats mb-3">
             <div v-if="countryActionStats.length" class="stats-section">
-              <div class="stats-section-title">Scam Action</div>
+              <div class="stats-section-title">Issue Type</div>
               <div class="rings-row">
                 <div v-for="item in countryActionStats" :key="item.name" class="ring-item">
                   <svg width="56" height="56" viewBox="0 0 56 56">
                     <circle cx="28" cy="28" r="22" fill="none" stroke="#e9ecef" stroke-width="4"/>
-                    <circle cx="28" cy="28" r="22" fill="none" stroke="#e74c3c" stroke-width="4"
+                    <circle cx="28" cy="28" r="22" fill="none" stroke="#D97757" stroke-width="4"
                       stroke-linecap="round"
                       :stroke-dasharray="statCircumference"
                       :stroke-dashoffset="getStatDashOffset(item.percentage)"
@@ -119,12 +117,12 @@
               </div>
             </div>
             <div v-if="countryContextStats.length" class="stats-section mt-3">
-              <div class="stats-section-title">Scam Context</div>
+              <div class="stats-section-title">Travel Situation</div>
               <div class="rings-row">
                 <div v-for="item in countryContextStats" :key="item.name" class="ring-item">
                   <svg width="56" height="56" viewBox="0 0 56 56">
                     <circle cx="28" cy="28" r="22" fill="none" stroke="#e9ecef" stroke-width="4"/>
-                    <circle cx="28" cy="28" r="22" fill="none" stroke="#3B82F6" stroke-width="4"
+                    <circle cx="28" cy="28" r="22" fill="none" stroke="#2A9D8F" stroke-width="4"
                       stroke-linecap="round"
                       :stroke-dasharray="statCircumference"
                       :stroke-dashoffset="getStatDashOffset(item.percentage)"
@@ -140,7 +138,7 @@
             </div>
           </div>
 
-          <!-- 하단: State 목록 -->
+          <!-- bottom: state list -->
           <div>
             <div v-if="isLoadingState && sidebarStates.length === 0" class="loading-spinner">
               <div class="spinner-border text-primary" role="status">
@@ -163,9 +161,9 @@
                 </div>
                 <div class="d-flex align-items-center gap-1">
                   <span v-if="state.riskLevel" class="badge risk-badge" :class="state.riskLevel.toLowerCase()">
-                    {{ state.riskLevel }}
+                    {{ getActivityLabel(state.riskLevel) }}
                   </span>
-                  <span class="badge text-bg-primary rounded-pill">{{ state.scamCnt }}</span>
+                  <span class="count-badge">{{ state.scamCnt }}</span>
                 </div>
               </li>
             </ul>
@@ -184,18 +182,17 @@
             </select>
           </div>
 
-          <!-- 상단: 국가의 모든 리포트 보기 버튼 -->
+          <!-- top: view all reports for this state -->
           <div class="mb-3">
-            <button 
-              class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3 report-cta"
+            <button
+              class="report-cta"
               @click="showReportsByState(selectedState.id, selectedState.name)"
-              style="border-radius: 8px;"
             >
               <span class="d-flex align-items-center">
                 <font-awesome-icon :icon="['fas', 'file-alt']" class="me-2" />
-                See all reports in {{ selectedState.name }}
+                View {{ selectedState.name }} reports
               </span>
-              <span class="badge bg-light text-dark">
+              <span class="cta-count">
                 {{ selectedState.scamCnt || 0 }} reports
               </span>
             </button>
@@ -222,7 +219,7 @@
                   {{ city.name }}
                 </div>
               </div>
-              <span class="badge text-bg-primary rounded-pill">{{ city.scamCnt }}</span>
+              <span class="count-badge">{{ city.scamCnt }}</span>
             </li>
           </ul>
         </template>
@@ -234,9 +231,9 @@
             </button>
 
             <h6 class="fw-bold mb-0 flex-grow-1 text-center">
-              <span v-if="selectedCity.id">Reports from {{ selectedCity.name }}</span>
-              <span v-else-if="selectedState.id">Reports from {{ selectedState.name }}</span>
-              <span v-else>Reports from {{ selectedCountry.name }}</span>
+              <span v-if="selectedCity.id">Travel notes from {{ selectedCity.name }}</span>
+              <span v-else-if="selectedState.id">Travel notes from {{ selectedState.name }}</span>
+              <span v-else>Travel notes from {{ selectedCountry.name }}</span>
             </h6>
 
             <button class="sort-btn d-flex align-items-center gap-1 flex-shrink-0" @click="toggleSortOrder">
@@ -251,7 +248,7 @@
           </div>
           <div v-else-if="!isLoadingReport && sidebarReports.length === 0" class="empty-state">
             <font-awesome-icon :icon="['fas', 'file-circle-xmark']" class="empty-icon" />
-            <p>No reports found.</p>
+            <p>No travel notes here yet.</p>
           </div>
           <ul class="list-group">
             <li
@@ -260,22 +257,28 @@
               :key="report.reportId"
               @click="openReportDetailModal(report.source, report.reportId)"
             >
-              <span class="badge bg-primary position-absolute top-0 end-0 translate-middle-y me-2">
-                {{ report.source === 'SAFETRIP' ? '✍️ SafeTrip' : '🤖 AI Bot' }}
+              <span
+                class="report-source-badge"
+                :class="report.source === 'SAFETRIP' ? 'source-user' : 'source-collected'"
+              >
+                <font-awesome-icon
+                  :icon="report.source === 'SAFETRIP' ? ['fas', 'user-shield'] : ['fas', 'database']"
+                  class="me-1"
+                />
+                {{ report.source === 'SAFETRIP' ? 'Traveler note' : 'AI-Assisted' }}
               </span>
 
-              <div class="fw-bold mb-1 mt-3 d-flex align-items-start">
-                <font-awesome-icon :icon="['fas', 'shield-alt']" class="me-2 text-danger mt-1 flex-shrink-0" />
+              <div class="report-card-title">
                 <span>{{ report.title }}</span>
               </div>
 
-              <div class="mb-1">
-                <span class="badge text-bg-danger me-1">{{ report.scamAction }}</span>
-                <span class="badge text-bg-warning">{{ report.scamContext }}</span>
+              <div class="report-card-tags">
+                <span class="report-chip action-chip">{{ report.scamAction }}</span>
+                <span class="report-chip context-chip">{{ report.scamContext }}</span>
               </div>
 
-              <div class="text-end">
-                <small class="text-muted">{{ formatDate(report.posted_at) }}</small>
+              <div class="report-card-date">
+                {{ formatDate(report.posted_at) }}
               </div>
             </li>
           </ul>
@@ -284,7 +287,7 @@
 
     </div>
 
-    <!-- 토글 버튼 (사이드바 열기) -->
+    <!-- sidebar open/close toggle button -->
     <button @click="toggleSidebar" class="toggle-btn">
       <font-awesome-icon 
         v-if="!isOpen" 
@@ -437,7 +440,7 @@ const selectSearchResult = async (result) => {
   searchResults.value = [];
 };
 
-const viewType = ref('country') // 'country' 또는 'state' 또는 'city' 또는 'report'
+const viewType = ref('country') // 'country' | 'state' | 'city' | 'report'
 
 const sidebarCountries = ref([]);
 const sidebarStates = ref([]);
@@ -491,6 +494,13 @@ const toStatPercentageItems = (stats) => {
 };
 
 const getStatDashOffset = (percentage) => statCircumference * (1 - percentage / 100);
+
+const getActivityLabel = (riskLevel) => {
+  if (riskLevel === 'HIGH') return 'Hotspot';
+  if (riskLevel === 'MEDIUM') return 'Moderate';
+  if (riskLevel === 'LOW') return 'Quiet';
+  return riskLevel || '';
+};
 
 const loadCountryStats = async (countryId) => {
   const [actionRes, contextRes] = await Promise.all([
@@ -566,9 +576,9 @@ const formatDate = (date) => {
 }
 
 /**
- * ISO2 코드를 플래그 이모티콘으로 변환합니다.
- * @param {string} iso2 - ISO2 국가 코드 (예: "US", "KR", "JP")
- * @returns {string} 플래그 이모티콘 (예: "🇺🇸", "🇰🇷", "🇯🇵")
+ * Convert an ISO2 country code into a flag emoji.
+ * @param {string} iso2 - ISO2 country code (e.g. "US", "KR", "JP")
+ * @returns {string} flag emoji (e.g. "🇺🇸", "🇰🇷", "🇯🇵")
  */
 const getCountryFlag = (iso2) => {
   if (!iso2 || typeof iso2 !== 'string' || iso2.length !== 2) {
@@ -611,7 +621,7 @@ function mapUserReportDetail(result, reportId) {
     title: result.title,
     content: result.description,
     postedAt: formatDate(result.createdAt),
-    imageUrls: result.urls || [],
+    imageUrls: result.urls || result.URLs || result.imageUrls || [],
   })
 }
 
@@ -630,12 +640,13 @@ function mapExternalReportDetail(result, reportId) {
     title: result.title,
     content: result.summary,
     postedAt: formatDate(result.postedAt),
+    imageUrls: [],
   })
 }
 
 /**
- * 사용자 리포트 상세 정보를 조회합니다.
- * @param {number} reportId - 조회할 리포트 ID
+ * Load detailed information for a user-submitted report.
+ * @param {number} reportId - report ID to fetch
  */
 const loadUserReportDetailInfo = async (reportId) => {
   try {
@@ -645,13 +656,13 @@ const loadUserReportDetailInfo = async (reportId) => {
     mapUserReportDetail(result, reportId);
 
   } catch (e) {
-    console.error('API 요청 실패:', e);
+    console.error('API request failed:', e);
   }
 }
 
 /**
- * 외부 리포트 상세 정보를 조회합니다.
- * @param {number} reportId - 조회할 리포트 ID
+ * Load detailed information for an externally collected report.
+ * @param {number} reportId - report ID to fetch
  */
 const loadExternalReportDetailInfo = async (reportId) => {
   try {
@@ -660,16 +671,16 @@ const loadExternalReportDetailInfo = async (reportId) => {
     mapExternalReportDetail(result, reportId);
 
   } catch (e) {
-    console.error('API 요청 실패:', e);
+    console.error('API request failed:', e);
   }
 }
 
 
 
 /**
- * 통계 정보를 포함한 국가 목록을 조회합니다 (페이지네이션).
- * 스캠 리포트 개수 기준으로 내림차순 정렬하여 반환합니다.
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ * Load the country list with aggregated statistics (paginated).
+ * Returned in descending order of scam report count.
+ * @param {string} mode - 'click' (refresh from page 0) or 'scroll' (append next page)
  */
 const loadCountriesWithStatistics = async (mode = 'click') => {
 
@@ -761,7 +772,6 @@ const showReportsByCountry = async (countryId, countryName) => {
   selectedCity.name = '';
   viewType.value = 'report';
   
-  // 국가의 모든 리포트 로드
   await loadReportsByCountry(countryId, 'click');
 };
 
@@ -772,14 +782,13 @@ const showReportsByState = async (stateId, stateName) => {
   selectedCity.name = '';
   viewType.value = 'report';
   
-  // State의 모든 리포트 로드
   await loadReportsByState(stateId, 'click');
 };
 
 /**
- * 특정 주(State)의 모든 스캠 리포트 목록을 조회합니다 (페이지네이션).
- * @param {number} stateId - 조회할 주(State) ID
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ * Load all scam reports belonging to a state (paginated).
+ * @param {number} stateId - state ID to query
+ * @param {string} mode - 'click' (refresh from page 0) or 'scroll' (append next page)
  */
 const loadReportsByState = async (stateId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingReport.value || isLastReportPage.value)) return;
@@ -813,9 +822,9 @@ const loadReportsByState = async (stateId, mode = 'click') => {
 };
 
 /**
- * 특정 국가의 모든 스캠 리포트 목록을 조회합니다 (페이지네이션).
- * @param {number} countryId - 조회할 국가 ID
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ * Load all scam reports belonging to a country (paginated).
+ * @param {number} countryId - country ID to query
+ * @param {string} mode - 'click' (refresh from page 0) or 'scroll' (append next page)
  */
 const loadReportsByCountry = async (countryId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingReport.value || isLastReportPage.value)) return;
@@ -849,11 +858,10 @@ const loadReportsByCountry = async (countryId, mode = 'click') => {
 };
 
 /**
- * 특정 주(State)의 도시(City) 목록을 보여줍니다 (페이지네이션 지원).
- * 스캠 리포트 개수 기준으로 내림차순 정렬하여 반환합니다.
- * @param {number} stateId - 조회할 주(State) ID
- * @param {string} stateName - 주(State) 이름
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ * Show the city list for a given state (paginated).
+ * Returned in descending order of scam report count.
+ * @param {number} stateId - state ID to query
+ * @param {string} mode - 'click' (refresh from page 0) or 'scroll' (append next page)
  */
 const showCitiesByState = async (stateId, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingCity.value || isLastCityPage.value)) return;
@@ -893,10 +901,10 @@ const showCitiesByState = async (stateId, mode = 'click') => {
 }
 
 /**
- * 특정 도시(City)의 스캠 리포트 목록을 보여줍니다 (페이지네이션 지원).
- * @param {number} cityId - 조회할 도시(City) ID
- * @param {string} cityName - 도시(City) 이름
- * @param {string} mode - 'click' (새로고침) 또는 'scroll' (스크롤 추가 로드)
+ * Show the scam reports for a given city (paginated).
+ * @param {number} cityId - city ID to query
+ * @param {string} cityName - city name (for display)
+ * @param {string} mode - 'click' (refresh from page 0) or 'scroll' (append next page)
  */
 const showReportsByCity = async (cityId, cityName, mode = 'click') => {
   if (mode === 'scroll' && (isLoadingReport.value || isLastReportPage.value)) return;
@@ -944,13 +952,10 @@ const goToParentView = (type) => {
 const backFromReport = () => {
   sortOrder.value = 'DESC';
   if (selectedCity.id) {
-    // 도시에서 온 경우
     viewType.value = 'city';
   } else if (selectedState.id) {
-    // State에서 온 경우 - state로 돌아감
     viewType.value = 'city';
   } else if (selectedCountry.id) {
-    // 국가에서 온 경우
     viewType.value = 'state';
   }
 }
@@ -959,7 +964,6 @@ const toggleSidebar = () => {
   isOpen.value = !isOpen.value;
 };
 
-// 스크롤 감지
 const onSidebarScroll = () => {
   const sidebarEl = sidebarRef.value;
   if (!sidebarEl) return;
@@ -995,7 +999,6 @@ onMounted(() => {
 
 $sidebar-width: 560px;
 
-/* 사이드바 컨테이너 */
 .sidebar-container {
   position: fixed;
   display: flex;
@@ -1003,22 +1006,20 @@ $sidebar-width: 560px;
   z-index: 1001;
 }
 
-/* 사이드바 */
 .sidebar {
   position: fixed;
   display: flex;
   top: 0;
-  left: -$sidebar-width; /* 기본적으로 숨김 */
+  left: -$sidebar-width; /* hidden by default, slides in when .open is added */
   width: $sidebar-width;
   height: 100vh;
-  background-color: #ffffff;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
+  background-color: var(--safetrip-page);
+  box-shadow: 4px 0 28px rgba(15, 23, 42, 0.1);
   transition: left 0.3s ease;
   padding: 20px;
   flex-direction: column;
 }
 
-/* 사이드바가 열릴 때 */
 .sidebar.open {
   left: 0;
 }
@@ -1034,7 +1035,7 @@ $sidebar-width: 560px;
   left: 24px;
   top: 39%;
   transform: translateY(-50%);
-  color: #3B82F6;
+  color: var(--safetrip-primary);
   z-index: 10;
   font-size: 1rem;
 }
@@ -1064,20 +1065,20 @@ $sidebar-width: 560px;
   transition: background 0.15s ease;
 
   &:hover {
-    background: #f1f5fe;
+    background: var(--safetrip-primary-soft);
   }
 }
 
 .result-name {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--safetrip-text);
 }
 
 .result-type {
   font-size: 11px;
   color: #888;
-  background: #f1f3f5;
+  background: #eef6f6;
   padding: 2px 8px;
   border-radius: 20px;
 }
@@ -1096,8 +1097,8 @@ $sidebar-width: 560px;
   }
 
   &:focus {
-    border-color: #3B82F6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--safetrip-primary);
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.14);
   }
 }
 
@@ -1107,11 +1108,11 @@ $sidebar-width: 560px;
   padding-left: 4px;
   padding-right: 8px;
   overflow-y: auto;
-  overscroll-behavior: contain; /* 스크롤 범위를 벗어나면 움직이지 않게 */
+  overscroll-behavior: contain; /* prevent the page from scrolling when the sidebar reaches its bounds */
 }
 
 
-/* 사이드바가 열렸을 때 토글 버튼 위치 조정 */
+/* shift the toggle button to the sidebar's right edge when open */
 .sidebar.open + .toggle-btn {
   left: $sidebar-width;
 }
@@ -1119,26 +1120,26 @@ $sidebar-width: 560px;
 .list-group-item {
   position: relative;
   background: #ffffff;
-  color: black;
-  border-radius: 10px;
-  padding: 14px;
+  color: var(--safetrip-text);
+  border-radius: 12px;
+  padding: 14px 15px;
   margin-bottom: 8px;
   margin-top: 8px;
-  border: 1px solid #e9ecef;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--safetrip-border);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
   cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
-    background: #f8f9fa;
+    background: #fffdf8;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
   }
 
   &:active {
-    background: #f1f3f5;
+    background: #faf6ee;
     transform: translateY(0);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
   }
 }
 
@@ -1181,54 +1182,137 @@ $sidebar-width: 560px;
 }
 
 .report-cta {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   position: relative;
   overflow: hidden;
-  border-radius: 12px !important;
-  background: linear-gradient(135deg, #3B82F6, #60A5FA);
-  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.2);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 20% -20% auto auto;
-    width: 160px;
-    height: 160px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.45), transparent 70%);
-    opacity: 0.6;
-    transition: opacity 0.25s ease;
-  }
+  border: 1px solid #b9e4dc;
+  border-radius: 12px;
+  background: #fffdf8;
+  color: var(--safetrip-primary);
+  padding: 14px 15px;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(36, 49, 58, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 26px rgba(59, 130, 246, 0.3);
-    background: linear-gradient(135deg, #2563EB, #3B82F6);
-  }
-
-  &:hover::before {
-    opacity: 0.9;
+    transform: translateY(-2px);
+    border-color: var(--safetrip-primary);
+    background: var(--safetrip-primary-soft);
+    box-shadow: 0 10px 22px rgba(36, 49, 58, 0.09);
   }
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
+    box-shadow: 0 4px 12px rgba(36, 49, 58, 0.07);
   }
+}
+
+.cta-count {
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--safetrip-primary);
+  color: #fff;
+  padding: 4px 9px;
+  font-size: 0.75rem;
+  font-weight: 800;
 }
 
 .risk-badge {
   font-size: 11px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
   color: white;
 
-  &.high   { background-color: #e74c3c; }
-  &.medium { background-color: #f39c12; }
-  &.low    { background-color: #2ecc71; }
+  &.high   { background-color: var(--safetrip-activity-many); }
+  &.medium { background-color: var(--safetrip-activity-some); }
+  &.low    { background-color: var(--safetrip-activity-few); }
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: var(--safetrip-primary);
+  background: var(--safetrip-primary-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.report-source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid transparent;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.source-user {
+  color: #1f7f74;
+  background: var(--safetrip-primary-soft);
+  border-color: #b9e4dc;
+}
+
+.source-collected {
+  color: #475569;
+  background: #f8fbfb;
+  border-color: #d6e3e4;
+}
+
+.report-card-title {
+  margin: 6px 0 10px;
+  color: var(--safetrip-text);
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.report-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.report-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.action-chip {
+  color: #8f432f;
+  background: #fff1ec;
+  border: 1px solid #f3c6b8;
+}
+
+.context-chip {
+  color: #73511f;
+  background: #fff7df;
+  border: 1px solid #ecd39a;
+}
+
+.report-card-date {
+  color: var(--safetrip-muted);
+  font-size: 0.78rem;
+  text-align: right;
 }
 
 .country-stats {
-  background: #f8f9fa;
+  background: #fffdf8;
   border-radius: 10px;
   padding: 14px;
 }
@@ -1288,30 +1372,30 @@ $sidebar-width: 560px;
   }
 }
 
-/* 토글 버튼 (사이드바 여닫기 버튼) */
+/* sidebar open/close toggle button */
 .toggle-btn {
   position: fixed;
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  background-color: #3B82F6;
+  background-color: var(--safetrip-primary);
   color: white;
   border: none;
   padding: 14px 10px;
   font-size: 15px;
   cursor: pointer;
   border-radius: 0 10px 10px 0;
-  box-shadow: 3px 0 12px rgba(59, 130, 246, 0.35);
+  box-shadow: 3px 0 12px rgba(42, 157, 143, 0.26);
   transition: left 0.3s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    background-color: #2563EB;
-    box-shadow: 4px 0 18px rgba(59, 130, 246, 0.5);
+    background-color: var(--safetrip-primary-hover);
+    box-shadow: 4px 0 18px rgba(42, 157, 143, 0.34);
     transform: translateY(-50%) translateX(2px);
   }
 
   &:active {
-    background-color: #1D4ED8;
+    background-color: var(--safetrip-primary-active);
     transform: translateY(-50%) translateX(0);
   }
 }

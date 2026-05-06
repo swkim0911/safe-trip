@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -120,14 +122,14 @@ public class UserReportService {
                 .createdAt(ur.getCreatedAt())
                 .build();
 
-        response.setURLs(getImageUrlsById(id));
+        response.setUrls(getImageUrlsById(id));
         return response;
     }
 
     private List<String> getImageUrlsById(Long id) {
         List<Image> images = imageService.findImagesByReportId(id);
         return images.stream()
-                .map(Image::getAccessURL)
+                .map(imageService::createPresignedImageUrl)
                 .toList();
     }
 
@@ -157,7 +159,7 @@ public class UserReportService {
                         ur.getCity() != null ? ur.getCity().getName() : null,
                         ur.getContent(),
                         ur.getCreatedAt(),
-                        ur.getImages().isEmpty() ? null : ur.getImages().get(0).getAccessURL()
+                        ur.getImages().isEmpty() ? null : imageService.createPresignedImageUrl(ur.getImages().get(0))
                 ))
                 .toList();
     }
@@ -214,11 +216,18 @@ public class UserReportService {
         }
         report.setCity(city);
 
-        // 새 이미지가 있으면 기존 이미지 교체
-        if (images != null && !images.isEmpty()) {
+        boolean hasNewImages = images != null && !images.isEmpty();
+        boolean shouldRemoveImages = Boolean.TRUE.equals(request.removeImage());
+
+        if (hasNewImages || shouldRemoveImages) {
+            List<Image> oldImages = new ArrayList<>(report.getImages());
+            List<Image> newImages = hasNewImages
+                    ? imageService.saveImagesInS3Bucket(images)
+                    : Collections.emptyList();
+
             report.getImages().clear();
-            List<Image> newImages = imageService.saveImagesInS3Bucket(images);
             newImages.forEach(report::addImage);
+            imageService.deleteImagesFromOci(oldImages);
         }
         log.info("User report updated: id={}, user={}", reportId, email);
     }

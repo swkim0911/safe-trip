@@ -1,70 +1,74 @@
 <template>
   <div class="modal fade" ref="modalRef" id="reportDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="staticBackdropLabel">Travel Scam Report</h5>
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+      <div class="modal-content report-modal">
+        <div class="modal-header report-modal-header">
+          <div>
+            <h5 class="modal-title report-modal-title" id="staticBackdropLabel">Travel Note</h5>
+          </div>
           <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
         </div>
 
-        <div class="modal-body">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h5 class="fw-bold mb-2">{{ report.title }}</h5>
-              <span class="badge bg-danger me-1">{{ report.scamAction }}</span>
-              <span class="badge bg-warning text-dark">{{ report.scamContext }}</span>
+        <div class="modal-body report-modal-body">
+          <section class="report-hero">
+            <div class="report-main">
+              <div class="report-title-row">
+                <div class="report-meta-line">
+                  <span>{{ report.postedAt }}</span>
+                </div>
+                <div class="report-source-actions">
+                  <span
+                    v-if="report.source === 'SAFETRIP'"
+                    class="source-badge source-user"
+                  >
+                    <font-awesome-icon :icon="['fas', 'user-shield']" />
+                    Traveler note
+                  </span>
+                  <span
+                    v-else
+                    class="source-badge source-ai"
+                  >
+                    <font-awesome-icon :icon="['fas', 'database']" />
+                    AI-Assisted
+                  </span>
+                  <span v-if="report.source === 'SAFETRIP'" class="source-author">
+                    by {{ report.nickname }}
+                  </span>
+                  <a v-if="report.sourceUrl" :href="report.sourceUrl" target="_blank" class="source-text-link">
+                    <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" />
+                    {{ sourceLinkLabel }}
+                  </a>
+                  <button
+                    v-if="report.source !== 'SAFETRIP' && !alreadySubmitted && !showInaccuracyForm"
+                    type="button"
+                    class="correction-text-btn"
+                    @click="handleInaccuracyClick"
+                  >
+                    <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
+                    Suggest edit
+                  </button>
+                  <span v-else-if="report.source !== 'SAFETRIP' && alreadySubmitted" class="feedback-icon">
+                    <font-awesome-icon :icon="['fas', 'circle-check']" />
+                  </span>
+                </div>
+              </div>
+              <h2 class="report-title">{{ report.title }}</h2>
+              <div class="report-tags">
+                <span class="report-chip action-chip">{{ report.scamAction }}</span>
+                <span class="report-chip context-chip">{{ report.scamContext }}</span>
+              </div>
             </div>
+          </section>
 
-            <div class="text-end small ms-3 flex-shrink-0">
-              <div class="d-flex justify-content-end mb-1">
-                <span
-                  v-if="report.source === 'SAFETRIP'"
-                  class="badge rounded-pill border border-primary text-primary fs-6 px-2 py-1"
-                >
-                  👤 User Report
-                </span>
-                <span
-                  v-else
-                  class="badge rounded-pill bg-light text-dark border fs-6 px-2 py-1"
-                >
-                  🤖 Collected by AI Bot
-                </span>
-              </div>
-              <div>
-                <span v-if="report.source === 'SAFETRIP'" class="text-muted">
-                  by {{ report.nickname }}
-                </span>
-                <span v-else>
-                  <span class="fw-bold text-primary">{{ report.source }}</span>
-                </span>
-              </div>
-              <div v-if="report.sourceUrl">
-                <a :href="report.sourceUrl" target="_blank" class="small text-primary text-decoration-none">
-                  🔗 Original
-                </a>
-              </div>
-
-              <!-- Report Inaccuracy 영역 -->
-              <div v-if="report.source !== 'SAFETRIP'" class="mt-2">
-                <span v-if="alreadySubmitted" class="text-muted small">✅ Feedback submitted</span>
-                <button
-                  v-else-if="!showInaccuracyForm"
-                  type="button"
-                  class="btn btn-sm btn-outline-warning"
-                  @click="handleInaccuracyClick"
-                >
-                  ⚠️ Report Inaccuracy
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 인라인 신고 폼 -->
-          <div v-if="showInaccuracyForm" class="border rounded p-3 mb-3 bg-light">
-            <p class="fw-bold small mb-2">⚠️ Report Inaccuracy</p>
+          <!-- inline inaccuracy report form -->
+          <div v-if="showInaccuracyForm" class="correction-panel">
+            <p class="correction-title">
+              <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
+              Suggest a quick fix
+            </p>
             <div class="mb-2">
               <select v-model="inaccuracyReason" class="form-select form-select-sm">
-                <option value="" disabled>Select a reason</option>
+                <option value="" disabled>Choose a reason</option>
                 <option value="WRONG_LOCATION">Wrong Location</option>
                 <option value="WRONG_SCAM_TYPE">Wrong Scam Type</option>
                 <option value="NOT_A_SCAM">Not a Scam</option>
@@ -77,7 +81,7 @@
                 v-model="inaccuracyDescription"
                 class="form-control form-control-sm"
                 rows="2"
-                placeholder="Describe the inaccuracy... (optional)"
+                placeholder="Tell us what looks off... (optional)"
                 maxlength="500"
               ></textarea>
               <div class="text-end text-muted" style="font-size: 0.75rem;">{{ inaccuracyDescription.length }} / 500</div>
@@ -86,69 +90,62 @@
               <button type="button" class="btn btn-sm btn-secondary" @click="cancelInaccuracy">Cancel</button>
               <button
                 type="button"
-                class="btn btn-sm btn-warning"
+                class="btn btn-sm btn-primary"
                 :disabled="!inaccuracyReason || isSubmitting"
                 @click="submitInaccuracy"
               >
                 <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-1"></span>
-                Submit
+                Send
               </button>
             </div>
           </div>
 
-          <hr class="my-2" />
+          <section class="report-section">
+            <div class="section-label">{{ report.source === 'SAFETRIP' ? 'Traveler Story' : 'Summary' }}</div>
+            <p class="report-copy">{{ report.content }}</p>
+          </section>
 
-          <div class="mb-3">
-            <span class="fw-bold">{{ report.source === 'SAFETRIP' ? 'Description' : 'Summary' }}</span>
-            <p class="text-body mt-1" style="white-space: pre-wrap; overflow-wrap: break-word;">{{ report.content }}</p>
-          </div>
-
-          <!-- 이미지 표시 (User Report만) -->
-          <div v-if="report.source === 'SAFETRIP' && report.imageUrls && report.imageUrls.length > 0" class="mb-3">
-            <span class="fw-bold">Photos</span>
-            <div class="row g-2 mt-1">
+          <section v-if="normalizedImageUrls.length > 0" class="report-section">
+            <div class="section-label">Photos</div>
+            <div class="report-photo-grid">
               <div
-                v-for="(url, index) in report.imageUrls"
+                v-for="(url, index) in normalizedImageUrls"
                 :key="index"
-                class="col-md-6"
+                class="report-photo-frame"
               >
                 <img
                   :src="url"
-                  :alt="`Scam evidence ${index + 1}`"
-                  class="w-100"
-                  style="cursor: pointer; object-fit: cover; height: 200px; border-radius: 4px;"
+                  :alt="`Travel note photo ${index + 1}`"
+                  class="report-photo"
                   @click="openImageModal(url)"
                 />
               </div>
             </div>
-          </div>
+          </section>
 
-          <hr class="my-2" />
+          <section class="report-section location-section">
+            <div>
+              <div class="section-label">Location</div>
+              <p class="location-copy">
+                <font-awesome-icon :icon="['fas', 'location-dot']" class="location-icon" />
+              {{ [report.cityName, report.stateName, report.countryName].filter(Boolean).join(', ') }}
+              </p>
+            </div>
+          </section>
 
-          <div class="mb-3">
-            <span class="fw-bold">Location</span>
-            <p class="text-body">
-              {{ [report.countryName, report.stateName, report.cityName].filter(Boolean).join(', ') }}
-            </p>
-          </div>
-
-          <div class="text-end text-muted small mt-2">
-            Posted: {{ report.postedAt }}
-          </div>
-
-          <!-- 댓글 -->
-          <hr class="my-3" />
-          <CommentSection
-            :report-id="report.reportId"
-            :report-type="report.source === 'SAFETRIP' ? 'USER' : 'EXTERNAL'"
-            @request-login="handleRequestLogin"
-          />
+          <section class="report-section comments-section">
+            <CommentSection
+              :report-id="report.reportId"
+              :report-type="report.source === 'SAFETRIP' ? 'USER' : 'EXTERNAL'"
+              @request-login="handleRequestLogin"
+            />
+          </section>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 이미지 확대 모달 -->
+  <!-- enlarged image modal -->
   <div
     v-if="selectedImage"
     class="image-modal-overlay"
@@ -162,7 +159,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { useBootstrapModal } from '@/composables/useBootstrapModal';
 import { useAuthStore } from '@/stores/auth';
 import { useMapStore } from '@/stores/map';
@@ -192,6 +189,15 @@ const props = defineProps({
   }
 });
 
+const normalizedImageUrls = computed(() => {
+  if (!Array.isArray(props.report.imageUrls)) return [];
+  return props.report.imageUrls.filter(Boolean);
+});
+
+const sourceLinkLabel = computed(() =>
+  props.report.source === 'REDDIT' ? 'Reddit source' : 'Original source'
+);
+
 watch(() => props.report.reportId, async (reportId) => {
   alreadySubmitted.value = false;
   showInaccuracyForm.value = false;
@@ -214,7 +220,7 @@ const cancelInaccuracy = () => {
 
 const handleInaccuracyClick = () => {
   if (!authStore.accessToken) {
-    toast.show('Login is required to report inaccuracies.');
+  toast.show('Please log in to suggest an edit.');
     mapStore.requestReopenReportDetail();
     hide();
     openAuthModal();
@@ -241,7 +247,7 @@ const submitInaccuracy = async () => {
 };
 
 const handleRequestLogin = () => {
-  toast.show('Login is required to write a comment.');
+  toast.show('Please log in to join the conversation.');
   mapStore.requestReopenReportDetail();
   hide();
   openAuthModal();
@@ -275,6 +281,265 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.report-modal {
+  overflow: hidden;
+  border: 1px solid var(--safetrip-border);
+  border-radius: 14px;
+  background: var(--safetrip-page);
+}
+
+.report-modal-header {
+  align-items: flex-start;
+  background: #fffdf8;
+  border-bottom: 1px solid var(--safetrip-border);
+  padding: 22px 28px;
+}
+
+.report-modal-title {
+  color: var(--safetrip-primary);
+  font-weight: 800;
+}
+
+.report-modal-body {
+  padding: 24px 28px 28px;
+}
+
+.report-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.report-main,
+.report-section,
+.correction-panel {
+  background: var(--safetrip-surface);
+  border: 1px solid var(--safetrip-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(36, 49, 58, 0.06);
+}
+
+.report-main {
+  padding: 22px;
+}
+
+.report-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.report-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--safetrip-muted);
+  font-size: 0.82rem;
+  padding-top: 6px;
+}
+
+.report-source-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.report-title {
+  margin: 0 0 16px;
+  color: var(--safetrip-text);
+  font-size: 1.38rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.report-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.action-chip {
+  color: #8f432f;
+  background: #fff1ec;
+  border: 1px solid #f3c6b8;
+}
+
+.context-chip {
+  color: #73511f;
+  background: #fff7df;
+  border: 1px solid #ecd39a;
+}
+
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.source-user {
+  color: #1f7f74;
+  background: var(--safetrip-primary-soft);
+  border: 1px solid #b9e4dc;
+}
+
+.source-ai {
+  color: #4b5d62;
+  background: #f6f3ed;
+  border: 1px solid #ded6ca;
+}
+
+.source-text-link,
+.correction-text-btn,
+.feedback-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--safetrip-border);
+  background: #fffdf8;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.source-author {
+  color: var(--safetrip-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.source-text-link {
+  color: var(--safetrip-primary);
+  text-decoration: none;
+
+  &:hover {
+    background: var(--safetrip-primary-soft);
+    color: var(--safetrip-primary-hover);
+  }
+}
+
+.correction-text-btn {
+  color: #9a562a;
+  border-color: #e9b872;
+  background: #fff8e7;
+
+  &:hover,
+  &:focus {
+    color: #8c4d25;
+    background: #d99a45;
+    border-color: #d99a45;
+  }
+}
+
+.feedback-icon {
+  color: var(--safetrip-primary);
+  background: var(--safetrip-primary-soft);
+  border-color: #b9e4dc;
+}
+
+.correction-panel {
+  margin-bottom: 18px;
+  padding: 16px;
+}
+
+.correction-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: var(--safetrip-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.report-section {
+  margin-top: 14px;
+  padding: 20px 22px;
+}
+
+.section-label {
+  margin-bottom: 10px;
+  color: var(--safetrip-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.report-copy {
+  margin: 0;
+  color: var(--safetrip-text);
+  font-size: 1rem;
+  line-height: 1.75;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.report-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, max-content));
+  gap: 12px;
+}
+
+.report-photo-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 520px);
+  min-height: 220px;
+}
+
+.report-photo {
+  display: block;
+  max-width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.location-section {
+  padding: 16px 22px;
+}
+
+.location-copy {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--safetrip-text);
+  font-size: 1rem;
+}
+
+.location-icon {
+  color: var(--safetrip-primary);
+}
+
+.comments-section {
+  padding-top: 18px;
+}
+
 .image-modal-overlay {
   position: fixed;
   top: 0;
@@ -327,5 +592,25 @@ onMounted(() => {
   max-height: 90vh;
   object-fit: contain;
   border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .report-modal-header,
+  .report-modal-body {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .report-title {
+    font-size: 1.3rem;
+  }
+
+  .report-title-row {
+    flex-direction: column;
+  }
+
+  .report-source-actions {
+    justify-content: flex-start;
+  }
 }
 </style>

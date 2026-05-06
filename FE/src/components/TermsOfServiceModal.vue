@@ -66,7 +66,7 @@
 
   p { margin-bottom: 12px; }
   ul { margin-bottom: 12px; padding-left: 1.4rem; li { margin-bottom: 4px; } }
-  a { color: #3B82F6; }
+  a { color: var(--safetrip-primary); }
 }
 
 .section-title {

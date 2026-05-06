@@ -36,7 +36,7 @@ public class UserReportDetailResponse {
     private LocalDateTime createdAt;
 
     @Setter
-    private List<String> URLs;
+    private List<String> urls;
 
     @Builder
     public UserReportDetailResponse(
