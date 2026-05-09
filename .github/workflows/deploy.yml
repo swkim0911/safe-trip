@@ -53,32 +53,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 8. Blue(자기 자신) 환경변수 + compose 파일 준비
-      - name: Prepare Blue instance files
+      # 8. Blue(self-hosted runner) / Green 양쪽 인스턴스에 동일한 파일 배치
+      #    한 단계에서 두 대상에 같은 함수를 호출해 비대칭 누락을 구조적으로 차단
+      - name: Prepare both instances
         run: |
-          mkdir -p /home/ubuntu/safe-trip
-          echo "${{ secrets.ENV_BACKEND_FILE }}" > /home/ubuntu/safe-trip/.env.backend
-          echo "${{ secrets.ENV_CRAWLER_FILE }}" > /home/ubuntu/safe-trip/.env.crawler
-          cp ${{ github.workspace }}/docker-compose.prod.yml /home/ubuntu/safe-trip/
-
-      # 9. Green 인스턴스에 환경변수 + compose 파일 전송
-      - name: Prepare Green instance files
-        run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ vars.GREEN_IP }} "mkdir -p /home/ubuntu/safe-trip"
+          # 1) runner의 /tmp에 한 번만 staging
           echo "${{ secrets.ENV_BACKEND_FILE }}" > /tmp/.env.backend
           echo "${{ secrets.ENV_CRAWLER_FILE }}" > /tmp/.env.crawler
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
-            /tmp/.env.backend \
-            ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/.env.backend
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
-            /tmp/.env.crawler \
-            ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/.env.crawler
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
-            ${{ github.workspace }}/docker-compose.prod.yml \
-            ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/
-          rm /tmp/.env.backend /tmp/.env.crawler
+          cp ${{ github.workspace }}/docker-compose.prod.yml /tmp/docker-compose.prod.yml
 
-      # 10. Blue-Green 배포 스크립트 실행
+          # 2) 대상별 동일 동작 (local = Blue, ssh = Green)
+          deploy_files() {
+            local target=$1
+            if [ "$target" = "local" ]; then
+              mkdir -p /home/ubuntu/safe-trip
+              cp /tmp/.env.backend /tmp/.env.crawler /tmp/docker-compose.prod.yml /home/ubuntu/safe-trip/
+            else
+              ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@$target "mkdir -p /home/ubuntu/safe-trip"
+              scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+                /tmp/.env.backend /tmp/.env.crawler /tmp/docker-compose.prod.yml \
+                ubuntu@$target:/home/ubuntu/safe-trip/
+            fi
+          }
+
+          deploy_files local
+          deploy_files ${{ vars.GREEN_IP }}
+
+          # 3) staging 정리
+          rm /tmp/.env.backend /tmp/.env.crawler /tmp/docker-compose.prod.yml
+
+      # 9. Blue-Green 배포 스크립트 실행
       - name: Blue-Green Deploy
         env:
           BLUE_IP: ${{ vars.BLUE_IP }}
@@ -87,7 +91,7 @@ jobs:
           chmod +x ${{ github.workspace }}/scripts/deploy-blue-green.sh
           ${{ github.workspace }}/scripts/deploy-blue-green.sh
 
-      # 11. Cron Job 설정 (daily ETL, UTC 02:00)
+      # 10. Cron Job 설정 (daily ETL, UTC 02:00)
       - name: Setup crawler cron job
         run: |
           (crontab -l 2>/dev/null | grep -qF "daily_etl_pipeline") || \
