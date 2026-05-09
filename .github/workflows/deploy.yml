@@ -53,7 +53,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 8. Blue(self-hosted runner) / Green 양쪽 인스턴스에 동일한 파일 배치
+      # 8. Runner / Remote 양쪽 인스턴스에 동일한 파일 배치
       #    한 단계에서 두 대상에 같은 함수를 호출해 비대칭 누락을 구조적으로 차단
       - name: Prepare both instances
         run: |
@@ -62,7 +62,7 @@ jobs:
           echo "${{ secrets.ENV_CRAWLER_FILE }}" > /tmp/.env.crawler
           cp ${{ github.workspace }}/docker-compose.prod.yml /tmp/docker-compose.prod.yml
 
-          # 2) 대상별 동일 동작 (local = Blue, ssh = Green)
+          # 2) 대상별 동일 동작 (local = runner 인스턴스, ssh = remote 인스턴스)
           #    crawler 이미지도 같이 pull — cron이 캐시된 옛 이미지로 ETL을 돌리지 않도록
           deploy_files() {
             local target=$1
@@ -81,7 +81,7 @@ jobs:
           }
 
           deploy_files local
-          deploy_files ${{ vars.GREEN_IP }}
+          deploy_files ${{ vars.REMOTE_IP }}
 
           # 3) staging 정리
           rm /tmp/.env.backend /tmp/.env.crawler /tmp/docker-compose.prod.yml
@@ -89,13 +89,16 @@ jobs:
       # 9. Blue-Green 배포 스크립트 실행
       - name: Blue-Green Deploy
         env:
-          BLUE_IP: ${{ vars.BLUE_IP }}
-          GREEN_IP: ${{ vars.GREEN_IP }}
+          RUNNER_IP: ${{ vars.RUNNER_IP }}
+          REMOTE_IP: ${{ vars.REMOTE_IP }}
         run: |
           chmod +x ${{ github.workspace }}/scripts/deploy-blue-green.sh
           ${{ github.workspace }}/scripts/deploy-blue-green.sh
 
       # 10. Cron Job 설정 (daily ETL, UTC 02:00)
+      #     의도적으로 runner 인스턴스 전용 — self-hosted runner의 crontab에만 등록되며,
+      #     LB가 remote 인스턴스를 active로 전환해도 ETL은 항상 runner 인스턴스에서 실행된다.
+      #     runner 인스턴스 교체 시 워크플로 재실행 필요 (grep -qF 체크로 idempotent).
       - name: Setup crawler cron job
         run: |
           (crontab -l 2>/dev/null | grep -qF "daily_etl_pipeline") || \
