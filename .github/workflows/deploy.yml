@@ -66,13 +66,17 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ vars.GREEN_IP }} "mkdir -p /home/ubuntu/safe-trip"
           echo "${{ secrets.ENV_BACKEND_FILE }}" > /tmp/.env.backend
+          echo "${{ secrets.ENV_CRAWLER_FILE }}" > /tmp/.env.crawler
           scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
             /tmp/.env.backend \
             ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/.env.backend
           scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+            /tmp/.env.crawler \
+            ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/.env.crawler
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
             ${{ github.workspace }}/docker-compose.prod.yml \
             ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/
-          rm /tmp/.env.backend
+          rm /tmp/.env.backend /tmp/.env.crawler
 
       # 10. Blue-Green 배포 스크립트 실행
       - name: Blue-Green Deploy
