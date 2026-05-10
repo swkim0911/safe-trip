@@ -68,7 +68,9 @@ class TravelScamParser:
 
                     record = json.loads(line)
                     reddit_id = record["custom_id"]
-                    text = record["response"]["body"]["output"][0]["content"][0]["text"]
+                    # Responses API가 메시지를 여러 개 emit하는 경우(중간에 멈췄다 다시 출력 등)
+                    # 첫 번째는 불완전할 수 있으므로 마지막 메시지를 최종 응답으로 사용한다.
+                    text = record["response"]["body"]["output"][-1]["content"][0]["text"]
 
                     try:
                         parsed_items = self.safe_json_loads(text)
