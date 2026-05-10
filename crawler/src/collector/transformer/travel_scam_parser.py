@@ -73,9 +73,11 @@ class TravelScamParser:
                     try:
                         parsed_items = self.safe_json_loads(text)
                     except (json.JSONDecodeError, ValueError) as e:
-                        # 진단용 컨텍스트: 어느 reddit_id / batch_id의 응답이 깨졌는지 + 잘림 여부 판단을 위해 head/tail 노출
+                        # 한 게시글의 응답이 깨졌어도 전체 파이프라인을 죽이지 않는다.
+                        # 진단용 컨텍스트(reddit_id / batch_id / head / tail)를 남기고
+                        # 빈 결과로 취급해 호출 다음 분기에서 empty_result 마킹으로 흘려보낸다.
                         self.logger.error(
-                            "Parse 응답 처리 실패\n"
+                            "Parse 응답 처리 실패 — empty_result로 마킹하고 계속 진행\n"
                             "  reddit_id: %s\n"
                             "  batch_id: %s\n"
                             "  text_len: %d\n"
@@ -84,7 +86,7 @@ class TravelScamParser:
                             "  error: %s",
                             reddit_id, batch_id, len(text), text[:300], text[-300:], e,
                         )
-                        raise
+                        parsed_items = []
                     raw_doc = self.reddit_repository.find_raw_document_by_reddit_id(reddit_id)
                     now = datetime.now(UTC)
 
