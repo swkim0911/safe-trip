@@ -70,7 +70,21 @@ class TravelScamParser:
                     reddit_id = record["custom_id"]
                     text = record["response"]["body"]["output"][0]["content"][0]["text"]
 
-                    parsed_items = self.safe_json_loads(text)
+                    try:
+                        parsed_items = self.safe_json_loads(text)
+                    except (json.JSONDecodeError, ValueError) as e:
+                        # 진단용 컨텍스트: 어느 reddit_id / batch_id의 응답이 깨졌는지 + 잘림 여부 판단을 위해 head/tail 노출
+                        self.logger.error(
+                            "Parse 응답 처리 실패\n"
+                            "  reddit_id: %s\n"
+                            "  batch_id: %s\n"
+                            "  text_len: %d\n"
+                            "  text_head(300): %r\n"
+                            "  text_tail(300): %r\n"
+                            "  error: %s",
+                            reddit_id, batch_id, len(text), text[:300], text[-300:], e,
+                        )
+                        raise
                     raw_doc = self.reddit_repository.find_raw_document_by_reddit_id(reddit_id)
                     now = datetime.now(UTC)
 
@@ -171,7 +185,11 @@ class TravelScamParser:
         try:
             return json.loads(text)
         except json.JSONDecodeError as e:
-            self.logger.error("safe_json_loads 실패: %s\n원본: %s...", e, text[:200], exc_info=True)
+            # 호출자가 reddit_id/batch_id까지 추가 로깅하도록 둠 — 여기선 처리 후 head/tail만 남긴다.
+            self.logger.error(
+                "safe_json_loads 실패: %s\n  processed_text_len: %d\n  head: %r\n  tail: %r",
+                e, len(text), text[:300], text[-300:],
+            )
             raise
 
     def parse(self, text: str) -> list[dict[str, Any]]:
