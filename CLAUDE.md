@@ -128,9 +128,19 @@ Push to `main` → GitHub Actions → build + test → Docker images to DockerHu
 
 표준 Blue-Green 배포 용어에서 Blue ≡ Active이므로, 코드에선 혼동을 피하기 위해 인스턴스 정체성에 Blue/Green 라벨을 쓰지 않는다.
 
-### Daily ETL Cron 위치
+### Daily ETL Cron 셋업
 
-Daily ETL cron은 **runner 인스턴스에만** 등록된다 (모니터링 단일 소스 + 무료 티어 한도). LB가 remote 인스턴스를 active로 전환해도 ETL은 항상 runner 인스턴스에서 실행된다. runner 인스턴스를 교체할 경우 워크플로를 한 번 재실행해 cron을 다시 깔아야 한다.
+Daily ETL cron은 **runner 인스턴스에만** 등록된다 (모니터링 단일 소스 + 무료 티어 한도). LB가 remote 인스턴스를 active로 전환해도 ETL은 항상 runner 인스턴스에서 실행된다.
+
+**cron은 CI/CD에서 자동 등록하지 않는다.** 명령이 고정이라 매 배포 시 재설정할 필요가 없고, 자동화하면 오히려 매 push마다 wipe 위험만 생긴다 (실제로 한 번 겪음). 그래서 **새 runner 인스턴스를 띄울 때 1회만 수동 등록**한다.
+
+```bash
+# 새 runner 인스턴스에서 1회 실행
+echo "0 2 * * * /home/ubuntu/safe-trip/run-daily-etl.sh >> /home/ubuntu/safe-trip/crawler.log 2>&1" | crontab -
+crontab -l   # 확인
+```
+
+cron 명령 자체를 바꿀 일이 생기면 이 문서와 runner의 crontab을 같이 업데이트.
 
 ## Load Testing (k6)
 

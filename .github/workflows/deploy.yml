@@ -103,14 +103,6 @@ jobs:
           chmod +x ${{ github.workspace }}/scripts/deploy-blue-green.sh
           ${{ github.workspace }}/scripts/deploy-blue-green.sh
 
-      # 10. Cron Job 설정 (daily ETL, UTC 02:00)
-      #     의도적으로 runner 인스턴스 전용 — self-hosted runner의 crontab에만 등록되며,
-      #     LB가 remote 인스턴스를 active로 전환해도 ETL은 항상 runner 인스턴스에서 실행된다.
-      #     runner 인스턴스 교체 시 워크플로 재실행 필요. cron은 wrapper(run-daily-etl.sh)를
-      #     호출하며 wrapper가 실패 시 Slack 웹훅으로 알림을 보낸다.
-      - name: Setup crawler cron job
-        run: |
-          # 옛 형식(daily_etl_pipeline 직접 호출) + 새 형식 모두 제거 후 새 라인 추가 → 매 배포 idempotent
-          ( crontab -l 2>/dev/null | grep -v "daily_etl_pipeline\|run-daily-etl.sh" ; \
-            echo "0 2 * * * /home/ubuntu/safe-trip/run-daily-etl.sh >> /home/ubuntu/safe-trip/crawler.log 2>&1" \
-          ) | crontab -
+      # cron 등록은 워크플로에서 다루지 않음.
+      # 명령이 고정이라 매 배포마다 재설정할 필요가 없고, 매번 손대면 오히려 실수 위험만 큼.
+      # 새 runner 인스턴스를 띄울 때 1회만 수동 등록 — CLAUDE.md의 "Daily ETL Cron 셋업" 참조.
