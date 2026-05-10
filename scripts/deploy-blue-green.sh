@@ -4,34 +4,36 @@ set -e
 export PATH="$PATH:/home/ubuntu/bin"
 
 # ── 설정 ────────────────────────────────────────────────────────────
+# RUNNER_IP / REMOTE_IP 는 인스턴스 정체성(고정), ACTIVE_IP / STANDBY_IP 는
+# LB 상태에 따라 매 배포마다 결정되는 역할(Blue-Green 표준 의미).
 LB_ID="ocid1.loadbalancer.oc1.ap-chuncheon-1.aaaaaaaaboowr4zz4smwzpjuwcimjkd7nbaxbtbinqdg6ohbem5c4hyx46pq"
 BACKEND_SET="bs_lb_2026-0401-1645"
-BLUE_IP="${BLUE_IP:?BLUE_IP variable is not set}"
-GREEN_IP="${GREEN_IP:?GREEN_IP variable is not set}"
+RUNNER_IP="${RUNNER_IP:?RUNNER_IP variable is not set}"   # self-hosted runner가 떠있는 인스턴스 (고정)
+REMOTE_IP="${REMOTE_IP:?REMOTE_IP variable is not set}"   # SSH 대상 인스턴스 (고정)
 SSH_KEY="$HOME/.ssh/id_rsa"
 DEPLOY_DIR="/home/ubuntu/safe-trip"
 HEALTH_URL="http://localhost:8080/actuator/health"
 OCI_PROFILE="DEFAULT"
 
-# ── 현재 active 인스턴스 판별 ────────────────────────────────────────
-BLUE_OFFLINE=$(oci lb backend get \
+# ── 현재 active/standby 판별 ────────────────────────────────────────
+RUNNER_OFFLINE=$(oci lb backend get \
   --load-balancer-id "$LB_ID" \
   --backend-set-name "$BACKEND_SET" \
-  --backend-name "$BLUE_IP:8080" \
+  --backend-name "$RUNNER_IP:8080" \
   --profile "$OCI_PROFILE" \
   --query 'data.offline' \
   --raw-output)
 
-if [ "$BLUE_OFFLINE" = "false" ]; then
-  ACTIVE_IP="$BLUE_IP"
-  STANDBY_IP="$GREEN_IP"
-  STANDBY_NAME="$GREEN_IP:8080"
-  ACTIVE_NAME="$BLUE_IP:8080"
+if [ "$RUNNER_OFFLINE" = "false" ]; then
+  ACTIVE_IP="$RUNNER_IP"
+  STANDBY_IP="$REMOTE_IP"
+  STANDBY_NAME="$REMOTE_IP:8080"
+  ACTIVE_NAME="$RUNNER_IP:8080"
 else
-  ACTIVE_IP="$GREEN_IP"
-  STANDBY_IP="$BLUE_IP"
-  STANDBY_NAME="$BLUE_IP:8080"
-  ACTIVE_NAME="$GREEN_IP:8080"
+  ACTIVE_IP="$REMOTE_IP"
+  STANDBY_IP="$RUNNER_IP"
+  STANDBY_NAME="$RUNNER_IP:8080"
+  ACTIVE_NAME="$REMOTE_IP:8080"
 fi
 
 echo "▶ Active: $ACTIVE_IP / Standby: $STANDBY_IP"
@@ -39,15 +41,15 @@ echo "▶ Active: $ACTIVE_IP / Standby: $STANDBY_IP"
 # ── Standby에 새 버전 배포 ────────────────────────────────────────────
 echo "▶ Standby($STANDBY_IP)에 새 버전 배포 중..."
 
-if [ "$STANDBY_IP" = "$BLUE_IP" ]; then
-  # 자기 자신 (Blue = A 인스턴스)
+if [ "$STANDBY_IP" = "$RUNNER_IP" ]; then
+  # standby가 자기 자신 (runner 인스턴스)
   mkdir -p "$DEPLOY_DIR"
   cp "$(dirname "$0")/../docker-compose.prod.yml" "$DEPLOY_DIR/"
   cd "$DEPLOY_DIR"
   docker compose -f docker-compose.prod.yml pull backend
   docker compose -f docker-compose.prod.yml up -d backend
 else
-  # Green 인스턴스에 SSH로 배포
+  # standby가 원격 인스턴스
   ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "ubuntu@$STANDBY_IP" bash <<EOF
     cd $DEPLOY_DIR
     docker compose -f docker-compose.prod.yml pull backend
@@ -58,7 +60,7 @@ fi
 # ── 헬스체크 ────────────────────────────────────────────────────────
 echo "▶ Standby($STANDBY_IP) 헬스체크 중..."
 for i in $(seq 1 12); do
-  if [ "$STANDBY_IP" = "$BLUE_IP" ]; then
+  if [ "$STANDBY_IP" = "$RUNNER_IP" ]; then
     STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
   else
     STATUS=$(ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "ubuntu@$STANDBY_IP" \
@@ -107,7 +109,7 @@ oci lb backend update \
 # ── 기존 Active 컨테이너 종료 ────────────────────────────────────────
 echo "▶ Active($ACTIVE_IP) 컨테이너 종료 중..."
 
-if [ "$ACTIVE_IP" = "$BLUE_IP" ]; then
+if [ "$ACTIVE_IP" = "$RUNNER_IP" ]; then
   cd "$DEPLOY_DIR"
   docker compose -f docker-compose.prod.yml stop backend
 else
