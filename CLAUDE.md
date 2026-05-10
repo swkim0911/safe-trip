@@ -119,6 +119,19 @@ Reddit API → Extract → Classify → Parse → Enrich Location → Load MySQL
 
 Push to `main` → GitHub Actions → build + test → Docker images to DockerHub → SSH deploy to EC2 via `docker-compose.prod.yml`.
 
+### 인스턴스 명명 규칙
+
+배포 인프라에는 **두 가지 다른 분류**가 동시에 존재한다.
+
+- **인스턴스 정체성 (고정)**: `RUNNER_IP` = self-hosted runner가 떠있는 인스턴스, `REMOTE_IP` = SSH로 접근하는 다른 인스턴스. GitHub Actions vars에 IP가 박혀 있어 자동으로 안 바뀜.
+- **트래픽 역할 (로테이션)**: `ACTIVE` = 지금 LB가 트래픽을 보내는 쪽, `STANDBY` = 대기 중인 쪽. 매 배포마다 둘 사이를 오감.
+
+표준 Blue-Green 배포 용어에서 Blue ≡ Active이므로, 코드에선 혼동을 피하기 위해 인스턴스 정체성에 Blue/Green 라벨을 쓰지 않는다.
+
+### Daily ETL Cron 위치
+
+Daily ETL cron은 **runner 인스턴스에만** 등록된다 (모니터링 단일 소스 + 무료 티어 한도). LB가 remote 인스턴스를 active로 전환해도 ETL은 항상 runner 인스턴스에서 실행된다. runner 인스턴스를 교체할 경우 워크플로를 한 번 재실행해 cron을 다시 깔아야 한다.
+
 ## Load Testing (k6)
 
 k6는 로컬이 아닌 **원격 서버에 설치**되어 있다. k6 명령어는 반드시 원격 서버에 SSH 접속 후 실행해야 한다.

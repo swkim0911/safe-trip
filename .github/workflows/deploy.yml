@@ -53,38 +53,64 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 8. Blue(자기 자신) 환경변수 + compose 파일 준비
-      - name: Prepare Blue instance files
+      # 8. Runner / Remote 양쪽 인스턴스에 동일한 파일 배치
+      #    한 단계에서 두 대상에 같은 함수를 호출해 비대칭 누락을 구조적으로 차단
+      - name: Prepare both instances
         run: |
-          mkdir -p /home/ubuntu/safe-trip
-          echo "${{ secrets.ENV_BACKEND_FILE }}" > /home/ubuntu/safe-trip/.env.backend
-          echo "${{ secrets.ENV_CRAWLER_FILE }}" > /home/ubuntu/safe-trip/.env.crawler
-          cp ${{ github.workspace }}/docker-compose.prod.yml /home/ubuntu/safe-trip/
-
-      # 9. Green 인스턴스에 환경변수 + compose 파일 전송
-      - name: Prepare Green instance files
-        run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ vars.GREEN_IP }} "mkdir -p /home/ubuntu/safe-trip"
+          # 1) runner의 /tmp에 한 번만 staging
           echo "${{ secrets.ENV_BACKEND_FILE }}" > /tmp/.env.backend
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
-            /tmp/.env.backend \
-            ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/.env.backend
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
-            ${{ github.workspace }}/docker-compose.prod.yml \
-            ubuntu@${{ vars.GREEN_IP }}:/home/ubuntu/safe-trip/
-          rm /tmp/.env.backend
+          echo "${{ secrets.ENV_CRAWLER_FILE }}" > /tmp/.env.crawler
+          echo "SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}" > /tmp/.env.alerts
+          cp ${{ github.workspace }}/docker-compose.prod.yml /tmp/docker-compose.prod.yml
+          cp ${{ github.workspace }}/scripts/run-daily-etl.sh /tmp/run-daily-etl.sh
 
-      # 10. Blue-Green 배포 스크립트 실행
+          # 2) 대상별 동일 동작 (local = runner 인스턴스, ssh = remote 인스턴스)
+          #    crawler 이미지도 같이 pull — cron이 캐시된 옛 이미지로 ETL을 돌리지 않도록
+          deploy_files() {
+            local target=$1
+            if [ "$target" = "local" ]; then
+              mkdir -p /home/ubuntu/safe-trip
+              cp /tmp/.env.backend /tmp/.env.crawler /tmp/.env.alerts \
+                 /tmp/docker-compose.prod.yml /tmp/run-daily-etl.sh \
+                 /home/ubuntu/safe-trip/
+              chmod +x /home/ubuntu/safe-trip/run-daily-etl.sh
+              docker compose -f /home/ubuntu/safe-trip/docker-compose.prod.yml pull crawler
+            else
+              ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@$target "mkdir -p /home/ubuntu/safe-trip"
+              scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+                /tmp/.env.backend /tmp/.env.crawler /tmp/.env.alerts \
+                /tmp/docker-compose.prod.yml /tmp/run-daily-etl.sh \
+                ubuntu@$target:/home/ubuntu/safe-trip/
+              ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@$target \
+                "chmod +x /home/ubuntu/safe-trip/run-daily-etl.sh && \
+                 docker compose -f /home/ubuntu/safe-trip/docker-compose.prod.yml pull crawler"
+            fi
+          }
+
+          deploy_files local
+          deploy_files ${{ vars.REMOTE_IP }}
+
+          # 3) staging 정리
+          rm /tmp/.env.backend /tmp/.env.crawler /tmp/.env.alerts \
+             /tmp/docker-compose.prod.yml /tmp/run-daily-etl.sh
+
+      # 9. Blue-Green 배포 스크립트 실행
       - name: Blue-Green Deploy
         env:
-          BLUE_IP: ${{ vars.BLUE_IP }}
-          GREEN_IP: ${{ vars.GREEN_IP }}
+          RUNNER_IP: ${{ vars.RUNNER_IP }}
+          REMOTE_IP: ${{ vars.REMOTE_IP }}
         run: |
           chmod +x ${{ github.workspace }}/scripts/deploy-blue-green.sh
           ${{ github.workspace }}/scripts/deploy-blue-green.sh
 
-      # 11. Cron Job 설정 (daily ETL, UTC 02:00)
+      # 10. Cron Job 설정 (daily ETL, UTC 02:00)
+      #     의도적으로 runner 인스턴스 전용 — self-hosted runner의 crontab에만 등록되며,
+      #     LB가 remote 인스턴스를 active로 전환해도 ETL은 항상 runner 인스턴스에서 실행된다.
+      #     runner 인스턴스 교체 시 워크플로 재실행 필요. cron은 wrapper(run-daily-etl.sh)를
+      #     호출하며 wrapper가 실패 시 Slack 웹훅으로 알림을 보낸다.
       - name: Setup crawler cron job
         run: |
-          (crontab -l 2>/dev/null | grep -qF "daily_etl_pipeline") || \
-          (crontab -l 2>/dev/null; echo "0 2 * * * cd /home/ubuntu/safe-trip && docker compose -f docker-compose.prod.yml run --rm crawler python src/daily_etl_pipeline.py >> /home/ubuntu/safe-trip/crawler.log 2>&1") | crontab -
+          # 옛 형식(daily_etl_pipeline 직접 호출) + 새 형식 모두 제거 후 새 라인 추가 → 매 배포 idempotent
+          ( crontab -l 2>/dev/null | grep -v "daily_etl_pipeline\|run-daily-etl.sh" ; \
+            echo "0 2 * * * /home/ubuntu/safe-trip/run-daily-etl.sh >> /home/ubuntu/safe-trip/crawler.log 2>&1" \
+          ) | crontab -
