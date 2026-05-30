@@ -32,5 +32,5 @@ typing-inspection==0.4.1
 typing_extensions==4.14.1
 Unidecode==1.4.0
 update-checker==0.18.0
-urllib3==2.6.3
+urllib3==2.7.0
 websocket-client==1.8.0
