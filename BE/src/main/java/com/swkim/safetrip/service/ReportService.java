@@ -6,7 +6,6 @@ import com.swkim.safetrip.dto.response.ScamActionStatItem;
 import com.swkim.safetrip.repository.ReportJdbcRepository;
 import com.swkim.safetrip.repository.ReportNativeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +21,6 @@ public class ReportService {
     private final ReportNativeRepository reportNativeRepository;
     private final RiskLevelService riskLevelService;
 
-    @Cacheable(cacheNames = "scam-action-stats", key = "'global'")
     @Transactional(readOnly = true)
     public List<ScamActionStatItem> getScamActionStats() {
         return reportJdbcRepository.findScamActionStats();
@@ -33,7 +31,6 @@ public class ReportService {
         return reportJdbcRepository.findScamActionStatsByCountry(countryId);
     }
 
-    @Cacheable(cacheNames = "scam-context-stats", key = "'global'")
     @Transactional(readOnly = true)
     public List<ScamActionStatItem> getScamContextStats() {
         return reportJdbcRepository.findScamContextStats();
@@ -44,21 +41,18 @@ public class ReportService {
         return reportJdbcRepository.findScamContextStatsByCountry(countryId);
     }
 
-    @Cacheable(cacheNames = "map-countries", key = "'all'")
     @Transactional(readOnly = true)
     public RegionScamStatisticsResponse getCountryStatistics(){
         List<RegionScamStatisticsItem> items = reportJdbcRepository.findCountryStatistics();
         return new RegionScamStatisticsResponse(COUNTRY, riskLevelService.assignRiskLevels(items));
     }
 
-    @Cacheable(cacheNames = "map-states", key = "'all'")
     @Transactional(readOnly = true)
     public RegionScamStatisticsResponse getStateStatistics(){
         List<RegionScamStatisticsItem> items = reportJdbcRepository.findStateStatistics();
         return new RegionScamStatisticsResponse(STATE, riskLevelService.assignRiskLevels(items));
     }
 
-    @Cacheable(cacheNames = "map-cities", key = "'all'")
     @Transactional(readOnly = true)
     public RegionScamStatisticsResponse getCityStatistics(){
         List<RegionScamStatisticsItem> items = reportJdbcRepository.findCityStatistics();
